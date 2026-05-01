@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   getCategories,
   getSearchIndex,
-  getAllPages,
   BRAIN_COLORS,
   BRAIN_LABELS,
   type Brain,
@@ -12,10 +11,6 @@ import Nav from "@/components/Nav";
 export default function HomePage() {
   const categories = getCategories();
   const searchIndex = getSearchIndex();
-  const allPages = getAllPages();
-
-  const totalPages = allPages.length;
-  const totalCategories = categories.length;
 
   // Group by brain
   const brainGroups = categories.reduce<Record<string, typeof categories>>(
@@ -53,13 +48,9 @@ export default function HomePage() {
           />
 
           <div className="relative">
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4">
               <span className="text-ae font-mono text-[11px] tracking-widest uppercase">
                 ⬡ The Axiom
-              </span>
-              <span className="text-white/20 text-[11px]">·</span>
-              <span className="text-muted font-mono text-[11px]">
-                Lewis Elliott
               </span>
             </div>
 
@@ -67,35 +58,15 @@ export default function HomePage() {
               className="font-display text-5xl sm:text-6xl font-semibold text-primary mb-5 leading-[1.1]"
               style={{ letterSpacing: "-0.03em" }}
             >
-              Notes on AI,
+              Notes on
               <br />
-              <span className="text-ae">written as I go.</span>
+              <span className="text-ae">building AI.</span>
             </h1>
 
             <p className="text-secondary text-lg leading-relaxed max-w-xl mb-10">
-              Agents, LLMs, RAG, evals, safety, infra. {totalPages} pages.
-              The things worth writing down.
+              Agents, LLMs, RAG, evals, safety, infra. The things worth writing down.
             </p>
 
-            <div className="flex flex-wrap gap-6">
-              {[
-                { label: "Pages", value: totalPages },
-                { label: "Categories", value: totalCategories },
-                { label: "Last updated", value: "May 2026" },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex flex-col gap-0.5">
-                  <span
-                    className="text-2xl font-display font-semibold text-primary"
-                    style={{ letterSpacing: "-0.02em" }}
-                  >
-                    {value}
-                  </span>
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-muted">
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
