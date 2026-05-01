@@ -36,3 +36,5 @@ yarn-error.log*
 next-env.d.ts
 
 # wiki content is committed — run scripts/copy-wiki.mjs to sync
+
+.vercel
