@@ -41,6 +41,7 @@ function extractExcerpt(content: string, maxLen = 160): string {
       (l) =>
         l &&
         !l.startsWith("#") &&
+        !l.startsWith(">") &&
         !l.startsWith("---") &&
         !l.startsWith("```") &&
         !l.startsWith("|")
