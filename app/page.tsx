@@ -37,40 +37,19 @@ export default function HomePage() {
       <Nav searchIndex={searchIndex} />
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
-        {/* Hero */}
-        <section className="pt-20 pb-16 relative">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 40% at 50% -10%, #22d3ee10 0%, transparent 70%)",
-            }}
-          />
+        <div className="pt-14 pb-10">
+          <h1
+            className="font-display text-4xl sm:text-5xl font-semibold text-primary leading-[1.1]"
+            style={{ letterSpacing: "-0.03em" }}
+          >
+            The Axiom
+          </h1>
+          <p className="text-secondary text-sm mt-2 font-mono">
+            An AI engineering knowledge base.
+          </p>
+        </div>
 
-          <div className="relative">
-            <div className="mb-4">
-              <span className="text-ae font-mono text-[11px] tracking-widest uppercase">
-                ⬡ The Axiom
-              </span>
-            </div>
-
-            <h1
-              className="font-display text-5xl sm:text-6xl font-semibold text-primary mb-5 leading-[1.1]"
-              style={{ letterSpacing: "-0.03em" }}
-            >
-              Notes on
-              <br />
-              <span className="text-ae">building AI.</span>
-            </h1>
-
-            <p className="text-secondary text-lg leading-relaxed max-w-xl mb-10">
-              Agents, LLMs, RAG, evals, safety, infra. The things worth writing down.
-            </p>
-
-          </div>
-        </section>
-
-        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-14" />
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-12" />
 
         {/* Brain sections */}
         {brainOrder.map((brain) => {

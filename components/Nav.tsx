@@ -40,27 +40,6 @@ export default function Nav({ searchIndex }: NavProps) {
           <Search index={searchIndex} />
         </div>
 
-        {/* Nav links */}
-        <nav className="hidden sm:flex items-center gap-1">
-          {[
-            { href: "/", label: "Home" },
-            { href: "/llms", label: "LLMs" },
-            { href: "/agents", label: "Agents" },
-            { href: "/rag", label: "RAG" },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-colors ${
-                pathname === href
-                  ? "text-ae bg-ae/10"
-                  : "text-secondary hover:text-primary hover:bg-white/[0.04]"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
       </div>
     </header>
   );
