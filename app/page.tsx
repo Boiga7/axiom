@@ -59,7 +59,7 @@ export default function HomePage() {
               </span>
               <span className="text-white/20 text-[11px]">·</span>
               <span className="text-muted font-mono text-[11px]">
-                AI Engineering Knowledge Base
+                Lewis Elliott
               </span>
             </div>
 
@@ -67,15 +67,14 @@ export default function HomePage() {
               className="font-display text-5xl sm:text-6xl font-semibold text-primary mb-5 leading-[1.1]"
               style={{ letterSpacing: "-0.03em" }}
             >
-              Everything I know
+              Notes on AI,
               <br />
-              <span className="text-ae">about building AI</span>
+              <span className="text-ae">written as I go.</span>
             </h1>
 
             <p className="text-secondary text-lg leading-relaxed max-w-xl mb-10">
-              {totalPages} pages across {totalCategories} domains — LLMs,
-              agents, RAG, evals, safety, infrastructure, and the full
-              engineering stack behind frontier AI systems.
+              Agents, LLMs, RAG, evals, safety, infra. {totalPages} pages.
+              The things worth writing down.
             </p>
 
             <div className="flex flex-wrap gap-6">
