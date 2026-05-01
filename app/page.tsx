@@ -1,101 +1,184 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  getCategories,
+  getSearchIndex,
+  getAllPages,
+  BRAIN_COLORS,
+  BRAIN_LABELS,
+  type Brain,
+} from "@/lib/wiki";
+import Nav from "@/components/Nav";
 
-export default function Home() {
+export default function HomePage() {
+  const categories = getCategories();
+  const searchIndex = getSearchIndex();
+  const allPages = getAllPages();
+
+  const totalPages = allPages.length;
+  const totalCategories = categories.length;
+
+  // Group by brain
+  const brainGroups = categories.reduce<Record<string, typeof categories>>(
+    (acc, cat) => {
+      const b = cat.brain;
+      if (!acc[b]) acc[b] = [];
+      acc[b].push(cat);
+      return acc;
+    },
+    {}
+  );
+
+  const brainOrder: Brain[] = [
+    "ai-engineering",
+    "research",
+    "infrastructure",
+    "engineering",
+    "intelligence",
+    "other",
+  ];
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      <Nav searchIndex={searchIndex} />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
+        {/* Hero */}
+        <section className="pt-20 pb-16 relative">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 60% 40% at 50% -10%, #22d3ee10 0%, transparent 70%)",
+            }}
+          />
+
+          <div className="relative">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-ae font-mono text-[11px] tracking-widest uppercase">
+                ⬡ The Axiom
+              </span>
+              <span className="text-white/20 text-[11px]">·</span>
+              <span className="text-muted font-mono text-[11px]">
+                AI Engineering Knowledge Base
+              </span>
+            </div>
+
+            <h1
+              className="font-display text-5xl sm:text-6xl font-semibold text-primary mb-5 leading-[1.1]"
+              style={{ letterSpacing: "-0.03em" }}
+            >
+              Everything I know
+              <br />
+              <span className="text-ae">about building AI</span>
+            </h1>
+
+            <p className="text-secondary text-lg leading-relaxed max-w-xl mb-10">
+              {totalPages} pages across {totalCategories} domains — LLMs,
+              agents, RAG, evals, safety, infrastructure, and the full
+              engineering stack behind frontier AI systems.
+            </p>
+
+            <div className="flex flex-wrap gap-6">
+              {[
+                { label: "Pages", value: totalPages },
+                { label: "Categories", value: totalCategories },
+                { label: "Last updated", value: "May 2026" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span
+                    className="text-2xl font-display font-semibold text-primary"
+                    style={{ letterSpacing: "-0.02em" }}
+                  >
+                    {value}
+                  </span>
+                  <span className="text-[11px] font-mono uppercase tracking-widest text-muted">
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-14" />
+
+        {/* Brain sections */}
+        {brainOrder.map((brain) => {
+          const cats = brainGroups[brain];
+          if (!cats?.length) return null;
+          const color = BRAIN_COLORS[brain];
+          const label = BRAIN_LABELS[brain];
+
+          return (
+            <section key={brain} className="mb-14">
+              <div className="flex items-center gap-3 mb-6">
+                <div
+                  className="w-1.5 h-6 rounded-full"
+                  style={{ background: color }}
+                />
+                <h2
+                  className="font-mono text-[11px] uppercase tracking-widest"
+                  style={{ color }}
+                >
+                  {label}
+                </h2>
+                <div className="flex-1 h-px bg-white/[0.04]" />
+                <span className="font-mono text-[11px] text-muted">
+                  {cats.reduce((s, c) => s + c.count, 0)} pages
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                {cats.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    href={`/${cat.slug}`}
+                    className="group relative block rounded-lg border border-white/[0.06] bg-card p-4 transition-all duration-200 hover:border-white/[0.12] hover:bg-elevated"
+                  >
+                    <div
+                      className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                      style={{
+                        background: `radial-gradient(circle at 30% 30%, ${color}12 0%, transparent 70%)`,
+                      }}
+                    />
+
+                    <div className="relative">
+                      <p
+                        className="font-mono text-[9px] uppercase tracking-widest mb-2"
+                        style={{ color: color + "80" }}
+                      >
+                        {cat.count} pages
+                      </p>
+                      <h3 className="font-display text-sm font-semibold text-primary leading-tight group-hover:text-white transition-colors">
+                        {cat.label}
+                      </h3>
+                    </div>
+
+                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-60 transition-opacity">
+                      <svg
+                        className="w-3.5 h-3.5"
+                        style={{ color }}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-8 mb-10" />
+        <footer className="text-center text-muted font-mono text-[11px] tracking-wider">
+          <span>The Axiom · </span>
+          <span className="text-ae/60">elliot-digital.co.uk</span>
+        </footer>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </>
   );
 }
