@@ -5,12 +5,12 @@ tags: [context-engineering, context-window, compression, summarisation, kv-cache
 sources: []
 updated: 2026-05-01
 para: resource
-tldr: Context engineering manages ALL tokens in the context window — not just the prompt text. Context rot degrades recall as token count grows. Three techniques for long-horizon tasks: compaction, note-taking, sub-agent isolation.
+tldr: "Context engineering manages ALL tokens in the context window — not just the prompt text. Context rot degrades recall as token count grows. Three techniques for long-horizon tasks: compaction, note-taking, sub-agent isolation."
 ---
 
 # Context Engineering
 
-> **TL;DR** Context engineering manages ALL tokens in the context window — not just the prompt text. Context rot degrades recall as token count grows. Three techniques for long-horizon tasks: compaction, note-taking, sub-agent isolation.
+> **TL;DR** Context engineering manages ALL tokens in the context window — not just the prompt text. Context rot degrades recall as token count grows. Three techniques for long-horizon tasks: compaction, note-taking, sub-agent isolation."
 
 Managing what goes into the context window is a core engineering discipline. As models get 1M-token windows, the problem shifts from "how do I fit this?" to "what should I include, and where?" Context engineering is the answer.
 

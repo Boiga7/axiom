@@ -102,3 +102,5 @@ All gaps from v1 (2026-05-01) resolved in the same session:
 - [[index]] — coverage map
 - [[security/mcp-cves]] — mcpindex's primary research domain
 - [[evals/methodology]] — evalcheck's core domain
+
+- [[synthesis/graph-health]] — link density audit of this vault; pre/post-fix scores

@@ -180,3 +180,5 @@ All 10 were applied during this audit run. Post-fix score: 97/100.
 ## Sources
 - Audit run: 2026-05-01
 - Method: scripted `[[wikilink]]` extraction across all 87 content pages (23 categories + PARA), normalised to canonical `category/slug` form, frontmatter excluded, self-links and duplicates removed
+
+- [[synthesis/gap-report]] — ranked knowledge gaps feeding into the same learning path
