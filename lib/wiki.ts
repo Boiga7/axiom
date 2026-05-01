@@ -42,12 +42,18 @@ function extractExcerpt(content: string, maxLen = 160): string {
         l &&
         !l.startsWith("#") &&
         !l.startsWith(">") &&
+        !l.startsWith("-") &&
+        !l.startsWith("*") &&
+        !l.startsWith("+") &&
+        !/^\d+\./.test(l) &&
         !l.startsWith("---") &&
         !l.startsWith("```") &&
         !l.startsWith("|")
     );
   const first = lines[0] ?? "";
-  return first.length > maxLen ? first.slice(0, maxLen) + "…" : first;
+  // Strip markdown bold/italic so raw ** doesn't appear in card text
+  const clean = first.replace(/\*{1,3}([^*\n]+)\*{1,3}/g, "$1").replace(/_{1,2}([^_\n]+)_{1,2}/g, "$1");
+  return clean.length > maxLen ? clean.slice(0, maxLen) + "…" : clean;
 }
 
 function deriveTitle(content: string, slug: string): string {
