@@ -108,7 +108,7 @@ export function getAllPages(): WikiPage[] {
         title: deriveTitle(content, slug),
         content,
         frontmatter: data as WikiFrontmatter,
-        excerpt: extractExcerpt(content),
+        excerpt: typeof data.tldr === "string" ? data.tldr : extractExcerpt(content),
         href: `/${category}/${slug}`,
       });
     }
