@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { cache } from "react";
 import {
   BRAIN_MAP,
   BRAIN_LABELS,
@@ -62,10 +63,7 @@ function deriveTitle(content: string, slug: string): string {
   return slugToLabel(slug);
 }
 
-let _cache: WikiPage[] | null = null;
-
-export function getAllPages(): WikiPage[] {
-  if (_cache) return _cache;
+export const getAllPages = cache(function getAllPages(): WikiPage[] {
 
   const pages: WikiPage[] = [];
   if (!fs.existsSync(WIKI_ROOT)) return pages;
@@ -114,9 +112,8 @@ export function getAllPages(): WikiPage[] {
     }
   }
 
-  _cache = pages;
   return pages;
-}
+});
 
 export function getCategories(): Category[] {
   const pages = getAllPages();
