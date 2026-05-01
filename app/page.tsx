@@ -37,19 +37,7 @@ export default function HomePage() {
       <Nav searchIndex={searchIndex} />
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
-        <div className="pt-14 pb-10">
-          <h1
-            className="font-display text-4xl sm:text-5xl font-semibold text-primary leading-[1.1]"
-            style={{ letterSpacing: "-0.03em" }}
-          >
-            The Axiom
-          </h1>
-          <p className="text-secondary text-sm mt-2 font-mono">
-            An AI engineering knowledge base.
-          </p>
-        </div>
-
-        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-12" />
+        <div className="pt-10 mb-10" />
 
         {/* Brain sections */}
         {brainOrder.map((brain) => {
