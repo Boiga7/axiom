@@ -16,24 +16,20 @@ html {
   background: #07090d;
   color: #f0f4f8;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-jakarta);
-  background: #07090d;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Grain overlay */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
+  overflow-x: hidden;
+  /* Smooth gradient background — deep navy at top fading to near-black */
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(34, 211, 238, 0.055) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 40% at 100% 100%, rgba(99, 102, 241, 0.04) 0%, transparent 60%),
+    #07090d;
 }
 
 /* Scrollbar */
@@ -63,6 +59,9 @@ body::before {
   color: #cbd5e1;
   line-height: 1.75;
   font-size: 0.9375rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .wiki-prose h1,
@@ -104,13 +103,31 @@ body::before {
   border: 1px solid rgba(34,211,238,0.15);
 }
 
+/* Scroll wrapper — isolates code block overflow from body clip */
+.wiki-pre-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.25rem 0;
+  border-radius: 8px;
+}
+
 .wiki-prose pre {
   background: #0e1117 !important;
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
   padding: 1.25rem;
-  overflow-x: auto;
-  margin: 1.25rem 0;
+  overflow-x: visible;
+  margin: 0;
+  min-width: max-content;
+}
+
+/* On mobile, wrap instead of scroll — easier to read */
+@media (max-width: 639px) {
+  .wiki-prose pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-width: 0;
+  }
 }
 
 .wiki-prose pre code {
@@ -162,7 +179,6 @@ body::before {
 .wiki-prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.25rem 0;
   font-size: 0.875rem;
 }
 
@@ -193,6 +209,26 @@ body::before {
   border: none;
   border-top: 1px solid rgba(255,255,255,0.06);
   margin: 2rem 0;
+}
+
+/* Tables — horizontally scrollable on mobile */
+.wiki-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.25rem 0;
+}
+
+.wiki-table-scroll table {
+  margin: 0;
+  min-width: 480px;
+}
+
+/* Images */
+.wiki-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 1rem 0;
 }
 
 /* Wikilink styles */

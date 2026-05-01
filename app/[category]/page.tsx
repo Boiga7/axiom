@@ -85,7 +85,7 @@ export default function CategoryPage({ params }: Props) {
             <Link
               key={page.slug}
               href={page.href}
-              className="group flex items-start gap-4 rounded-lg border border-white/[0.05] bg-card px-5 py-4 transition-all duration-150 hover:border-white/[0.1] hover:bg-elevated"
+              className="group flex items-start gap-4 rounded-lg border border-white/[0.05] bg-card px-5 py-4 transition-all duration-150 hover:border-white/[0.1] hover:bg-elevated min-w-0 overflow-hidden"
             >
               <div
                 className="w-0.5 self-stretch rounded-full mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0"

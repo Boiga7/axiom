@@ -60,6 +60,10 @@ export default function GraphView({ nodes, links }: Props) {
     lastX: 0,
     lastY: 0,
     hoverId: null as string | null,
+    touchStartX: 0,
+    touchStartY: 0,
+    zoom: 1,
+    lastPinchDist: 0,
   });
 
   // Pre-computed sphere positions (one per node)
@@ -96,6 +100,19 @@ export default function GraphView({ nodes, links }: Props) {
     return () => window.removeEventListener("resize", resize);
   }, []);
 
+  // Desktop scroll-to-zoom (non-passive so we can preventDefault)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY * (e.deltaMode === 1 ? 20 : 1);
+      state.current.zoom = Math.max(0.3, Math.min(3, state.current.zoom - delta * 0.001));
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, []);
+
   // Draw loop
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -109,12 +126,10 @@ export default function GraphView({ nodes, links }: Props) {
 
       const W = canvas.width;
       const H = canvas.height;
-      const cssW = W / dpr;
-      const cssH = H / dpr;
       const cx = W / 2;
       const cy = H / 2;
-      // Sphere fills ~70% of the smaller dimension
-      const R = Math.min(W, H) * 0.36;
+      // Sphere fills ~70% of the smaller dimension, scaled by zoom
+      const R = Math.min(W, H) * 0.36 * state.current.zoom;
       const t = Date.now() / 1000;
 
       ctx.clearRect(0, 0, W, H);
@@ -275,7 +290,7 @@ export default function GraphView({ nodes, links }: Props) {
       const H = canvas.height;
       const cx = W / 2 / dpr;
       const cy = H / 2 / dpr;
-      const R = Math.min(W, H) * 0.36 / dpr;
+      const R = Math.min(W, H) * 0.36 / dpr * state.current.zoom;
       const s = state.current;
 
       let best: string | null = null;
@@ -352,16 +367,95 @@ export default function GraphView({ nodes, links }: Props) {
     [getCanvasPos, findHovered, nodes, router]
   );
 
+  const getCanvasTouchPos = useCallback((touch: React.Touch) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (e.touches.length === 2) {
+        // Pinch start — record initial distance, stop drag
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        state.current.lastPinchDist = Math.hypot(dx, dy);
+        state.current.dragging = false;
+        return;
+      }
+      const { x, y } = getCanvasTouchPos(e.touches[0]);
+      state.current.dragging = true;
+      state.current.lastX = x;
+      state.current.lastY = y;
+      state.current.touchStartX = x;
+      state.current.touchStartY = y;
+    },
+    [getCanvasTouchPos]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (e.touches.length === 2) {
+        // Pinch zoom
+        const dx = e.touches[1].clientX - e.touches[0].clientX;
+        const dy = e.touches[1].clientY - e.touches[0].clientY;
+        const dist = Math.hypot(dx, dy);
+        const ratio = dist / (state.current.lastPinchDist || dist);
+        state.current.zoom = Math.max(0.3, Math.min(3, state.current.zoom * ratio));
+        state.current.lastPinchDist = dist;
+        return;
+      }
+      const { x, y } = getCanvasTouchPos(e.touches[0]);
+      const s = state.current;
+      if (s.dragging) {
+        const dx = x - s.lastX;
+        const dy = y - s.lastY;
+        s.rotY += dx * 0.006;
+        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + dy * 0.006));
+        s.lastX = x;
+        s.lastY = y;
+      }
+      state.current.hoverId = findHovered(x, y);
+    },
+    [getCanvasTouchPos, findHovered]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      // If lifting one finger from a two-finger gesture, don't nav
+      if (e.touches.length > 0) {
+        state.current.dragging = false;
+        return;
+      }
+      const s = state.current;
+      s.dragging = false;
+      const { x, y } = getCanvasTouchPos(e.changedTouches[0]);
+      const dx = Math.abs(x - s.touchStartX);
+      const dy = Math.abs(y - s.touchStartY);
+      if (dx < 10 && dy < 10) {
+        const hit = findHovered(x, y);
+        if (hit) {
+          const node = nodes.find((n) => n.id === hit);
+          if (node) router.push(node.href);
+        }
+      }
+      state.current.hoverId = null;
+    },
+    [getCanvasTouchPos, findHovered, nodes, router]
+  );
+
   return (
     <canvas
       ref={canvasRef}
       className="w-full h-full"
-      style={{ cursor: "grab" }}
+      style={{ cursor: "grab", touchAction: "none" }}
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     />
   );
 }

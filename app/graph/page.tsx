@@ -11,7 +11,7 @@ function extractLinks(content: string): string[] {
     .replace(/```[\s\S]*?```/g, "")
     .replace(/`[^`\n]+`/g, "");
   const matches = stripped.matchAll(/\[\[([a-zA-Z0-9_/-]+)(?:\|[^\]]+)?\]\]/g);
-  return [...matches].map((m) => {
+  return Array.from(matches).map((m) => {
     const raw = m[1].trim();
     return raw.includes("/") ? raw.split("/").pop()! : raw;
   });
@@ -62,8 +62,8 @@ export default function GraphPage() {
       <Nav searchIndex={searchIndex} />
 
       <div className="fixed inset-0 top-14 bg-base">
-        {/* Legend */}
-        <div className="absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-4 py-3 flex flex-col gap-2">
+        {/* Legend — desktop: vertical list top-left; mobile: compact dots top-right */}
+        <div className="hidden sm:flex absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-4 py-3 flex-col gap-2">
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Brain</p>
           {Object.entries(BRAIN_COLORS).map(([brain, color]) => (
             <div key={brain} className="flex items-center gap-2">
@@ -75,10 +75,21 @@ export default function GraphPage() {
           ))}
         </div>
 
+        {/* Mobile legend — dots only, top-right corner */}
+        <div className="sm:hidden absolute top-4 right-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-3 py-2 flex flex-col gap-1.5">
+          {Object.entries(BRAIN_COLORS).map(([brain, color]) => (
+            <div key={brain} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+              <span className="font-mono text-[9px] text-muted capitalize">{brain.replace("-", " ")}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Instructions */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
           <p className="font-mono text-[10px] text-muted text-center">
-            Scroll to zoom · drag to pan · click a node to open the page
+            <span className="hidden sm:inline">Scroll to zoom · drag to rotate · click a node to open</span>
+            <span className="sm:hidden">Pinch to zoom · drag to rotate · tap a node to open</span>
           </p>
         </div>
 

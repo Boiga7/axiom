@@ -65,7 +65,11 @@ export default function WikiContent({ content, allPageHrefs }: Props) {
     h1: ({ children }) => (
       <h1>{children}</h1>
     ),
-    pre: ({ children }) => <pre>{children}</pre>,
+    pre: ({ children }) => (
+      <div className="wiki-pre-scroll">
+        <pre>{children}</pre>
+      </div>
+    ),
     code: ({ className, children, ...props }) => {
       const inline = !className;
       if (inline) {
@@ -77,6 +81,15 @@ export default function WikiContent({ content, allPageHrefs }: Props) {
         </code>
       );
     },
+    table: ({ children }) => (
+      <div className="wiki-table-scroll">
+        <table>{children}</table>
+      </div>
+    ),
+    img: ({ src, alt }) => (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={src} alt={alt ?? ""} className="wiki-img" />
+    ),
   };
 
   return (

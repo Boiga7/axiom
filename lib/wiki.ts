@@ -156,3 +156,22 @@ export function getSearchIndex(): SearchEntry[] {
     tags: p.frontmatter.tags ?? [],
   }));
 }
+
+// All slugs across the vault — including excluded dirs (experiments, para)
+// and root-level files (index.md, overview.md). Used by scan to avoid
+// false-positive broken links for pages that exist but aren't in the nav.
+export function getKnownSlugs(): Set<string> {
+  const slugs = new Set(getAllPages().map((p) => p.slug));
+  if (!fs.existsSync(WIKI_ROOT)) return slugs;
+  for (const entry of fs.readdirSync(WIKI_ROOT)) {
+    const full = path.join(WIKI_ROOT, entry);
+    if (entry.endsWith(".md")) {
+      slugs.add(entry.replace(/\.md$/, ""));
+    } else if (fs.statSync(full).isDirectory()) {
+      for (const file of fs.readdirSync(full).filter((f) => f.endsWith(".md"))) {
+        slugs.add(file.replace(/\.md$/, ""));
+      }
+    }
+  }
+  return slugs;
+}

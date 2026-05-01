@@ -1,9 +1,51 @@
-import { getAllPages, getCategories, getSearchIndex, BRAIN_COLORS, BRAIN_MAP, slugToLabel } from "@/lib/wiki";
+import { getAllPages, getCategories, getSearchIndex, getKnownSlugs, BRAIN_COLORS, BRAIN_MAP, slugToLabel } from "@/lib/wiki";
 import Nav from "@/components/Nav";
 import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Scan" };
+export const dynamic = "force-dynamic";
+
+const GIST_RAW_URL =
+  "https://gist.githubusercontent.com/Boiga7/e00007b4119f3b4f02d32906c8381be9/raw/gap-report.md";
+
+type Gap = { rank: number; label: string; detail: string };
+
+async function fetchGaps(): Promise<{ critical: Gap[]; concept: Gap[] }> {
+  try {
+    const res = await fetch(GIST_RAW_URL, { cache: "no-store" });
+    if (!res.ok) return { critical: [], concept: [] };
+    const md = await res.text();
+
+    const critical: Gap[] = [];
+    const concept: Gap[] = [];
+
+    // Split on H3 headings inside each section
+    const criticalBlock = md.match(/## Critical Gaps[\s\S]*?(?=## Concept Gaps|## $|$)/)?.[0] ?? "";
+    const conceptBlock = md.match(/## Concept Gaps[\s\S]*/)?.[0] ?? "";
+
+    const parseBlock = (block: string, out: Gap[]) => {
+      const items = block.split(/\n### /g).slice(1);
+      for (const item of items) {
+        const firstLine = item.split("\n")[0].trim();
+        // "1. `path/slug` — MISSING" or similar
+        const rankMatch = firstLine.match(/^(\d+)\./);
+        const rank = rankMatch ? parseInt(rankMatch[1]) : out.length + 1;
+        // Strip rank prefix, trim backtick paths
+        const label = firstLine.replace(/^\d+\.\s*/, "").replace(/`/g, "").split("—")[0].trim();
+        const detail = item.split("\n").slice(1).join("\n").replace(/- \*\*Suggested.*?\n/g, "").trim().split("\n")[0] ?? "";
+        out.push({ rank, label, detail });
+      }
+    };
+
+    parseBlock(criticalBlock, critical);
+    parseBlock(conceptBlock, concept);
+
+    return { critical, concept };
+  } catch {
+    return { critical: [], concept: [] };
+  }
+}
 
 function extractWikilinks(content: string): string[] {
   // Strip fenced code blocks and inline code before matching to avoid false positives
@@ -12,18 +54,19 @@ function extractWikilinks(content: string): string[] {
     .replace(/`[^`\n]+`/g, "");
   // Only match slug-like targets: alphanumeric, hyphens, underscores, slashes
   const matches = stripped.matchAll(/\[\[([a-zA-Z0-9_/-]+)(?:\|[^\]]+)?\]\]/g);
-  return [...matches].map((m) => {
+  return Array.from(matches).map((m) => {
     const raw = m[1].trim();
     return raw.includes("/") ? raw.split("/").pop()! : raw;
   });
 }
 
-export default function ScanPage() {
+export default async function ScanPage() {
   const allPages = getAllPages();
   const categories = getCategories();
   const searchIndex = getSearchIndex();
+  const { critical, concept } = await fetchGaps();
 
-  const slugSet = new Set(allPages.map((p) => p.slug));
+  const slugSet = getKnownSlugs();
 
   // 1. Broken wikilinks — link targets that don't exist
   const broken: { from: string; fromHref: string; target: string }[] = [];
@@ -67,7 +110,7 @@ export default function ScanPage() {
       count: brokenByTarget.size,
       content: (
         <ul className="flex flex-col gap-2">
-          {[...brokenByTarget.entries()].slice(0, 30).map(([target, sources]) => (
+          {Array.from(brokenByTarget.entries()).slice(0, 30).map(([target, sources]) => (
             <li key={target} className="flex items-start gap-3">
               <span className="font-mono text-xs text-[#f87171] mt-0.5">[[{target}]]</span>
               <span className="text-xs text-muted">
@@ -195,6 +238,58 @@ export default function ScanPage() {
             </section>
           ))}
         </div>
+
+        {/* Knowledge Gaps — live from Gist */}
+        {(critical.length > 0 || concept.length > 0) && (
+          <div className="mt-12">
+            <div className="mb-6">
+              <h2 className="font-display text-xl font-semibold text-primary" style={{ letterSpacing: "-0.02em" }}>
+                Knowledge gaps
+              </h2>
+              <p className="text-muted text-xs font-mono mt-1">
+                Live from the latest sprint report — what to research next.
+              </p>
+            </div>
+
+            {critical.length > 0 && (
+              <div className="mb-6">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[#f87171] mb-3">Critical</p>
+                <div className="flex flex-col gap-3">
+                  {critical.map((g) => (
+                    <div key={g.label} className="rounded-lg border border-white/[0.06] bg-card px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="font-mono text-xs text-[#f87171] shrink-0 mt-0.5">{g.rank}.</span>
+                        <div className="min-w-0">
+                          <p className="font-mono text-sm text-primary break-words">{g.label}</p>
+                          {g.detail && <p className="text-xs text-muted mt-1 leading-relaxed">{g.detail}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {concept.length > 0 && (
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[#a78bfa] mb-3">Concept gaps</p>
+                <div className="flex flex-col gap-3">
+                  {concept.map((g) => (
+                    <div key={g.label} className="rounded-lg border border-white/[0.06] bg-card px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="font-mono text-xs text-[#a78bfa] shrink-0 mt-0.5">{g.rank}.</span>
+                        <div className="min-w-0">
+                          <p className="font-mono text-sm text-primary break-words">{g.label}</p>
+                          {g.detail && <p className="text-xs text-muted mt-1 leading-relaxed">{g.detail}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </>
   );

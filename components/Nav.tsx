@@ -30,26 +30,27 @@ export default function Nav({ searchIndex }: NavProps) {
         </Link>
 
         {/* Search */}
-        <div className="flex-1 max-w-lg">
+        <div className="flex-1 min-w-0">
           <Search index={searchIndex} />
         </div>
 
         {/* Nav */}
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-0.5 shrink-0">
           {NAV.map(({ href, label, icon }) => {
             const active = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-colors ${
+                aria-label={label}
+                className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-md text-sm sm:text-xs font-mono transition-colors ${
                   active
                     ? "text-ae bg-ae/10"
                     : "text-secondary hover:text-primary hover:bg-white/[0.04]"
                 }`}
               >
-                <span className="opacity-60">{icon}</span>
-                {label}
+                <span className={active ? "" : "opacity-60"}>{icon}</span>
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}
