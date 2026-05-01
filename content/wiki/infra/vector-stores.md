@@ -115,7 +115,7 @@ results = client.search("docs", query_vector=[0.1, ...], limit=5,
 
 Built-in BM25 + dense hybrid search without needing a separate keyword search layer. Module system for automatic vectorisation (call embedding model on ingest).
 
-Good choice when you want hybrid retrieval without managing two separate systems (Elasticsearch + vector DB).
+Good choice when you want hybrid retrieval without managing two separate systems (Elasticsearch + vector DB). See [[infra/weaviate]] for full setup and query examples.
 
 ---
 

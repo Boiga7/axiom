@@ -257,6 +257,7 @@ I(X; Y) = H(X) - H(X|Y) = KL(P(X,Y) || P(X)P(Y))
 
 ## Connections
 
+- [[math/information-theory]] — entropy, mutual information, and bits-per-character in depth; the information-theoretic foundations behind cross-entropy and perplexity
 - [[llms/transformer-architecture]] — softmax and cross-entropy are the core of the attention mechanism and pretraining objective
 - [[fine-tuning/dpo-grpo]] — DPO loss function contains implicit KL terms; the RLHF KL penalty is explicit in the reward formula
 - [[evals/methodology]] — perplexity is a standard offline eval metric; entropy can signal hallucination risk

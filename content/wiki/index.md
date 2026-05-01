@@ -410,6 +410,7 @@ updated: 2026-05-01
 - [[synthesis/getting-started]] — First API call, SDK setup, system prompts, multi-turn chat, streaming, async, common first mistakes
 - [[synthesis/learning-path]] — Staged curriculum for software engineers moving into AI engineering: foundations → building → production → advanced; project ladder
 - [[synthesis/software-engineer-to-ai-engineer]] — Which SE skills transfer directly to AI engineering, what needs re-mapping, and the fastest learning order for a working developer
+- [[synthesis/gap-report]] — Ranked knowledge gaps relative to active projects and the 0→SE→AE learning path — what to research next
 
 ---
 

@@ -153,6 +153,7 @@ See [[evals/methodology]] for the full golden set construction guide. Short vers
 - [[evals/llm-as-judge]] — evaluating custom tasks without ground truth answers
 - [[landscape/ai-labs]] — benchmark context for each lab's research priorities
 - [[llms/claude]] — Claude's benchmark scores in full context
+- [[papers/swe-bench]] — full paper: SWE-bench methodology, dataset construction, and why it's the gold standard for coding evals
 
 ## Open Questions
 
