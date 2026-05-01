@@ -36,8 +36,13 @@ function resolveWikilinks(
   });
 }
 
+// Strip > TL;DR blockquote lines from the raw markdown
+function stripTldrBlockquote(md: string): string {
+  return md.replace(/^>[ \t]*\*{0,2}TL;?DR\*{0,2}:?[ \t][^\n]*\n?/gim, "");
+}
+
 export default function WikiContent({ content, allPageHrefs }: Props) {
-  const processed = resolveWikilinks(content, allPageHrefs);
+  const processed = resolveWikilinks(stripTldrBlockquote(content), allPageHrefs);
 
   const components: Components = {
     a: ({ href, children }) => {
@@ -60,8 +65,6 @@ export default function WikiContent({ content, allPageHrefs }: Props) {
     h1: ({ children }) => (
       <h1>{children}</h1>
     ),
-    // Suppress blockquotes — all pages use > TL;DR which we show in the page header instead
-    blockquote: () => null,
     pre: ({ children }) => <pre>{children}</pre>,
     code: ({ className, children, ...props }) => {
       const inline = !className;
