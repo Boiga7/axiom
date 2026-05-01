@@ -92,7 +92,7 @@ export default function WikiPage({ params }: Props) {
               </h1>
 
               {/* TL;DR summary */}
-              {page.frontmatter.tldr && (
+              {typeof page.frontmatter.tldr === "string" && (
                 <p className="text-secondary text-[15px] leading-relaxed mb-5 max-w-2xl">
                   {page.frontmatter.tldr}
                 </p>
@@ -127,11 +127,7 @@ export default function WikiPage({ params }: Props) {
               </div>
             </header>
 
-            {/* Wiki content — strip the inline > TL;DR blockquote since we show it above */}
-            <WikiContent
-              content={page.content.replace(/^>\s*\*{0,2}TL;DR\*{0,2}\s+[^\n]*\n+/m, "")}
-              allPageHrefs={hrefMap}
-            />
+            <WikiContent content={page.content} allPageHrefs={hrefMap} />
           </article>
 
           {/* Sidebar — sibling pages */}

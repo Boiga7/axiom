@@ -60,6 +60,8 @@ export default function WikiContent({ content, allPageHrefs }: Props) {
     h1: ({ children }) => (
       <h1>{children}</h1>
     ),
+    // Suppress blockquotes — all pages use > TL;DR which we show in the page header instead
+    blockquote: () => null,
     pre: ({ children }) => <pre>{children}</pre>,
     code: ({ className, children, ...props }) => {
       const inline = !className;
