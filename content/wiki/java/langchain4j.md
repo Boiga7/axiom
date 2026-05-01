@@ -230,6 +230,7 @@ dependencies {
 - [[rag/pipeline]] — Java-agnostic RAG concepts implemented by LangChain4j pipeline
 - [[java/spring-ai]] — Spring Boot alternative; comparison on Spring integration and agent maturity
 - [[java/build-tools]] — Maven and Gradle setup for LangChain4j projects, including the `langchain4j-bom` BOM
+- [[java/what-is-java]] — JVM fundamentals, virtual threads, static typing — context for why Java in AI
 
 ## Open Questions
 

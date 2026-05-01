@@ -234,6 +234,7 @@ const client = new Anthropic();
 - [[evals/methodology]] — testing Claude integrations; eval-driven development
 - [[synthesis/cost-optimisation]] — caching and batching as the top cost levers
 - [[apis/google-ai]] — sibling provider API; comparison on caching, tool use, and pricing
+- [[apis/what-is-an-api]] — fundamentals: HTTP, REST, JSON, status codes, rate limits, API keys
 
 ## Open Questions
 

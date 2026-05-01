@@ -179,6 +179,6 @@ For LLM APIs, REST + Server-Sent Events (SSE) for streaming is the standard patt
 
 - [[apis/anthropic-api]] — the Anthropic Messages API in detail: caching, streaming, tool use
 - [[java/grpc]] — gRPC: an alternative to REST for high-performance service-to-service calls
-- [[python/async]] — async HTTP clients for calling APIs without blocking
+- [[python/ecosystem]] — async HTTP clients (httpx, aiohttp) for calling APIs without blocking
 - [[web-frameworks/fastapi]] — building your own API endpoints with Python
 - [[security/owasp-llm-top10]] — API security concerns: key exposure, injection, rate limit bypass
