@@ -50,6 +50,20 @@ export default function GraphView({ nodes, links }: Props) {
   const router = useRouter();
   const graphRef = useRef<any>(null);
 
+  // Configure d3 forces for a compact globe layout (runs once after mount)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const fg = graphRef.current;
+      if (!fg) return;
+      // Less repulsion → nodes pack tighter instead of spreading into arms
+      fg.d3Force("charge")?.strength(-80);
+      // Shorter links → connected nodes stay closer together
+      fg.d3Force("link")?.distance(45).strength(0.5);
+      fg.d3ReheatSimulation?.();
+    }, 100);
+    return () => clearTimeout(t);
+  }, []);
+
   // Drive continuous redraws so pulsing keeps going after force simulation cools
   useEffect(() => {
     let animId: number;
@@ -162,8 +176,9 @@ export default function GraphView({ nodes, links }: Props) {
           return src ? src.color + "cc" : "#22d3ee";
         }}
         onNodeClick={handleClick}
-        warmupTicks={80}
-        cooldownTicks={200}
+        onEngineStop={() => graphRef.current?.zoomToFit(600, 60)}
+        warmupTicks={200}
+        cooldownTicks={400}
         enableZoomInteraction
         enablePanInteraction
         minZoom={0.3}

@@ -182,6 +182,9 @@ Not Claude's domain — generation is a separate model family.
 - [[llms/transformer-architecture]] — how ViT encoders integrate with LLMs
 - [[prompting/techniques]] — prompting strategies with image context
 - [[multimodal/audio]] — audio capabilities alongside vision
+- [[multimodal/document-processing]] — deep dive on PDF extraction pipelines, OCR, and table extraction with Claude
+- [[multimodal/video]] — video understanding with Gemini; frame extraction fallback for Claude
+- [[multimodal/image-generation]] — DALL-E 3, Flux, Stable Diffusion — generation is a separate model family from understanding
 
 ## Open Questions
 

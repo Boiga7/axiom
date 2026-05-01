@@ -91,6 +91,13 @@ export default function WikiPage({ params }: Props) {
                 {page.title}
               </h1>
 
+              {/* TL;DR summary */}
+              {page.frontmatter.tldr && (
+                <p className="text-secondary text-[15px] leading-relaxed mb-5 max-w-2xl">
+                  {page.frontmatter.tldr}
+                </p>
+              )}
+
               {/* Meta row */}
               <div className="flex flex-wrap items-center gap-3">
                 {page.frontmatter.updated && (
@@ -120,8 +127,11 @@ export default function WikiPage({ params }: Props) {
               </div>
             </header>
 
-            {/* Wiki content */}
-            <WikiContent content={page.content} allPageHrefs={hrefMap} />
+            {/* Wiki content — strip the inline > TL;DR blockquote since we show it above */}
+            <WikiContent
+              content={page.content.replace(/^>\s*\*{0,2}TL;DR\*{0,2}\s+[^\n]*\n+/m, "")}
+              allPageHrefs={hrefMap}
+            />
           </article>
 
           {/* Sidebar — sibling pages */}

@@ -6,7 +6,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Scan" };
 
 function extractWikilinks(content: string): string[] {
-  const matches = content.matchAll(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g);
+  // Strip fenced code blocks and inline code before matching to avoid false positives
+  const stripped = content
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`\n]+`/g, "");
+  // Only match slug-like targets: alphanumeric, hyphens, underscores, slashes
+  const matches = stripped.matchAll(/\[\[([a-zA-Z0-9_/-]+)(?:\|[^\]]+)?\]\]/g);
   return [...matches].map((m) => {
     const raw = m[1].trim();
     return raw.includes("/") ? raw.split("/").pop()! : raw;

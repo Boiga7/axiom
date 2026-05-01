@@ -5,12 +5,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Graph" };
 
-// Extract wikilink targets from markdown content
+// Extract wikilink targets from markdown content (strips code blocks to avoid false positives)
 function extractLinks(content: string): string[] {
-  const matches = content.matchAll(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g);
+  const stripped = content
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/`[^`\n]+`/g, "");
+  const matches = stripped.matchAll(/\[\[([a-zA-Z0-9_/-]+)(?:\|[^\]]+)?\]\]/g);
   return [...matches].map((m) => {
     const raw = m[1].trim();
-    // Return basename only
     return raw.includes("/") ? raw.split("/").pop()! : raw;
   });
 }
