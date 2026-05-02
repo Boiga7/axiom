@@ -18,8 +18,9 @@ export default function HomePage() {
   const searchIndex = getSearchIndex();
 
   // Build preview titles per category: first 3 pages alphabetically
+  const sortedPages = [...allPages].sort((a, b) => a.title.localeCompare(b.title));
   const previewMap: Record<string, string[]> = {};
-  for (const page of allPages) {
+  for (const page of sortedPages) {
     if (!previewMap[page.category]) previewMap[page.category] = [];
     if (previewMap[page.category].length < 3) {
       previewMap[page.category].push(page.title);
@@ -86,7 +87,7 @@ export default function HomePage() {
 
             <div className="flex items-center justify-center gap-3">
               <Link
-                href="/learn/ai-engineering-fundamentals"
+                href={`/learn/${LEARNING_PATHS[0].id}`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all bg-ae/10 text-ae border border-ae/20 hover:bg-ae/20 hover:border-ae/40"
               >
                 Start Learning
