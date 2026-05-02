@@ -81,7 +81,7 @@ export default function HomePage() {
             </h1>
 
             <p className="text-secondary text-lg leading-relaxed max-w-xl mx-auto mb-8">
-              A practitioner's reference for AI engineering. LLMs, agents, RAG, evals,
+              A practitioner&apos;s reference for AI engineering. LLMs, agents, RAG, evals,
               and infrastructure from first principles.
             </p>
 
