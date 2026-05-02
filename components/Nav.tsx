@@ -11,7 +11,7 @@ type NavProps = {
 
 const NAV = [
   { href: "/", label: "Home", icon: "⊹" },
-  { href: "/learn/ai-engineering-fundamentals", label: "Learn", icon: "◈" },
+  { href: "/learn/ai-engineer", label: "Learn", icon: "◈" },
   { href: "/graph", label: "Graph", icon: "◎" },
   { href: "/scan", label: "Scan", icon: "⟳" },
 ];
@@ -23,11 +23,8 @@ export default function Nav({ searchIndex }: NavProps) {
     <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-base/80 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 group">
-          <span className="text-ae font-mono text-xs opacity-60 group-hover:opacity-100 transition-opacity">⬡</span>
-          <span className="font-display text-base font-semibold text-primary" style={{ letterSpacing: "-0.02em" }}>
-            The Axiom
-          </span>
+        <Link href="/" className="flex items-center gap-2 shrink-0 group" aria-label="The Axiom">
+          <span className="text-ae font-mono text-sm opacity-60 group-hover:opacity-100 transition-opacity">⬡</span>
         </Link>
 
         {/* Search */}
