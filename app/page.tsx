@@ -85,16 +85,7 @@ export default function HomePage() {
               and infrastructure from first principles.
             </p>
 
-            <div className="flex items-center justify-center gap-3">
-              <Link
-                href={`/learn/${LEARNING_PATHS[0].id}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all bg-ae/10 text-ae border border-ae/20 hover:bg-ae/20 hover:border-ae/40"
-              >
-                Start Learning
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
+            <div className="flex items-center justify-center">
               <a
                 href="#browse"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all text-secondary border border-white/[0.08] hover:border-white/[0.16] hover:text-primary"
