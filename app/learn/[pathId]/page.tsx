@@ -1,19 +1,21 @@
 // app/learn/[pathId]/page.tsx
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { LEARNING_PATHS } from "@/lib/learning-paths";
+import { LEARNING_PATHS, TOPIC_BUNDLES } from "@/lib/learning-paths";
 import { getPage, getSearchIndex, BRAIN_COLORS, slugToLabel } from "@/lib/wiki";
 import Nav from "@/components/Nav";
 import type { Metadata } from "next";
 
+const ALL_PATHS = [...LEARNING_PATHS, ...TOPIC_BUNDLES];
+
 type Props = { params: { pathId: string } };
 
 export function generateStaticParams() {
-  return LEARNING_PATHS.map((p) => ({ pathId: p.id }));
+  return ALL_PATHS.map((p) => ({ pathId: p.id }));
 }
 
 export function generateMetadata({ params }: Props): Metadata {
-  const path = LEARNING_PATHS.find((p) => p.id === params.pathId);
+  const path = ALL_PATHS.find((p) => p.id === params.pathId);
   if (!path) return {};
   return {
     title: path.title,
@@ -22,7 +24,7 @@ export function generateMetadata({ params }: Props): Metadata {
 }
 
 export default function LearnPathPage({ params }: Props) {
-  const learningPath = LEARNING_PATHS.find((p) => p.id === params.pathId);
+  const learningPath = ALL_PATHS.find((p) => p.id === params.pathId);
   if (!learningPath) return notFound();
 
   const searchIndex = getSearchIndex();
