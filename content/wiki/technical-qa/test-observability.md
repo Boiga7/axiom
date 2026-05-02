@@ -5,6 +5,7 @@ para: resource
 tags: [test-observability, test-analytics, flakiness, datadog, allure, failure-analysis, ci-insights]
 sources: []
 updated: 2026-05-01
+tldr: Treating the test suite as a system to be monitored — tracking health, trends, and failure patterns over time.
 ---
 
 # Test Observability

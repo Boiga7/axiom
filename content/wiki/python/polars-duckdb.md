@@ -5,6 +5,7 @@ para: resource
 tags: [polars, duckdb, dataframes, analytics, python, data-processing]
 sources: []
 updated: 2026-05-01
+tldr: The two workhorses of Python data processing for AI engineers. Polars is a DataFrame library (pandas replacement) built on Apache Arrow — lazy evaluation, parallel by default, no GIL.
 ---
 
 # Polars + DuckDB

@@ -5,6 +5,7 @@ para: resource
 tags: [multi-tenancy, saas, tenant-isolation, data-partitioning, billing, rbac]
 sources: []
 updated: 2026-05-01
+tldr: Serving multiple customers from shared infrastructure.
 ---
 
 # Multi-Tenancy Patterns

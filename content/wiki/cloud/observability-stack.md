@@ -5,6 +5,7 @@ para: resource
 tags: [observability, prometheus, grafana, loki, tempo, opentelemetry, monitoring]
 sources: []
 updated: 2026-05-01
+tldr: "The three pillars of observability: metrics (what's broken), logs (why it broke), traces (where it broke)."
 ---
 
 # Observability Stack

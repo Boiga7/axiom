@@ -5,6 +5,7 @@ para: resource
 tags: [rlhf, instructgpt, alignment, ppo, reward-model, ouyang, stiennon, 2020, 2022]
 sources: []
 updated: 2026-05-01
+tldr: "Two papers that define RLHF as an alignment technique: Stiennon et al. (2020) demonstrated it at scale for summarisation; Ouyang et al."
 ---
 
 # RLHF: Reinforcement Learning from Human Feedback

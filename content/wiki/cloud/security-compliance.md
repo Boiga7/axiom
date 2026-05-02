@@ -5,6 +5,7 @@ para: resource
 tags: [security-hub, config, guardduty, inspector, compliance, waf, macie, aws-security]
 sources: []
 updated: 2026-05-01
+tldr: Security Hub, GuardDuty, Config, Inspector, and WAF — the AWS security control plane.
 ---
 
 # AWS Security and Compliance

@@ -5,6 +5,7 @@ para: resource
 tags: [type-hints, typing, generics, protocol, typevar, mypy, pyright, typeddict]
 sources: []
 updated: 2026-05-01
+tldr: Advanced typing patterns that make code self-documenting, statically verifiable, and composable.
 ---
 
 # Python Type Annotations

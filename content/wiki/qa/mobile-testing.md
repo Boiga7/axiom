@@ -5,6 +5,7 @@ para: resource
 tags: [mobile-testing, appium, xcuitest, espresso, browserstack]
 sources: []
 updated: 2026-05-01
+tldr: "Testing native iOS/Android apps and mobile web. Different from web testing: platform APIs, gestures, device fragmentation, permissions, network conditions, and battery state all affect behaviour."
 ---
 
 # Mobile Testing

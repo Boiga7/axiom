@@ -5,6 +5,7 @@ para: resource
 tags: [usability, ux, user-testing, heuristics, cognitive-walkthrough, a-b-testing]
 sources: []
 updated: 2026-05-01
+tldr: Evaluating a product by testing it with real users to find where the interface confuses, frustrates, or fails them.
 ---
 
 # Usability Testing

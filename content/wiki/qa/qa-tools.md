@@ -5,6 +5,7 @@ para: resource
 tags: [qa-tools, testrail, jira, zephyr, qtest, test-management, defect-tracking]
 sources: []
 updated: 2026-05-01
+tldr: The tools QA engineers use to manage test cases, track defects, and report quality. Covers test management platforms, defect tracking, and supporting utilities.
 ---
 
 # QA Tools

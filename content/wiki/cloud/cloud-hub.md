@@ -5,6 +5,7 @@ para: resource
 tags: [hub, cloud-engineering, brain]
 sources: []
 updated: 2026-05-01
+tldr: Central hub for all cloud and platform engineering knowledge. Every page in the Cloud brain connects here.
 ---
 
 # Cloud Engineering Brain

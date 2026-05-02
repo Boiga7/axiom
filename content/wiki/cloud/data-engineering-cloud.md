@@ -5,6 +5,7 @@ para: resource
 tags: [data-engineering, s3, glue, athena, redshift, dbt, data-lake, etl]
 sources: []
 updated: 2026-05-01
+tldr: Building data pipelines and analytics infrastructure on AWS. From S3 data lake to queryable analytics with Athena, Glue, and Redshift.
 ---
 
 # Data Engineering on Cloud

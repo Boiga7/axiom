@@ -5,6 +5,7 @@ para: resource
 tags: [postman, newman, api-testing, collections, environments, ci-cd, pre-request-scripts]
 sources: []
 updated: 2026-05-01
+tldr: Postman for API exploration and collection building; Newman for running those collections in CI.
 ---
 
 # Postman and Newman

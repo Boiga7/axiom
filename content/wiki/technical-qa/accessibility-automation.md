@@ -5,6 +5,7 @@ para: resource
 tags: [accessibility, wcag, axe-core, aria, screen-reader, automated-a11y]
 sources: []
 updated: 2026-05-01
+tldr: Automated accessibility testing using axe-core and Playwright. Automation catches ~30-40% of WCAG issues; the rest require manual testing and lived experience. Both are required.
 ---
 
 # Accessibility Automation

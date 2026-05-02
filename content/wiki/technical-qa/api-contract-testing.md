@@ -5,6 +5,7 @@ para: resource
 tags: [contract-testing, pact, consumer-driven, provider, pactflow, schema-registry]
 sources: []
 updated: 2026-05-01
+tldr: Consumer-driven contract testing ensures that services can evolve independently without breaking integrations. The consumer defines what it needs; the provider verifies it can meet that.
 ---
 
 # API Contract Testing (Advanced)

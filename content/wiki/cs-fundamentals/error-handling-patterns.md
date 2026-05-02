@@ -5,6 +5,7 @@ para: resource
 tags: [error-handling, exceptions, result-types, error-propagation, fastapi, custom-exceptions]
 sources: []
 updated: 2026-05-01
+tldr: Designing error handling that is informative, testable, and does not silently swallow failures.
 ---
 
 # Error Handling Patterns

@@ -5,6 +5,7 @@ para: resource
 tags: [testcontainers, integration-testing, docker, postgresql, kafka]
 sources: []
 updated: 2026-05-01
+tldr: Library that spins up real Docker containers in tests — actual PostgreSQL, Redis, Kafka, etc. instead of mocks. Tests talk to real services; no fakes, no mocks, no in-memory substitutes.
 ---
 
 # Testcontainers

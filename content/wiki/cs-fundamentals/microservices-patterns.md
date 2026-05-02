@@ -5,6 +5,7 @@ para: resource
 tags: [microservices, saga, cqrs, outbox, service-mesh, decomposition]
 sources: []
 updated: 2026-05-01
+tldr: Architectural patterns for systems composed of independently deployable services.
 ---
 
 # Microservices Patterns

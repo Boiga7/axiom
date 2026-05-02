@@ -5,6 +5,7 @@ para: resource
 tags: [test-planning, test-plan, scope, test-approach, risk, entry-exit-criteria]
 sources: []
 updated: 2026-05-01
+tldr: The discipline of deciding what to test, how to test it, and what "done" means — before writing a single test.
 ---
 
 # Test Planning

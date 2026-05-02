@@ -5,6 +5,7 @@ para: resource
 tags: [load-testing, k6, locust, performance, sla, slo, throughput]
 sources: []
 updated: 2026-05-01
+tldr: "Performance testing at scale: throughput, latency, saturation, and breakpoints. Goes beyond simple scripts into realistic traffic shaping, SLO validation, and CI integration."
 ---
 
 # Load Testing — Advanced

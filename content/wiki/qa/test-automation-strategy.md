@@ -5,6 +5,7 @@ para: resource
 tags: [test-automation, strategy, roi, tool-selection, build-vs-buy]
 sources: []
 updated: 2026-05-01
+tldr: The plan for where, when, and what to automate — and what not to. Automation without strategy produces a flaky, expensive test suite that nobody trusts.
 ---
 
 # Test Automation Strategy

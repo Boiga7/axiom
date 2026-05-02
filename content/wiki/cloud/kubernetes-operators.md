@@ -5,6 +5,7 @@ para: resource
 tags: [kubernetes, operators, crds, kubebuilder, controller-runtime]
 sources: []
 updated: 2026-05-01
+tldr: Operators extend Kubernetes with domain-specific knowledge.
 ---
 
 # Kubernetes Operators

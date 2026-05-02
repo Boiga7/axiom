@@ -5,6 +5,7 @@ para: resource
 tags: [code-review, pull-request, feedback, pair-programming, reviewer]
 sources: []
 updated: 2026-05-01
+tldr: A structured review of code changes before they merge. Done well, code review catches bugs, spreads knowledge, enforces standards, and is the most effective quality gate a team has.
 ---
 
 # Code Review

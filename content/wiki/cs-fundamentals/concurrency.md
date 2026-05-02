@@ -5,6 +5,7 @@ para: resource
 tags: [concurrency, async, threading, race-conditions, locks, goroutines]
 sources: []
 updated: 2026-05-01
+tldr: Running multiple tasks that overlap in time. Concurrency is about structure (managing many tasks); parallelism is about execution (running on multiple CPUs simultaneously).
 ---
 
 # Concurrency

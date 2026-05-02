@@ -5,6 +5,7 @@ para: resource
 tags: [bdd, gherkin, cucumber, behaviour-driven-development, acceptance-criteria, qa]
 sources: []
 updated: 2026-05-01
+tldr: Behaviour-Driven Development bridges the gap between business requirements and automated tests. Requirements are written in natural language (Gherkin), then automated using step definitions.
 ---
 
 # BDD and Gherkin

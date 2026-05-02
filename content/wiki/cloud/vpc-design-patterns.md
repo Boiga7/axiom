@@ -5,6 +5,7 @@ para: resource
 tags: [vpc, subnets, nat-gateway, transit-gateway, private-link, security-groups, nacl, network-design]
 sources: []
 updated: 2026-05-01
+tldr: Network architecture patterns for secure, scalable AWS deployments — from single-account to multi-account.
 ---
 
 # VPC Design Patterns

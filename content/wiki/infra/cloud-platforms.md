@@ -382,6 +382,7 @@ Below ~10M tokens/month, managed inference APIs (Together AI, Fireworks, Groq) a
 - [[infra/deployment]] — Docker, GitHub Actions CI/CD, Vercel, Fly.io deployment patterns
 - [[infra/gpu-hardware]] — GPU selection before choosing an instance type
 - [[apis/anthropic-api]] — direct Anthropic API as the baseline comparison for Bedrock
+- [[apis/aws-bedrock]] — deep dive on Converse API, Knowledge Bases, Guardrails, boto3 patterns
 - [[security/owasp-llm-top10]] — cloud-specific AI security considerations (IAM, supply chain)
 
 ## Open Questions

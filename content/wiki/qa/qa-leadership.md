@@ -5,6 +5,7 @@ para: resource
 tags: [qa-leadership, quality-strategy, team-building, metrics, stakeholders, qa-maturity]
 sources: []
 updated: 2026-05-01
+tldr: Operating QA at team and organisation scale — strategy, metrics, team building, and stakeholder communication.
 ---
 
 # QA Leadership and Quality Strategy

@@ -5,6 +5,7 @@ para: resource
 tags: [websockets, real-time, fastapi, broadcasting, rooms, heartbeat, backpressure]
 sources: []
 updated: 2026-05-01
+tldr: Persistent bidirectional connections for real-time features — chat, live feeds, collaborative editing.
 ---
 
 # WebSockets

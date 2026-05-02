@@ -5,6 +5,7 @@ para: resource
 tags: [deepspeed, zero, distributed-training, multi-gpu, memory-efficiency, microsoft]
 sources: []
 updated: 2026-05-01
+tldr: Zero Redundancy Optimizer — Microsoft's distributed training system that partitions model training state across GPUs to eliminate memory redundancy.
 ---
 
 # DeepSpeed ZeRO

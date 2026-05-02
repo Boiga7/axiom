@@ -5,6 +5,7 @@ para: resource
 tags: [test-strategy, testing-pyramid, quality-assurance, test-planning, coverage]
 sources: []
 updated: 2026-05-01
+tldr: A test strategy defines what to test, how much of each type, and how testing integrates into the delivery process.
 ---
 
 # Test Strategy

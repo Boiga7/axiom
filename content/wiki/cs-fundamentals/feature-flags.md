@@ -5,6 +5,7 @@ para: resource
 tags: [feature-flags, feature-toggles, launchdarkly, unleash, experimentation, gradual-rollout]
 sources: []
 updated: 2026-05-01
+tldr: Decoupling deployment from release — ship code dark, control visibility independently.
 ---
 
 # Feature Flags

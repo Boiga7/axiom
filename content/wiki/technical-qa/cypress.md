@@ -5,6 +5,7 @@ para: resource
 tags: [cypress, e2e, component-testing, intercepts, automation]
 sources: []
 updated: 2026-05-01
+tldr: JavaScript E2E and component testing framework. Runs in the browser (not via WebDriver). Direct DOM access, automatic waiting, time-travel debugging, built-in screenshot and video recording.
 ---
 
 # Cypress

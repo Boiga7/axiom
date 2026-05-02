@@ -5,6 +5,7 @@ para: resource
 tags: [sagemaker, ml-serving, endpoints, training-jobs, model-registry, batch-transform, mlops]
 sources: []
 updated: 2026-05-01
+tldr: "Managed ML platform: training, model registry, real-time inference endpoints, and batch transform — the bridge between cloud engineering and AI engineering."
 ---
 
 # AWS SageMaker

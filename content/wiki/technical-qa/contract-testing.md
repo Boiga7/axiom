@@ -5,6 +5,7 @@ para: resource
 tags: [contract-testing, pact, consumer-driven, microservices, pactflow, api-contracts]
 sources: []
 updated: 2026-05-01
+tldr: Validates that two services (consumer and provider) can communicate correctly. Sits between unit tests and E2E integration tests.
 ---
 
 # Contract Testing

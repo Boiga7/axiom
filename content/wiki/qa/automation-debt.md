@@ -5,6 +5,7 @@ para: resource
 tags: [automation-debt, test-debt, flaky-tests, maintenance, refactoring, technical-debt]
 sources: []
 updated: 2026-05-01
+tldr: The accumulated cost of shortcuts taken in test automation — and how to pay it down.
 ---
 
 # Automation Debt

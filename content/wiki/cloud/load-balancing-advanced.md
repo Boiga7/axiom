@@ -5,6 +5,7 @@ para: resource
 tags: [alb, nlb, global-accelerator, target-groups, weighted-routing, health-checks, sticky-sessions]
 sources: []
 updated: 2026-05-01
+tldr: ALB, NLB, Global Accelerator, and traffic management patterns for high-availability architectures.
 ---
 
 # Advanced Load Balancing on AWS

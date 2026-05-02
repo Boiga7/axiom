@@ -4,7 +4,8 @@ category: llms
 para: resource
 tags: [hub, ai-engineering, brain]
 sources: []
-updated: 2026-05-01
+tldr: Central hub for the AI Engineering brain — every major category linked from one place. Start here to navigate foundation models, agents, RAG, fine-tuning, evals, prompting, security, and infrastructure.
+updated: 2026-05-02
 ---
 
 # AI Engineering Brain

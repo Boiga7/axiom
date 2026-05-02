@@ -5,6 +5,7 @@ para: resource
 tags: [aws, api-gateway, rest-api, http-api, websocket, serverless]
 sources: []
 updated: 2026-05-01
+tldr: Fully managed API layer. Routes HTTP requests to Lambda, ECS, EC2, or any HTTP backend.
 ---
 
 # AWS API Gateway

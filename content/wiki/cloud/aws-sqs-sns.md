@@ -5,6 +5,7 @@ para: resource
 tags: [aws, sqs, sns, messaging, queues, pub-sub, event-driven]
 sources: []
 updated: 2026-05-01
+tldr: The messaging backbone of AWS event-driven architectures. SQS = queue (point-to-point). SNS = pub/sub (one-to-many fan-out).
 ---
 
 # AWS SQS and SNS

@@ -5,6 +5,7 @@ para: resource
 tags: [pytest, fixtures, plugins, parametrize, conftest, markers, hooks, coverage]
 sources: []
 updated: 2026-05-01
+tldr: Beyond basic fixtures and assertions — plugins, custom hooks, fixture architecture, and test organisation at scale.
 ---
 
 # Advanced pytest Patterns

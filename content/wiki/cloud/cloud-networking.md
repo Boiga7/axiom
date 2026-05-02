@@ -5,6 +5,7 @@ para: resource
 tags: [networking, vpc, subnets, load-balancing, dns, cdn, private-link, zero-trust]
 sources: []
 updated: 2026-05-01
+tldr: Network design underpins security, performance, and cost in cloud architectures. The same concepts — VPC, subnets, routing, firewalls — appear in all three major clouds with different names.
 ---
 
 # Cloud Networking

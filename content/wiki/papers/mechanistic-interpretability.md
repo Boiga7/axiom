@@ -5,6 +5,7 @@ para: resource
 tags: [mechanistic-interpretability, circuits, superposition, monosemanticity, olah, anthropic, safety]
 sources: []
 updated: 2026-05-01
+tldr: The research programme of understanding what computations neural networks actually implement.
 ---
 
 # Mechanistic Interpretability — Core Papers

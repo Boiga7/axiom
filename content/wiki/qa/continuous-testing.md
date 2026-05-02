@@ -5,6 +5,7 @@ para: resource
 tags: [continuous-testing, shift-left, shift-right, pipeline, feedback-loops]
 sources: []
 updated: 2026-05-01
+tldr: Testing integrated throughout the entire software delivery lifecycle — not a phase at the end. Shift left to catch bugs earlier; shift right to validate in production.
 ---
 
 # Continuous Testing

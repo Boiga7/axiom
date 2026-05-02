@@ -5,6 +5,7 @@ para: resource
 tags: [serverless, lambda, cloud-run, event-driven, cold-start, sam]
 sources: []
 updated: 2026-05-01
+tldr: Architectural patterns for serverless compute — Lambda, Cloud Run, Azure Functions.
 ---
 
 # Serverless Patterns

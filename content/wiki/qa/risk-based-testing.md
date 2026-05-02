@@ -5,6 +5,7 @@ para: resource
 tags: [risk-based-testing, risk-assessment, test-prioritisation, qa, quality]
 sources: []
 updated: 2026-05-01
+tldr: Prioritise testing effort toward areas of highest risk. You never have enough time to test everything — risk-based testing ensures the most critical and failure-prone areas get the most attention.
 ---
 
 # Risk-Based Testing

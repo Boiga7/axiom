@@ -5,6 +5,7 @@ para: resource
 tags: [react, agents, reasoning, acting, yao, 2022, tool-use, agentic]
 sources: []
 updated: 2026-05-01
+tldr: Interleave chain-of-thought reasoning with tool-use actions in a single generation loop — the model reasons about what to do, takes an action, observes the result, reasons again — enabling LLMs to complete tasks requiring external information retrieval.
 ---
 
 # ReAct: Synergizing Reasoning and Acting in Language Models (Yao et al., 2022)

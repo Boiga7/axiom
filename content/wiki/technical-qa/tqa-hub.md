@@ -5,6 +5,7 @@ para: resource
 tags: [hub, technical-qa, brain]
 sources: []
 updated: 2026-05-01
+tldr: Central hub for all test automation and technical quality engineering knowledge. Every page in the Technical QA brain connects here.
 ---
 
 # Technical QA Brain

@@ -5,6 +5,7 @@ para: resource
 tags: [distributed-systems, cap-theorem, consistency, consensus, fault-tolerance]
 sources: []
 updated: 2026-05-01
+tldr: Systems where computation spans multiple machines connected by a network.
 ---
 
 # Distributed Systems

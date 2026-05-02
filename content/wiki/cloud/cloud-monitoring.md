@@ -5,6 +5,7 @@ para: resource
 tags: [monitoring, observability, cloudwatch, prometheus, grafana, alerting, sli, slo]
 sources: []
 updated: 2026-05-01
+tldr: "Observability for cloud infrastructure. You cannot improve what you cannot measure. The three pillars: metrics (what is happening), logs (why it happened), traces (where time was spent)."
 ---
 
 # Cloud Monitoring

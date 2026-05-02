@@ -5,6 +5,7 @@ para: resource
 tags: [aws, cost-optimisation, finops, spot, reserved-instances, rightsizing]
 sources: []
 updated: 2026-05-01
+tldr: "FinOps discipline for managing cloud spend. The goal is unit economics: cost per transaction, cost per user, cost per model inference — not absolute spend."
 ---
 
 # Cloud Cost Optimisation

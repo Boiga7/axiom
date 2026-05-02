@@ -200,5 +200,6 @@ def create_preference_pair(prompt: str, response_a: str, response_b: str) -> dic
 - [[papers/dpo]] — DPO paper (Rafailov et al., 2023)
 - [[safety/constitutional-ai]] — Anthropic's approach using AI feedback instead of human labellers
 - [[fine-tuning/frameworks]] — TRL (canonical RLHF/DPO library), Axolotl, Unsloth
-- [[fine-tuning/lora]] — LoRA is almost always used alongside DPO to reduce memory cost
+- [[fine-tuning/lora-qlora]] — LoRA is almost always used alongside DPO to reduce memory cost
+- [[fine-tuning/dpo-grpo]] — sibling page; covers the DPO/GRPO training objectives with TRL code patterns
 - [[data/rlhf-datasets]] — datasets of human preference pairs for training

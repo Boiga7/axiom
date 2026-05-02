@@ -5,6 +5,7 @@ para: resource
 tags: [uat, user-acceptance-testing, acceptance, business-testing, qa]
 sources: []
 updated: 2026-05-01
+tldr: The final validation before release, performed by business stakeholders or end users. UAT confirms the software meets business requirements and is fit for purpose — not just that it's bug-free.
 ---
 
 # User Acceptance Testing (UAT)

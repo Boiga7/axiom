@@ -5,6 +5,7 @@ para: resource
 tags: [test-data, generation, synthetic-data, faker, factories, data-seeding]
 sources: []
 updated: 2026-05-01
+tldr: Advanced patterns for generating test data at scale — deterministic factories, database seeding strategies, and generating data with the right statistical properties for load and edge case testing.
 ---
 
 # Test Data Generation (Technical)

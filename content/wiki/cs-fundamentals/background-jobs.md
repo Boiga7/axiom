@@ -5,6 +5,7 @@ para: resource
 tags: [celery, arq, background-tasks, job-queue, redis, beat, retry, dlq]
 sources: []
 updated: 2026-05-01
+tldr: Offloading work from the request/response cycle — email sending, report generation, data processing.
 ---
 
 # Background Jobs and Task Queues

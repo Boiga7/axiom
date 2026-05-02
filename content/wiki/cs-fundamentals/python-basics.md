@@ -5,6 +5,7 @@ para: resource
 tags: [python, basics, fundamentals]
 sources: []
 updated: 2026-05-01
+tldr: The entry point for the vault's 0→SE→AE path. Covers the language features you need before moving on to [[cs-fundamentals/oop-patterns]] and [[python/ecosystem]].
 ---
 
 # Python Basics

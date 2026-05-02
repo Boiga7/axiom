@@ -5,6 +5,7 @@ para: resource
 tags: [eks, kubernetes, node-groups, fargate-profiles, irsa, addons, eksctl, cdk]
 sources: []
 updated: 2026-05-01
+tldr: "Managed Kubernetes on AWS: control plane management, node groups, Fargate profiles, and IRSA."
 ---
 
 # Amazon EKS — Elastic Kubernetes Service

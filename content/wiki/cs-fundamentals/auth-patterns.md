@@ -5,6 +5,7 @@ para: resource
 tags: [auth, oauth2, jwt, oidc, pkce, api-keys, authentication]
 sources: []
 updated: 2026-05-01
+tldr: Authentication (who are you?) and authorisation (what can you do?). Getting auth wrong is the most common source of security vulnerabilities. Use established protocols rather than inventing your own.
 ---
 
 # Auth Patterns

@@ -5,6 +5,7 @@ para: resource
 tags: [test-reporting, allure, junit-xml, dashboards, qa-metrics]
 sources: []
 updated: 2026-05-01
+tldr: Making test results visible, actionable, and historically trackable. Raw test output in a terminal window is not a report — good reporting surfaces trends, assigns ownership, and drives decisions.
 ---
 
 # Test Reporting

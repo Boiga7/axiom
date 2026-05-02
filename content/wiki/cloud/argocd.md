@@ -5,6 +5,7 @@ para: resource
 tags: [argocd, gitops, kubernetes, cd, continuous-delivery, app-of-apps]
 sources: []
 updated: 2026-05-01
+tldr: GitOps continuous delivery for Kubernetes. Watches a Git repository; reconciles cluster state to match. The cluster tells Argo what's running; Git tells Argo what should be running.
 ---
 
 # ArgoCD

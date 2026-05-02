@@ -5,6 +5,7 @@ para: resource
 tags: [bug-lifecycle, defect-management, severity, priority, qa, jira]
 sources: []
 updated: 2026-05-01
+tldr: The process a defect goes through from discovery to closure. A well-defined lifecycle ensures bugs don't get lost, misunderstood, or marked done before they're verified.
 ---
 
 # Bug Lifecycle

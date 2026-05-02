@@ -5,6 +5,7 @@ para: resource
 tags: [database-testing, schema-testing, migration-testing, data-integrity, postgresql]
 sources: []
 updated: 2026-05-01
+tldr: Testing database schema, migrations, constraints, stored procedures, and data integrity — not just whether the application layer works.
 ---
 
 # Database Testing

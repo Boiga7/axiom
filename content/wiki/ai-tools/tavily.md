@@ -5,6 +5,7 @@ para: resource
 tags: [tavily, search-api, agents, rag, web-search]
 sources: []
 updated: 2026-05-01
+tldr: Real-time web search API purpose-built for LLM agents and RAG pipelines. The de facto standard search tool in agent tutorials and production systems. Acquired by Nebius in February 2026.
 ---
 
 # Tavily

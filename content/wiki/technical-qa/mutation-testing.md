@@ -5,6 +5,7 @@ para: resource
 tags: [mutation-testing, mutmut, pit, test-quality, coverage]
 sources: []
 updated: 2026-05-01
+tldr: Automatically introducing bugs (mutations) into source code to verify that tests catch them. A test suite with 100% line coverage can still be useless if it never asserts anything.
 ---
 
 # Mutation Testing

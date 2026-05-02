@@ -5,6 +5,7 @@ para: resource
 tags: [platform-engineering, internal-developer-platform, backstage, golden-paths, idp]
 sources: []
 updated: 2026-05-01
+tldr: Building and operating an Internal Developer Platform (IDP) that enables product teams to self-serve infrastructure, deployments, and tooling — without needing deep ops expertise.
 ---
 
 # Platform Engineering

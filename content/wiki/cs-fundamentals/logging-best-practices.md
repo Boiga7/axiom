@@ -5,6 +5,7 @@ para: resource
 tags: [logging, structured-logging, correlation-ids, pii, log-levels, observability, structlog]
 sources: []
 updated: 2026-05-01
+tldr: Structured, queryable logs that help you debug production issues without drowning in noise.
 ---
 
 # Logging Best Practices

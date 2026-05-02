@@ -5,6 +5,7 @@ para: resource
 tags: [cli, click, typer, rich, argparse, subprocess, terminal, developer-tools]
 sources: []
 updated: 2026-05-01
+tldr: Building professional command-line tools with Click, Typer, and Rich.
 ---
 
 # CLI Tooling

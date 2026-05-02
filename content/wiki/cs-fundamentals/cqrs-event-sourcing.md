@@ -5,6 +5,7 @@ para: resource
 tags: [cqrs, event-sourcing, commands, queries, projections, event-store, snapshots]
 sources: []
 updated: 2026-05-01
+tldr: Separating reads from writes, and storing state as a sequence of events rather than current values.
 ---
 
 # CQRS and Event Sourcing

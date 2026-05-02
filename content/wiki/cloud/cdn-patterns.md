@@ -5,6 +5,7 @@ para: resource
 tags: [cdn, cloudfront, edge, caching, cache-invalidation, performance]
 sources: []
 updated: 2026-05-01
+tldr: "Content delivery networks and edge computing: moving content and computation closer to users to reduce latency and origin load. Critical for global applications."
 ---
 
 # CDN and Edge Patterns

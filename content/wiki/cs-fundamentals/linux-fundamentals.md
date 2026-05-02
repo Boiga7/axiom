@@ -5,6 +5,7 @@ para: resource
 tags: [linux, bash, shell, processes, networking, permissions, systemd]
 sources: []
 updated: 2026-05-01
+tldr: "Core Linux knowledge for software engineers: process management, file system, networking, shell scripting, and systemd. Essential for anyone running services in production."
 ---
 
 # Linux Fundamentals

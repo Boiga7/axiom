@@ -5,6 +5,7 @@ para: resource
 tags: [event-driven, events, kafka, pub-sub, event-sourcing, cqrs, choreography]
 sources: []
 updated: 2026-05-01
+tldr: "Systems that communicate by producing and consuming events rather than direct calls. Temporal decoupling: producer doesn't wait for consumer; spatial decoupling: producer doesn't know who consumes."
 ---
 
 # Event-Driven Architecture

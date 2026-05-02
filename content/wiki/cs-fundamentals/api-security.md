@@ -5,6 +5,7 @@ para: resource
 tags: [api-security, rate-limiting, jwt-attacks, oauth, input-validation, cors, owasp]
 sources: []
 updated: 2026-05-01
+tldr: Securing APIs against authentication attacks, injection, abuse, and data exposure.
 ---
 
 # API Security

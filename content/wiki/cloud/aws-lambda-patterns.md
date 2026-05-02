@@ -5,6 +5,7 @@ para: resource
 tags: [aws, lambda, serverless, event-driven, api-gateway, sqs, patterns]
 sources: []
 updated: 2026-05-01
+tldr: Lambda beyond hello-world. Cold starts, concurrency, event sources, and deployment patterns that matter for production workloads.
 ---
 
 # AWS Lambda — Patterns and Production

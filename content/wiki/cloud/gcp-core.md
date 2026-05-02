@@ -5,6 +5,7 @@ para: resource
 tags: [gcp, google-cloud, gke, cloud-run, bigquery, vertex-ai, iam, pubsub]
 sources: []
 updated: 2026-05-01
+tldr: Google Cloud Platform. Second cloud for most teams; first cloud for ML/AI workloads and analytics. GCP leads on Kubernetes (invented it), BigQuery, and Vertex AI. 12% market share (2026).
 ---
 
 # GCP Core Services

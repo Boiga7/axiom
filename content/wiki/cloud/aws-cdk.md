@@ -5,6 +5,7 @@ para: resource
 tags: [aws-cdk, cdk, iac, cloudformation, typescript, constructs, stacks]
 sources: []
 updated: 2026-05-01
+tldr: AWS Cloud Development Kit. Define AWS infrastructure in TypeScript, Python, Java, or Go.
 ---
 
 # AWS CDK

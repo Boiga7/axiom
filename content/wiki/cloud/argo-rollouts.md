@@ -5,6 +5,7 @@ para: resource
 tags: [argo-rollouts, progressive-delivery, canary, blue-green, gitops]
 sources: []
 updated: 2026-05-01
+tldr: Progressive delivery controller for Kubernetes. Extends Deployments with canary, blue-green, and analysis-driven rollout strategies.
 ---
 
 # Argo Rollouts

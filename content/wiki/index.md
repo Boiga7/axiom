@@ -5,7 +5,7 @@ updated: 2026-05-01
 
 # Nexus — Content Index
 
-290 pages across 27 categories. Updated 2026-05-01.
+306 pages across 27 categories. Updated 2026-05-02.
 
 ---
 
@@ -18,6 +18,8 @@ updated: 2026-05-01
 - [[cs-fundamentals/algorithms]] — Sorting (merge/quick), binary search, recursion, dynamic programming, two pointers, backtracking
 - [[cs-fundamentals/system-design]] — Load balancing, caching strategies, CAP theorem, databases, microservices vs monolith, back-of-envelope estimation
 - [[cs-fundamentals/sql]] — SELECT/JOIN/GROUP BY/HAVING, indexes, ACID, transactions, normalisation, SQLAlchemy ORM patterns, N+1 problem
+- [[cs-fundamentals/nosql-databases]] — Document (MongoDB), key-value (DynamoDB, Redis data structures), wide-column (Cassandra), graph (Neo4j) — when each wins over SQL
+- [[cs-fundamentals/cicd-pipelines]] — Stage ordering (lint→build→test→scan→staging→prod), Jenkins Declarative Pipeline, Azure DevOps YAML, DORA metrics, trunk-based development
 - [[cs-fundamentals/git]] — Staging, committing, branching, merge vs rebase, interactive rebase, PR workflow, conventional commits, .gitignore
 - [[cs-fundamentals/networking]] — HTTP/HTTPS/TLS, DNS, TCP vs UDP, status codes, headers, REST, WebSockets, SSE (LLM streaming), CORS
 - [[cs-fundamentals/oop-patterns]] — Classes, inheritance, composition, SOLID, Factory/Observer/Strategy/Repository patterns
@@ -74,6 +76,7 @@ updated: 2026-05-01
 ## Layer 1 — Core AI Knowledge
 
 ### `llms/` — Foundation Models
+- [[llms/ae-hub]] — AI Engineering Brain central hub: every major AE category linked from one place
 - [[llms/claude]] — Claude 4.x family: Opus 4.7/4.6, Sonnet 4.6, Haiku 4.5 — benchmarks, pricing, extended thinking, prompt caching
 - [[llms/transformer-architecture]] — Attention mechanism, KV cache, RoPE/ALiBi, SwiGLU, MoE, Chinchilla scaling laws
 - [[llms/model-families]] — GPT/o-series, Gemini, Llama, Mistral, DeepSeek R1, Qwen, Phi — when to use each
@@ -83,6 +86,7 @@ updated: 2026-05-01
 - [[safety/alignment]] — RSP (ASL tiers), red teaming, scalable oversight, superalignment, safety vs helpfulness
 - [[safety/constitutional-ai]] — CAI two-phase training (SL-CAF + RLAIF), constitution as principles, vs RLHF
 - [[safety/mechanistic-interpretability]] — Superposition, SAEs, circuits, Anthropic's Golden Gate Claude demo
+- [[safety/red-teaming-methodology]] — structured adversarial testing, failure mode discovery, automated red teaming in CI
 
 ### `agents/` — Agentic Systems
 - [[agents/langchain]] — LCEL pipe operator, document loaders, text splitters, prompt templates, RAG chains, conversation memory; relationship to LangGraph
@@ -96,6 +100,8 @@ updated: 2026-05-01
 - [[agents/multi-agent-patterns]] — Supervisor, Swarm/handoff, Parallel fan-out; context management, trust, debugging
 - [[agents/memory]] — In-context, episodic, semantic, procedural memory; LangGraph checkpointing; multi-tenant isolation
 - [[agents/openai-agents-sdk]] — OpenAI Agents SDK (March 2025): handoffs, guardrails, structured output, streaming; vs LangGraph
+- [[agents/mcp-server-development]] — FastMCP decorator API, tool/resource/prompt definitions, stdio vs streamable-HTTP transports, Claude Desktop/Code integration, tool poisoning defence
+- [[agents/strands-agents-sdk]] — AWS open-source Python SDK; @tool decorator, Bedrock Converse API, MCP-native, used by Amazon Q Developer; vs LangGraph
 
 ### `rag/` — Retrieval-Augmented Generation
 - [[rag/pipeline]] — Full RAG pipeline: chunking → embed → retrieve → rerank → generate; GraphRAG; RAGAS
@@ -121,11 +127,15 @@ updated: 2026-05-01
 ### `multimodal/` — Vision and Multimodal AI
 - [[multimodal/vision]] — VLM comparison, Claude vision API, document processing, multimodal RAG, image generation
 - [[multimodal/audio]] — Whisper/Deepgram ASR, ElevenLabs/OpenAI TTS, voice agents, streaming pipeline, Realtime API
+- [[multimodal/document-processing]] — Claude PDF handling, pymupdf/unstructured pipeline; best-in-class for PDFs, tables, charts
+- [[multimodal/image-generation]] — Flux.1 vs DALL-E 3 vs Midjourney, open-source image gen APIs, no local GPU needed
+- [[multimodal/video]] — Gemini 1.5 Pro/2.0 Flash video understanding (1M context), Sora/Veo generation landscape
 
 ### `fine-tuning/` — Model Customisation
 - [[fine-tuning/decision-framework]] — Prompting → RAG → SFT → DPO → full FT decision tree; training objectives; hardware guide
 - [[fine-tuning/lora-qlora]] — LoRA math (ΔW=BA, 256x savings), QLoRA NF4, BitsAndBytesConfig, merge_and_unload
 - [[fine-tuning/dpo-grpo]] — DPO loss, TRL DPOTrainer, GRPO (DeepSeek-R1), ORPO, KTO; choosing objective
+- [[fine-tuning/rlhf-dpo]] — RLHF three-stage pipeline (SFT+reward model+PPO), DPO without reward model, newer variants (ORPO/KTO/GRPO), preference data generation
 - [[fine-tuning/frameworks]] — Axolotl YAML, TRL trainers, Unsloth 2-4x speedup, multi-GPU DeepSpeed/FSDP
 
 ### `math/` — Mathematical Foundations
@@ -180,11 +190,13 @@ updated: 2026-05-01
 - [[infra/deepspeed-zero]] — Zero Redundancy Optimizer; 3 partitioning stages (optimizer states/gradients/params); enables 200B+ model training; vs PyTorch FSDP
 - [[infra/github-apps]] — JWT + installation token auth flow; webhook processing; App vs OAuth App; permissions; secrets management
 - [[infra/github-marketplace]] — Billing models (free/flat-rate/per-unit); purchase lifecycle webhooks; listing requirements; verified publisher
+- [[infra/litellm]] — OpenAI-compatible interface to 100+ LLM providers; router with retry/fallback/load balancing; self-hosted AI gateway proxy
 
 ### `apis/` — LLM APIs
 - [[apis/anthropic-api]] — Messages API, prompt caching (5-min/1-hour), Batch API, streaming, tool use, extended thinking
 - [[apis/openai-api]] — Chat completions, function calling, structured output, o1/o3 reasoning models, embeddings, Whisper
 - [[apis/google-ai]] — Gemini 2.5 Pro/Flash, Google AI Studio vs Vertex AI, vision, function calling, thinking mode
+- [[apis/aws-bedrock]] — Converse API (model-agnostic boto3), Knowledge Bases (managed RAG), Guardrails (content safety), Bedrock Agents — AWS-native LLM platform
 
 ### `ai-tools/` — Developer Tooling
 - [[ai-tools/claude-code]] — CLI capabilities, CLAUDE.md governance, hooks system, skills, settings.json, /ultrareview
@@ -373,8 +385,10 @@ updated: 2026-05-01
 ### `data/` — Data Engineering
 - [[data/synthetic-data]] — Self-Instruct, Orca reasoning traces, preference pair generation, quality filtering, distilabel
 - [[data/distilabel]] — Argilla's synthetic data pipeline framework; DPO/RLHF pair generation; composable steps; HuggingFace Hub integration
+- [[data/datasets]] — HuggingFace datasets library; Alpaca/OpenHermes/HH-RLHF/The Stack; streaming large datasets; push_to_hub
 - [[data/rlhf-datasets]] — HH-RLHF, UltraFeedback, building custom preference datasets, LLM-as-judge labelling, quality checks
 - [[data/pipelines]] — dbt transformations, Airflow/Prefect orchestration, DVC versioning, RLHF feedback loops
+- [[data/annotation-tooling]] — Label Studio (pairwise RLHF templates, ML pre-annotation) and Argilla (purpose-built LLM preference collection) — the human-in-the-loop layer for fine-tuning datasets
 
 ### `papers/` — Research Papers
 - [[papers/key-papers]] — Reading list by area: Architecture, Alignment, Agents, RAG, Efficient Training, Safety, Scaling — one-day and one-week priority order

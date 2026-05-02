@@ -5,6 +5,7 @@ para: resource
 tags: [gpt-3, openai, few-shot, scaling, in-context-learning, 2020]
 sources: []
 updated: 2026-05-01
+tldr: Scaling a decoder-only Transformer to 175B parameters with 300B tokens of training data produced a model that could perform new tasks from a handful of examples in the prompt — without any gradient updates.
 ---
 
 # GPT-3: Language Models are Few-Shot Learners (Brown et al., 2020)

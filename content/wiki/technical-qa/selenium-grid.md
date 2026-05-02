@@ -5,6 +5,7 @@ para: resource
 tags: [selenium, grid, selenium-grid-4, docker, dynamic-grid, remote-webdriver, hub-node]
 sources: []
 updated: 2026-05-01
+tldr: Running Selenium tests across browsers and machines in parallel with Grid 4's router/hub/node architecture.
 ---
 
 # Selenium Grid 4

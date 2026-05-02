@@ -5,6 +5,7 @@ para: resource
 tags: [exploratory-testing, session-based, charters, heuristics, qa]
 sources: []
 updated: 2026-05-01
+tldr: Simultaneous learning, test design, and execution. The tester uses their knowledge of the system to discover behaviours that scripted tests miss.
 ---
 
 # Exploratory Testing

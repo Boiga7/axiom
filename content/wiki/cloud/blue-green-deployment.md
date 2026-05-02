@@ -5,6 +5,7 @@ para: resource
 tags: [blue-green, deployment, canary, rolling, kubernetes, argocd, feature-flags]
 sources: []
 updated: 2026-05-01
+tldr: Zero-downtime deployment patterns with instant rollback capability.
 ---
 
 # Blue-Green and Advanced Deployment Strategies

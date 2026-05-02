@@ -5,6 +5,7 @@ para: resource
 tags: [performance-testing, nfr, sla, slo, capacity-planning, baseline]
 sources: []
 updated: 2026-05-01
+tldr: "QA's role in performance: defining NFR acceptance criteria, running performance tests as quality gates, and communicating results to stakeholders. Distinct from engineering-level load testing tooling."
 ---
 
 # Performance Testing (QA Perspective)

@@ -5,6 +5,7 @@ para: resource
 tags: [performance, optimisation, profiling, caching, database, async, benchmarking]
 sources: []
 updated: 2026-05-01
+tldr: "Systematic approach to improving system performance: measure first, optimise the bottleneck, measure again."
 ---
 
 # Performance Optimisation

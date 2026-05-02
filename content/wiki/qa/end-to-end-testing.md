@@ -5,6 +5,7 @@ para: resource
 tags: [e2e-testing, playwright, critical-paths, flakiness, test-isolation, user-journeys]
 sources: []
 updated: 2026-05-01
+tldr: How to scope, design, and maintain E2E tests that provide signal rather than noise.
 ---
 
 # End-to-End Testing Strategy

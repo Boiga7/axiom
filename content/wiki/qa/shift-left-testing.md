@@ -5,6 +5,7 @@ para: resource
 tags: [shift-left, early-testing, requirements, static-analysis, tdd, three-amigos]
 sources: []
 updated: 2026-05-01
+tldr: Moving quality activities earlier in the SDLC — from deployment back to design — so defects are caught when they're cheapest to fix.
 ---
 
 # Shift-Left Testing

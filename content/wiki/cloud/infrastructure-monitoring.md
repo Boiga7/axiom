@@ -5,6 +5,7 @@ para: resource
 tags: [cloudwatch, monitoring, dashboards, synthetics, x-ray, alarms, slos]
 sources: []
 updated: 2026-05-01
+tldr: CloudWatch, X-Ray, Synthetics, and SLO-driven alerting for AWS workloads.
 ---
 
 # Infrastructure Monitoring on AWS

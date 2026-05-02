@@ -5,6 +5,7 @@ para: resource
 tags: [database-design, normalisation, indexes, schema, partitioning, query-optimisation]
 sources: []
 updated: 2026-05-01
+tldr: Designing relational database schemas for correctness, performance, and maintainability. Good schema design prevents bugs, makes queries fast, and reduces the cost of future changes.
 ---
 
 # Database Design

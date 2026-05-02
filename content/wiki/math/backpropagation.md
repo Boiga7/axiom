@@ -5,6 +5,7 @@ para: resource
 tags: [backpropagation, gradients, chain-rule, vanishing-gradients, residual-connections, training]
 sources: []
 updated: 2026-05-01
+tldr: "How neural networks learn: compute the loss, attribute it to each weight via the chain rule, update weights to reduce the loss."
 ---
 
 # Backpropagation and Gradient Flow

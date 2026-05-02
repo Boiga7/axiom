@@ -5,6 +5,7 @@ para: resource
 tags: [lambda, powertools, logger, tracer, metrics, idempotency, batch-processing, aws]
 sources: []
 updated: 2026-05-01
+tldr: Production-grade observability, idempotency, and batch processing for Lambda — the standard library for serious Lambda work.
 ---
 
 # AWS Lambda Powertools

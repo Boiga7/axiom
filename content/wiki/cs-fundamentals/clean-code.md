@@ -5,6 +5,7 @@ para: resource
 tags: [clean-code, solid, naming, refactoring, code-quality]
 sources: []
 updated: 2026-05-01
+tldr: Writing code that is easy to read, understand, and change. Clean code is not about aesthetics — it's about reducing the cognitive cost of every future change.
 ---
 
 # Clean Code

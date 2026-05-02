@@ -5,6 +5,7 @@ para: resource
 tags: [api-versioning, backward-compatibility, deprecation, semver, openapi]
 sources: []
 updated: 2026-05-01
+tldr: "Evolving APIs without breaking existing clients. The hardest constraint in API design: you can add anything, but removing or changing existing behaviour will break someone."
 ---
 
 # API Versioning and Backward Compatibility

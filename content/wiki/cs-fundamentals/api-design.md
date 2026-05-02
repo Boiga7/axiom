@@ -5,6 +5,7 @@ para: resource
 tags: [api-design, rest, openapi, versioning, http, hateoas]
 sources: []
 updated: 2026-05-01
+tldr: Designing HTTP APIs that are intuitive, consistent, and maintainable. Good API design is about the consumer's experience — the API is a product, not just an implementation detail.
 ---
 
 # API Design

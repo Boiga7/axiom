@@ -5,6 +5,7 @@ para: resource
 tags: [aws, step-functions, state-machine, orchestration, serverless]
 sources: []
 updated: 2026-05-01
+tldr: Serverless orchestration for distributed workflows. Coordinates Lambda functions, ECS tasks, SQS, SNS, DynamoDB, and 200+ AWS services into reliable state machines.
 ---
 
 # AWS Step Functions

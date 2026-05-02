@@ -5,6 +5,7 @@ para: resource
 tags: [api-performance, k6, latency, throughput, percentiles, slos, regression, benchmark]
 sources: []
 updated: 2026-05-01
+tldr: Measuring, baselining, and regression-testing API latency and throughput.
 ---
 
 # API Performance Testing

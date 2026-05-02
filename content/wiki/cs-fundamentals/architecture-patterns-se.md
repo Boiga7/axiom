@@ -5,6 +5,7 @@ para: resource
 tags: [architecture, hexagonal, clean-architecture, layered, monolith, ports-adapters]
 sources: []
 updated: 2026-05-01
+tldr: Structural approaches to organising application code. The right architecture makes code easier to test, change, and understand. The wrong one creates coupling that makes every change expensive.
 ---
 
 # Architecture Patterns

@@ -5,6 +5,7 @@ para: resource
 tags: [non-functional-testing, performance, reliability, usability, compatibility]
 sources: []
 updated: 2026-05-01
+tldr: Testing how the system behaves under conditions, not just whether it does the right thing.
 ---
 
 # Non-Functional Testing

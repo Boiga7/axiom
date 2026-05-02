@@ -5,6 +5,7 @@ para: resource
 tags: [fargate, ecs, serverless-containers, task-definition, networking, spot]
 sources: []
 updated: 2026-05-01
+tldr: Serverless compute engine for containers — run ECS or EKS workloads without managing EC2 instances.
 ---
 
 # AWS Fargate

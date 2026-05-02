@@ -5,6 +5,7 @@ para: resource
 tags: [observability, logging, metrics, tracing, opentelemetry, structured-logging]
 sources: []
 updated: 2026-05-01
+tldr: "Instrumenting applications so you can understand their runtime behaviour without modifying code. The three pillars: logs, metrics, traces. Modern production systems are undebuggable without them."
 ---
 
 # Observability for Software Engineers

@@ -5,6 +5,7 @@ para: resource
 tags: [container-security, docker, kubernetes, trivy, falco, image-scanning, pod-security]
 sources: []
 updated: 2026-05-01
+tldr: "Securing the container lifecycle: from image build to runtime in Kubernetes. Containers reduce attack surface compared to VMs but introduce their own threat model."
 ---
 
 # Container Security

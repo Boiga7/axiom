@@ -5,6 +5,7 @@ para: resource
 tags: [performance-testing, k6, jmeter, load-testing, stress-testing, sla, thresholds]
 sources: []
 updated: 2026-05-01
+tldr: Validates that a system behaves acceptably under expected and peak load. Catches performance regressions before they become production incidents.
 ---
 
 # Performance Testing

@@ -5,6 +5,7 @@ para: resource
 tags: [cloud-native, twelve-factor, sidecar, service-mesh, immutable, stateless]
 sources: []
 updated: 2026-05-01
+tldr: "Design principles and patterns for applications built to run on cloud infrastructure: containerised, dynamically orchestrated, microservices-oriented, and built for scale and resilience."
 ---
 
 # Cloud-Native Patterns

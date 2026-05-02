@@ -5,6 +5,7 @@ para: resource
 tags: [aws, cloud, ec2, s3, lambda, rds, ecs, eks, iam, vpc]
 sources: []
 updated: 2026-05-01
+tldr: The foundational services every cloud engineer needs to know. AWS dominates cloud (33% market share, 2026). These ten services underpin the vast majority of production architectures.
 ---
 
 # AWS Core Services

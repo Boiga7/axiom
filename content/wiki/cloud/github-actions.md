@@ -5,6 +5,7 @@ para: resource
 tags: [github-actions, ci-cd, oidc, caching, matrix, reusable-workflows, automation]
 sources: []
 updated: 2026-05-01
+tldr: CI/CD built into GitHub. Triggered by events (push, PR, schedule, manual). Runs jobs in parallel or sequence across GitHub-hosted or self-hosted runners.
 ---
 
 # GitHub Actions
@@ -315,3 +316,4 @@ concurrency:
 - [[cloud/aws-core]] — OIDC role assumption for AWS deployments
 - [[cloud/docker]] — GitHub Actions builds Docker images, pushes to GHCR/ECR
 - [[cloud/secrets-management]] — OIDC avoids storing static credentials as secrets
+- [[cs-fundamentals/cicd-pipelines]] — pipeline design discipline: stage ordering, DORA metrics, Jenkins/Azure DevOps patterns

@@ -1,6 +1,6 @@
 ---
 type: synthesis
-updated: 2026-04-29
+updated: 2026-05-02
 ---
 
 # AI Engineering — Living Overview
@@ -11,9 +11,9 @@ updated: 2026-04-29
 
 ## State of the Wiki
 
-**Pages:** 85
-**Categories:** 23 across 5 layers
-**Last ingest:** Batches 2-6 research sprint — all 23 categories seeded (2026-04-29)
+**Pages:** 302
+**Categories:** 27 across 5 layers (added CS Fundamentals, Cloud Brain, QA Brain, Technical QA Brain)
+**Last ingest:** Sprint 2026-05-02 — added aws-bedrock (Converse API/Knowledge Bases/Guardrails), mcp-server-development (FastMCP/transports/security), nosql-databases, cicd-pipelines, annotation-tooling; indexed 5 previously unindexed pages (multimodal/document-processing, image-generation, video; safety/red-teaming-methodology; data/datasets)
 
 ---
 

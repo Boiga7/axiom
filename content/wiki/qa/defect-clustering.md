@@ -5,6 +5,7 @@ para: resource
 tags: [defect-clustering, 80-20, hotspots, predictive-analysis, risk-based, defect-density]
 sources: []
 updated: 2026-05-01
+tldr: Defects are not randomly distributed — they cluster in a small number of modules. Find the hotspots and focus testing there.
 ---
 
 # Defect Clustering and Hotspot Analysis

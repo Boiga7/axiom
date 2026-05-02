@@ -5,6 +5,7 @@ para: resource
 tags: [design-principles, yagni, dry, kiss, solid, coupling, cohesion]
 sources: []
 updated: 2026-05-01
+tldr: Heuristics for making code decisions. Not laws — principles that, when violated, should have a reason. Knowing when NOT to apply them is as important as applying them.
 ---
 
 # Software Design Principles

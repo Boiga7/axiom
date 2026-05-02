@@ -560,3 +560,42 @@ Filled the three major gaps identified in the vault audit.
 - `infra/weaviate.md` — Hybrid search (BM25+dense, alpha=0.75); multi-tenancy; v4 Python client; Weaviate Cloud; vs pgvector/Pinecone/Qdrant comparison
 
 Index updated: 290 pages, 27 categories.
+
+## [2026-05-02] lint | Sprint lint — 294 pages, graph stale, 4 missing from index
+
+Vault is at 294 pages (4 added since last index update not yet catalogued). Structural issues found:
+
+**Structural (5 issues):**
+- `graph-health.md` severely stale — last audit covered 87 pages; vault now 294. Score 97/100 is invalid. Updated with staleness notice; full rebuild needed.
+- 4 pages from last commit not yet in `index.md`: multimodal/document-processing, multimodal/video, multimodal/image-generation, safety/red-teaming-methodology
+- ~183 pages missing `## Open Questions` section (107/290+ have it) — concentrated in cloud/, cs-fundamentals/, qa/, technical-qa/
+- ~164 pages missing `tldr:` frontmatter (126/290+ have it) — same distribution
+- `gap-report.md` stale: lists python-basics, instructor, langchain, guardrails as MISSING but they exist
+
+**Under-linked pages (4 new):**
+- multimodal/document-processing (1 inbound), multimodal/video (1), multimodal/image-generation (2), safety/red-teaming-methodology (1)
+
+**Active [unverified] claims (18 files — all recent, none stale > 60 days):**
+- Concentrated in landscape/ (AI lab valuations, GPT-5 rumour, Gemini 3), rag/pipeline (69% accuracy stat), protocols/ (MCP CVE counts)
+
+**No contradictions found** in sampled pages. 512-token default consistent across rag/chunking and rag/pipeline.
+
+## [2026-05-02] lint | Gap Intelligence — 2 content gaps, 7 index gaps found
+
+gap-report.md updated to v4. Both active projects (evalcheck, mcpindex) have adequate wiki coverage. No critical blocks.
+
+2 genuine content gaps remain: `cs-fundamentals/nosql-databases` and `cs-fundamentals/cicd-pipelines`. Prior gaps from v3 now resolved via technical-qa/qa expansion (load-testing, testing-at-scale, guardrails, langchain, instructor).
+
+7 pages exist but are absent from index.md: multimodal/document-processing, multimodal/video, multimodal/image-generation, safety/red-teaming-methodology, llms/ae-hub, data/datasets, fine-tuning/rlhf-dpo.
+
+## [2026-05-02] research | Gap Intelligence — 0 critical gaps, 2 concept gaps, 7 index gaps
+gap-report.md updated to v5. Both active projects fully covered. 5 sprint gaps resolved: nosql-databases, cicd-pipelines, annotation-tooling, aws-bedrock, mcp-server-development. 7 index maintenance gaps remain (files exist, not indexed). 2 concept gaps: LiteLLM, Strands Agents SDK.
+
+## [2026-05-02] research | Sprint — 5 pages added, 5 gaps resolved
+- Added: [[cs-fundamentals/nosql-databases]], [[cs-fundamentals/cicd-pipelines]], [[data/annotation-tooling]], [[apis/aws-bedrock]], [[agents/mcp-server-development]]
+- Indexed (previously unindexed): [[multimodal/document-processing]], [[multimodal/image-generation]], [[multimodal/video]], [[safety/red-teaming-methodology]], [[data/datasets]]
+- Resolved gaps: nosql-databases, cicd-pipelines, annotation-tooling, aws-bedrock, mcp-server-development
+- Remaining top gaps: LiteLLM (concept gap), Strands Agents SDK (concept gap), 2 index stubs (llms/ae-hub, fine-tuning/rlhf-dpo review)
+
+## [2026-05-02] lint | Vault audit — 134 broken links, 0 semantic duplicates, 197 frontmatter fixes
+Full vault audit run. Rule-based: 134 broken links (90% from 4 missing hub pages: cloud-hub, se-hub, qa-hub, tqa-hub), 167 frontmatter issues. Semantic: 3 flagged duplicate pairs all confirmed complementary (grpc: cs-fundamentals vs java; constitutional-ai: papers vs safety; mechanistic-interpretability: papers vs safety). Accuracy: 1 minor [unverified] gap in strands-agents-sdk. Frontmatter: 197 pages patched with tldr values (auto-extracted from first paragraph or one-sentence field). Audit report at [[synthesis/audit-report]].

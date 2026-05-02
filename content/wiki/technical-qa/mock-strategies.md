@@ -5,6 +5,7 @@ para: resource
 tags: [mocking, stubs, fakes, test-doubles, dependency-injection]
 sources: []
 updated: 2026-05-01
+tldr: Test doubles — mocks, stubs, fakes, spies — are the tool for isolating units from their dependencies. Choosing the wrong double leads to tests that pass but miss real bugs.
 ---
 
 # Mock Strategies

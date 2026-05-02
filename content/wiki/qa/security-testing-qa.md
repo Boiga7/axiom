@@ -5,6 +5,7 @@ para: resource
 tags: [security-testing, owasp, dast, sast, penetration-testing, qa]
 sources: []
 updated: 2026-05-01
+tldr: "QA's role in application security: running automated security scans, coordinating with pen testers, and integrating security checks into the test pipeline."
 ---
 
 # Security Testing (QA)

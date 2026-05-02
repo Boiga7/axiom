@@ -5,6 +5,7 @@ para: resource
 tags: [aws, security, iam, guardduty, security-hub, waf, scps]
 sources: []
 updated: 2026-05-01
+tldr: "Securing AWS infrastructure: IAM least privilege, preventive controls (SCPs, resource policies), detective controls (GuardDuty, CloudTrail, Security Hub), and network security (WAF, Security Groups, N..."
 ---
 
 # Cloud Security

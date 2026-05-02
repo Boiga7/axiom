@@ -5,6 +5,7 @@ para: resource
 tags: [finops, cost, tagging, budgets, rightsizing, savings-plans, reserved-instances]
 sources: []
 updated: 2026-05-01
+tldr: Engineering discipline for understanding, controlling, and optimising cloud spend.
 ---
 
 # FinOps and Cloud Cost Management

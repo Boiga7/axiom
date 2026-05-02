@@ -5,6 +5,7 @@ para: resource
 tags: [wiremock, service-virtualisation, stubs, mocking, api-testing]
 sources: []
 updated: 2026-05-01
+tldr: Service virtualisation tool — stubbing HTTP dependencies so you can test your service without running real downstream services. Available as a Java library, standalone server, and Docker image.
 ---
 
 # WireMock

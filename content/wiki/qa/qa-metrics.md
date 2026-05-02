@@ -5,6 +5,7 @@ para: resource
 tags: [qa-metrics, quality-metrics, defect-density, test-coverage, reporting]
 sources: []
 updated: 2026-05-01
+tldr: Metrics make quality visible and improvement measurable. Without them, QA discussions are opinions; with them, they're data-driven decisions. Track metrics to improve processes, not to measure people.
 ---
 
 # QA Metrics

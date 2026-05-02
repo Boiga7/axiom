@@ -5,6 +5,7 @@ para: resource
 tags: [aws, rds, aurora, postgresql, database, multi-az]
 sources: []
 updated: 2026-05-01
+tldr: Managed relational database services. RDS manages MySQL, PostgreSQL, MariaDB, Oracle, SQL Server.
 ---
 
 # AWS RDS & Aurora

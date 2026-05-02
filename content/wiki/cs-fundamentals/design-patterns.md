@@ -5,6 +5,7 @@ para: resource
 tags: [design-patterns, creational, structural, behavioural, gof]
 sources: []
 updated: 2026-05-01
+tldr: "Reusable solutions to recurring design problems. The GoF (Gang of Four) catalogue: 23 patterns in three categories. Knowing when NOT to use a pattern is as valuable as knowing the pattern itself."
 ---
 
 # Design Patterns

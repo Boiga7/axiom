@@ -5,6 +5,7 @@ para: resource
 tags: [ai-testing, llm-testing, qa, hallucination, non-determinism]
 sources: []
 updated: 2026-05-01
+tldr: "QA's role when the product includes LLM-powered features: chatbots, AI recommendations, summarisation, classification."
 ---
 
 # Testing AI/LLM Features

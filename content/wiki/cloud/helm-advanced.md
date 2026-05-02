@@ -5,6 +5,7 @@ para: resource
 tags: [helm, kubernetes, charts, hooks, oci, dependencies, templating]
 sources: []
 updated: 2026-05-01
+tldr: Beyond `helm install`. Hooks, library charts, OCI registries, testing, and patterns for production-grade chart management.
 ---
 
 # Helm — Advanced Patterns

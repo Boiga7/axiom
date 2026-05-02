@@ -5,6 +5,7 @@ para: resource
 tags: [qa, devops, quality-gates, ci-cd, shift-left, continuous-testing]
 sources: []
 updated: 2026-05-01
+tldr: How quality practices integrate with DevOps pipelines. DevOps QA is not a team — it's quality gates, automated checks, and feedback loops embedded into the delivery pipeline.
 ---
 
 # QA in DevOps

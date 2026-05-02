@@ -332,4 +332,5 @@ users = session.query(User).options(joinedload(User.orders)).all()
 - [[cs-fundamentals/data-structures]] — indexes are B-trees; query plans use data structure intuitions
 - [[infra/vector-stores]] — pgvector extends PostgreSQL with vector column types for AI workloads
 - [[web-frameworks/django]] — Django ORM sits on top of SQL; understanding SQL makes ORM debugging tractable
+- [[cs-fundamentals/nosql-databases]] — when to reach beyond relational: MongoDB, DynamoDB, Cassandra, Redis, Neo4j
 - [[web-frameworks/fastapi]] — SQLAlchemy async engine integrates directly with FastAPI's dependency injection

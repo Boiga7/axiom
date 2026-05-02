@@ -5,6 +5,7 @@ para: resource
 tags: [dpo, direct-preference-optimization, alignment, rafailov, 2023, rlhf-replacement]
 sources: []
 updated: 2026-05-01
+tldr: DPO shows that the RLHF reward model and PPO optimisation loop can be eliminated — the LLM itself encodes an implicit reward function, allowing direct optimisation on preference pairs with a simple classification-style loss.
 ---
 
 # Direct Preference Optimization (Rafailov et al., 2023)

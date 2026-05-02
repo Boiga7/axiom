@@ -5,6 +5,7 @@ para: resource
 tags: [elasticache, redis, memcached, aws, caching, pub-sub, session-store]
 sources: []
 updated: 2026-05-01
+tldr: Managed Redis and Memcached in AWS. ElastiCache handles node provisioning, patching, failure detection, and replication. Use Redis for most workloads — richer data structures, persistence, pub/sub.
 ---
 
 # AWS ElastiCache

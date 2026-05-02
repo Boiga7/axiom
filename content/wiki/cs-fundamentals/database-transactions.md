@@ -5,6 +5,7 @@ para: resource
 tags: [transactions, acid, isolation-levels, deadlocks, postgresql, sqlalchemy, optimistic-locking]
 sources: []
 updated: 2026-05-01
+tldr: ACID guarantees, isolation levels, deadlocks, and patterns for correct concurrent data access.
 ---
 
 # Database Transactions

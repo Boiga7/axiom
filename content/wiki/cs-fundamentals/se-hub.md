@@ -5,6 +5,7 @@ para: resource
 tags: [hub, software-engineering, brain]
 sources: []
 updated: 2026-05-01
+tldr: Central hub for all software engineering knowledge. Every page in the SE brain connects here.
 ---
 
 # Software Engineering Brain

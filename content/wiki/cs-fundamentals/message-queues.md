@@ -5,6 +5,7 @@ para: resource
 tags: [message-queues, rabbitmq, kafka, sqs, async, pub-sub, dead-letter-queue]
 sources: []
 updated: 2026-05-01
+tldr: "Asynchronous communication between services. Queues decouple producers from consumers: the producer doesn't wait for the consumer; the consumer processes at its own pace."
 ---
 
 # Message Queues

@@ -5,6 +5,7 @@ para: resource
 tags: [langchain, lcel, llm-framework, chains, document-loaders]
 sources: []
 updated: 2026-05-01
+tldr: The base LLM application framework. Provides document loaders, text splitters, prompt templates, chains, and the LangChain Expression Language (LCEL) pipe operator for composing LLM pipelines.
 ---
 
 # LangChain

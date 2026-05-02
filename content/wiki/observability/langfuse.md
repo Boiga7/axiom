@@ -5,6 +5,7 @@ para: resource
 tags: [langfuse, observability, tracing, llm-monitoring, open-source, self-hosted]
 sources: []
 updated: 2026-05-01
+tldr: Open-source LLM observability platform. The standard self-hosted choice for teams that want full data ownership.
 ---
 
 # Langfuse

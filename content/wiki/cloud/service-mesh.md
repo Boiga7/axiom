@@ -5,6 +5,7 @@ para: resource
 tags: [service-mesh, istio, linkerd, envoy, mtls, traffic-management, kubernetes]
 sources: []
 updated: 2026-05-01
+tldr: "A service mesh handles cross-cutting network concerns for microservices: mTLS, retries, circuit breaking, traffic shaping, and observability — without touching application code."
 ---
 
 # Service Mesh

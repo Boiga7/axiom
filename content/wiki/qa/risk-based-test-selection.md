@@ -5,6 +5,7 @@ para: resource
 tags: [test-selection, risk-based, change-impact, ci-speed, regression-selection, flakiness]
 sources: []
 updated: 2026-05-01
+tldr: Running the right tests at the right time — not the entire suite on every commit.
 ---
 
 # Risk-Based Test Selection

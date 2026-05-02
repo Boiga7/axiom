@@ -5,6 +5,7 @@ para: resource
 tags: [kubernetes, k8s, pods, deployments, hpa, rbac, helm, ingress]
 sources: []
 updated: 2026-05-01
+tldr: Open-source container orchestration. Declare desired state; the control plane makes it so and keeps it so. The standard production substrate for containerised workloads.
 ---
 
 # Kubernetes

@@ -5,6 +5,7 @@ para: resource
 tags: [graphql, schema, resolvers, dataloader, federation, subscriptions]
 sources: []
 updated: 2026-05-01
+tldr: A query language for APIs and a runtime for executing those queries. Clients request exactly the data they need; the schema is the contract.
 ---
 
 # GraphQL

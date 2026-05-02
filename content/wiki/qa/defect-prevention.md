@@ -5,6 +5,7 @@ para: resource
 tags: [defect-prevention, static-analysis, code-review, shift-left, peer-review]
 sources: []
 updated: 2026-05-01
+tldr: Finding bugs before they're written is cheaper than finding them after.
 ---
 
 # Defect Prevention

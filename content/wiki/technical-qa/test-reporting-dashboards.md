@@ -5,6 +5,7 @@ para: resource
 tags: [allure, test-reporting, dashboards, slack, junit-xml, html-report, flaky-tracking]
 sources: []
 updated: 2026-05-01
+tldr: Making test results visible, actionable, and trackable over time.
 ---
 
 # Test Reporting and Dashboards

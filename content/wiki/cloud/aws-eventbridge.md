@@ -5,6 +5,7 @@ para: resource
 tags: [eventbridge, event-bus, rules, pipes, schema-registry, aws, serverless]
 sources: []
 updated: 2026-05-01
+tldr: Serverless event bus for decoupling producers from consumers across AWS services, SaaS, and custom applications.
 ---
 
 # Amazon EventBridge

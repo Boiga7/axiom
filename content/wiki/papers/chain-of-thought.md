@@ -5,6 +5,7 @@ para: resource
 tags: [chain-of-thought, cot, reasoning, wei, 2022, prompting, emergence]
 sources: []
 updated: 2026-05-01
+tldr: Adding intermediate reasoning steps to few-shot examples — "chain-of-thought" — dramatically improves LLM performance on multi-step reasoning tasks, but only emerges at large model scale (~100B parameters).
 ---
 
 # Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (Wei et al., 2022)

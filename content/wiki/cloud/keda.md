@@ -5,6 +5,7 @@ para: resource
 tags: [keda, kubernetes, autoscaling, kafka, sqs, event-driven]
 sources: []
 updated: 2026-05-01
+tldr: KEDA (Kubernetes Event-Driven Autoscaling) extends Kubernetes HPA to scale workloads based on external event sources — Kafka consumer lag, SQS queue depth, Prometheus metrics, Redis list length, and 6...
 ---
 
 # KEDA — Kubernetes Event-Driven Autoscaling

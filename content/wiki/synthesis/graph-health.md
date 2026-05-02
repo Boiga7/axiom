@@ -3,9 +3,31 @@ type: synthesis
 category: synthesis
 para: area
 tags: [graph, health, audit]
-tldr: Link density audit across all Nexus pages — pre-fix score 81/100, post-fix score 97/100 after 10 links added; 0 orphans, 24 under-linked, 48 healthy, 15 hubs.
-updated: 2026-05-01
+tldr: "STALE — last audit 87 pages (97/100); vault now 294 pages. Full rebuild needed. 4 known under-linked pages from last commit."
+updated: 2026-05-02
 ---
+
+# Graph Health Report — 2026-05-02
+
+> **Status: STALE — full rebuild required.** Last audit covered 87 pages on 2026-05-01 (score 97/100). Vault has since grown to 294 pages across 7 phases of mass expansion. The cs-fundamentals/, cloud/, qa/, technical-qa/, papers/, and math/ categories were all added post-audit. Score of 97/100 is no longer valid.
+
+## Known Issues (since last audit)
+
+### Under-linked pages (4 — from last commit, 2026-05-01)
+- `multimodal/document-processing` — 1 inbound link (only from multimodal/vision)
+- `multimodal/video` — 1 inbound link (only from multimodal/vision)
+- `multimodal/image-generation` — 2 inbound links (multimodal/vision + multimodal/video)
+- `safety/red-teaming-methodology` — 1 inbound link (only from papers/constitutional-ai)
+
+### Not yet in index.md (4)
+- multimodal/document-processing, multimodal/video, multimodal/image-generation, safety/red-teaming-methodology
+
+### Vault size delta
+- Last audit: 87 pages
+- Current: 294 pages (207 new pages added in 7 phases)
+- New hub pages: se-hub, cloud-hub, qa-hub, tqa-hub (each has 3-5 inbound links — healthy)
+
+## Previous Audit Results (2026-05-01, 87 pages)
 
 # Graph Health Report — 2026-05-01
 

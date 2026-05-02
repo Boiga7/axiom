@@ -5,6 +5,7 @@ para: resource
 tags: [scaling-laws, kaplan, chinchilla, compute, parameters, data, 2020, 2022]
 sources: []
 updated: 2026-05-01
+tldr: Two papers that define how LLM performance scales with compute, parameters, and data. Chinchilla corrected a key mistake in Kaplan and changed how all subsequent models are trained.
 ---
 
 # Scaling Laws for Neural Language Models (Kaplan et al., 2020) + Chinchilla (Hoffmann et al., 2022)

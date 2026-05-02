@@ -5,6 +5,7 @@ para: resource
 tags: [hub, quality-assurance, brain]
 sources: []
 updated: 2026-05-01
+tldr: Central hub for all quality assurance knowledge. Every page in the QA brain connects here.
 ---
 
 # QA Brain

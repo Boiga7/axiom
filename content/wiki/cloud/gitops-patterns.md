@@ -5,6 +5,7 @@ para: resource
 tags: [gitops, argocd, flux, progressive-delivery, pull-based-deployment]
 sources: []
 updated: 2026-05-01
+tldr: GitOps uses Git as the single source of truth for infrastructure and application state. A GitOps operator continuously reconciles the actual cluster state toward what's declared in Git.
 ---
 
 # GitOps Patterns

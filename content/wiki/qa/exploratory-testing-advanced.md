@@ -5,6 +5,7 @@ para: resource
 tags: [exploratory-testing, heuristics, session-based, charters, bugs, cognitive-bias]
 sources: []
 updated: 2026-05-01
+tldr: Going beyond basic charter/session structure into the cognitive craft of finding bugs that scripted tests miss. Exploratory testing is a skill, not a workflow.
 ---
 
 # Exploratory Testing — Advanced

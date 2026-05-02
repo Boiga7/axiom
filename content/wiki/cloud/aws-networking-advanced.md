@@ -5,6 +5,7 @@ para: resource
 tags: [aws, networking, vpc, transit-gateway, private-link, waf, route53]
 sources: []
 updated: 2026-05-01
+tldr: "Beyond basic VPC: multi-VPC architectures, transit gateway, PrivateLink, WAF, DNS failover, and network performance patterns."
 ---
 
 # AWS Networking — Advanced

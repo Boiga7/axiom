@@ -5,6 +5,7 @@ para: resource
 tags: [hub, python, brain]
 sources: []
 updated: 2026-05-01
+tldr: Central hub for all Python-specific knowledge. Covers the production AI Python stack — async I/O, data tooling, structured outputs, packaging, CLI frameworks, and testing.
 ---
 
 # Python Brain

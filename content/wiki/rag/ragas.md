@@ -5,6 +5,7 @@ para: resource
 tags: [ragas, rag-evaluation, faithfulness, answer-relevancy, context-precision, evals]
 sources: []
 updated: 2026-05-01
+tldr: Reference-free evaluation framework for RAG pipelines.
 ---
 
 # RAGAS — RAG Evaluation Framework

@@ -5,6 +5,7 @@ para: resource
 tags: [aws, ecs, fargate, containers, task-definition, service]
 sources: []
 updated: 2026-05-01
+tldr: AWS-native container orchestration. Simpler than Kubernetes — no control plane to manage, no YAML manifests.
 ---
 
 # AWS ECS — Elastic Container Service

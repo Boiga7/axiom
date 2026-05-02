@@ -5,6 +5,7 @@ para: resource
 tags: [openai-evals, evaluation, benchmarks, llm-testing, open-source]
 sources: []
 updated: 2026-05-01
+tldr: Open-source framework for evaluating LLMs and LLM-powered systems, plus a registry of community benchmarks.
 ---
 
 # OpenAI Evals

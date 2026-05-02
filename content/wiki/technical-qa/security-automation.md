@@ -5,6 +5,7 @@ para: resource
 tags: [security-automation, zap, semgrep, trivy, sast, dast, ci]
 sources: []
 updated: 2026-05-01
+tldr: Automating security checks as part of CI/CD — SAST (static analysis), DAST (dynamic scanning), dependency auditing, container scanning, and secrets detection.
 ---
 
 # Security Automation

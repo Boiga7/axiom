@@ -5,6 +5,7 @@ para: resource
 tags: [regression-testing, test-selection, ci, qa, automation]
 sources: []
 updated: 2026-05-01
+tldr: Verifying that previously working functionality hasn't been broken by new changes. The primary value of an automated test suite — it prevents known-good behaviour from silently degrading.
 ---
 
 # Regression Testing

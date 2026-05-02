@@ -5,6 +5,7 @@ para: resource
 tags: [visual-testing, percy, applitools, playwright, screenshots, regression]
 sources: []
 updated: 2026-05-01
+tldr: Automated comparison of UI screenshots against approved baselines to catch unintended visual regressions.
 ---
 
 # Visual Testing

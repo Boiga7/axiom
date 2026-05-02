@@ -5,6 +5,7 @@ para: resource
 tags: [arize, phoenix, observability, llm-monitoring, ml-monitoring, evals, open-source]
 sources: []
 updated: 2026-05-01
+tldr: Open-source AI observability platform from Arize AI ($70M Series C, 2024).
 ---
 
 # Arize Phoenix

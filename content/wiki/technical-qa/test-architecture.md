@@ -5,6 +5,7 @@ para: resource
 tags: [test-architecture, page-object-model, screenplay, fixtures, test-design, automation]
 sources: []
 updated: 2026-05-01
+tldr: Structural patterns for maintainable automation code. Tests are code — they need design, abstraction, and refactoring the same as production code.
 ---
 
 # Test Architecture

@@ -5,6 +5,7 @@ para: resource
 tags: [infrastructure-testing, terraform, checkov, terratest, compliance, iac]
 sources: []
 updated: 2026-05-01
+tldr: "Testing infrastructure-as-code before it reaches production: static validation, compliance scanning, and live end-to-end infrastructure tests."
 ---
 
 # Infrastructure Testing

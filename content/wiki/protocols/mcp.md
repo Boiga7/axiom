@@ -170,6 +170,7 @@ Use direct function calling for tight, internal tools. Use MCP for anything mean
 - [[protocols/a2a]] — Google's agent-to-agent protocol (complements MCP)
 - [[ai-tools/claude-code]] — primary host that popularised MCP; plugin system
 - [[protocols/tool-design]] — how to write safe, well-designed MCP tool schemas
+- [[agents/mcp-server-development]] — building MCP servers in Python with FastMCP
 
 ## Open Questions
 

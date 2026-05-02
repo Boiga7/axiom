@@ -5,6 +5,7 @@ para: resource
 tags: [tdd, test-driven-development, red-green-refactor, outside-in, bdd]
 sources: []
 updated: 2026-05-01
+tldr: Write a failing test before writing code. The test defines the contract; the implementation satisfies it.
 ---
 
 # Test-Driven Development

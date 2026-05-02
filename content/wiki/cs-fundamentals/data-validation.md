@@ -5,6 +5,7 @@ para: resource
 tags: [pydantic, validation, schemas, type-safety, marshmallow, data-classes, serialisation]
 sources: []
 updated: 2026-05-01
+tldr: Schema definition, custom validators, serialisation, and defensive data handling at system boundaries.
 ---
 
 # Data Validation with Pydantic v2

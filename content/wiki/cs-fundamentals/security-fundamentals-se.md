@@ -5,6 +5,7 @@ para: resource
 tags: [security, owasp, xss, csrf, sql-injection, encryption, tls, secrets]
 sources: []
 updated: 2026-05-01
+tldr: Application security principles every engineer must know — not a specialisation, a baseline.
 ---
 
 # Security Fundamentals for Software Engineers

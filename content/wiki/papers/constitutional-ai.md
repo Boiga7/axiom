@@ -5,6 +5,7 @@ para: resource
 tags: [constitutional-ai, anthropic, rlhf, alignment, harmlessness, 2022]
 sources: []
 updated: 2026-05-01
+tldr: Instead of collecting human labels for harmful outputs, train a model to critique and revise its own responses using a written set of principles (a "constitution"), then use those AI-generated preference labels to train the final model.
 ---
 
 # Constitutional AI: Harmlessness from AI Feedback (Bai et al., Anthropic, 2022)

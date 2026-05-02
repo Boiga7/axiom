@@ -5,6 +5,7 @@ para: resource
 tags: [dependency-injection, ioc, di-container, fastapi, testing, inversion-of-control]
 sources: []
 updated: 2026-05-01
+tldr: Providing dependencies from outside rather than creating them inside — the key to testable, composable code.
 ---
 
 # Dependency Injection

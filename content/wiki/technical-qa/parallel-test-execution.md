@@ -5,6 +5,7 @@ para: resource
 tags: [parallelism, sharding, pytest-xdist, playwright-sharding, ci-matrix, test-isolation]
 sources: []
 updated: 2026-05-01
+tldr: Running tests concurrently to compress feedback time — without introducing isolation failures.
 ---
 
 # Parallel Test Execution

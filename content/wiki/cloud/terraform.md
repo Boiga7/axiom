@@ -5,6 +5,7 @@ para: resource
 tags: [terraform, iac, infrastructure-as-code, hcl, modules, state]
 sources: []
 updated: 2026-05-01
+tldr: Infrastructure as Code tool by HashiCorp (now part of IBM, with community fork OpenTofu under MPL 2.0). Declare infrastructure in HCL, run plan-apply-destroy.
 ---
 
 # Terraform

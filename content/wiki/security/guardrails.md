@@ -5,6 +5,7 @@ para: resource
 tags: [guardrails, output-validation, structured-outputs, safety, llm-reliability]
 sources: []
 updated: 2026-05-01
+tldr: Runtime enforcement of LLM output contracts — ensuring models return valid structure, safe content, and correct format before that output reaches your users or downstream systems.
 ---
 
 # Guardrails and Output Validation

@@ -5,6 +5,7 @@ para: resource
 tags: [ansible, iac, configuration-management, playbooks, automation]
 sources: []
 updated: 2026-05-01
+tldr: Agentless configuration management and automation tool. Uses SSH to push configuration to remote hosts — no daemon, no agent installed on targets. Written in Python; tasks are YAML playbooks.
 ---
 
 # Ansible

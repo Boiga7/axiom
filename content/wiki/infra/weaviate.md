@@ -5,6 +5,7 @@ para: resource
 tags: [weaviate, vector-store, hybrid-search, graphql, bm25, production]
 sources: []
 updated: 2026-05-01
+tldr: Open-source vector database with built-in hybrid search (BM25 + dense vector), a GraphQL API, and first-class support for module-based vectorisation.
 ---
 
 # Weaviate

@@ -5,6 +5,7 @@ para: resource
 tags: [pair-testing, collaborative-testing, cross-functional, developer-qa, exploratory]
 sources: []
 updated: 2026-05-01
+tldr: Two people testing together — more perspectives, fewer assumptions, faster knowledge transfer.
 ---
 
 # Pair Testing

@@ -5,6 +5,7 @@ para: resource
 tags: [test-documentation, test-cases, traceability-matrix, test-summary-report, test-charter]
 sources: []
 updated: 2026-05-01
+tldr: "The minimum viable paper trail: what to write, how to write it, and what to skip."
 ---
 
 # Test Documentation

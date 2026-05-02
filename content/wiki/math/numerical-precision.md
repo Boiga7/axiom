@@ -5,6 +5,7 @@ para: resource
 tags: [numerical-precision, fp16, bf16, int8, fp8, quantisation, inference, training, mixed-precision]
 sources: []
 updated: 2026-05-01
+tldr: "Every LLM inference and training decision involves a precision trade-off: lower precision = smaller memory footprint + faster compute, but risks numerical instability and accuracy loss."
 ---
 
 # Numerical Precision — fp32, fp16, bf16, int8, fp8

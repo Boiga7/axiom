@@ -5,6 +5,7 @@ para: resource
 tags: [test-case-design, equivalence-partitioning, boundary-value-analysis, decision-tables, qa]
 sources: []
 updated: 2026-05-01
+tldr: Systematic techniques for deriving test cases from requirements. The goal is maximum defect detection with minimum test cases.
 ---
 
 # Test Case Design

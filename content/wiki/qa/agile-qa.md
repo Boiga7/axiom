@@ -5,6 +5,7 @@ para: resource
 tags: [agile, scrum, qa, sprint, definition-of-done, devtestops]
 sources: []
 updated: 2026-05-01
+tldr: How quality assurance integrates with Scrum and agile delivery. QA is not a phase at the end of a sprint — it's a continuous activity woven through every sprint ceremony and development step.
 ---
 
 # QA in Agile

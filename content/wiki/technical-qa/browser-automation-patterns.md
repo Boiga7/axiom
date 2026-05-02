@@ -5,6 +5,7 @@ para: resource
 tags: [browser-automation, playwright, selectors, network-interception, authentication, downloads]
 sources: []
 updated: 2026-05-01
+tldr: Advanced Playwright patterns for real-world automation challenges.
 ---
 
 # Browser Automation Patterns

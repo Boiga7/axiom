@@ -5,6 +5,7 @@ para: resource
 tags: [flaky-tests, test-reliability, quarantine, ci, automation]
 sources: []
 updated: 2026-05-01
+tldr: A test that sometimes passes and sometimes fails on the same code is a flaky test. Flaky tests erode trust in the test suite — engineers start re-running failures instead of investigating them.
 ---
 
 # Flaky Test Management

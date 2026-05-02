@@ -5,6 +5,7 @@ para: resource
 tags: [cross-browser, playwright, browserstack, lambdatest, compatibility]
 sources: []
 updated: 2026-05-01
+tldr: Verifying an application works correctly across different browsers, versions, operating systems, and screen sizes.
 ---
 
 # Cross-Browser Testing

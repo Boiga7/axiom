@@ -5,6 +5,7 @@ para: resource
 tags: [caching, redis, cache-aside, write-through, eviction, cdn]
 sources: []
 updated: 2026-05-01
+tldr: Storing computed or fetched data closer to where it's needed to reduce latency and backend load. Caching is the most common performance optimisation — and a common source of bugs when done wrong.
 ---
 
 # Caching Strategies

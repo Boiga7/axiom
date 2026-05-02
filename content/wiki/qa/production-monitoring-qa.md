@@ -5,6 +5,7 @@ para: resource
 tags: [production-monitoring, synthetic-monitoring, real-user-monitoring, on-call, slo]
 sources: []
 updated: 2026-05-01
+tldr: QA's role doesn't end at release — production is where quality actually matters. Synthetic monitoring, real user monitoring, and SLO tracking extend testing into live systems.
 ---
 
 # Production Monitoring for QA

@@ -5,6 +5,7 @@ para: resource
 tags: [information-theory, entropy, kl-divergence, cross-entropy, perplexity, mutual-information]
 sources: []
 updated: 2026-05-01
+tldr: The mathematical language for uncertainty, surprise, and divergence between distributions.
 ---
 
 # Information Theory for AI Engineers

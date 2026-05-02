@@ -5,6 +5,7 @@ para: resource
 tags: [sqlalchemy, orm, async, postgresql, database, python]
 sources: []
 updated: 2026-05-01
+tldr: Python's standard ORM and SQL toolkit. Version 2.0 (2023) introduced fully type-annotated models via `Mapped[T]` + `mapped_column()`, a unified `select()` API, and first-class async support.
 ---
 
 # SQLAlchemy 2.0

@@ -5,6 +5,7 @@ para: resource
 tags: [rca, 5-whys, fishbone, post-mortem, incident-analysis, production-defects]
 sources: []
 updated: 2026-05-01
+tldr: Finding why defects happen so they stop happening — not just fixing the symptom.
 ---
 
 # Root Cause Analysis

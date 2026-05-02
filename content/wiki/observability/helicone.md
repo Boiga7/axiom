@@ -5,6 +5,7 @@ para: resource
 tags: [helicone, observability, llm-monitoring, ai-gateway, caching, open-source]
 sources: []
 updated: 2026-05-01
+tldr: Open-source LLM observability platform and AI gateway. One-line integration. Combines monitoring, tracing, prompt management, semantic caching, and multi-provider routing in a single proxy layer.
 ---
 
 # Helicone

@@ -5,6 +5,7 @@ para: resource
 tags: [smoke-testing, sanity-testing, regression, ci, release]
 sources: []
 updated: 2026-05-01
+tldr: Two fast verification techniques used at different stages of delivery. Often confused; both are narrow scope, but serve different purposes.
 ---
 
 # Smoke and Sanity Testing

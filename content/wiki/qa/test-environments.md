@@ -5,6 +5,7 @@ para: resource
 tags: [test-environments, environment-parity, ephemeral-environments, feature-flags]
 sources: []
 updated: 2026-05-01
+tldr: The environments through which code travels from developer laptop to production. Environment gaps cause bugs that only appear in certain stages.
 ---
 
 # Test Environments

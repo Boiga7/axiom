@@ -5,6 +5,7 @@ para: resource
 tags: [grpc, protobuf, rpc, streaming, microservices, performance]
 sources: []
 updated: 2026-05-01
+tldr: A high-performance RPC framework using Protocol Buffers for serialisation. Strongly typed, auto-generated clients, 4 streaming modes. Preferred for internal service-to-service communication at scale.
 ---
 
 # gRPC

@@ -5,6 +5,7 @@ para: resource
 tags: [chaos-engineering, resilience, fault-injection, gameday, fis]
 sources: []
 updated: 2026-05-01
+tldr: Deliberately injecting failure into a system to verify it behaves correctly under stress — before production does it for you. Chaos is a quality practice, not an ops stunt.
 ---
 
 # Chaos Engineering

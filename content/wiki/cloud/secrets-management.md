@@ -5,6 +5,7 @@ para: resource
 tags: [secrets, vault, hashicorp, aws-secrets-manager, key-vault, rotation, dynamic-secrets]
 sources: []
 updated: 2026-05-01
+tldr: Credentials, API keys, database passwords, TLS certificates — anything that grants access must be managed, rotated, and audited.
 ---
 
 # Secrets Management

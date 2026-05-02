@@ -208,6 +208,7 @@ distilabel's value: pipelines are version-controlled, reproducible, and based on
 - [[fine-tuning/dpo-grpo]] — the training objectives that consume distilabel's output
 - [[fine-tuning/frameworks]] — TRL DPOTrainer consumes distilabel preference pairs
 - [[evals/llm-as-judge]] — UltraFeedback uses LLM-as-judge methodology
+- [[data/annotation-tooling]] — Argilla (built by the same team) for human review of distilabel-generated data
 
 ## Open Questions
 - Does distilabel support GRPO training data generation (process reward model format)?

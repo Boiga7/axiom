@@ -5,6 +5,7 @@ para: resource
 tags: [api-testing, postman, rest-assured, http, rest, graphql, schema-validation]
 sources: []
 updated: 2026-05-01
+tldr: Validating HTTP APIs at the integration layer — below the UI, above the database.
 ---
 
 # API Testing

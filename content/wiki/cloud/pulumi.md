@@ -5,6 +5,7 @@ para: resource
 tags: [pulumi, iac, typescript, python, infrastructure-as-code, stacks]
 sources: []
 updated: 2026-05-01
+tldr: Infrastructure as Code using real programming languages. Write AWS/GCP/Azure resources in TypeScript, Python, Go, or .NET.
 ---
 
 # Pulumi

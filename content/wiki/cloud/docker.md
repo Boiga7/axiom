@@ -5,6 +5,7 @@ para: resource
 tags: [docker, containers, dockerfile, multi-stage, buildkit, compose]
 sources: []
 updated: 2026-05-01
+tldr: Container runtime. Packages an application and its dependencies into a portable, reproducible image that runs identically in dev, CI, and production.
 ---
 
 # Docker

@@ -5,6 +5,7 @@ para: resource
 tags: [ddd, domain-driven-design, aggregate, bounded-context, ubiquitous-language, value-object]
 sources: []
 updated: 2026-05-01
+tldr: Aligning software design with the business domain. DDD provides a vocabulary and set of patterns for modelling complex business domains — making the code reflect the real world rather than database ta...
 ---
 
 # Domain-Driven Design

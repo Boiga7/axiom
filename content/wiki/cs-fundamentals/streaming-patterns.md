@@ -5,6 +5,7 @@ para: resource
 tags: [sse, streaming, backpressure, async-generator, langchain, fastapi, chunked-transfer]
 sources: []
 updated: 2026-05-01
+tldr: Server-Sent Events, chunked responses, and backpressure — the mechanics of real-time data delivery.
 ---
 
 # Streaming Patterns

@@ -5,6 +5,7 @@ para: resource
 tags: [graphql, testing, schema, apollo, mutations, subscriptions]
 sources: []
 updated: 2026-05-01
+tldr: "Testing GraphQL APIs differs from REST: single endpoint, type system, queries vs mutations vs subscriptions, N+1 loader patterns, and schema-first contracts."
 ---
 
 # GraphQL Testing

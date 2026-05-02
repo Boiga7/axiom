@@ -5,6 +5,7 @@ para: resource
 tags: [weights-and-biases, mlflow, experiment-tracking, fine-tuning, training]
 sources: []
 updated: 2026-05-01
+tldr: "Logging and comparing ML training runs. Distinct from production LLM observability (see [[observability/platforms]]): experiment tracking is for the training phase — comparing hyperparameter runs, cat..."
 ---
 
 # Experiment Tracking

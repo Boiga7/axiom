@@ -5,6 +5,7 @@ para: resource
 tags: [migration, 6rs, lift-and-shift, re-architect, migration-hub, wave-planning, tcl]
 sources: []
 updated: 2026-05-01
+tldr: "Planning and executing workload migrations to AWS: the 6 Rs, wave planning, and the tools that make it work."
 ---
 
 # Cloud Migration

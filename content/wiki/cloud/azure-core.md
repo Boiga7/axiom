@@ -5,6 +5,7 @@ para: resource
 tags: [azure, microsoft, aks, azure-functions, cosmos-db, entra-id, blob-storage]
 sources: []
 updated: 2026-05-01
+tldr: Microsoft Azure. Third cloud globally but dominant in enterprise (Microsoft 365 integration, Entra ID as de facto corporate identity).
 ---
 
 # Azure Core Services

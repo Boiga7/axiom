@@ -5,6 +5,7 @@ para: resource
 tags: [asyncio, task-groups, cancellation, semaphore, timeout, async-generators, trio]
 sources: []
 updated: 2026-05-01
+tldr: Beyond `await` — task groups, cancellation, timeouts, and structured concurrency.
 ---
 
 # Advanced Async Patterns in Python

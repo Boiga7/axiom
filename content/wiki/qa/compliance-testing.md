@@ -5,6 +5,7 @@ para: resource
 tags: [compliance, gdpr, accessibility, wcag, audit, pci-dss, regulation]
 sources: []
 updated: 2026-05-01
+tldr: Verifying software meets legal, regulatory, and standards requirements. Failing compliance isn't just a bug — it's a regulatory risk.
 ---
 
 # Compliance Testing

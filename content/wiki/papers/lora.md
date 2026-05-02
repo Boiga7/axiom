@@ -5,6 +5,7 @@ para: resource
 tags: [lora, fine-tuning, low-rank, adaptation, hu, 2021, peft]
 sources: []
 updated: 2026-05-01
+tldr: Instead of fine-tuning all model weights, freeze the original weights and inject trainable low-rank decomposition matrices into each attention layer — achieving 10,000× fewer trainable parameters with no inference overhead.
 ---
 
 # LoRA: Low-Rank Adaptation of Large Language Models (Hu et al., 2021)

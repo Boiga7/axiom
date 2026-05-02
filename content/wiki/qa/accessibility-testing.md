@@ -5,6 +5,7 @@ para: resource
 tags: [accessibility, wcag, a11y, axe, screen-reader, qa]
 sources: []
 updated: 2026-05-01
+tldr: Verifying that a product can be used by people with disabilities. Legal requirement in many jurisdictions (EU EAA, UK Equality Act, US Section 508, ADA).
 ---
 
 # Accessibility Testing

@@ -5,6 +5,7 @@ para: resource
 tags: [e2e-framework, page-objects, test-architecture, fixtures, abstractions, screenplay]
 sources: []
 updated: 2026-05-01
+tldr: Architecting a maintainable E2E test framework — the code behind the tests.
 ---
 
 # E2E Framework Design

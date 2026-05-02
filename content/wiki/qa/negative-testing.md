@@ -5,6 +5,7 @@ para: resource
 tags: [negative-testing, error-paths, boundary-testing, invalid-input, error-messages, robustness]
 sources: []
 updated: 2026-05-01
+tldr: Testing what the system does when things go wrong — invalid inputs, failed dependencies, boundary violations.
 ---
 
 # Negative Testing

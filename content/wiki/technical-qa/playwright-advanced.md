@@ -5,6 +5,7 @@ para: resource
 tags: [playwright, advanced, fixtures, api-testing, tracing, codegen]
 sources: []
 updated: 2026-05-01
+tldr: "Advanced Playwright patterns beyond basic locators and clicks: custom fixtures, API testing, tracing, code generation, CI optimisation, and the Healer agent for self-healing selectors."
 ---
 
 # Playwright Advanced

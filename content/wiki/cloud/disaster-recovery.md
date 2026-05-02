@@ -5,6 +5,7 @@ para: resource
 tags: [disaster-recovery, rto, rpo, backup, multi-region, business-continuity]
 sources: []
 updated: 2026-05-01
+tldr: Planning and executing recovery from catastrophic failures — region outages, data corruption, ransomware, accidental mass deletion.
 ---
 
 # Disaster Recovery

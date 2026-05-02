@@ -5,6 +5,7 @@ para: resource
 tags: [flash-attention, attention, training, inference, memory-efficiency, gpu]
 sources: []
 updated: 2026-05-01
+tldr: IO-aware exact attention algorithm that reduces GPU memory usage from O(N²) to O(N) and achieves 2–10× speedup over standard attention. Standard in all modern LLM training and inference stacks.
 ---
 
 # Flash Attention

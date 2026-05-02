@@ -5,6 +5,7 @@ para: resource
 tags: [ci-cd, quality-gates, pipeline, coverage, sonarqube, shift-left]
 sources: []
 updated: 2026-05-01
+tldr: Automated checkpoints in a delivery pipeline that block promotion when quality thresholds aren't met. Quality gates make "definition of done" machine-enforceable rather than aspirational.
 ---
 
 # CI/CD Quality Gates

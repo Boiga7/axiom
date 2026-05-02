@@ -5,6 +5,7 @@ para: resource
 tags: [swe-bench, benchmark, code, agents, jimenez, 2024, evaluation]
 sources: []
 updated: 2026-05-01
+tldr: A benchmark of 2,294 real GitHub issues from 12 popular Python repositories — to resolve each issue, a model must understand a full codebase, write a patch, and pass the existing test suite.
 ---
 
 # SWE-bench: Can Language Models Resolve Real-World GitHub Issues? (Jimenez et al., 2024)

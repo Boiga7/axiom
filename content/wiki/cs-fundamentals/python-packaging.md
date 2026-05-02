@@ -5,6 +5,7 @@ para: resource
 tags: [uv, pyproject, packaging, publishing, pypi, versioning, monorepo, hatch]
 sources: []
 updated: 2026-05-01
+tldr: Modern Python package management with uv, pyproject.toml, and publishing to PyPI.
 ---
 
 # Python Packaging and Distribution

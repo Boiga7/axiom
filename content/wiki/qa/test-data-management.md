@@ -5,6 +5,7 @@ para: resource
 tags: [test-data, factories, fixtures, anonymisation, synthetic-data]
 sources: []
 updated: 2026-05-01
+tldr: How to get good test data reliably without coupling tests to each other or exposing production PII.
 ---
 
 # Test Data Management
