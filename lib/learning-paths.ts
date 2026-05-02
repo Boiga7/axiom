@@ -62,6 +62,7 @@ export const LEARNING_PATHS: LearningPath[] = [
       { category: "cs-fundamentals", slug: "error-handling-patterns", note: "Timeouts, retries, circuit breakers — real backend engineering" },
       { category: "cs-fundamentals", slug: "performance-optimisation-se", note: "CPU vs IO, memory leaks, slow queries — measure, do not guess" },
       { category: "cs-fundamentals", slug: "debugging-systems", note: "Systematic debugging under pressure: correlation IDs, tracing across services, reproducing production bugs" },
+      { category: "cs-fundamentals", slug: "os-internals", note: "Why your process was OOM killed, what a context switch costs, processes vs threads" },
     ],
   },
   {
@@ -230,6 +231,8 @@ export const TOPIC_BUNDLES: LearningPath[] = [
       { category: "cs-fundamentals", slug: "distributed-systems", note: "How failures propagate: partial outages, inconsistency, cascade failure" },
       { category: "cs-fundamentals", slug: "error-handling-patterns", note: "Circuit breakers, retries with backoff, timeouts, graceful degradation" },
       { category: "synthesis", slug: "engineering-tradeoffs", note: "Cache vs recompute, RAG vs fine-tuning, scale up vs out, consistency vs availability" },
+      { category: "synthesis", slug: "data-as-system", note: "Lineage, freshness, contracts, consistency — most production bugs are data bugs" },
+      { category: "synthesis", slug: "technical-communication", note: "ADRs, postmortems, stakeholder translation — the communication layer that multiplies technical skill" },
     ],
   },
   {
