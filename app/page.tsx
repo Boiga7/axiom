@@ -8,7 +8,7 @@ import {
   BRAIN_LABELS,
   type Brain,
 } from "@/lib/wiki";
-import { LEARNING_PATHS } from "@/lib/learning-paths";
+import { LEARNING_PATHS, TOPIC_BUNDLES } from "@/lib/learning-paths";
 import Nav from "@/components/Nav";
 import LearningPathCard from "@/components/LearningPathCard";
 
@@ -81,8 +81,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-secondary text-lg leading-relaxed max-w-xl mx-auto mb-8">
-              An AI engineering knowledge base for practitioners — LLMs, agents, RAG,
-              evals, infrastructure, and everything in between.
+              A practitioner's reference for AI engineering. LLMs, agents, RAG, evals,
+              and infrastructure from first principles.
             </p>
 
             <div className="flex items-center justify-center gap-3">
@@ -105,19 +105,42 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Learning Paths ───────────────────────────────────── */}
-        <section className="mb-16">
-          <div className="flex items-center gap-3 mb-6">
+        {/* ── Role-Based Learning Paths ───────────────────────── */}
+        <section className="mb-16" id="learn-paths">
+          <div className="flex items-center gap-3 mb-2">
             <div className="w-1.5 h-5 rounded-full bg-ae/60" />
             <h2 className="font-mono text-[11px] uppercase tracking-widest text-ae/80">
               Learning Paths
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
+          <p className="text-secondary text-xs font-mono mb-6 ml-4">
+            Choose the path for your role
+          </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {LEARNING_PATHS.map((path) => (
               <LearningPathCard key={path.id} path={path} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Topic Bundles ────────────────────────────────────── */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-1.5 h-5 rounded-full bg-white/20" />
+            <h2 className="font-mono text-[11px] uppercase tracking-widest text-secondary">
+              Topic Bundles
+            </h2>
+            <div className="flex-1 h-px bg-white/[0.04]" />
+          </div>
+          <p className="text-secondary text-xs font-mono mb-6 ml-4">
+            Deep dives into specific AI engineering areas
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {TOPIC_BUNDLES.map((bundle) => (
+              <LearningPathCard key={bundle.id} path={bundle} />
             ))}
           </div>
         </section>
