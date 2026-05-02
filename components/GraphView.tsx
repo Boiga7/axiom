@@ -3,36 +3,17 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-type Node = {
-  id: string;
-  label: string;
-  category: string;
-  href: string;
-  color: string;
-  val: number;
-};
+type Node = { id: string; label: string; category: string; href: string; color: string; val: number; };
+type Link = { source: string; target: string; };
+type Props = { nodes: Node[]; links: Link[]; };
 
-type Link = {
-  source: string;
-  target: string;
-};
-
-type Props = {
-  nodes: Node[];
-  links: Link[];
-};
-
-// Evenly distribute n points on a unit sphere (Fibonacci spiral)
+// Evenly distribute n points on a unit sphere
 function fibonacciSphere(n: number): [number, number, number][] {
   const phi = (1 + Math.sqrt(5)) / 2;
   return Array.from({ length: n }, (_, i) => {
     const t = Math.acos(1 - 2 * (i + 0.5) / n);
     const az = 2 * Math.PI * i / phi;
-    return [
-      Math.sin(t) * Math.cos(az),
-      Math.cos(t),
-      Math.sin(t) * Math.sin(az),
-    ];
+    return [Math.sin(t) * Math.cos(az), Math.cos(t), Math.sin(t) * Math.sin(az)];
   });
 }
 
@@ -44,18 +25,41 @@ function rotX([x, y, z]: [number, number, number], a: number): [number, number, 
   return [x, y * Math.cos(a) - z * Math.sin(a), y * Math.sin(a) + z * Math.cos(a)];
 }
 
-function hex2(v: number) {
-  return Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0");
+// Pre-compute sphere wireframe: meridians + parallels
+function buildWireframe(STEPS = 80): [number, number, number][][] {
+  const lines: [number, number, number][][] = [];
+  for (let i = 0; i < 10; i++) {
+    const lon = (i / 10) * Math.PI * 2;
+    const line: [number, number, number][] = [];
+    for (let j = 0; j <= STEPS; j++) {
+      const lat = (j / STEPS) * Math.PI - Math.PI / 2;
+      line.push([Math.cos(lat) * Math.cos(lon), Math.sin(lat), Math.cos(lat) * Math.sin(lon)]);
+    }
+    lines.push(line);
+  }
+  for (let i = 1; i <= 5; i++) {
+    const lat = (i / 6) * Math.PI - Math.PI / 2;
+    const r = Math.cos(lat);
+    const y = Math.sin(lat);
+    const line: [number, number, number][] = [];
+    for (let j = 0; j <= STEPS; j++) {
+      const lon = (j / STEPS) * Math.PI * 2;
+      line.push([r * Math.cos(lon), y, r * Math.sin(lon)]);
+    }
+    lines.push(line);
+  }
+  return lines;
 }
+
+const WIREFRAME = buildWireframe();
 
 export default function GraphView({ nodes, links }: Props) {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Mutable state kept in a ref so the animation loop always sees fresh values
   const state = useRef({
     rotY: 0,
-    rotX: -0.25,
+    rotX: -0.2,
     dragging: false,
     lastX: 0,
     lastY: 0,
@@ -66,27 +70,20 @@ export default function GraphView({ nodes, links }: Props) {
     lastPinchDist: 0,
   });
 
-  // Pre-computed sphere positions (one per node)
   const positions = useRef<[number, number, number][]>([]);
-
-  // Adjacency index: nodeId → set of connected nodeIds
   const adj = useRef<Map<string, Set<string>>>(new Map());
 
   useEffect(() => {
     positions.current = fibonacciSphere(nodes.length);
-
     const map = new Map<string, Set<string>>();
     for (const n of nodes) map.set(n.id, new Set());
     for (const l of links) {
-      const a = l.source as string;
-      const b = l.target as string;
-      map.get(a)?.add(b);
-      map.get(b)?.add(a);
+      map.get(l.source as string)?.add(l.target as string);
+      map.get(l.target as string)?.add(l.source as string);
     }
     adj.current = map;
   }, [nodes, links]);
 
-  // Canvas resize
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -100,20 +97,18 @@ export default function GraphView({ nodes, links }: Props) {
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  // Desktop scroll-to-zoom (non-passive so we can preventDefault)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = e.deltaY * (e.deltaMode === 1 ? 20 : 1);
-      state.current.zoom = Math.max(0.3, Math.min(3, state.current.zoom - delta * 0.001));
+      state.current.zoom = Math.max(0.35, Math.min(3, state.current.zoom - delta * 0.001));
     };
     canvas.addEventListener("wheel", onWheel, { passive: false });
     return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
-  // Draw loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -128,37 +123,65 @@ export default function GraphView({ nodes, links }: Props) {
       const H = canvas.height;
       const cx = W / 2;
       const cy = H / 2;
-      // Sphere fills ~70% of the smaller dimension, scaled by zoom
-      const R = Math.min(W, H) * 0.36 * state.current.zoom;
-      const t = Date.now() / 1000;
+      const R = Math.min(W, H) * 0.37 * state.current.zoom;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Auto-rotate
       if (!state.current.dragging) {
-        state.current.rotY += 0.0018;
+        state.current.rotY += 0.0006;
       }
 
       const s = state.current;
 
-      // --- Project all nodes ---
-      const proj = nodes.map((node, i) => {
-        const pos = positions.current[i] ?? [0, 0, 0];
-        let p = rotX(pos as [number, number, number], s.rotX);
+      // Orthographic projection: no z-based position scaling
+      const project = (p3: [number, number, number]) => {
+        let p = rotX(p3, s.rotX);
         p = rotY(p, s.rotY);
         const [x, y, z] = p;
-        // Slight perspective: nodes at front (z=1) are 15% larger
-        const scale = 1 + z * 0.15;
-        return {
-          px: cx + x * R * scale,
-          py: cy + y * R * scale,
-          z,
-          node,
-          i,
-        };
+        return { x: cx + x * R, y: cy + y * R, z };
+      };
+
+      // --- WIREFRAME ---
+      // Back hemisphere (very faint, gives globe depth without screensaver feel)
+      ctx.lineWidth = 0.5;
+      for (const line of WIREFRAME) {
+        ctx.beginPath();
+        let prevZ = 1;
+        for (const p3 of line) {
+          const { x, y, z } = project(p3);
+          if (z <= 0) {
+            if (prevZ > 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          prevZ = z;
+        }
+        ctx.strokeStyle = "rgba(71, 85, 105, 0.18)";
+        ctx.stroke();
+      }
+      // Front hemisphere (slightly brighter)
+      for (const line of WIREFRAME) {
+        ctx.beginPath();
+        let prevZ = -1;
+        for (const p3 of line) {
+          const { x, y, z } = project(p3);
+          if (z > 0) {
+            if (prevZ <= 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          prevZ = z;
+        }
+        ctx.strokeStyle = "rgba(71, 85, 105, 0.32)";
+        ctx.stroke();
+      }
+
+      // --- PROJECT ALL NODES ---
+      const proj = nodes.map((node, i) => {
+        const pos = positions.current[i] ?? [0, 0, 0] as [number, number, number];
+        const { x, y, z } = project(pos);
+        return { px: x, py: y, z, node };
       });
 
-      // --- Links (draw behind sphere centre for depth) ---
+      // --- EDGES ---
       const hov = s.hoverId;
       const hovAdj = hov ? adj.current.get(hov) : null;
 
@@ -168,81 +191,83 @@ export default function GraphView({ nodes, links }: Props) {
         if (ai < 0 || bi < 0) continue;
         const a = proj[ai];
         const b = proj[bi];
-        // Skip if both nodes are fully behind the sphere
-        if (a.z < -0.5 && b.z < -0.5) continue;
+        if (a.z < -0.55 && b.z < -0.55) continue;
 
-        const avgZ = (a.z + b.z) / 2;
-        const depthA = Math.max(0, avgZ + 0.5) / 1.5;
+        const isHovEdge = hov && (a.node.id === hov || b.node.id === hov);
 
-        const isHighlit = hov &&
-          (a.node.id === hov || b.node.id === hov || hovAdj?.has(a.node.id) && hovAdj?.has(b.node.id));
-
-        const opacity = isHighlit ? depthA * 0.6 : depthA * 0.08;
-        if (opacity < 0.005) continue;
-
-        ctx.beginPath();
-        ctx.moveTo(a.px, a.py);
-        ctx.lineTo(b.px, b.py);
-        ctx.strokeStyle = a.node.color + hex2(opacity);
-        ctx.lineWidth = isHighlit ? 1.2 : 0.5;
-        ctx.stroke();
+        if (isHovEdge) {
+          const depth = Math.max(0, (a.z + b.z) / 2 + 0.55) / 1.55;
+          ctx.beginPath();
+          ctx.moveTo(a.px, a.py);
+          ctx.lineTo(b.px, b.py);
+          ctx.strokeStyle = a.node.color + Math.round(depth * 0.75 * 255).toString(16).padStart(2, "0");
+          ctx.lineWidth = 0.9;
+          ctx.stroke();
+        } else {
+          const depth = Math.max(0, (a.z + b.z) / 2 + 0.55) / 1.55;
+          const opacity = depth * 0.09;
+          if (opacity < 0.005) continue;
+          ctx.beginPath();
+          ctx.moveTo(a.px, a.py);
+          ctx.lineTo(b.px, b.py);
+          ctx.strokeStyle = `rgba(148, 163, 184, ${opacity})`;
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
       }
 
-      // --- Nodes (back-to-front) ---
+      // --- NODES (back to front) ---
       const sorted = [...proj].sort((a, b) => a.z - b.z);
 
       for (const { px, py, z, node } of sorted) {
-        const phase = node.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-        const freq = 0.7 + (phase % 11) * 0.12;
-        const pulse = 1 + Math.sin(t * freq * Math.PI * 2 + phase * 0.41) * 0.04;
-        const fire = 0;
-
-        // Depth: nodes at front are full brightness, nodes at back are dim
-        const depthV = Math.max(0, z + 1) / 2; // 0 (back) → 1 (front)
-
-        const baseR = Math.sqrt(node.val ?? 1) * 2.4 * pulse * (0.6 + depthV * 0.5) * dpr;
-        const r = baseR;
-
+        const depthV = Math.max(0, z + 1) / 2;
         const isHovered = hov === node.id;
-        const isAdjHov = hovAdj?.has(node.id);
+        const isAdj = hovAdj?.has(node.id);
 
-        // Outer glow
-        const glowIntensity = (0.07 + fire * 0.28) * depthV + (isHovered ? 0.3 : 0) + (isAdjHov ? 0.1 : 0);
-        if (glowIntensity > 0.01) {
-          const grd = ctx.createRadialGradient(px, py, 0, px, py, r * 3.5);
-          grd.addColorStop(0, node.color + hex2(glowIntensity));
+        // Crisp dot — no pulse, no glow by default
+        const r = (1.4 + Math.sqrt(node.val ?? 1) * 0.45) * (0.4 + depthV * 0.6) * dpr;
+        const alpha = Math.min(1, 0.3 + depthV * 0.7 + (isHovered ? 0.2 : isAdj ? 0.1 : 0));
+
+        // Tight glow on hover only — subtle, not dramatic
+        if (isHovered) {
+          const grd = ctx.createRadialGradient(px, py, 0, px, py, r * 5);
+          grd.addColorStop(0, node.color + "28");
           grd.addColorStop(1, "transparent");
           ctx.beginPath();
-          ctx.arc(px, py, r * 3.5, 0, Math.PI * 2);
+          ctx.arc(px, py, r * 5, 0, Math.PI * 2);
           ctx.fillStyle = grd;
           ctx.fill();
         }
 
-        // Node core
+        // The dot
         ctx.beginPath();
         ctx.arc(px, py, r, 0, Math.PI * 2);
-        const coreA = 0.35 + depthV * 0.65 + (isHovered ? 0.2 : 0);
-        ctx.fillStyle = node.color + hex2(Math.min(1, coreA));
+        ctx.fillStyle = node.color + Math.round(alpha * 255).toString(16).padStart(2, "0");
         ctx.fill();
 
-        // Label on hover
-        if (isHovered && z > -0.15) {
-          const label = node.label;
+        // Clean label on hover
+        if (isHovered && z > -0.1) {
           const fontSize = 11 * dpr;
-          ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+          ctx.font = `500 ${fontSize}px "JetBrains Mono", monospace`;
           ctx.textAlign = "center";
-          // Background pill
-          const tw = ctx.measureText(label).width;
+          const tw = ctx.measureText(node.label).width;
           const pad = 5 * dpr;
-          const lh = fontSize + pad * 2;
-          const lx = px - tw / 2 - pad;
-          const ly = py - r - lh - 4 * dpr;
-          ctx.fillStyle = "rgba(7,9,13,0.85)";
+          const pillW = tw + pad * 2;
+          const pillH = fontSize + pad * 1.6;
+          const lx = px - pillW / 2;
+          const ly = py - r - pillH - 6 * dpr;
+
+          ctx.fillStyle = "rgba(7, 9, 13, 0.9)";
           ctx.beginPath();
-          ctx.roundRect(lx, ly, tw + pad * 2, lh, 4 * dpr);
+          ctx.roundRect(lx, ly, pillW, pillH, 3 * dpr);
           ctx.fill();
-          ctx.fillStyle = "#f0f4f8ee";
-          ctx.fillText(label, px, ly + fontSize + pad * 0.5);
+
+          ctx.strokeStyle = node.color + "45";
+          ctx.lineWidth = 0.75 * dpr;
+          ctx.stroke();
+
+          ctx.fillStyle = "rgba(226, 232, 240, 0.92)";
+          ctx.fillText(node.label, px, ly + fontSize + pad * 0.55);
         }
       }
 
@@ -253,7 +278,6 @@ export default function GraphView({ nodes, links }: Props) {
     return () => cancelAnimationFrame(animId);
   }, [nodes, links]);
 
-  // --- Mouse handlers ---
   const getCanvasPos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -268,21 +292,20 @@ export default function GraphView({ nodes, links }: Props) {
       const H = canvas.height;
       const cx = W / 2 / dpr;
       const cy = H / 2 / dpr;
-      const R = Math.min(W, H) * 0.36 / dpr * state.current.zoom;
+      const R = Math.min(W, H) * 0.37 / dpr * state.current.zoom;
       const s = state.current;
 
       let best: string | null = null;
-      let bestDist = 18; // px threshold
+      let bestDist = 20;
 
       nodes.forEach((node, i) => {
-        const pos = positions.current[i] ?? [0, 0, 0];
-        let p = rotX(pos as [number, number, number], s.rotX);
+        const pos = positions.current[i] ?? [0, 0, 0] as [number, number, number];
+        let p = rotX(pos, s.rotX);
         p = rotY(p, s.rotY);
         const [x, y, z] = p;
         if (z < -0.3) return;
-        const scale = 1 + z * 0.15;
-        const px = cx + x * R * scale;
-        const py = cy + y * R * scale;
+        const px = cx + x * R;
+        const py = cy + y * R;
         const dist = Math.hypot(mx - px, my - py);
         if (dist < bestDist) { bestDist = dist; best = node.id; }
       });
@@ -296,22 +319,15 @@ export default function GraphView({ nodes, links }: Props) {
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const { x, y } = getCanvasPos(e);
       const s = state.current;
-
       if (s.dragging) {
-        const dx = x - s.lastX;
-        const dy = y - s.lastY;
-        s.rotY += dx * 0.006;
-        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + dy * 0.006));
-        s.lastX = x;
-        s.lastY = y;
+        s.rotY += (x - s.lastX) * 0.006;
+        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + (y - s.lastY) * 0.006));
+        s.lastX = x; s.lastY = y;
         return;
       }
-
       const hit = findHovered(x, y);
       state.current.hoverId = hit;
-      if (canvasRef.current) {
-        canvasRef.current.style.cursor = hit ? "pointer" : "grab";
-      }
+      if (canvasRef.current) canvasRef.current.style.cursor = hit ? "pointer" : "grab";
     },
     [getCanvasPos, findHovered]
   );
@@ -320,8 +336,7 @@ export default function GraphView({ nodes, links }: Props) {
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const { x, y } = getCanvasPos(e);
       state.current.dragging = true;
-      state.current.lastX = x;
-      state.current.lastY = y;
+      state.current.lastX = x; state.current.lastY = y;
       if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
     },
     [getCanvasPos]
@@ -353,7 +368,6 @@ export default function GraphView({ nodes, links }: Props) {
   const handleTouchStart = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       if (e.touches.length === 2) {
-        // Pinch start — record initial distance, stop drag
         const dx = e.touches[1].clientX - e.touches[0].clientX;
         const dy = e.touches[1].clientY - e.touches[0].clientY;
         state.current.lastPinchDist = Math.hypot(dx, dy);
@@ -362,10 +376,8 @@ export default function GraphView({ nodes, links }: Props) {
       }
       const { x, y } = getCanvasTouchPos(e.touches[0]);
       state.current.dragging = true;
-      state.current.lastX = x;
-      state.current.lastY = y;
-      state.current.touchStartX = x;
-      state.current.touchStartY = y;
+      state.current.lastX = x; state.current.lastY = y;
+      state.current.touchStartX = x; state.current.touchStartY = y;
     },
     [getCanvasTouchPos]
   );
@@ -373,24 +385,20 @@ export default function GraphView({ nodes, links }: Props) {
   const handleTouchMove = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       if (e.touches.length === 2) {
-        // Pinch zoom
         const dx = e.touches[1].clientX - e.touches[0].clientX;
         const dy = e.touches[1].clientY - e.touches[0].clientY;
         const dist = Math.hypot(dx, dy);
         const ratio = dist / (state.current.lastPinchDist || dist);
-        state.current.zoom = Math.max(0.3, Math.min(3, state.current.zoom * ratio));
+        state.current.zoom = Math.max(0.35, Math.min(3, state.current.zoom * ratio));
         state.current.lastPinchDist = dist;
         return;
       }
       const { x, y } = getCanvasTouchPos(e.touches[0]);
       const s = state.current;
       if (s.dragging) {
-        const dx = x - s.lastX;
-        const dy = y - s.lastY;
-        s.rotY += dx * 0.006;
-        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + dy * 0.006));
-        s.lastX = x;
-        s.lastY = y;
+        s.rotY += (x - s.lastX) * 0.006;
+        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + (y - s.lastY) * 0.006));
+        s.lastX = x; s.lastY = y;
       }
       state.current.hoverId = findHovered(x, y);
     },
@@ -399,11 +407,7 @@ export default function GraphView({ nodes, links }: Props) {
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent<HTMLCanvasElement>) => {
-      // If lifting one finger from a two-finger gesture, don't nav
-      if (e.touches.length > 0) {
-        state.current.dragging = false;
-        return;
-      }
+      if (e.touches.length > 0) { state.current.dragging = false; return; }
       const s = state.current;
       s.dragging = false;
       const { x, y } = getCanvasTouchPos(e.changedTouches[0]);
