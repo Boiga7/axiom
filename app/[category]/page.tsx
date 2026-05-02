@@ -1,3 +1,4 @@
+// app/[category]/page.tsx
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -24,14 +25,23 @@ export function generateMetadata({ params }: Props): Metadata {
 
 export default function CategoryPage({ params }: Props) {
   const { category } = params;
-  const pages = getPagesByCategory(category);
-  if (!pages.length) notFound();
+  const allPages = getPagesByCategory(category);
+  if (!allPages.length) return notFound();
 
   const searchIndex = getSearchIndex();
   const cats = getCategories();
   const catMeta = cats.find((c) => c.slug === category);
   const color = catMeta ? BRAIN_COLORS[catMeta.brain] : "#94a3b8";
   const label = slugToLabel(category);
+
+  // Detect hub page (named <category>-hub or anything ending in -hub)
+  const hubSlug = `${category}-hub`;
+  const hubPage =
+    allPages.find((p) => p.slug === hubSlug) ??
+    allPages.find((p) => p.slug.endsWith("-hub"));
+  const regularPages = hubPage
+    ? allPages.filter((p) => p.slug !== hubPage.slug)
+    : allPages;
 
   return (
     <>
@@ -72,16 +82,65 @@ export default function CategoryPage({ params }: Props) {
             </div>
 
             <p className="text-secondary font-mono text-sm ml-4">
-              {pages.length} {pages.length === 1 ? "page" : "pages"}
+              {allPages.length} {allPages.length === 1 ? "page" : "pages"}
             </p>
           </div>
         </section>
 
-        <div className="h-px bg-white/[0.06] mb-10" />
+        {/* Hub page — featured "Start here" */}
+        {hubPage && (
+          <div className="mb-8">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">
+              Start here
+            </p>
+            <Link
+              href={hubPage.href}
+              className="group flex items-start gap-5 rounded-xl border px-6 py-5 transition-all duration-150 hover:bg-elevated"
+              style={{
+                borderColor: color + "30",
+                background: color + "08",
+              }}
+            >
+              <div
+                className="w-0.5 self-stretch rounded-full shrink-0"
+                style={{ background: color }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-widest"
+                    style={{ color }}
+                  >
+                    Hub
+                  </span>
+                </div>
+                <h2 className="font-display text-base font-semibold text-primary group-hover:text-white transition-colors mb-1">
+                  {hubPage.title}
+                </h2>
+                {hubPage.excerpt && (
+                  <p className="text-secondary text-sm leading-relaxed line-clamp-2">
+                    {hubPage.excerpt}
+                  </p>
+                )}
+              </div>
+              <svg
+                className="w-4 h-4 text-muted shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        )}
+
+        <div className="h-px bg-white/[0.06] mb-6" />
 
         {/* Page list */}
         <div className="grid gap-2">
-          {pages.map((page) => (
+          {regularPages.map((page) => (
             <Link
               key={page.slug}
               href={page.href}
