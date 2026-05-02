@@ -1,5 +1,8 @@
 ---
 type: synthesis
+category: synthesis
+para: resource
+tldr: Living overview of the AI engineering field — current state of models, tooling, infrastructure, and key trends across 310+ wiki pages.
 updated: 2026-05-02
 ---
 

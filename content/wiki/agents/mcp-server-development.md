@@ -342,7 +342,7 @@ Clients and servers negotiate the highest mutually supported version at connecti
 - [[ai-tools/claude-code]] — Claude Code MCP plugin system; how to register servers in `.claude/settings.json`
 - [[security/owasp-llm-top10]] — tool poisoning is an MCP-specific attack vector in OWASP Agentic Top 10 2026
 - [[agents/langgraph]] — LangGraph can expose tools via MCP for external clients to call
-- [[python/async]] — async tool handlers use standard asyncio patterns
+- [[python/python-hub]] — async tool handlers use standard asyncio patterns
 
 ## Open Questions
 

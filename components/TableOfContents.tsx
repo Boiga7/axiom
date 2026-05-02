@@ -46,7 +46,7 @@ export default function TableOfContents({ content, color = "#94a3b8" }: Props) {
 
   return (
     <nav aria-label="Table of contents">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">
+      <p className="font-mono text-[10px] uppercase tracking-widest mb-3" style={{ color: color + "80" }}>
         Contents
       </p>
       <ul className="flex flex-col gap-0.5">
