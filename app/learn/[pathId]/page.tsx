@@ -2,8 +2,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { LEARNING_PATHS, TOPIC_BUNDLES } from "@/lib/learning-paths";
-import { getPage, getSearchIndex, BRAIN_COLORS, slugToLabel } from "@/lib/wiki";
+import { getPage, getSearchIndex, BRAIN_COLORS } from "@/lib/wiki";
 import Nav from "@/components/Nav";
+import PathSteps from "@/components/PathSteps";
 import type { Metadata } from "next";
 
 const ALL_PATHS = [...LEARNING_PATHS, ...TOPIC_BUNDLES];
@@ -37,6 +38,15 @@ export default function LearnPathPage({ params }: Props) {
       step: (typeof learningPath.steps)[number];
       page: NonNullable<ReturnType<typeof getPage>>;
     }>;
+
+  const steps = resolvedSteps.map(({ step, page }, index) => ({
+    href: page.href,
+    title: page.title,
+    excerpt: page.excerpt,
+    note: step.note,
+    category: step.category,
+    index,
+  }));
 
   return (
     <>
@@ -87,83 +97,12 @@ export default function LearnPathPage({ params }: Props) {
           />
         </header>
 
-        {/* Steps */}
-        <ol className="flex flex-col gap-4">
-          {resolvedSteps.map(({ step, page }, index) => (
-            <li key={`${step.category}/${step.slug}`}>
-              <Link
-                href={page.href}
-                className="group flex gap-5 rounded-xl border border-white/[0.06] bg-card px-6 py-5 transition-all duration-150 hover:border-white/[0.12] hover:bg-elevated"
-              >
-                {/* Step number */}
-                <div
-                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-semibold mt-0.5"
-                  style={{
-                    background: color + "18",
-                    color,
-                    border: `1px solid ${color}30`,
-                  }}
-                >
-                  {index + 1}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p
-                        className="font-mono text-[9px] uppercase tracking-widest mb-1"
-                        style={{ color: color + "80" }}
-                      >
-                        {slugToLabel(step.category)}
-                      </p>
-                      <h2 className="font-display text-base font-semibold text-primary group-hover:text-white transition-colors leading-snug">
-                        {page.title}
-                      </h2>
-                    </div>
-                    <svg
-                      className="w-4 h-4 text-muted shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </div>
-
-                  {page.excerpt && (
-                    <p className="text-secondary text-sm leading-relaxed mt-1.5 line-clamp-2">
-                      {page.excerpt}
-                    </p>
-                  )}
-
-                  {step.note && (
-                    <p
-                      className="font-mono text-[10px] mt-2"
-                      style={{ color: color + "90" }}
-                    >
-                      ↳ {step.note}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ol>
-
-        {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-white/[0.06] text-center">
-          <p className="text-muted font-mono text-xs">
-            {resolvedSteps.length} pages · ~{learningPath.estimatedHours}h estimated reading time
-          </p>
-          <Link
-            href="/"
-            className="inline-block mt-3 text-xs font-mono text-muted hover:text-secondary transition-colors"
-          >
-            ← Browse all topics
-          </Link>
-        </div>
+        <PathSteps
+          steps={steps}
+          pathId={params.pathId}
+          color={color}
+          estimatedHours={learningPath.estimatedHours}
+        />
       </main>
     </>
   );
