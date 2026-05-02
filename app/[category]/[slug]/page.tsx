@@ -11,6 +11,7 @@ import {
 } from "@/lib/wiki";
 import Nav from "@/components/Nav";
 import WikiContent from "@/components/WikiContent";
+import TableOfContents from "@/components/TableOfContents";
 import type { Metadata } from "next";
 
 type Props = { params: { category: string; slug: string } };
@@ -37,7 +38,7 @@ export function generateMetadata({ params }: Props): Metadata {
 export default function WikiPage({ params }: Props) {
   const { category, slug } = params;
   const page = getPage(category, slug);
-  if (!page) notFound();
+  if (!page) return notFound();
 
   const searchIndex = getSearchIndex();
   const cats = getCategories();
@@ -130,27 +131,33 @@ export default function WikiPage({ params }: Props) {
             <WikiContent content={page.content} allPageHrefs={hrefMap} />
           </article>
 
-          {/* Sidebar — sibling pages */}
-          {siblings.length > 0 && (
-            <aside className="hidden lg:block w-60 shrink-0">
-              <div className="sticky top-20">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">
-                  In {slugToLabel(category)}
-                </p>
-                <nav className="flex flex-col gap-0.5">
-                  {siblings.map((s) => (
-                    <Link
-                      key={s.slug}
-                      href={s.href}
-                      className="text-xs text-secondary hover:text-primary px-2.5 py-1.5 rounded-md hover:bg-card transition-colors leading-snug"
-                    >
-                      {s.title}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            </aside>
-          )}
+          {/* Sidebar — ToC + sibling pages */}
+          <aside className="hidden lg:block w-56 shrink-0">
+            <div className="sticky top-20 flex flex-col gap-8">
+              {/* Table of contents */}
+              <TableOfContents content={page.content} color={color} />
+
+              {/* Sibling pages */}
+              {siblings.length > 0 && (
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">
+                    In {slugToLabel(category)}
+                  </p>
+                  <nav className="flex flex-col gap-0.5">
+                    {siblings.slice(0, 10).map((s) => (
+                      <Link
+                        key={s.slug}
+                        href={s.href}
+                        className="text-xs text-secondary hover:text-primary px-2.5 py-1.5 rounded-md hover:bg-card transition-colors leading-snug"
+                      >
+                        {s.title}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </div>
     </>

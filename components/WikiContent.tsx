@@ -62,9 +62,37 @@ export default function WikiContent({ content, allPageHrefs }: Props) {
       );
     },
     // Strip the first H1 since we render it in the page header
-    h1: ({ children }) => (
-      <h1>{children}</h1>
-    ),
+    h1: ({ children }) => <h1>{children}</h1>,
+    h2: ({ children }) => {
+      const text = Array.isArray(children)
+        ? children.map((c) => (typeof c === "string" ? c : "")).join("")
+        : typeof children === "string"
+        ? children
+        : "";
+      const id = text
+        .toLowerCase()
+        .replace(/[*_`[\]()#]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      return <h2 id={id}>{children}</h2>;
+    },
+    h3: ({ children }) => {
+      const text = Array.isArray(children)
+        ? children.map((c) => (typeof c === "string" ? c : "")).join("")
+        : typeof children === "string"
+        ? children
+        : "";
+      const id = text
+        .toLowerCase()
+        .replace(/[*_`[\]()#]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      return <h3 id={id}>{children}</h3>;
+    },
     pre: ({ children }) => (
       <div className="wiki-pre-scroll">
         <pre>{children}</pre>
