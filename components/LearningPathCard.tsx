@@ -38,7 +38,7 @@ export default function LearningPathCard({ path }: { path: LearningPath }) {
         </h3>
 
         {/* Description */}
-        <p className="text-secondary text-sm leading-relaxed line-clamp-2">
+        <p className="text-secondary text-sm leading-relaxed line-clamp-3">
           {path.description}
         </p>
 

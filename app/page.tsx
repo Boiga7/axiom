@@ -53,7 +53,7 @@ export default function HomePage() {
     <>
       <Nav searchIndex={searchIndex} />
 
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 pb-24">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="pt-16 pb-14 relative">
           <div
@@ -105,7 +105,7 @@ export default function HomePage() {
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {LEARNING_PATHS.map((path) => (
               <LearningPathCard key={path.id} path={path} />
             ))}
@@ -168,14 +168,14 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {cats.map((cat) => {
                     const previews = previewMap[cat.slug] ?? [];
                     return (
                       <Link
                         key={cat.slug}
                         href={`/${cat.slug}`}
-                        className="group relative block rounded-lg border border-white/[0.06] bg-card p-4 transition-all duration-200 hover:border-white/[0.12] hover:bg-elevated"
+                        className="group relative block rounded-lg border border-white/[0.06] bg-card p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-elevated"
                       >
                         <div
                           className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -191,7 +191,7 @@ export default function HomePage() {
                           >
                             {cat.count} pages
                           </p>
-                          <h3 className="font-display text-sm font-semibold text-primary leading-tight group-hover:text-white transition-colors mb-3">
+                          <h3 className="font-display text-base font-semibold text-primary leading-tight group-hover:text-white transition-colors mb-3">
                             {cat.label}
                           </h3>
                           {/* Page previews */}
@@ -200,7 +200,7 @@ export default function HomePage() {
                               {previews.map((title) => (
                                 <li
                                   key={title}
-                                  className="font-mono text-[10px] text-muted truncate leading-relaxed"
+                                  className="font-mono text-[11px] text-muted truncate leading-relaxed"
                                 >
                                   {title}
                                 </li>
