@@ -112,6 +112,23 @@ Tavily is the default recommendation for prototyping and moderate-scale producti
 
 ---
 
+## Common Failure Cases
+
+**`search_depth="advanced"` returns results that still contain promotional or low-quality content because the query is too generic**  
+Why: `advanced` depth performs deeper crawling and de-duplication but does not filter for content quality; broad queries (e.g., "LangGraph") return marketing pages, overview articles, and SEO-optimised content alongside substantive technical results.  
+Detect: the agent cites Tavily results that contain only high-level summaries or promotional copy; the model's answer is superficial despite having search results available.  
+Fix: make queries specific and technical (`"LangGraph conditional edges API 2025"` rather than `"LangGraph"`); use `include_domains=["docs.langchain.com", "github.com"]` to restrict results to trusted sources.
+
+**Tavily Extract API returns empty content for a URL that is clearly accessible in a browser, because the page renders via JavaScript**  
+Why: Tavily's Extract API fetches and parses static HTML; single-page applications and JavaScript-rendered pages serve an empty shell to the scraper, returning minimal or no content.  
+Detect: `client.extract(urls=[url])["results"][0]["raw_content"]` is empty or contains only navigation elements; opening the URL in a browser shows rich content.  
+Fix: for JS-rendered pages, use Playwright-based scraping instead of Tavily Extract; or search for a cached version, a documentation page, or a GitHub README that contains the same content in static HTML.
+
+**Agent hits Tavily rate limits in a multi-step ReAct loop, causing `TavilyError: rate limit exceeded` mid-task**  
+Why: a ReAct agent that searches on every thought step can issue 10-20 Tavily requests per complex task; the free tier allows 1,000 requests per month (~33 per day), which is exhausted quickly in development or testing loops.  
+Detect: the error appears after several successful search steps; the error rate increases with task complexity; checking the Tavily dashboard shows API credit near zero.  
+Fix: implement result caching at the tool level (cache by query string for 1 hour); add a search step budget (`max_searches = 5`) to the agent loop; upgrade to a paid tier for production use.
+
 ## Connections
 
 - [[agents/react-pattern]] — Tavily is the canonical external tool in ReAct agent examples

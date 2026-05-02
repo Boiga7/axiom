@@ -10,7 +10,7 @@ tldr: Heuristics for making code decisions. Not laws — principles that, when v
 
 # Software Design Principles
 
-Heuristics for making code decisions. Not laws — principles that, when violated, should have a reason. Knowing when NOT to apply them is as important as applying them.
+Heuristics for making code decisions. Not laws. Principles that, when violated, should have a reason. Knowing when NOT to apply them is as important as applying them.
 
 ---
 

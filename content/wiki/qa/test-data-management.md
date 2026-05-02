@@ -222,5 +222,27 @@ def user():
 
 ---
 
+## Common Failure Cases
+
+**Factory sequences collide across parallel test workers**
+Why: `factory.Sequence(lambda n: f"user{n}@example.com")` resets to `n=0` in each worker process, so parallel pytest-xdist workers create duplicate emails and trigger unique-constraint errors.
+Detect: tests pass when run serially with `pytest` but fail intermittently with `pytest -n auto` on email or username uniqueness constraint violations.
+Fix: use `factory.LazyFunction(lambda: f"user_{uuid.uuid4().hex[:8]}@example.com")` for fields that must be globally unique, or configure factory_boy's sequence to use a per-worker offset seeded from the worker ID.
+
+**Transactional rollback fixture leaks data when the code under test spawns a background task**
+Why: if the code creates a database record inside a Celery task or async background job, that write occurs outside the transaction scope and is not rolled back, leaving residue in the test database.
+Detect: test count in the database grows over multiple test runs even with rollback fixtures in place; subsequent test runs fail on unexpected row counts.
+Fix: for tests involving background tasks, use explicit teardown (`yield u; u.delete()`) instead of transactional rollback, or mock the background task dispatcher in the test layer.
+
+**Anonymised data retains re-identifiable combinations**
+Why: individual fields (name, phone, email) are anonymised, but combinations like (postcode + date-of-birth + gender) can still uniquely identify a person in a small dataset.
+Detect: run a k-anonymity check on the anonymised dataset; any record that is unique after removing direct identifiers is a re-identification risk.
+Fix: apply generalisation to quasi-identifiers (truncate postcodes to district level, replace exact birth dates with birth year) in addition to masking direct identifiers; or use Gretel.ai to generate fully synthetic data that preserves statistical distributions without any real records.
+
+**LLM-generated synthetic data produces unrealistic edge cases silently**
+Why: `generate_synthetic_orders` via `client.messages.create` returns plausible-looking JSON but may produce negative prices, future-dated past events, or logically inconsistent field combinations that pass type validation but break business-logic assertions.
+Detect: synthetic data passes schema validation but causes test failures in assertions about business invariants (e.g., total != sum of line items).
+Fix: run a validation pass on LLM-generated data using Pydantic validators that encode business rules before loading it into tests; treat any validation failure as a generation failure and retry with a stricter prompt.
+
 ## Connections
 [[qa-hub]] · [[qa/test-environments]] · [[qa/agile-qa]] · [[technical-qa/test-architecture]] · [[technical-qa/database-testing]] · [[llms/ae-hub]]

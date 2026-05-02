@@ -12,7 +12,7 @@ tldr: Gemini 1.5 Pro / 2.0 Flash are the frontier for video understanding — 1M
 
 > **TL;DR** Gemini 1.5 Pro / 2.0 Flash are the frontier for video understanding — 1M token context handles full-length films; video generation (Sora, Veo, Runway) is improving fast but still unreliable for complex motion.
 
-Video is the last major modality to reach production quality. Understanding lags image understanding by about two years. Generation lags further. Claude does not natively process video — Gemini is the practical option for video understanding tasks.
+Video is the last major modality to reach production quality. Understanding lags image understanding by about two years. Generation lags further. Claude does not natively process video. Gemini is the practical option for video understanding tasks.
 
 ---
 
@@ -260,6 +260,23 @@ Combined pattern: Whisper for transcript + Gemini (or frame extraction + Claude)
 - Frame extraction fallback: `cv2.VideoCapture` + Claude vision handles video without Gemini; loses temporal continuity
 - Runway Gen-3: best commercially accessible API for text-to-video; 10s max clip length
 - Video gen common failures: physics (objects pass through each other), text legibility, identity consistency across cuts
+
+## Common Failure Cases
+
+**Gemini `video_file.state.name` stays `"PROCESSING"` indefinitely because the video codec is not supported and the upload failed silently**  
+Why: Gemini's Files API accepts many video formats but some codec/container combinations (e.g., H.265 in MKV, certain HEVC encodings) fail during server-side processing; the file object is created and the state transitions to `PROCESSING` but never reaches `ACTIVE`.  
+Detect: the polling loop runs for more than 5 minutes without state change; adding a timeout check reveals the file is stuck; re-uploading the same video re-encoded to H.264 MP4 processes successfully.  
+Fix: add a timeout to the polling loop (e.g., fail after 10 minutes); re-encode problematic videos to H.264 MP4 before upload using `ffmpeg -c:v libx264 input.mkv output.mp4`.
+
+**Token cost for a 30-minute meeting video exceeds the Gemini context window, causing a 400 error**  
+Why: at 1fps, 30 minutes = 1,800 frames × 258 tokens = ~464,400 tokens; combined with a long system prompt and expected output, this may exceed the 1M token limit for some Gemini models or incur unexpectedly high costs.  
+Detect: the API returns `400 Request payload size exceeds the limit`; checking `1_800 * 258` confirms the video alone consumes half the context window.  
+Fix: reduce frame rate by specifying a lower fps in the content part; for meeting summarisation, Whisper transcription + Claude is often cheaper (audio-only, no frames) and sufficient when the visual content is not needed.
+
+**Frame extraction with Claude misses temporal events because `interval_seconds=5` skips a 3-second action that happens between frames**  
+Why: sampling at fixed intervals does not capture brief events (a chart displayed for 2 seconds, a speaker change); the frame-extraction approach loses all continuity between samples.  
+Detect: Claude's analysis omits events that are clearly visible in the video at timestamps not aligned to the sampling interval; reducing `interval_seconds` to 1 captures more events at the cost of more tokens.  
+Fix: for event-dense content, use Gemini's native video processing instead of frame extraction; if Gemini is unavailable, sample at 1 fps and add a Whisper transcript as additional context for temporal anchoring.
 
 ## Connections
 

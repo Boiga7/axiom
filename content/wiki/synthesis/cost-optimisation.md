@@ -27,13 +27,13 @@ At Claude Sonnet 4.6 ($3/$15 per M):
 - 10,000 token input + 500 token output × 1,000 calls/day = **$345/month**
 - 10,000 token input + 500 token output × 10,000 calls/day = **$3,450/month**
 
-The input token count is usually the biggest lever — and it's where prompt caching helps most.
+The input token count is usually the biggest lever, and it's where prompt caching helps most.
 
 ---
 
 ## Lever 1: Prompt Caching (Highest Impact)
 
-Cache the static prefix of your prompt — system prompt, documents, few-shot examples. Pay 0.1x on cache reads.
+Cache the static prefix of your prompt. System prompt, documents, few-shot examples. Pay 0.1x on cache reads.
 
 ```python
 import anthropic
@@ -256,7 +256,7 @@ Typical cache hit rate for customer support / FAQ use cases: 30-60%.
 
 ## Lever 7: Streaming for UX, Not Cost
 
-Streaming doesn't reduce token cost — you pay the same tokens either way. Use streaming for user experience (responses appear faster), not cost reduction.
+Streaming doesn't reduce token cost. You pay the same tokens either way. Use streaming for user experience (responses appear faster), not cost reduction.
 
 ---
 
@@ -279,7 +279,7 @@ These optimisations stack multiplicatively.
 
 ## Monitoring Costs
 
-Track costs in production — don't discover overruns from your invoice.
+Track costs in production. Don't discover overruns from your invoice.
 
 ```python
 from dataclasses import dataclass

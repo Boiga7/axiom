@@ -303,6 +303,28 @@ def calculate_and_emit_slo_metrics(service: str, window_minutes: int = 60) -> di
 
 ---
 
+## Common Failure Cases
+
+**Alarm fires but the SNS topic never delivers the notification**
+Why: the SNS topic subscription was confirmed manually in one region but the alarm was created in a different region, or the subscription's filter policy silently drops the alarm notification payload.
+Detect: CloudWatch shows the alarm entered ALARM state; SNS delivery status logs (if enabled) show no attempts or filtered-out messages.
+Fix: enable SNS delivery status logging, confirm the subscription ARN is in the same region as the alarm, and verify the filter policy allows the alarm notification format.
+
+**Anomaly detection alarm triggers constantly for the first two weeks**
+Why: the anomaly detection model has insufficient historical data and the training band is too narrow, so normal daily variance breaches the band.
+Detect: the alarm fires multiple times per day at predictable times with no corresponding real incident; the Anomaly Detection widget shows a very tight band.
+Fix: set `evaluation_periods` to 3+ and configure `ExcludedTimeRanges` to exclude initial noisy training days, then wait 14 days for the model to stabilise before relying on the alarm.
+
+**Synthetics canary succeeds locally but always fails in the scheduled run**
+Why: the canary code references an environment variable or secret that exists in the local test context but was not passed via `environment_variables` in the Canary CDK resource.
+Detect: `SyntheticsLogger` shows a missing environment variable error; the canary Python/Node runtime logs confirm the variable is undefined.
+Fix: add the missing variable to the `environment_variables` map in the Canary construct and redeploy.
+
+**EMF metrics never appear in CloudWatch despite logs being published**
+Why: the Lambda function log group does not have the CloudWatch Logs metric filter enabled — EMF requires the log group to have `PutMetricData` permission, but more commonly the JSON is printed with extra non-JSON text before it, breaking the parser.
+Detect: Lambda logs show the EMF JSON, but no custom metric appears under the declared namespace in CloudWatch.
+Fix: ensure the EMF JSON is the only content on the printed line (no prefix text); use `json.dumps` directly without concatenation; verify the `_aws.CloudWatchMetrics` structure matches the documented EMF schema exactly.
+
 ## Connections
 
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/observability-stack]] · [[cloud/aws-lambda-patterns]] · [[cloud/production-monitoring-qa]] · [[cloud/serverless-patterns]] · [[llms/ae-hub]]

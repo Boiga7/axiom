@@ -167,5 +167,27 @@ def handler(event, context):
 
 ---
 
+## Common Failure Cases
+
+**Smoke tests depend on shared test credentials that expire or get deleted**
+Why: `SMOKE_USER_EMAIL` and `SMOKE_USER_PASSWORD` are created manually once and not rotated, so when the account is cleaned up or the password expires the entire smoke suite fails in a way that looks like an application regression.
+Detect: the smoke suite suddenly fails on login after a period of stability, and the failure is reproducible only in CI, not locally with fresh credentials.
+Fix: create smoke test credentials via a setup step in the CI pipeline itself using the factory pattern or a seed command, and inject them as environment variables rather than storing long-lived credentials in secrets.
+
+**The smoke suite grows into a mini-regression suite**
+Why: engineers add tests to the smoke suite because it's the fastest thing that runs, until it covers 80 tests and takes 20 minutes.
+Detect: the smoke suite duration exceeds 5 minutes, or it tests anything beyond the five must-cover categories (health, DB, auth, critical paths, third-party pings).
+Fix: enforce a maximum of 10 smoke tests with a CI check on the count; anything beyond basic health checks belongs in Tier 2.
+
+**Synthetic monitoring canary runs against a static URL that is redirected in production**
+Why: the canary Lambda was written when the API was at `/api/products`, but a later deployment moved it to `/v2/api/products`; the canary still returns 200 because the old path redirects rather than 404ing.
+Detect: the canary reports healthy but real users are hitting the new endpoint path; compare the URLs the canary tests against the OpenAPI spec on every deploy.
+Fix: derive synthetic monitoring URLs from the deployed OpenAPI spec or a service discovery endpoint rather than hardcoding them; add an assertion that the response body is non-empty and contains expected schema keys, not just a 200 status code.
+
+**Sanity test re-runs the full regression after a bug fix**
+Why: when a fix is delivered, the team defaults to running the complete regression suite "just to be safe," eliminating the time-saving point of sanity testing.
+Detect: cycle time from "fix delivered" to "fix accepted" is 4+ hours because a full regression runs every time.
+Fix: define the sanity scope explicitly in the bug ticket (which component, which test scenarios), and run only those plus a smoke check; document the decision to skip full regression in the ticket.
+
 ## Connections
 [[qa-hub]] · [[qa/regression-testing]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/qa-metrics]] · [[cloud/cloud-monitoring]]

@@ -10,7 +10,7 @@ tldr: Advanced patterns for generating test data at scale — deterministic fact
 
 # Test Data Generation (Technical)
 
-Advanced patterns for generating test data at scale — deterministic factories, database seeding strategies, and generating data with the right statistical properties for load and edge case testing.
+Advanced patterns for generating test data at scale. Deterministic factories, database seeding strategies, and generating data with the right statistical properties for load and edge case testing.
 
 ---
 
@@ -219,6 +219,28 @@ def data_tracker(db_session):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Faker without a seed produces non-deterministic data, causing intermittent assertion failures**
+Why: `Faker()` without `seed_instance()` draws from the global random state; test output varies between runs, so assertions on specific generated values are unreliable.
+Detect: a test that asserts a generated email format passes locally but fails in CI after a different test has already consumed random state.
+Fix: always call `fake.seed_instance(some_integer)` at the start of any test that asserts on specific generated values, or use deterministic sequences (`factory.Sequence`) rather than `Faker` for identity fields.
+
+**Bulk insert via `executemany` fails silently when a single row violates a constraint**
+Why: some database drivers roll back the entire `executemany` batch on the first constraint violation but report success at the Python level; the table remains empty.
+Detect: the seed function returns without error but row count queries return zero; assertions on bulk-seeded data fail with "no rows found".
+Fix: use `COPY` for PostgreSQL bulk loads (which reports the offending row), or wrap `executemany` in an explicit transaction with per-row error logging.
+
+**`TestDataTracker.cleanup()` deletes in the wrong order, violating foreign key constraints**
+Why: the hardcoded delete order in `reversed([...])` must match the actual foreign key dependency graph; any new table added to the schema that was not added to the list causes FK violation errors on cleanup.
+Detect: teardown raises `ForeignKeyViolation`; tests themselves pass but the fixture cleanup fails, leaving dirty data.
+Fix: query `information_schema.referential_constraints` at test startup to derive deletion order dynamically, or use `ON DELETE CASCADE` on FK constraints and delete only parent rows.
+
+**Statistical distribution parameters produce out-of-range values that fail validation**
+Why: log-normal and Pareto distributions have no upper bound; generated `price` or `amount` values can exceed application-level maximums (e.g., `999.99`), causing insert failures or validation errors during load tests.
+Detect: bulk seed runs fail partway through with check-constraint violations on numeric columns.
+Fix: clamp generated values to valid ranges after sampling (`min(value, MAX)`) and add an assertion in the generator to verify the output distribution stays within expected bounds.
 
 ## Connections
 [[tqa-hub]] · [[qa/test-data-management]] · [[technical-qa/testcontainers]] · [[technical-qa/database-testing]] · [[technical-qa/load-testing-advanced]] · [[qa/defect-prevention]]

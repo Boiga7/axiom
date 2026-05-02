@@ -10,7 +10,7 @@ tldr: Moving quality activities earlier in the SDLC — from deployment back to 
 
 # Shift-Left Testing
 
-Moving quality activities earlier in the SDLC — from deployment back to design — so defects are caught when they're cheapest to fix.
+Moving quality activities earlier in the SDLC (from deployment back to design) so defects are caught when they're cheapest to fix.
 
 ---
 
@@ -220,6 +220,28 @@ Time from code complete to test complete:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Pre-commit hook is too slow, so developers bypass it with `--no-verify`**
+Why: running the full unit test suite on every commit takes more than 30 seconds, making the hook feel like an obstacle.
+Detect: `git log --format="%H %s" | xargs -I{} git show {}:. 2>/dev/null` can't easily detect this, but `git log --all --grep="no-verify"` in commit messages or a rising bug rate into QA is the signal.
+Fix: scope the pre-commit unit test step to `tests/unit/` with `--timeout=5` and `-x` (fail fast), keeping the hook under 15 seconds; move integration tests to the CI push hook instead.
+
+**API contract review is skipped because the OpenAPI spec is generated after implementation**
+Why: teams generate their OpenAPI spec from code annotations rather than writing it first, so there is nothing to review before implementation starts.
+Detect: the OpenAPI spec file is only modified in the same commit that implements the endpoint, never before.
+Fix: require the OpenAPI spec to be committed in a separate PR before the implementation PR is opened; use the spec as the implementation contract, not a by-product.
+
+**Three Amigos sessions produce ACs that are not measurable**
+Why: product managers define ACs in business language without specifying the user type, data conditions, or pass/fail threshold, leaving QA to guess at test specifics.
+Detect: ACs contain words like "fast," "appropriate," or "should work" without numerical thresholds or explicit personas.
+Fix: block the Three Amigos sign-off until every AC passes the checklist: verifiable outcome, named user type, defined error cases, and non-functional requirements with numbers where applicable.
+
+**Shift-left metrics show good escape rates but are measured at the wrong boundary**
+Why: teams measure defect escape rate from QA into production but ignore the rate from development into QA, missing the shift-left signal entirely.
+Detect: QA is still finding large numbers of bugs that should have been caught by unit or integration tests — the escape rate from dev into QA is never tracked.
+Fix: add a "defect detection stage" field to every bug ticket and produce a monthly chart showing the distribution of detection stages; the target is to move the peak leftward over time.
 
 ## Connections
 

@@ -211,5 +211,27 @@ with tracer.start_as_current_span("process-order") as span:
 
 ---
 
+## Common Failure Cases
+
+**Prometheus scrape target shows "context deadline exceeded" for high-cardinality services**
+Why: the scrape timeout is shorter than the time required to collect all metrics from a service with very high label cardinality; the endpoint responds slowly when enumerating thousands of label combinations.
+Detect: `prometheus_target_scrape_pool_exceeded_target_limit` metric rises; `kubectl logs prometheus-...` shows timeout errors on the affected job; the `/metrics` endpoint takes >10s to respond under load.
+Fix: reduce cardinality by removing high-cardinality labels (user IDs, request IDs) from metric label sets; or increase `scrapeTimeout` in the job config; use recording rules to pre-aggregate expensive queries.
+
+**Loki ingestion rejected with "entry out of order" errors**
+Why: Promtail is shipping logs from multiple pods with diverging system clocks, or log lines include out-of-order timestamps, violating Loki's per-stream ordering requirement.
+Detect: Promtail logs show `entry out of order for stream`; some log lines are missing from Loki queries; Promtail retry counter climbs.
+Fix: enable `unordered_writes: true` in the Loki config (Loki 2.4+); ensure all nodes are NTP-synced; or configure Promtail to use ingestion time rather than the log line timestamp.
+
+**OTel Collector drops spans under load due to `memory_limiter` triggering**
+Why: the `memory_limiter` processor is configured with a limit lower than the actual memory consumed by the span batch buffer at peak traffic, causing the collector to refuse new data.
+Detect: `otelcol_processor_dropped_spans` metric increases sharply at peak; collector logs show `Memory usage is above hard limit`; trace data gaps appear in Tempo.
+Fix: increase the collector's memory limit and `limit_mib` in the `memory_limiter` config; scale the collector deployment horizontally if a single pod cannot handle peak throughput.
+
+**Grafana dashboards show "no data" after Prometheus remote write is configured**
+Why: Prometheus remote write and local storage are both active, but the Grafana data source is pointed at the remote write endpoint (e.g., Thanos/Cortex) while queries expect the local Prometheus API path.
+Detect: the same PromQL query returns data in the Prometheus UI but "no data" in Grafana; checking the Grafana data source URL confirms it points to the wrong endpoint.
+Fix: update the Grafana data source URL to match the actual query endpoint (local Prometheus at port 9090 vs. the remote write receiver's query frontend port).
+
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[observability/platforms]] · [[llms/ae-hub]]

@@ -309,6 +309,28 @@ concurrency:
 
 ---
 
+## Common Failure Cases
+
+**OIDC role assumption fails because the trust policy subject condition is too strict**
+Why: The IAM trust policy condition uses `StringEquals` on `token.actions.githubusercontent.com:sub` with a specific branch (`ref:refs/heads/main`) but the workflow runs on a PR branch, so the subject does not match.
+Detect: The `configure-aws-credentials` step fails with `Error: Not authorized to perform sts:AssumeRoleWithWebIdentity`; the OIDC token subject in the error contains the PR branch ref instead of `main`.
+Fix: Use `StringLike` with a wildcard for non-deployment roles (`repo:my-org/my-repo:*`), and reserve the strict `ref:refs/heads/main` condition only for the production deployment role; use separate roles for CI (broad) and CD (narrow).
+
+**Cache restore key collision between branches causing stale dependencies**
+Why: The `restore-keys` fallback pattern (`${{ runner.os }}-pip-`) matches cache entries from any branch; a feature branch picks up a cache from `main` that contains a different dependency version, causing test failures that are impossible to reproduce locally.
+Detect: Tests pass on `main` but fail intermittently on feature branches after the cache is restored from a different branch; `pip list` in the job shows a package version that is not in `requirements.txt`.
+Fix: Include the branch name in the primary cache key (`${{ runner.os }}-pip-${{ github.ref }}-${{ hashFiles('requirements.txt') }}`); use the OS+pip prefix as the restore key fallback only.
+
+**Concurrent deploys racing to apply the same Terraform state**
+Why: Two PRs merge to `main` within seconds of each other; both trigger `terraform apply` concurrently and the second apply starts before the first releases the state lock, causing a `state lock` error or conflicting infrastructure changes.
+Detect: Terraform apply step fails with `Error acquiring the state lock` or `state is currently locked`; or both applies succeed but the final state reflects only one of the intended changes.
+Fix: Set `concurrency: group: terraform-apply, cancel-in-progress: false` on the deploy job so the second workflow queues rather than runs concurrently; Terraform remote backends (S3+DynamoDB, HCP Terraform) provide state locking automatically.
+
+**Workflow billing minutes exhausted because a step hangs without a timeout**
+Why: A step that calls an external API or waits on a resource hangs indefinitely; without `timeout-minutes` on the step or job, it runs until the 6-hour job limit and consumes the full credit.
+Detect: GitHub Actions billing shows a disproportionate minutes usage from a single workflow; the workflow run shows a single step that ran for hours before the job was cancelled or timed out.
+Fix: Set `timeout-minutes: 30` on every job (or a lower value per step for known-fast operations); add explicit timeout flags to CLI tools (`aws --cli-connect-timeout 10`, `terraform apply -lock-timeout=5m`).
+
 ## Connections
 
 - [[cloud/terraform]] — Terraform plan/apply via GitHub Actions

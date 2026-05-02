@@ -12,7 +12,7 @@ tldr: GPU selection guide for LLM inference and training — VRAM is the binding
 
 > **TL;DR** GPU selection guide for LLM inference and training — VRAM is the binding constraint (2 bytes per parameter in BF16), with H100 at ~3x A100 throughput for inference and RTX 4090 as the consumer sweet spot for fine-tuning.
 
-The practical guide to GPU selection for inference and training. VRAM is the binding constraint — a model that doesn't fit in VRAM can't run.
+The practical guide to GPU selection for inference and training. VRAM is the binding constraint. A model that doesn't fit in VRAM can't run.
 
 ---
 
@@ -30,7 +30,7 @@ Rule of thumb: **2 bytes per parameter for FP16/BF16**.
 
 Add ~20% overhead for KV cache + activations during inference.
 
-For training with AdamW: optimizer states take 3x the model size in FP32 Adam moments → a 7B model needs ~84GB for full fine-tuning. LoRA reduces this dramatically — only the adapter parameters need optimizer states.
+For training with AdamW: optimizer states take 3x the model size in FP32 Adam moments → a 7B model needs ~84GB for full fine-tuning. LoRA reduces this dramatically. Only the adapter parameters need optimizer states.
 
 ---
 
@@ -190,6 +190,33 @@ print(torch.cuda.get_device_properties(0).total_memory / 1e9, "GB total")
 - Apple M4 Max 128GB: 546 GB/s memory bandwidth; best local inference hardware (2025)
 - Spot/interruptible pricing: 50-70% cheaper — use with checkpointing for training
 - Google Colab Pro: $10/month, T4 16GB — cheapest option for experiments
+
+## Common Failure Cases
+
+**Model loads on VRAM paper spec but OOMs during inference due to KV cache**  
+Why: VRAM estimates are for weights only; KV cache grows with sequence length and batch size, adding 20-40% overhead.  
+Detect: CUDA OOM occurs after the model loads successfully but fails on first generation; `nvidia-smi` shows memory near capacity before inference starts.  
+Fix: account for 20% KV cache overhead when sizing GPU memory; reduce `max_new_tokens` or use streaming with smaller batch sizes.
+
+**Multi-GPU setup with `device_map="auto"` is slower than single GPU**  
+Why: PCIe interconnect bandwidth (~16 GB/s) is far slower than NVLink (~600 GB/s); on PCIe-connected GPUs, inter-device tensor transfers dominate latency.  
+Detect: tokens/second on 2× PCIe GPU is lower than 1× GPU of the same type; `nvidia-smi topo` shows `PHB` (PCIe Host Bridge) connections.  
+Fix: use NVLink-connected GPUs (SXM form factor) for multi-GPU inference; or use quantisation to fit on a single GPU instead.
+
+**`int4` quantisation causes severe quality degradation on instruction-following tasks**  
+Why: aggressive INT4 quantisation loses precision on the attention layers that drive instruction following; 4-bit models with bad calibration data are noticeably worse.  
+Detect: instruction-following accuracy drops >10% vs BF16 on your benchmark; the model ignores format requirements.  
+Fix: use Q4_K_M (GGUF) or GPTQ with calibrated quantisation rather than naive INT4; or use 5-bit quantisation as a compromise.
+
+**Cloud GPU spot instance preemption loses training progress**  
+Why: spot/interruptible instances are reclaimed without warning when demand increases.  
+Detect: training job terminates with `SpotInstanceInterruption` or equivalent; no checkpoint was saved recently.  
+Fix: checkpoint every 10-30 minutes with `save_steps`; enable training job restart from the latest checkpoint; use `deepspeed` ZeRO with checkpoint support.
+
+**Apple Silicon model loads but runs at 10% of expected speed due to CPU fallback**  
+Why: certain custom ops (e.g., some GGUF quantisation types) fall back to CPU on Apple Silicon; the GPU runs but CPU is the bottleneck.  
+Detect: GPU utilisation is 10-30% in Activity Monitor despite the model "running on GPU"; tokens/second is far below the expected rate.  
+Fix: use `n_gpu_layers=-1` in llama.cpp to maximise GPU offload; check that the GGUF quantisation type (Q4_K_M, Q5_K_M) is supported natively by Metal.
 
 ## Connections
 

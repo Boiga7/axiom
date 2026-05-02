@@ -216,6 +216,28 @@ helm install cluster-autoscaler autoscaler/cluster-autoscaler \
 
 ---
 
+## Common Failure Cases
+
+**Pods stuck in `Pending` — nodes not joining the cluster**
+Why: managed node group instances cannot reach the EKS control plane endpoint because the security group doesn't allow outbound HTTPS (443) to the cluster security group, or the nodes are in a subnet without a route to the private endpoint.
+Detect: `kubectl get nodes` shows no ready nodes; EC2 instances in the Auto Scaling Group are running but never appear in the cluster.
+Fix: ensure the node security group allows outbound 443 to the cluster security group, and that the subnet has a route to the VPC endpoint or NAT Gateway for the EKS API.
+
+**IRSA not working — pod gets 403 from AWS despite correct annotation**
+Why: the OIDC provider URL was not registered in IAM, the trust policy contains a typo in the namespace or service account name, or the pod's service account annotation uses the wrong role ARN.
+Detect: AWS SDK calls return `AccessDenied`; `kubectl describe pod` shows the projected `aws-web-identity-token-file` volume is mounted but the role assumption fails in CloudTrail.
+Fix: verify the OIDC issuer URL in IAM Identity Providers matches the cluster's OIDC endpoint exactly, and cross-check the trust policy's `StringEquals` condition against the actual namespace and service account name.
+
+**Cluster Autoscaler not scaling down — nodes remain after pods are removed**
+Why: the autoscaler's scale-down evaluation is blocked by system pods (CoreDNS, `kube-proxy`) that cannot be rescheduled, or the `cluster-autoscaler.kubernetes.io/safe-to-evict: "false"` annotation is set on long-running pods.
+Detect: empty nodes persist for >10 minutes after all workload pods were removed; autoscaler logs show `scale down skipped: node has pods that cannot be evicted`.
+Fix: add `cluster-autoscaler.kubernetes.io/safe-to-evict: "true"` to non-critical daemonset pods, and ensure critical pods have a PodDisruptionBudget that allows eviction with `minAvailable: 0` where appropriate.
+
+**EBS volume stuck in `Attaching` after pod reschedule**
+Why: the EBS volume is in a different AZ than the node the pod was rescheduled to; EBS volumes are AZ-local and cannot be attached across AZs.
+Detect: PVC stays in `Pending`; EBS CSI driver logs show `AttachVolume.Attach failed: ... is not in the same availability zone`.
+Fix: use topology-aware scheduling (`volumeBindingMode: WaitForFirstConsumer` in the StorageClass) so the volume is provisioned in the same AZ as the scheduled pod.
+
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/kubernetes]] · [[cloud/aws-fargate]] · [[cloud/aws-cdk]] · [[cloud/github-actions]] · [[cloud/argocd]] · [[cloud/keda]]

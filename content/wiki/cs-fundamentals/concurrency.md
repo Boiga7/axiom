@@ -235,5 +235,32 @@ else:
 
 ---
 
+## Common Failure Cases
+
+**Race condition survives code review and only appears under load**  
+Why: the read-modify-write sequence looks atomic in single-threaded review but the GIL releases between bytecodes, exposing the window at high concurrency.  
+Detect: counter or balance inconsistency only visible with 10+ concurrent requests; add a stress test with `threading.Barrier` to synchronise thread starts.  
+Fix: use `threading.Lock` around read-modify-write; prefer atomic data structures (`queue.Queue`) over shared mutable state.
+
+**asyncio task swallows exception silently**  
+Why: `asyncio.create_task()` without storing the result; when the task raises, the exception is attached to the task object and logged as a warning, often missed.  
+Detect: `asyncio: Future exception was never retrieved` warning in logs; expected side effect (write, notification) never occurred.  
+Fix: always store task references; use `asyncio.gather(*tasks, return_exceptions=False)` or add a done-callback that re-raises.
+
+**Deadlock between two locks acquired in different orders**  
+Why: Thread A holds `lock1` and waits for `lock2`; Thread B holds `lock2` and waits for `lock1`; both block forever.  
+Detect: application freezes under specific concurrency pattern; `threading.enumerate()` shows both threads in `BLOCKED` state.  
+Fix: document and enforce a canonical lock acquisition order across the codebase; acquire `sorted([lock1, lock2])` by id.
+
+**ProcessPoolExecutor hangs on KeyboardInterrupt**  
+Why: worker processes ignore `SIGINT` by default; the pool waits for workers to finish, blocking the main process shutdown.  
+Detect: Ctrl-C does not kill the process; `ps aux` shows zombie worker processes.  
+Fix: use `executor.shutdown(wait=False, cancel_futures=True)` in a `finally` block; or set `initializer` to re-enable `SIGINT` in workers.
+
+**Semaphore count leaks, blocking eventually all coroutines**  
+Why: an exception inside `async with semaphore:` is caught outside the block, but the semaphore was already acquired; if the exception path doesn't release, the count leaks.  
+Detect: over time, fewer and fewer concurrent operations proceed; semaphore `_value` drifts below initial count.  
+Fix: always use `async with semaphore:` (context manager). It releases on exceptions; never `await semaphore.acquire()` without a matching `release()` in a `finally` block.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[python/ecosystem]] · [[llms/ae-hub]]

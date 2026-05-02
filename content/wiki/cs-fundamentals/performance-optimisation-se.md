@@ -10,7 +10,7 @@ tldr: "Systematic approach to improving system performance: measure first, optim
 
 # Performance Optimisation
 
-Systematic approach to improving system performance: measure first, optimise the bottleneck, measure again. Premature optimisation is the root of all evil — but ignoring performance in production is inexcusable.
+Systematic approach to improving system performance: measure first, optimise the bottleneck, measure again. Premature optimisation is the root of all evil, but ignoring performance in production is inexcusable.
 
 ---
 
@@ -247,6 +247,33 @@ def test_db_query_performance(benchmark, db_session):
 ```
 
 ---
+
+## Common Failure Cases
+
+**N+1 query discovered in production, not in dev**  
+Why: dev has 10 rows; ORM's lazy loading fires one query per row; in production with 10,000 rows it fires 10,000 queries.  
+Detect: `EXPLAIN (ANALYZE)` on the endpoint shows hundreds of identical `SELECT` statements; SQLAlchemy's `echo=True` in staging reveals it.  
+Fix: add `joinedload` or `subqueryload`; always test with production-scale data in staging; add a query count assertion in integration tests.
+
+**Premature caching hides a correctness bug**  
+Why: stale cached value masks a write that should have updated the data; the bug only shows after cache expiry.  
+Detect: data inconsistency appears intermittently, correlated with TTL intervals; disabling the cache makes the bug reproduce consistently.  
+Fix: fix the underlying data consistency issue first; then re-enable caching with explicit invalidation on write.
+
+**Benchmark measures the wrong thing — cold vs warm JIT**  
+Why: the first `pytest-benchmark` iteration runs Python bytecode unoptimised; reported mean includes the cold-start outlier.  
+Detect: benchmark `min` is far lower than `mean`; first iteration is 10x slower than the rest in `--benchmark-verbose` output.  
+Fix: use `benchmark.pedantic` with `warmup_rounds=3` to discard cold-start iterations before measuring.
+
+**Async I/O gains eliminated by a blocking call inside the coroutine**  
+Why: one synchronous blocking call (`time.sleep`, `requests.get`, `open(...)`) inside an `async def` blocks the entire event loop for its duration.  
+Detect: event loop lag metric spikes; all other coroutines stall during the blocking call; `asyncio` debug mode logs the slow callback.  
+Fix: replace blocking calls with async equivalents (`asyncio.sleep`, `httpx.AsyncClient`, `aiofiles`); use `loop.run_in_executor` for unavoidable blocking calls.
+
+**Partial index not used because query doesn't match the WHERE clause**  
+Why: the partial index was created with `WHERE status != 'completed'` but the query filters `WHERE status = 'pending'`; planner chooses a seq scan.  
+Detect: `EXPLAIN` shows `Seq Scan` despite an index existing; `pg_stat_user_indexes` shows zero scans on the index.  
+Fix: align the partial index predicate with the actual query filter; or drop it and create a full index on `status`.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/observability-se]] · [[technical-qa/load-testing-advanced]]

@@ -182,5 +182,27 @@ async def dependencies():
 
 ---
 
+## Common Failure Cases
+
+**Ephemeral environment not torn down after PR closes, accumulating idle namespaces**
+Why: the cleanup job in the workflow only runs on `pull_request` closed events, which are missed if the PR is merged rather than closed, or if a workflow run times out before the delete step.
+Detect: `kubectl get namespaces | grep "^pr-"` in the cluster shows namespaces for PRs merged weeks ago.
+Fix: add a scheduled nightly workflow that lists all `pr-*` namespaces, checks whether the PR is still open via the GitHub API, and deletes any namespace whose PR is closed or merged.
+
+**Feature flag cache returns stale values after a flag change**
+Why: `@lru_cache(maxsize=1)` caches the flag values for the lifetime of the process, so a flag toggled in SSM Parameter Store does not take effect until the service restarts.
+Detect: a flag is changed in the console but the application behaviour does not change without a redeploy, or tests that toggle flags between test cases see the first value for all cases.
+Fix: replace `lru_cache` with a TTL-based cache (e.g., `cachetools.TTLCache` with a 60-second TTL) or use a flag service with push notifications (LaunchDarkly streaming, Unleash client) that invalidates the local cache on change.
+
+**Environment variable matrix has `DEBUG=true` reaching staging due to a misconfigured deploy script**
+Why: a deploy script copies the `.env.local` file as a base and overrides only selected variables, so `DEBUG=true` from the developer's local config slips through to the staging environment.
+Detect: the running staging app returns stack traces in API error responses or has verbose SQL logging enabled; check the deployed environment's `/health` or an admin endpoint that exposes the config.
+Fix: treat every environment's variable set as fully explicit with no inheritance from local; validate in the CI deploy step that `DEBUG` is absent or false before promoting to staging or production.
+
+**Testcontainers-based CI environment uses a different database collation than production**
+Why: the Testcontainers Postgres image uses the default `C` locale, while production RDS uses `en_US.UTF-8`, causing string sort order and case-insensitive query results to differ.
+Detect: a test passes in CI but fails in staging for queries that rely on ordering or case-insensitive matching; `SHOW lc_collate` returns different values between environments.
+Fix: specify the locale explicitly in the Testcontainers setup (`withEnv("POSTGRES_INITDB_ARGS", "--locale=en_US.UTF-8")`) to match the production RDS configuration.
+
 ## Connections
 [[qa-hub]] · [[qa/test-data-management]] · [[qa/agile-qa]] · [[qa/qa-in-devops]] · [[cloud/github-actions]] · [[cloud/kubernetes]]

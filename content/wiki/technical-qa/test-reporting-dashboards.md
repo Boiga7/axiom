@@ -238,6 +238,28 @@ New tests per sprint      Positive        Git diff on tests/
 
 ---
 
+## Common Failure Cases
+
+**Allure report is generated from a stale results directory when `--clean` is omitted**
+Why: `allure generate ./allure-results` without `--clean` merges new results with old ones; if a test was renamed or deleted, its old result files remain and appear as ghost tests in the report.
+Detect: the Allure report shows tests that no longer exist in the codebase, or a renamed test appears twice.
+Fix: always pass `--clean` to `allure generate` in CI; in the artifact upload step, upload the raw `allure-results/` directory and regenerate on each run.
+
+**Slack notification script reports "0 failed" when `junit.xml` is missing**
+Why: `ET.parse()` raises `FileNotFoundError` if pytest exits before writing the JUnit file (e.g., collection error); if the script catches all exceptions and defaults to success, the Slack message incorrectly shows a green build.
+Detect: CI pipeline shows a red pytest step followed by a green Slack notification.
+Fix: make the script fail explicitly if `junit.xml` does not exist (`sys.exit(1)`) and run it only after a successful `pytest` step using `if: always()` with an explicit file-existence check.
+
+**FlakyTracker history file grows unbounded and causes slow CI startup**
+Why: `self.results[node_id][-20:]` caps per-test history at 20 runs, but the JSON file accumulates entries for every test ever run, including deleted tests; over months the file can reach tens of MB.
+Detect: CI setup time increases gradually; the history file exceeds 10 MB.
+Fix: add a periodic cleanup step that removes entries for tests not present in the current `pytest --collect-only` output, or use a database with a TTL index instead of a flat JSON file.
+
+**PR comment shows incorrect test counts when tests run in parallel with `-n auto`**
+Why: `pytest-xdist` writes separate JUnit XML files per worker; if the CI step reads only the first file or concatenates them incorrectly, the comment reports a subset of the actual test count.
+Detect: PR comment shows 20 tests when the full suite has 200; failure counts are understated.
+Fix: use `--junitxml=junit.xml` with `pytest-xdist`'s merged output, or merge all per-worker XML files with `junitparser` before parsing.
+
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/flaky-test-management]] · [[technical-qa/parallel-test-execution]] · [[qa/qa-metrics]] · [[qa/test-reporting]] · [[cloud/github-actions]]

@@ -23,7 +23,7 @@ H(X) = -∑ p(x) log₂ p(x)    [bits]
 H(X) = -∑ p(x) ln p(x)      [nats]
 ```
 
-Intuition: a fair coin has maximum entropy (1 bit — maximum uncertainty). A biased coin with p=0.99 has low entropy (0.08 bits — you're almost always right guessing heads).
+Intuition: a fair coin has maximum entropy (1 bit, maximum uncertainty). A biased coin with p=0.99 has low entropy (0.08 bits, you're almost always right guessing heads).
 
 **Examples:**
 ```
@@ -91,7 +91,7 @@ Without this penalty, the model exploits the reward model by drifting to degener
 - Forward D_KL(p || q): mode-seeking — q concentrates on the most likely modes of p
 - Reverse D_KL(q || p): mean-seeking — q spreads to cover all modes of p
 
-LLMs use forward KL (model q matches the data p) — this causes the model to be confident, not covering all possible outputs.
+LLMs use forward KL (model q matches the data p). This causes the model to be confident, not covering all possible outputs.
 
 ---
 

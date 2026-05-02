@@ -12,7 +12,7 @@ tldr: Claude Code is Anthropic's autonomous agentic coding CLI that reads entire
 
 > **TL;DR** Claude Code is Anthropic's autonomous agentic coding CLI that reads entire codebases, runs shell commands, uses MCP tools, and spawns subagents — the most capable agentic coding tool as of April 2026.
 
-Anthropic's agentic coding CLI. Not a code completion tool — an autonomous agent that reads your codebase, plans multi-step changes, runs tests, uses MCP tools, and executes shell commands. The most capable agentic coding tool as of April 2026.
+Anthropic's agentic coding CLI. Not a code completion tool. An autonomous agent that reads your codebase, plans multi-step changes, runs tests, uses MCP tools, and executes shell commands. The most capable agentic coding tool as of April 2026.
 
 ---
 
@@ -30,7 +30,7 @@ claude
 ## Core Capabilities
 
 ### File Operations
-Reads, writes, and edits files. Understands entire codebases — not just the file you're looking at.
+Reads, writes, and edits files. Understands entire codebases. Not just the file you're looking at.
 
 ### Shell Execution
 Runs arbitrary shell commands: `npm test`, `git diff`, `python script.py`, etc. Sees the output and adapts.
@@ -46,7 +46,7 @@ claude mcp add --transport http https://api.example.com/mcp
 Built-in first-party MCP servers: filesystem, git, GitHub, Brave search, memory, and more.
 
 ### Subagents
-For complex parallel tasks, Claude Code can spawn subagents — separate agent instances that run independently and report back. Enables true parallel work (e.g. three subagents each working on a different module).
+For complex parallel tasks, Claude Code can spawn subagents. Separate agent instances that run independently and report back. Enables true parallel work (e.g. three subagents each working on a different module).
 
 ### Worktrees
 Agent-safe isolation via git worktrees:
@@ -125,7 +125,7 @@ Skills live in `~/.claude/plugins/` or are installed via npm packages.
 }
 ```
 
-Permission modes: `default` (interactive confirmation), `bypassPermissions` (auto-approve all — use with caution).
+Permission modes: `default` (interactive confirmation), `bypassPermissions` (auto-approve all, use with caution).
 
 ---
 
@@ -134,13 +134,13 @@ Permission modes: `default` (interactive confirmation), `bypassPermissions` (aut
 - **VS Code** (`@anthropic-ai/claude-code` extension) — sidebar panel, inline editing
 - **JetBrains** (IntelliJ, WebStorm, PyCharm) — same agent, native IDE UI
 
-The extension shares the same session as the terminal CLI — they're the same agent.
+The extension shares the same session as the terminal CLI. They're the same agent.
 
 ---
 
 ## /ultrareview
 
-A multi-agent cloud review command. Launches multiple review agents in parallel to analyse the current branch from different angles (architecture, security, test coverage, performance). Billed. Not available in subagents — user-triggered only.
+A multi-agent cloud review command. Launches multiple review agents in parallel to analyse the current branch from different angles (architecture, security, test coverage, performance). Billed. Not available in subagents. User-triggered only.
 
 ```bash
 claude /ultrareview          # review current branch
@@ -173,6 +173,28 @@ See [[ai-tools/cursor-copilot]] for comparison details.
 - VS Code and JetBrains extensions share the same agent session as the terminal CLI
 - Skills (SKILL.md) live in `~/.claude/plugins/` or are installed via npm packages
 - Up to 4 cache breakpoints per request when calling the underlying Anthropic API
+
+## Common Failure Cases
+
+**`CLAUDE.md` instructions are not followed because the file is in a subdirectory that Claude Code does not auto-load**  
+Why: Claude Code loads `CLAUDE.md` from the current working directory and parent directories up to the repo root; if the session is started from a subdirectory and the `CLAUDE.md` is in a parent directory not on the auto-scan path, the instructions are silently ignored.  
+Detect: Claude Code behaves differently from expected despite a valid `CLAUDE.md`; running `/context` or asking Claude Code to describe its instructions reveals it has not loaded the file.  
+Fix: start Claude Code from the directory that contains or is a parent of `CLAUDE.md`; or use the `--project` flag to specify the project root explicitly.
+
+**PostToolUse hook runs `npm run lint` on every file write, but the hook fails silently and the agent proceeds without seeing lint errors**  
+Why: hook commands that return a non-zero exit code produce a warning but do not block the agent by default; if the hook command is malformed or the lint tool is not installed, the hook exits with an error that is logged but not surfaced as a tool failure.  
+Detect: the agent writes files with lint violations but does not attempt to fix them; checking `~/.claude/logs/` shows the hook exiting with a non-zero code after each write.  
+Fix: write hook scripts that explicitly output failure messages to stdout (not just stderr) so Claude Code can read them; use `|| echo "LINT FAILED: ..."` to ensure exit code failures produce readable output the agent can act on.
+
+**Subagent spawned for parallel work modifies a shared file that the main agent is also editing, causing a merge conflict**  
+Why: Claude Code does not enforce file ownership between the main agent and subagents; if both are assigned tasks that touch the same file, their edits create conflicts that require manual resolution.  
+Detect: `git status` after a parallel subagent run shows merge conflicts in shared files; the conflicted content mixes the main agent's and subagent's changes.  
+Fix: assign strict file ownership at spawn time — specify in each subagent's brief exactly which files it may edit; use git worktrees (`claude --worktree`) to give each agent an isolated working copy.
+
+**`bypassPermissions` mode is enabled in project `settings.json` and accidentally committed, allowing the agent to run destructive commands without confirmation on any machine that checks out the repo**  
+Why: `bypassPermissions: true` in `.claude/settings.json` disables all confirmation prompts for shell commands; if committed to the repo, it applies to every developer and CI environment that uses Claude Code in the project.  
+Detect: other developers or CI runs notice that Claude Code never prompts for confirmation; checking `.claude/settings.json` in the repo shows `bypassPermissions: true`.  
+Fix: add `.claude/settings.json` to `.gitignore` for project settings that contain permission overrides; use `.claude/settings.local.json` (already gitignored) for personal permission configurations.
 
 ## Connections
 

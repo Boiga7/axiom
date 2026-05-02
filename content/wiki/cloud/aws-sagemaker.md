@@ -10,7 +10,7 @@ tldr: "Managed ML platform: training, model registry, real-time inference endpoi
 
 # AWS SageMaker
 
-Managed ML platform: training, model registry, real-time inference endpoints, and batch transform — the bridge between cloud engineering and AI engineering.
+Managed ML platform: training, model registry, real-time inference endpoints, and batch transform. The bridge between cloud engineering and AI engineering.
 
 ---
 
@@ -234,6 +234,28 @@ Hybrid: SageMaker for model registry + endpoint management, ECS for the actual s
 ```
 
 ---
+
+## Common Failure Cases
+
+**Endpoint deployment fails with "ResourceLimitExceeded" for GPU instances**
+Why: `ml.g4dn.xlarge` and similar GPU instance types have per-account service quota limits, and you've hit the limit across running endpoints and training jobs.
+Detect: `create_endpoint` raises `ResourceLimitExceeded: An error occurred ... you have exceeded your service limit for instances of type ml.g4dn.xlarge`.
+Fix: request a quota increase via AWS Service Quotas for the specific `ml.*` instance type; in the interim, use a smaller instance type or delete unused endpoints.
+
+**Endpoint invocation returns 413 — payload too large**
+Why: SageMaker real-time endpoints have a 6 MB payload limit per request; sending raw image bytes or large document batches inline exceeds this.
+Detect: `botocore.exceptions.ClientError: An error occurred (413) ... Payload Too Large`.
+Fix: for large inputs, upload to S3 and pass the S3 URI; for batch predictions, use Batch Transform instead of real-time endpoints.
+
+**Autoscaling does not scale down — instances idle at minimum**
+Why: `ScaleInCooldown` is set too long (e.g., 600s default) relative to traffic patterns, so the scale-in policy never fires during low-traffic windows.
+Detect: CloudWatch `SageMakerVariantInvocationsPerInstance` is near zero but instance count stays at `MinCapacity` > 1; cost is higher than expected.
+Fix: reduce `ScaleInCooldown` to match your off-peak window (e.g., 120-300s), and set `MinCapacity: 0` if you can tolerate the cold start latency of scaling from zero.
+
+**Model container fails health check — endpoint never becomes `InService`**
+Why: the custom inference container's `/ping` endpoint returns a non-200 status or takes longer than 60 seconds to respond during startup, causing SageMaker to mark it as unhealthy.
+Detect: endpoint status stays `Creating` then transitions to `Failed`; CloudWatch `/aws/sagemaker/Endpoints` logs show health check timeouts.
+Fix: ensure the container starts a web server on port 8080 that responds `200` to `GET /ping` within the startup window; the model weights should be loaded asynchronously or the health check should return 200 once the port is bound even before weights are loaded.
 
 ## Connections
 

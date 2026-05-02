@@ -107,7 +107,7 @@ class LoginTests: XCTestCase {
 
 ## Espresso (Android Native)
 
-Google's UI testing framework for Android. Synchronises with main thread automatically — no explicit waits needed.
+Google's UI testing framework for Android. Synchronises with main thread automatically. No explicit waits needed.
 
 ```kotlin
 // LoginTest.kt
@@ -187,6 +187,33 @@ driver = webdriver.Remote(
 - **OTA updates** — what happens if app updates while user is on a screen
 
 ---
+
+## Common Failure Cases
+
+**Appium tests pass on emulator but fail on real devices due to element ID differences**
+Why: resource IDs on emulators can differ from those on physical devices, especially across manufacturer skins (Samsung One UI, MIUI).
+Detect: tests green in CI against emulator-5554 but fail when run via BrowserStack on Samsung Galaxy devices.
+Fix: use accessibility IDs or content descriptions as locators instead of resource IDs; validate the locator strategy against at least two real-device OEMs before adding to the suite.
+
+**XCUITest simulator tests miss biometric and permission dialogs**
+Why: the simulator handles Face ID and permission dialogs differently than physical devices; tests that tap through dialogs on simulator silently skip the system alert on device.
+Detect: `testBiometricLogin` passes on simulator but hangs or fails on a physical iPhone in BrowserStack.
+Fix: add explicit handling for system alerts (`addUIInterruptionMonitor`) and use `XCUIApplication(bundleIdentifier: "com.apple.springboard")` only for simulator; gate biometric tests to run on physical device farms only.
+
+**Network condition tests not representative — always run on fast Wi-Fi**
+Why: CI and local emulators default to full-speed networking; mobile-specific failure modes (3G latency, offline mid-transaction) are never exercised.
+Detect: app receives production crash reports for `SocketTimeoutException` under LTE conditions not seen in testing.
+Fix: add at least one test run using Network Link Conditioner or BrowserStack's network profiles set to "3G - Good" and verify the app shows a graceful loading or retry state.
+
+**App state not reset between tests — bleed-over causes flaky order**
+Why: `no_reset: False` is only set in some configurations; prior test data (login session, partially filled forms) leaks into the next test.
+Detect: tests pass individually but fail in batch runs; failure order changes between runs.
+Fix: set `no_reset: False` and `full_reset: True` in the Appium options fixture, or implement a `clear_app_data()` helper called in `tearDown`; confirm each test starts from a clean install state.
+
+**Orientation change during multi-step form loses state silently**
+Why: Android activity restarts on rotation by default; if the fragment doesn't save and restore `ViewModel` state, form data is lost without an error message.
+Detect: rotate the device on step 2 of checkout; verify step 2 data is still populated after rotation.
+Fix: write a dedicated rotation test using `driver.rotate(ScreenOrientation.LANDSCAPE)` mid-form; fix the ViewModel to use `SavedStateHandle` if state is lost.
 
 ## Connections
 [[qa-hub]] · [[qa/cross-browser-testing]] · [[qa/test-environments]] · [[technical-qa/browser-automation-patterns]] · [[technical-qa/test-architecture]]

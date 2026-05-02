@@ -204,5 +204,27 @@ Block release on search fix. All other endpoints pass SLOs.
 
 ---
 
+## Common Failure Cases
+
+**Baseline captured from an unrepresentative environment (dev laptop, cold cache)**
+Why: the baseline script runs against a local server with no warm cache and no concurrent users; every subsequent measurement in staging looks like a regression even when performance has not changed.
+Detect: every release the p95 for `GET /api/products` shows "50% regression" but production metrics are unchanged.
+Fix: always capture baselines against the staging environment with the same warmup pass (10 requests discarded) and the same data volume as production; document the exact conditions in the baseline JSON metadata.
+
+**Performance ACs written in prose, not as measurable thresholds**
+Why: the story AC says "the page should load quickly" rather than specifying percentile and concurrent user count; the test cannot fail because there is no numeric threshold.
+Detect: `test_no_performance_regression` cannot be written because `baseline[endpoint]` has no `p95` entry.
+Fix: require all performance ACs to follow the Given/When/Then format with explicit p-value, latency threshold, and concurrent user count before the story enters the sprint.
+
+**Regression threshold set too loosely — real regressions pass**
+Why: `REGRESSION_THRESHOLD = 1.20` (20% allowed regression) masks a 15% slowdown on a 300ms endpoint, which is a 45ms real-world impact that violates the SLO.
+Detect: the test passes, but the stakeholder report shows the p95 for `POST /api/checkout` climbed from 1.8s to 2.1s over three releases.
+Fix: set the threshold relative to the SLO headroom, not a fixed percentage: if the SLO is 3s and the baseline is 2.1s, the allowed regression should be at most `(3.0 - 2.1) / 2.1 ≈ 43%` — but prefer a hard ceiling of 10% to catch gradual degradation early.
+
+**Soak and volume tests only run manually before major releases — leaks between releases**
+Why: the CI pipeline only includes the load test; soak and volume tests are run manually once per quarter and so memory leaks introduced in intermediate releases go undetected.
+Detect: heap memory grows by 20MB/hour in production Grafana charts; no automated test would have caught it.
+Fix: add the soak test as a nightly scheduled CI job (not a pre-release gate) so it catches regressions within 24 hours of introduction.
+
 ## Connections
 [[qa-hub]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[technical-qa/load-testing-advanced]] · [[qa/qa-metrics]] · [[cloud/observability-stack]]

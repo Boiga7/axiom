@@ -12,7 +12,7 @@ tldr: Open-weight models (Llama, Mistral, DeepSeek, Qwen, Gemma, Phi) are now cr
 
 > **TL;DR** Open-weight models (Llama, Mistral, DeepSeek, Qwen, Gemma, Phi) are now credible production choices for most tasks — covering model selection, licensing, hardware requirements, and the specific strengths of each family.
 
-The models you can download, self-host, and fine-tune. The open ecosystem has caught up to frontier proprietary models on many benchmarks — open models are now a credible production choice for most use cases.
+The models you can download, self-host, and fine-tune. The open ecosystem has caught up to frontier proprietary models on many benchmarks. Open models are now a credible production choice for most use cases.
 
 ---
 
@@ -138,7 +138,7 @@ Performance:   o1-level on AIME, MATH, SWE-bench
 API cost:      96% cheaper than o1
 ```
 
-Key insight: high-quality reasoning emerged from GRPO with rule-based rewards — no human preference data required. Changed understanding of what's needed for reasoning models.
+Key insight: high-quality reasoning emerged from GRPO with rule-based rewards. No human preference data required. Changed understanding of what's needed for reasoning models.
 
 ### DeepSeek R1 Distilled
 

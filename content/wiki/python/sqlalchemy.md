@@ -254,6 +254,28 @@ app.dependency_overrides[get_db] = lambda: test_db
 
 ---
 
+## Common Failure Cases
+
+**`MissingGreenlet: greenlet_spawn has not been called` when accessing a relationship in async context**  
+Why: lazy loading relationships (accessing `user.orders` without `selectinload`) triggers a synchronous database call inside an async context; SQLAlchemy 2.0 raises `MissingGreenlet` instead of silently blocking.  
+Detect: the error appears when accessing a relationship attribute after fetching the parent object; the relationship was not specified in `.options()` on the query.  
+Fix: always use `selectinload(Model.relationship)` or `joinedload(Model.relationship)` in the query options when you need relationship data; never access lazy-loaded relationships in async code.
+
+**`DetachedInstanceError` after committing a session and accessing model attributes**  
+Why: by default, SQLAlchemy expires all attributes after a commit; accessing an attribute on a committed instance triggers a new lazy load, but if the session is closed, the object is detached and the load fails.  
+Detect: `DetachedInstanceError: Instance is not bound to a Session` when accessing model attributes after `await session.commit()`; often appears in FastAPI response serialisation.  
+Fix: set `expire_on_commit=False` in `async_sessionmaker`; or `await db.refresh(instance)` after commit to eagerly reload needed attributes.
+
+**Connection pool exhausted under load because sessions are not properly closed**  
+Why: if a database session is not closed (e.g., an exception exits the `get_db` dependency before `yield` cleanup runs), the connection is not returned to the pool; under load, the pool exhausts and new requests hang waiting for a connection.  
+Detect: requests start timing out with `TimeoutError: QueuePool limit of size N overflow N reached` under moderate load; `engine.pool.checkedout()` shows all connections in use.  
+Fix: always use `async with AsyncSessionLocal() as session:` or a `try/finally` block in the dependency to ensure session closure; verify the FastAPI `Depends(get_db)` dependency uses a `yield` with proper exception handling.
+
+**Bulk UPDATE via ORM `session.execute(update(Model).values(...))` does not flush pending changes first**  
+Why: SQLAlchemy's ORM tracks pending changes in the session's identity map; a `session.execute(update(...))` bypasses the ORM and goes directly to the database, so in-memory changes may conflict with or be overwritten by the bulk update.  
+Detect: a bulk status update silently overwrites an in-flight ORM change to the same row; `session.dirty` shows pending objects at the time of the bulk update.  
+Fix: call `await session.flush()` before any bulk `execute(update(...))` to synchronise in-memory state to the database first.
+
 ## Connections
 
 [[python/python-hub]] · [[python/ecosystem]] · [[cs-fundamentals/database-design]] · [[technical-qa/database-testing]] · [[web-frameworks/fastapi]] · [[cloud/aws-rds-aurora]]

@@ -23,7 +23,7 @@ Standard RLHF (see [[papers/rlhf]]) for harmlessness requires humans to label wh
 - **Inconsistent** — human judgement on harm varies across labellers and cultures
 - **Opaque** — the resulting model's values are implicit in the labelling decisions
 
-Constitutional AI makes the values explicit (written in natural language) and uses AI feedback to replace human harm labels — reducing human exposure to harmful content and making the value system auditable.
+Constitutional AI makes the values explicit (written in natural language) and uses AI feedback to replace human harm labels. Reducing human exposure to harmful content and making the value system auditable.
 
 ---
 
@@ -37,7 +37,7 @@ A written list of principles used to judge outputs. Example principles from the 
 - "Choose the response that is most supportive of human autonomy and individual freedoms"
 - "Prefer the response that is more honest and doesn't contain deceptive or manipulative content"
 
-The constitution is not a rigid rule-set — it's a prompt given to a language model to elicit principled judgement.
+The constitution is not a rigid rule-set. It's a prompt given to a language model to elicit principled judgement.
 
 ### Two-Stage Training Pipeline
 
@@ -68,7 +68,7 @@ Human red-team prompt
 
 ### RLAIF — AI Replaces Human Labellers
 
-The critical insight: a sufficiently capable LLM can evaluate responses against written principles consistently enough to generate useful preference labels. This **scales** — no bottleneck on human labeller availability.
+The critical insight: a sufficiently capable LLM can evaluate responses against written principles consistently enough to generate useful preference labels. This **scales**. No bottleneck on human labeller availability.
 
 ---
 

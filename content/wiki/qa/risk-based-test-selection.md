@@ -10,7 +10,7 @@ tldr: Running the right tests at the right time — not the entire suite on ever
 
 # Risk-Based Test Selection
 
-Running the right tests at the right time — not the entire suite on every commit.
+Running the right tests at the right time. Not the entire suite on every commit.
 
 ---
 
@@ -218,6 +218,28 @@ GitHub PR comment template:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Testmon database not persisted between CI runs**
+Why: the `.testmondata` file is ephemeral in CI unless explicitly cached, so every run falls back to running the full suite.
+Detect: CI logs show `pytest --testmon` running all tests rather than a subset, or cache restore step reports a miss every run.
+Fix: add a `actions/cache` step keyed on the runner OS and a hash of all Python files, restoring `.testmondata` before pytest and saving after.
+
+**File-to-test mapping misses indirect dependencies**
+Why: the simple `src/foo.py` -> `tests/test_foo.py` path mapping doesn't account for shared utilities or transitive imports, so a change to a shared module triggers no tests.
+Detect: a commit touching a shared utility passes CI but introduces a regression caught only in the full nightly run.
+Fix: switch from manual path mapping to pytest-testmon or a dependency-graph tool (importlab, Coverage.py `--source`) that tracks actual import chains.
+
+**Tier markers applied inconsistently, causing silent gaps**
+Why: developers add tests without marking them, defaulting to no tier, so `pytest -m "tier1"` silently skips unmarked tests.
+Detect: run `pytest --collect-only -q | grep -v "tier"` and confirm unmarked tests exist; compare total collected counts between filtered and unfiltered runs.
+Fix: add a CI lint step (`pytest --collect-only -q -m "not tier1 and not tier2 and not tier3"`) that fails if any unmarked test is found, forcing explicit tier assignment.
+
+**Historical correlation map built from a flaky test pool**
+Why: if the failure database includes flaky test results, the correlation map over-selects tests unrelated to the changed file, inflating run time.
+Detect: the selected test set for small PRs grows over time without a corresponding growth in changed files, or the same tests are always selected regardless of what changed.
+Fix: filter the historical failure corpus to only include runs where failures were confirmed reproducible (i.e., failed twice in a row), or set a minimum co-occurrence threshold before adding a pair to the map.
 
 ## Connections
 

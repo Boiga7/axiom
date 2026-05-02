@@ -10,7 +10,7 @@ tldr: Providing dependencies from outside rather than creating them inside — t
 
 # Dependency Injection
 
-Providing dependencies from outside rather than creating them inside — the key to testable, composable code.
+Providing dependencies from outside rather than creating them inside. The key to testable, composable code.
 
 ---
 
@@ -240,6 +240,28 @@ Anti-pattern: Mutable shared state in singletons
 ```
 
 ---
+
+## Common Failure Cases
+
+**Session leaked across requests (wrong dependency scope)**
+Why: a database session declared as a module-level singleton is shared across concurrent requests, causing one request to see another's uncommitted data or exhaust the connection pool.
+Detect: intermittent data corruption or `DetachedInstanceError` under load; single-threaded tests pass cleanly.
+Fix: declare DB sessions as request-scoped `yield` dependencies so each request gets its own session that is closed on response.
+
+**Circular dependency deadlock**
+Why: Service A depends on Service B, which depends on Service A; the DI container cannot resolve either.
+Detect: application raises a `RecursionError` or container resolution error at startup.
+Fix: introduce an interface (Protocol) that both services depend on, or extract the shared logic into a third, lower-level service that neither depends on the other.
+
+**`dependency_overrides` not cleared between tests**
+Why: a FastAPI override registered in one test leaks into subsequent tests because `app.dependency_overrides.clear()` is not called in teardown.
+Detect: tests pass in isolation but fail when run in sequence; failures are non-deterministic.
+Fix: call `app.dependency_overrides.clear()` in a `yield` fixture's teardown block, or use `monkeypatch` which auto-resets after each test.
+
+**Constructor over-injection hiding design problems**
+Why: a class with 8+ injected dependencies is a sign it has too many responsibilities, not a DI configuration problem.
+Detect: the constructor signature keeps growing; mocking all dependencies in a test requires 10+ lines of setup.
+Fix: split the class along responsibility boundaries so each resulting class needs 2-4 dependencies.
 
 ## Connections
 

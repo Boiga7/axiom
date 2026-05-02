@@ -95,7 +95,7 @@ class LoggingClient(AnthropicClient):
 
 ## Composition Over Inheritance
 
-Inheritance models "is-a" relationships. Composition models "has-a" relationships. Prefer composition — it's more flexible and avoids deep inheritance hierarchies.
+Inheritance models "is-a" relationships. Composition models "has-a" relationships. Prefer composition. It's more flexible and avoids deep inheritance hierarchies.
 
 ```python
 # Inheritance approach (brittle — what if we want different retry AND different logging?)
@@ -385,7 +385,7 @@ class InMemoryEvalResultRepository(EvalResultRepository):
         return [r for r in self._store if r.run_id == run_id]
 ```
 
-The application code uses `EvalResultRepository` — it never knows whether it's talking to Postgres or an in-memory store. Tests use `InMemoryEvalResultRepository`.
+The application code uses `EvalResultRepository`. It never knows whether it's talking to Postgres or an in-memory store. Tests use `InMemoryEvalResultRepository`.
 
 ---
 
@@ -411,6 +411,33 @@ class EvalResult(BaseModel):
     model: str = "claude-sonnet-4-6"
     # Pydantic validates types on construction and can serialise to JSON
 ```
+
+## Common Failure Cases
+
+**Deep inheritance hierarchy breaks on new requirement**
+Why: six-level inheritance chains mean a change to a base class silently affects every subclass, usually in unexpected ways.
+Detect: you're adding an `if isinstance(self, SubclassX)` guard inside a parent method.
+Fix: flatten to two levels maximum and move divergent behaviour into composed strategy objects.
+
+**Violating LSP by raising unexpected exceptions in a subclass**
+Why: callers depend on the parent's implicit contract (no unexpected exceptions), and subclasses that add new failure modes break that assumption.
+Detect: callers catch exceptions that aren't declared in the parent class's docstring or type hints.
+Fix: handle the new failure mode internally in the subclass and return a safe default, or update the parent's contract explicitly.
+
+**Factory registry not thread-safe**
+Why: a class-level `dict` mutated by `register()` can be corrupted if two threads call it concurrently during startup.
+Detect: intermittent `KeyError` or partial registration under load.
+Fix: populate the registry at import time (module-level) rather than lazily at runtime.
+
+**Observer leaking references and preventing garbage collection**
+Why: storing handler callbacks in a list holds a strong reference to the subscriber, keeping it alive even after it should be collected.
+Detect: memory grows monotonically as subscribers are added; `gc.get_referrers()` shows the handler list as the only remaining reference.
+Fix: use `weakref.WeakSet` or `weakref.ref` for handler storage, or provide an explicit `off()` / `unsubscribe()` method.
+
+**Repository returning ORM objects outside the session scope**
+Why: SQLAlchemy lazy-loads relationships on attribute access; accessing them after the `Session` is closed raises `DetachedInstanceError`.
+Detect: `sqlalchemy.orm.exc.DetachedInstanceError` when reading a relationship attribute in a service or test.
+Fix: eager-load all needed relationships inside the repository method (`joinedload`/`selectinload`), or return plain dataclasses/Pydantic models rather than ORM instances.
 
 ## Connections
 

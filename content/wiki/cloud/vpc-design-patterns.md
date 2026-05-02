@@ -10,7 +10,7 @@ tldr: Network architecture patterns for secure, scalable AWS deployments — fro
 
 # VPC Design Patterns
 
-Network architecture patterns for secure, scalable AWS deployments — from single-account to multi-account.
+Network architecture patterns for secure, scalable AWS deployments. From single-account to multi-account.
 
 ---
 
@@ -222,6 +222,28 @@ Biggest savings opportunities:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Fargate tasks in private subnets fail to pull images with "CannotPullContainerError"**
+Why: private subnets route outbound traffic through a NAT Gateway, but the ECR interface VPC endpoints (ECR API, ECR Docker, and S3 gateway endpoint) are missing; without them, the task cannot reach ECR and the NAT gateway is either absent or its route table is misconfigured.
+Detect: ECS task stopped reason shows `CannotPullContainerError: ... no such host` or `i/o timeout`; VPC Flow Logs show REJECT on the ECR endpoint IPs.
+Fix: add `com.amazonaws.<region>.ecr.api`, `com.amazonaws.<region>.ecr.dkr` interface endpoints and an S3 gateway endpoint to the private subnets where Fargate runs; ensure all three have `private_dns_enabled=True`.
+
+**NAT Gateway becomes a single point of failure and entire AZ loses internet egress**
+Why: only one NAT Gateway was deployed (in one AZ) to save cost, and private subnets in the other AZs route their `0.0.0.0/0` traffic to it; when that AZ has an outage the other AZs lose outbound connectivity.
+Detect: applications in specific AZs lose outbound connectivity; VPC Flow Logs show all traffic from private subnets in those AZs targeting the NAT Gateway IP being rejected; the NAT Gateway AZ is in an impaired state.
+Fix: deploy one NAT Gateway per AZ and associate each private subnet's route table with the NAT Gateway in the same AZ; accept the additional ~$100/month as the cost of AZ-level resilience.
+
+**Security group rules accumulate until the 60-rule limit is reached, blocking new rules**
+Why: engineers add inbound rules over time without removing stale ones; when the per-security-group limit is reached, CloudFormation/CDK updates that add a new rule fail.
+Detect: `aws ec2 describe-security-groups` shows a security group with 55+ rules; CDK/Terraform `apply` fails with `InvalidGroup.RuleLimit` error.
+Fix: audit and remove stale rules using VPC Flow Logs to identify rules with zero accepted traffic over 30 days; refactor to reference security group IDs rather than CIDR ranges where possible (one rule covers all IPs in the referenced group).
+
+**VPC CIDR conflict blocks Transit Gateway attachment to a new VPC**
+Why: a new VPC was created with a CIDR that overlaps an existing VPC already attached to the Transit Gateway; Transit Gateway route tables cannot route overlapping CIDRs.
+Detect: TGW attachment creation succeeds but route propagation fails; `aws ec2 describe-transit-gateway-route-tables` shows a route conflict error; connectivity between the new VPC and others fails.
+Fix: delete the conflicting VPC and recreate with a non-overlapping CIDR; maintain a CIDR allocation registry (IPAM or a spreadsheet) before provisioning any new VPC to prevent overlaps.
 
 ## Connections
 

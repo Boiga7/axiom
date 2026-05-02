@@ -10,7 +10,7 @@ tldr: Systems where computation spans multiple machines connected by a network.
 
 # Distributed Systems
 
-Systems where computation spans multiple machines connected by a network. The fundamental challenge: networks fail, machines fail, and clocks disagree — yet users expect the system to behave coherently.
+Systems where computation spans multiple machines connected by a network. The fundamental challenge: networks fail, machines fail, and clocks disagree, yet users expect the system to behave coherently.
 
 ---
 
@@ -81,7 +81,9 @@ Required when distributed nodes must agree on a value (who is leader, what order
 | Byzantine | Node sends arbitrary/malicious messages | Hardest — blockchain uses BFT consensus |
 | Network partition | Two groups can't communicate | CAP theorem applies |
 | Slow node | Responds eventually but slowly | Causes tail latency; timeout and hedge |
-| Clock skew | Clocks disagree (up to 200ms in practice) | Ordering events by timestamp unreliable |
+| Clock skew | Clocks disagree (up to 200ms in practice) | Ordering events by timestamp unreliable
+
+> **→** [Request Flow Anatomy](/synthesis/request-flow-anatomy) — maps failure modes to the exact layer they occur in a live request chain. [Debugging Systems](/cs-fundamentals/debugging-systems) — how to trace a cascade failure using correlation IDs and distributed traces. |
 
 ---
 
@@ -172,6 +174,33 @@ async def consumer():
 | Use when | Strong consistency required | High availability required |
 
 ---
+
+## Common Failure Cases
+
+**Split-brain during partition: two leaders accept writes**  
+Why: the election timeout fires on a minority partition before it realises it can't form a quorum; both sides elect a leader.  
+Detect: conflicting writes on the same key in two nodes; data divergence visible in replication lag metrics.  
+Fix: require quorum acknowledgement before confirming any write; never commit without majority.
+
+**Read-your-writes broken with load balancer routing reads to replica**  
+Why: client writes to the leader, subsequent read is routed to a replica that hasn't yet received the replication.  
+Detect: users report seeing stale data immediately after an update; the lag is consistent with replica lag (check `pg_stat_replication`).  
+Fix: for session-critical reads, use sticky routing to the leader or pass a minimum LSN/version that the replica must have applied.
+
+**Clock skew causes causally-incorrect event ordering**  
+Why: two nodes disagree on wall clock time by more than the precision of the timestamps used for ordering events.  
+Detect: log entries appear out of causal order; event A that triggered B shows a later timestamp than B.  
+Fix: use logical clocks (Lamport timestamps, vector clocks) or hybrid logical clocks (HLC) for event ordering; never rely on wall clock for causality.
+
+**Cascading timeout: one slow service stalls the whole chain**  
+Why: Service A times out waiting for B; A's caller also times out waiting for A; the timeout propagates upstream without shedding load.  
+Detect: p99 latency spikes on every service simultaneously; traces show a single slow span at the leaf of the call graph.  
+Fix: implement circuit breakers at each service boundary; set timeouts shorter than the upstream's timeout; use bulkheads to isolate slow dependencies.
+
+**Idempotency key collision causes duplicate processing**  
+Why: idempotency keys are generated from non-unique inputs (e.g., timestamp-only) and two different requests share the same key.  
+Detect: orders or charges processed twice; idempotency record exists for a key but with different payload than the current request.  
+Fix: generate idempotency keys from a UUID or a hash of the full request content; validate payload matches on reuse.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]] · [[cloud/aws-sqs-sns]] · [[cloud/service-mesh]]

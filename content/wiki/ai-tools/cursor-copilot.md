@@ -18,7 +18,7 @@ The two most popular IDE-integrated AI coding assistants. Neither reaches Claude
 
 ## Cursor
 
-A VS Code fork with AI built into the editor itself. Not a plugin — a separate application with native AI integration throughout the IDE.
+A VS Code fork with AI built into the editor itself. Not a plugin. A separate application with native AI integration throughout the IDE.
 
 ### Key Features
 
@@ -57,7 +57,7 @@ $20/month (Pro). Includes 500 fast requests and unlimited slow requests per mont
 
 ## GitHub Copilot
 
-Microsoft/GitHub's AI assistant. More conservative than Cursor — inline suggestions first, chat second.
+Microsoft/GitHub's AI assistant. More conservative than Cursor. Inline suggestions first, chat second.
 
 ### Features
 
@@ -138,6 +138,23 @@ aider --model claude-sonnet-4-6 --file src/app.py
 - Cursor default agent model: Claude Sonnet 4.6; fast completions: Claude Haiku 4.5
 - `.cursorrules` is the Cursor equivalent of `CLAUDE.md`
 - Aider architect mode: Opus plans, Sonnet/Haiku implements
+
+## Common Failure Cases
+
+**`.cursorrules` instructions are silently ignored because the file is placed in a subdirectory rather than the repo root**  
+Why: Cursor loads `.cursorrules` only from the workspace root (the directory opened as the project in Cursor); if the file is in a src/ subdirectory or a monorepo package, it is not found and no instructions are applied.  
+Detect: Cursor ignores project-specific rules (e.g., uses `print` despite a rule saying to use `structlog`); checking `~/.cursor/logs/` or the Composer context shows no rules file loaded.  
+Fix: place `.cursorrules` at the root of the folder opened as the Cursor workspace; for monorepos, create a root-level file that references the conventions for all packages.
+
+**Cursor Composer edits the wrong file because the repo index is stale and maps a function name to an outdated file location**  
+Why: Cursor indexes the codebase at startup; if files were moved or renamed outside of Cursor (e.g., a git pull), the index may still reference old paths; Composer proposes edits to the stale location, which may be a deleted or renamed file.  
+Detect: Composer opens a file that doesn't match the current codebase structure; `git status` shows a new file created at the old path; the correct file at the new path is unchanged.  
+Fix: force a re-index by reloading the Cursor window (`Cmd+Shift+P` → "Reload Window"); or close and reopen the project after large structural changes.
+
+**GitHub Copilot suggests code that references an internal API that was deprecated in a recent version, because its training data cutoff predates the deprecation**  
+Why: Copilot's suggestions are based on training data with a cutoff date; for rapidly evolving frameworks (LangChain, Next.js App Router, SQLAlchemy 2.0), Copilot may suggest patterns from older versions that are no longer valid.  
+Detect: Copilot suggests `from langchain.chat_models import ChatOpenAI` (deprecated) instead of `from langchain_openai import ChatOpenAI`; the suggested code runs but emits deprecation warnings or fails at runtime.  
+Fix: when working with rapidly evolving frameworks, use Cursor or Claude Code with MCP documentation context tools that can fetch current API docs; treat Copilot suggestions for recently changed APIs with extra skepticism.
 
 ## Connections
 

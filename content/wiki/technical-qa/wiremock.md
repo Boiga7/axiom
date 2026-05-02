@@ -10,7 +10,7 @@ tldr: Service virtualisation tool — stubbing HTTP dependencies so you can test
 
 # WireMock
 
-Service virtualisation tool — stubbing HTTP dependencies so you can test your service without running real downstream services. Available as a Java library, standalone server, and Docker image.
+Service virtualisation tool. Stubbing HTTP dependencies so you can test your service without running real downstream services. Available as a Java library, standalone server, and Docker image.
 
 ---
 
@@ -199,6 +199,28 @@ docker run wiremock/wiremock:3.5.4 \
 ```
 
 ---
+
+## Common Failure Cases
+
+**Stub mapping is too broad and matches requests it should not**
+Why: `urlPathPattern: "/api/products/[0-9]+"` matches `/api/products/123/reviews` if the regex is not anchored; the wrong stub returns, and the real endpoint is never called.
+Detect: tests pass but the application behaves incorrectly in staging; WireMock request journal shows unexpected matches.
+Fix: anchor URL patterns with `$` at the end (`/api/products/[0-9]+$`) and prefer `urlPath` (exact path) over `urlPathPattern` when the path is fixed.
+
+**Scenario state is not reset between tests, causing stateful stub bleed**
+Why: WireMock scenarios persist their state for the lifetime of the server; if one test advances a scenario through multiple states but fails before resetting, the next test starts from the wrong state.
+Detect: the second test in a suite using stateful scenarios fails with unexpected response bodies; running the test in isolation always passes.
+Fix: call `DELETE /__admin/scenarios` (reset all scenarios to `Started`) in a fixture teardown after every test that uses scenario-based stubs.
+
+**`requests-mock` does not intercept `httpx` calls, leaving real HTTP requests in tests**
+Why: `requests_mock.Mocker` only patches the `requests` library's transport; code that uses `httpx` bypasses the mock entirely and makes real network calls.
+Detect: tests make unexpected outbound connections visible in network logs; they pass in environments with internet access but fail in isolated CI environments.
+Fix: use `respx` for `httpx` mocking, or replace `requests_mock` with `responses` library paired with the appropriate transport mock for the HTTP client in use.
+
+**Recording mode captures production secrets in stub response bodies**
+Why: `--record-mappings` saves the full response including `Authorization` headers, tokens, and PII returned by the real API; recorded stub files committed to the repository expose secrets.
+Detect: `wiremock/mappings/*.json` files contain `Authorization` or `Set-Cookie` headers with real tokens.
+Fix: add a post-recording scrubbing step that removes sensitive headers from all recorded mapping files; add `wiremock/mappings/` to `.gitignore` and require manual review before committing any recording.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/contract-testing]] · [[technical-qa/api-testing]] · [[technical-qa/testcontainers]] · [[qa/test-environments]]

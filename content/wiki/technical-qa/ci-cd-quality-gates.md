@@ -273,5 +273,27 @@ Never gate on:
 
 ---
 
+## Common Failure Cases
+
+**Coverage gate passes because omit patterns are too broad, excluding new business logic**
+Why: `omit = ["*/migrations/*", "*/tests/*"]` is correct, but teams often also omit `*/utils/*` or `*/helpers/*` where real logic lives, inflating the reported percentage.
+Detect: add a new module under a path that matches an omit pattern and the coverage number stays the same despite uncovered code.
+Fix: audit `[tool.coverage.run] omit` regularly — omit only generated or test-infrastructure code, never application logic directories.
+
+**Integration test gate times out because the Postgres health check retries are insufficient**
+Why: GitHub Actions' `--health-retries 5` with `--health-interval 5s` gives 25 seconds total; on slow runners Postgres takes longer to start and the integration tests begin before the service is ready, causing connection refused errors.
+Detect: integration tests fail with `psycopg2.OperationalError: could not connect to server` in the first few seconds of the test run, then pass on retry.
+Fix: increase `--health-retries` to 10 and add `--health-start-period 10s` to give Postgres time to initialise before the health check loop begins.
+
+**`pact-broker can-i-deploy` silently exits 0 when the broker is unreachable**
+Why: if the broker URL is wrong or the token is expired, some versions of `pact-broker` CLI exit 0 with a warning rather than a non-zero exit code, so the CI gate never blocks.
+Detect: introduce a known breaking change in a provider; if the deploy proceeds without a block, the gate is not working.
+Fix: add `--retry-while-unknown 3` and `--retry-interval 10` flags; also add a preflight step that pings the broker URL and fails fast if it returns non-200.
+
+**Security gate is bypassed because `bandit` only scans `src/` while new code lands in `lib/`**
+Why: the scan command is `bandit -r src/` — if a new top-level directory is added, it is never scanned.
+Fix: replace the explicit path with a scan of the entire repo root excluding test directories: `bandit -r . --exclude ./.git,./tests,./node_modules`.
+Detect: add a deliberate `subprocess.call(user_input, shell=True)` in the new directory — if the gate passes, the scan path is wrong.
+
 ## Connections
 [[tqa-hub]] · [[qa/qa-in-devops]] · [[qa/test-automation-strategy]] · [[qa/smoke-sanity-testing]] · [[technical-qa/security-automation]] · [[cloud/gitops-patterns]]

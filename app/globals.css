@@ -146,13 +146,13 @@ body {
 }
 
 .wiki-prose blockquote {
-  border-left: 2px solid #22d3ee;
-  margin: 1.25rem 0;
-  padding: 0.5rem 1.25rem;
-  background: #22d3ee08;
+  border-left: 2px solid #22d3ee55;
+  margin: 1.5rem 0;
+  padding: 0.625rem 1.25rem;
+  background: #22d3ee0d;
   border-radius: 0 6px 6px 0;
   color: #94a3b8;
-  font-style: italic;
+  font-style: normal;
 }
 
 .wiki-prose ul,

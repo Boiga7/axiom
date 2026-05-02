@@ -255,6 +255,28 @@ events.Rule(self, "CrossAccountRule",
 
 ---
 
+## Common Failure Cases
+
+**Events published but no Lambda invocations — rule not matching**
+Why: the `source` or `detail-type` in the event pattern uses a different case or format than what the publisher sends (e.g., `com.myapp.orders` vs `myapp.orders`), so no rule matches.
+Detect: EventBridge CloudWatch metrics show `MatchedEvents = 0` for the rule despite `InvocationCount` being non-zero on the bus.
+Fix: use the EventBridge console "Event pattern tester" with a sample event payload to confirm the pattern matches before deploying; check every field for exact string equality.
+
+**Silent event loss — no DLQ on rule targets**
+Why: EventBridge retries Lambda invocations for up to 24 hours on throttles/errors, but if the Lambda is consistently failing, events are eventually discarded with no alert.
+Detect: Lambda `Throttles` or `Errors` CloudWatch metrics are non-zero and the DLQ is not filling (because no DLQ is configured).
+Fix: add a `dead_letter_queue` to every EventBridge rule target that invokes Lambda; alarm on DLQ depth > 0.
+
+**Cross-account event routing fails with 403**
+Why: the target event bus in the destination account does not have a resource policy granting `events:PutEvents` to the source account's principal.
+Detect: EventBridge `FailedInvocations` metric rises; CloudTrail in the destination account shows `AccessDenied` for `PutEvents`.
+Fix: add the resource policy shown in the cross-account section to the destination bus, scoped to the specific source account ID.
+
+**Pipe stops delivering — source SQS queue depth grows**
+Why: the enrichment Lambda is throwing unhandled exceptions, causing the Pipe to enter a retry loop and stop polling the source queue.
+Detect: the source SQS `ApproximateNumberOfMessagesNotVisible` climbs; Pipe execution history shows `FAILED` status.
+Fix: add a try/except in the enrichment Lambda that returns a valid (possibly enriched but flagged) payload rather than throwing; configure a DLQ on the Pipe source.
+
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]] · [[cloud/aws-lambda-patterns]] · [[cloud/serverless-patterns]]

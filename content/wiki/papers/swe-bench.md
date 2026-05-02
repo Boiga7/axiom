@@ -20,7 +20,7 @@ tldr: A benchmark of 2,294 real GitHub issues from 12 popular Python repositorie
 
 Coding benchmarks before SWE-bench (HumanEval, MBPP, CodeContests) test isolated function completion. They don't capture what software engineering actually requires: navigating a large existing codebase, understanding context, making multi-file edits, and validating changes against tests.
 
-SWE-bench uses real issues from real open-source repos. The task is not "write a function" — it is "fix this reported bug in this production codebase".
+SWE-bench uses real issues from real open-source repos. The task is not "write a function". It is "fix this reported bug in this production codebase".
 
 ---
 
@@ -28,7 +28,7 @@ SWE-bench uses real issues from real open-source repos. The task is not "write a
 
 ### Source Repositories (12 Python repos)
 
-Django, Flask, Requests, scikit-learn, pandas, Matplotlib, Sympy, Pillow, Sphinx, pytest, seaborn, Astropy — popular, well-maintained, high-quality repos with good test coverage.
+Django, Flask, Requests, scikit-learn, pandas, Matplotlib, Sympy, Pillow, Sphinx, pytest, seaborn, Astropy. Popular, well-maintained, high-quality repos with good test coverage.
 
 ### Issue Selection
 
@@ -79,7 +79,7 @@ SWE-bench Verified was introduced (500 manually verified issues). Scores rose ra
 | Claude 3.7 Sonnet (2025) | 62% |
 | Claude 4 / Code agents (2025+) | 70%+ [unverified] |
 
-The benchmark drove a rapid improvement cycle — labs optimised their agents specifically for SWE-bench.
+The benchmark drove a rapid improvement cycle. Labs optimised their agents specifically for SWE-bench.
 
 ---
 

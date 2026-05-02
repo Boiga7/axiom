@@ -59,7 +59,7 @@ headers = {
 
 ### Semantic Caching
 
-Caches responses for semantically similar queries — not just exact matches. Returns cached results for queries that mean the same thing even if worded differently.
+Caches responses for semantically similar queries. Not just exact matches. Returns cached results for queries that mean the same thing even if worded differently.
 
 ```python
 headers = {
@@ -88,7 +88,7 @@ Handles load balancing across multiple API keys and automatic retry on rate limi
 
 ### Prompt Management
 
-Version and deploy prompts without code changes. Production prompt versions are managed in the Helicone UI and served via the gateway — no redeploy needed to update a prompt.
+Version and deploy prompts without code changes. Production prompt versions are managed in the Helicone UI and served via the gateway. No redeploy needed to update a prompt.
 
 ---
 
@@ -117,6 +117,28 @@ Full self-hosted option available. The gateway and dashboard run in Docker. Data
 Helicone is the best choice when you want a quick drop-in that adds caching + routing + monitoring with minimal code changes. Langfuse wins for deep tracing and eval workflows. LangSmith wins if you're all-in on LangChain.
 
 ---
+
+## Common Failure Cases
+
+**Semantic cache returns a stale cached response after the underlying data changed**  
+Why: Helicone's semantic cache has no automatic invalidation; a query cached before your knowledge base was updated returns the old answer even though the correct answer changed.  
+Detect: users receive outdated information; the `Helicone-Cache-Hit` response header is `true` for a query that should have fetched fresh data.  
+Fix: disable semantic caching for queries that must always reflect live data via `"Helicone-Cache-Enabled": "false"` on those requests; or use a short TTL by setting `Helicone-Cache-Bucket-Max-Size` to a small value and accepting lower cache hit rates.
+
+**All requests blocked when Helicone gateway has an outage**  
+Why: routing all traffic through a single proxy creates a single point of failure; if Helicone's cloud gateway is down, every LLM call fails even though the underlying providers are healthy.  
+Detect: all LLM calls return connection errors; direct provider calls succeed; Helicone status page shows an incident.  
+Fix: implement a circuit-breaker that falls back to direct provider calls when the Helicone proxy returns 5xx errors; or self-host the gateway to control availability.
+
+**`Helicone-User-Id` header not set, making per-user cost attribution impossible in the dashboard**  
+Why: without the `Helicone-User-Id` header, all requests are grouped under an anonymous bucket; cost and latency dashboards cannot be broken down by user.  
+Detect: the Helicone dashboard shows no user breakdown; all requests attributed to a single unnamed group.  
+Fix: inject `Helicone-User-Id` with the authenticated user's ID in every request; do this at the HTTP client constructor level so it applies globally rather than per-call.
+
+**Prompt version rollback causes cache hits to return responses from the old prompt**  
+Why: semantic caching keys on the query text; if the system prompt changed but the user query is similar to a cached query, the old response is returned even with the new prompt.  
+Detect: after a prompt deployment, some responses still reflect the old prompt behaviour; `Helicone-Cache-Hit: true` on those requests.  
+Fix: use `Helicone-Cache-Seed` with a version identifier tied to your prompt version; changing the seed invalidates all existing cache entries for that prompt version.
 
 ## Connections
 

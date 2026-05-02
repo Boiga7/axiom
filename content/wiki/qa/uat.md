@@ -10,7 +10,7 @@ tldr: The final validation before release, performed by business stakeholders or
 
 # User Acceptance Testing (UAT)
 
-The final validation before release, performed by business stakeholders or end users. UAT confirms the software meets business requirements and is fit for purpose — not just that it's bug-free.
+The final validation before release, performed by business stakeholders or end users. UAT confirms the software meets business requirements and is fit for purpose. Not just that it's bug-free.
 
 UAT answers: "Does this software do what we actually need it to do?" QA tests ask: "Does the software work correctly?" These are different questions.
 

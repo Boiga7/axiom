@@ -191,5 +191,32 @@ Safe migration checklist:
 
 ---
 
+## Common Failure Cases
+
+**Foreign key columns without indexes, causing slow JOINs**
+Why: Postgres does not automatically index foreign key columns; a `JOIN orders ON orders.user_id = users.id` performs a sequential scan on `orders` if `user_id` has no index.
+Detect: `EXPLAIN ANALYZE` shows `Seq Scan` on a large table where you expected an `Index Scan`; cross-reference with `pg_stat_user_indexes` to find zero-use indexes and missing ones.
+Fix: create a B-tree index on every foreign key column that participates in JOINs or WHERE clauses: `CREATE INDEX idx_orders_user_id ON orders(user_id)`.
+
+**Lock escalation during non-concurrent index creation blocking all writes**
+Why: `CREATE INDEX` (without `CONCURRENTLY`) takes an `AccessExclusiveLock` that blocks all reads and writes on the table for the duration of the build.
+Detect: table locks spike in production monitoring; `pg_locks` shows a long-held `AccessExclusiveLock` during a migration.
+Fix: always use `CREATE INDEX CONCURRENTLY` for production migrations; add this as a required check in the migration review checklist.
+
+**NOT NULL column added without a default, breaking live deployments**
+Why: `ALTER TABLE products ADD COLUMN sku TEXT NOT NULL` fails immediately on a table with existing rows because there is no value to populate the new column.
+Detect: run the migration on a staging database with production-scale data before applying to production.
+Fix: add the column as `nullable=True` first, backfill all rows with a value, then apply `ALTER COLUMN ... SET NOT NULL` as a separate migration step.
+
+**Soft-delete filter missing, exposing deleted records**
+Why: a `WHERE deleted_at IS NULL` clause is added to some queries but forgotten on others, or a new query is added by a developer who is unaware of the soft-delete convention.
+Detect: query the table without the filter and verify the row count matches the filtered count; audit all queries in the codebase for the missing predicate.
+Fix: enforce the filter at the ORM layer via a default filter on the model (SQLAlchemy `with_loader_criteria`) so it is impossible to query the table without it.
+
+**Partition pruning disabled by implicit type cast in WHERE clause**
+Why: `WHERE created_at = '2026-01-15'` without explicit timezone cast prevents Postgres from pruning partitions when the column is `TIMESTAMPTZ`; all partitions are scanned.
+Detect: `EXPLAIN` shows `Seq Scan` on the parent table instead of a single partition scan.
+Fix: always include explicit timezone in date comparisons: `WHERE created_at >= '2026-01-15 00:00:00+00'::timestamptz AND created_at < '2026-01-16 00:00:00+00'::timestamptz`.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/caching-strategies]] · [[technical-qa/database-testing]] · [[cloud/aws-rds-aurora]] · [[python/ecosystem]]

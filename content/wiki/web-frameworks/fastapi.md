@@ -92,7 +92,7 @@ const reader = response.body.getReader();
 // read chunks, decode, update UI
 ```
 
-Or use the [[web-frameworks/vercel-ai-sdk]] for the frontend — it handles SSE parsing automatically.
+Or use the [[web-frameworks/vercel-ai-sdk]] for the frontend. It handles SSE parsing automatically.
 
 ---
 
@@ -150,7 +150,7 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
     return {"reply": response.content[0].text}
 ```
 
-For longer background work (minutes+), use Celery, ARQ, or a message queue — not BackgroundTasks.
+For longer background work (minutes+), use Celery, ARQ, or a message queue. Not BackgroundTasks.
 
 ---
 
@@ -216,6 +216,28 @@ gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker
 - Anthropic 529 status maps to HTTP 503 at the API boundary — always handle it explicitly
 - Production deployment: Gunicorn + UvicornWorker for multiple worker processes
 - SQLAlchemy 2.0 async engine requires `postgresql+asyncpg://` DSN prefix
+
+## Common Failure Cases
+
+**`StreamingResponse` generator is not async, causing the event loop to block during streaming**  
+Why: `StreamingResponse` with a sync generator (`def generate()`) runs synchronously in the event loop, blocking all other requests during the entire stream duration; async generators (`async def generate()`) are required.  
+Detect: all other requests queue behind a streaming response; response time for concurrent requests spikes to the full stream duration.  
+Fix: always define the generator function with `async def generate(): ... yield ...` and use `await` inside for any I/O (including LLM streaming calls).
+
+**`BackgroundTasks.add_task()` used for a long-running operation, causing the response to complete but the task to silently fail**  
+Why: `BackgroundTasks` runs in the same process as the response; if the task takes longer than the server's connection timeout or raises an unhandled exception, it fails silently — no error is returned to the client.  
+Detect: the response completes successfully but the expected side effect (Langfuse log, database write) never occurs; adding `try/except` to the background task reveals an exception.  
+Fix: add explicit exception handling in background tasks; use Celery or ARQ for tasks that can fail in ways that need retrying; only use `BackgroundTasks` for fire-and-forget operations under 5 seconds.
+
+**Pydantic `response_model` strips extra fields from the response without error, hiding bugs**  
+Why: FastAPI uses `response_model` to validate and serialise the response; any extra fields in the returned object that are not in `response_model` are silently stripped; if the route handler returns the wrong structure, the client gets a valid-but-incomplete response.  
+Detect: the client receives fewer fields than expected; comparing the route handler's return value to `response_model` shows discrepancies that FastAPI silently resolves.  
+Fix: use `response_model_exclude_unset=True` and add assertions in development mode that the returned object matches the expected model; or use `model_config = ConfigDict(extra="forbid")` in the Pydantic model to raise on unexpected fields.
+
+**Dependency injection creates a new database connection per request instead of per session when `yield` is not used**  
+Why: a `get_db` dependency that does not use `yield` creates a session but never closes it; the session stays open for the lifetime of the process rather than the request, consuming connection pool slots.  
+Detect: database connection count grows proportionally to requests; pool exhaustion under moderate load.  
+Fix: always use `async def get_db() -> AsyncGenerator[AsyncSession, None]: yield session` with `try/finally` or `async with` to ensure the session is closed after each request.
 
 ## Connections
 

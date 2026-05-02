@@ -247,6 +247,28 @@ Migration path: new tests → Playwright; existing Selenium → migrate graduall
 
 ---
 
+## Common Failure Cases
+
+**Node registers with the hub but never receives sessions**
+Why: event bus ports (4442/4443) are not reachable from the node container; nodes appear in `GET /status` but the distributor cannot route to them.
+Detect: `curl http://localhost:4444/status` shows nodes listed but `sessionCount` stays 0 while test queue grows.
+Fix: verify `SE_EVENT_BUS_HOST` resolves correctly (use the Docker service name, not `localhost`) and that ports 4442 and 4443 are exposed and not firewalled between containers.
+
+**Tests time out waiting for a Grid session under load**
+Why: `SE_SESSION_REQUEST_TIMEOUT` defaults to 300 seconds; if all node slots are occupied and the queue depth exceeds available slots, tests block until timeout.
+Detect: tests fail with `SessionNotCreatedException: Timeout waiting for a node to become available`; Grid UI shows a non-empty queue.
+Fix: scale node replicas (`docker-compose up --scale chrome=N`) before the test run, or set `--max-sessions` on each node to match available CPU; add a pre-test readiness check that polls `/status` until slot count meets the required concurrency.
+
+**Chrome node crashes due to insufficient shared memory**
+Why: Chrome uses `/dev/shm` for rendering; the default Docker shared memory (64 MB) is too small and causes the renderer process to crash silently.
+Detect: tests fail with `unknown error: session deleted because of page crash` or `ERR_INCOMPLETE_CHUNKED_ENCODING`.
+Fix: set `shm_size: 2g` on the Chrome node service in `docker-compose.yml`, or pass `--disable-dev-shm-usage` via `ChromeOptions`.
+
+**Cross-browser tests pass on Chrome but fail on Firefox due to driver API differences**
+Why: certain WebDriver commands behave differently across browsers (e.g., `send_keys` on file inputs, `execute_script` return types); tests written against Chrome behaviour break on Firefox.
+Detect: Firefox-parameterized test variants fail consistently while Chrome variants pass.
+Fix: write tests against the W3C WebDriver standard only; avoid browser-specific `execute_script` workarounds and use explicit Selenium locator strategies that are browser-neutral.
+
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[test-automation/selenium]] · [[technical-qa/parallel-test-execution]] · [[technical-qa/playwright-advanced]] · [[qa/cross-browser-testing]] · [[technical-qa/e2e-framework-design]]

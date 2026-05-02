@@ -165,5 +165,27 @@ def test_bucket_is_versioned():
 
 ---
 
+## Common Failure Cases
+
+**`pulumi up` fails with "resource already exists" when the cloud resource was created out-of-band**
+Why: the resource was created manually or by another tool, and it exists in the cloud but not in Pulumi state, so Pulumi tries to create it again and the cloud API rejects the duplicate.
+Detect: `pulumi up` error contains "already exists" with the resource name; the resource is visible in the AWS/GCP console.
+Fix: use `pulumi import <resource-type> <resource-name> <cloud-id>` to bring the existing resource under Pulumi management without recreating it.
+
+**Stack outputs containing Output<T> values are undefined in dependent stacks**
+Why: Pulumi Outputs are async promises; when you access `.id` or `.arn` on a resource inside a string interpolation without `pulumi.interpolate`, the value resolves to `[object Object]` or `undefined` in the rendered config.
+Detect: the dependent stack or another resource receives `undefined` or a serialised Output object instead of the actual ARN/ID string; the cloud API rejects the malformed value.
+Fix: always use `pulumi.interpolate` (TypeScript) or `pulumi.Output.concat` (Python) when building strings from Output values; never use f-strings or template literals directly with Output objects.
+
+**Pulumi Cloud state lock not released after a failed update, blocking all subsequent operations**
+Why: a `pulumi up` was interrupted (Ctrl-C, network drop, CI timeout) and the state lock was not released before the process died.
+Detect: subsequent `pulumi up` or `pulumi preview` fails with "the stack is currently locked by another update"; the lock is visible in the Pulumi Cloud console.
+Fix: use `pulumi cancel` to release the lock, or cancel it via the Pulumi Cloud console; investigate why the previous update was interrupted before retrying.
+
+**`pulumi destroy` deletes resources in the wrong order, causing dependency errors**
+Why: a custom resource or provider was added without declaring explicit dependencies via `depends_on`, so Pulumi's dependency graph is incorrect and it tries to delete a resource before its dependents.
+Detect: `pulumi destroy` fails with a cloud API error like "resource in use" or "dependency violation"; the error resource still has dependents listed in the cloud console.
+Fix: add explicit `opts=pulumi.ResourceOptions(depends_on=[...])` to resources that have implicit dependencies not inferred from property references; re-run `pulumi destroy` after fixing the graph.
+
 ## Connections
 [[cloud-hub]] · [[cloud/terraform]] · [[cloud/aws-cdk]] · [[cloud/github-actions]]

@@ -10,7 +10,7 @@ tldr: Writing code that is easy to read, understand, and change. Clean code is n
 
 # Clean Code
 
-Writing code that is easy to read, understand, and change. Clean code is not about aesthetics — it's about reducing the cognitive cost of every future change. The primary audience for code is other engineers (and your future self).
+Writing code that is easy to read, understand, and change. Clean code is not about aesthetics. It's about reducing the cognitive cost of every future change. The primary audience for code is other engineers (and your future self).
 
 ---
 
@@ -181,6 +181,28 @@ users = list(filter(is_eligible, db.query(User).all()))
 ```
 
 ---
+
+## Common Failure Cases
+
+**God class absorbing every responsibility over time**
+Why: a `UserService` starts with registration, then authentication, then email, then payments all get added incrementally; no single addition seems large enough to split, but the class ends up with 20 unrelated methods.
+Detect: a class that imports from more than 5 unrelated modules, or whose methods cannot be grouped by a single domain noun.
+Fix: apply Single Responsibility — extract cohesive clusters of methods into dedicated classes (`AuthService`, `UserEmailService`), each with one reason to change.
+
+**Dependency inversion bypassed by constructing concrete classes internally**
+Why: `class OrderService: def __init__(self): self.repo = PostgresOrderRepository()` hardwires the implementation, making unit tests require a live database.
+Detect: the class is impossible to test without its full infrastructure dependency; mocking requires monkey-patching rather than injection.
+Fix: accept the dependency as a constructor parameter typed against a Protocol or ABC, and inject the concrete implementation at the composition root.
+
+**Comments that restate the code rather than explaining intent**
+Why: developers add `# increment counter by 1` out of habit or to look thorough, which adds noise without signal and rots as soon as the code changes.
+Detect: read each comment and check whether deleting it loses any information the code itself doesn't already convey.
+Fix: delete what-comments; rename the code to be self-explanatory; write why-comments only when there is a non-obvious constraint, gotcha, or deliberate trade-off.
+
+**Premature abstraction creating indirection with no benefit**
+Why: a developer extracts a helper after seeing code repeated twice, but the two instances diverge immediately after extraction, leading to a helper full of `if mode == "A"` branches that is harder to read than the originals.
+Detect: a shared utility function with more than two boolean flags or mode parameters controlling its behaviour.
+Fix: prefer duplication over the wrong abstraction; wait for three or more genuinely identical callsites before extracting, and only when the abstraction boundary is stable.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]

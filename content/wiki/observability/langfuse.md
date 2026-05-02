@@ -202,6 +202,28 @@ Post-acquisition by ClickHouse (Jan 2026): high-volume deployments can replace P
 
 ---
 
+## Common Failure Cases
+
+**`langfuse.flush()` not called at the end of a script, so traces are never sent**  
+Why: Langfuse SDK buffers traces in memory and sends them in background batches; when a Python script exits before the flush interval, buffered traces are silently dropped.  
+Detect: traces appear in the Langfuse dashboard when the service runs continuously, but are missing for batch/script runs; adding `langfuse.flush()` before exit shows the missing traces.  
+Fix: always call `langfuse.flush()` at the end of scripts and batch jobs; use `atexit.register(langfuse.flush)` as a safety net.
+
+**`@observe()` decorator creates duplicate traces when the same function is called from multiple threads**  
+Why: the `@observe()` decorator uses a thread-local context variable to track the current trace; if a function decorated with `@observe()` is called concurrently from different threads, each gets its own root trace without nesting.  
+Detect: Langfuse shows N separate single-span traces instead of one trace with N children for a batch operation.  
+Fix: create the parent trace manually with `langfuse.trace()` before launching threads; pass the `trace_id` into each thread and use `langfuse_context.update_current_observation(trace_id=...)` to attach child spans.
+
+**Prompt fetched from Langfuse registry returns the wrong version in production after a rollback**  
+Why: `langfuse.get_prompt("my-prompt")` without a `version` parameter returns the latest production version; if a bad prompt was deployed as production and then a new version was published, the old bad version may still be cached in the SDK's local cache.  
+Detect: after a prompt update, some servers still serve the old prompt; `prompt.version` in the response shows an older version number.  
+Fix: the SDK caches prompts for 60 seconds by default; pass `cache_ttl_seconds=0` to force a fresh fetch; or pin the version explicitly in critical paths with `version=N`.
+
+**Scores logged with `langfuse.score()` appear on the wrong trace because `trace_id` was not verified**  
+Why: if the `trace_id` is derived from a request ID that changes on retry, the score is attached to a non-existent trace ID and silently discarded rather than raising an error.  
+Detect: LLM-as-judge scores are missing from traces in the Langfuse UI; the `score()` call returns no error.  
+Fix: verify the `trace_id` matches an existing trace before calling `langfuse.score()`; log both the trace_id and score value in your application logs for cross-reference.
+
 ## Connections
 
 [[observability/platforms]] · [[observability/tracing]] · [[observability/helicone]] · [[evals/methodology]] · [[rag/pipeline]] · [[web-frameworks/fastapi]]

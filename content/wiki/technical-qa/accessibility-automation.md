@@ -229,5 +229,27 @@ def test_escape_closes_modal(page: Page):
 
 ---
 
+## Common Failure Cases
+
+**axe-core finds no violations but users report accessibility failures**
+Why: automation only covers 30-40% of WCAG issues; rules-based checks cannot evaluate alt text quality, logical heading hierarchy, or screen reader announcement clarity.
+Detect: run a manual screen reader check (NVDA + Chrome, VoiceOver + Safari) after automated tests pass on any page with dynamic content.
+Fix: treat the automated suite as a floor, not a ceiling — pair it with keyboard-only navigation walkthroughs for every new feature.
+
+**Third-party embedded widgets inflate violation counts and block CI**
+Why: iframes from payment processors, chat widgets, and analytics tools contain violations you cannot fix.
+Detect: violations all share the same iframe `src` domain and are outside your application boundary.
+Fix: use `.exclude('.third-party-widget')` or scope the axe scan to your root application container — `new AxeBuilder({ page }).include('#app-root')`.
+
+**Colour contrast check passes automated rules but fails under real conditions**
+Why: axe calculates contrast on computed CSS values but cannot account for text rendered over images, semi-transparent overlays, or gradient backgrounds.
+Detect: violations are absent in axe results but visible to the eye — test the rendered page at actual viewport size rather than relying only on the computed style.
+Fix: inspect affected elements with browser dev tools' accessibility panel to get the true rendered contrast ratio, then adjust token values.
+
+**Modal focus-trap test passes in isolation but fails in the full suite**
+Why: a prior test left focus on an element outside the modal, and the next test inherits that focus state.
+Detect: the test passes when run alone (`pytest -k test_modal_keyboard_trap`) but fails in suite order.
+Fix: add `page.keyboard.press("Escape")` or close open dialogs in a `finally` block or `teardown` fixture to reset focus state between tests.
+
 ## Connections
 [[tqa-hub]] · [[qa/accessibility-testing]] · [[technical-qa/playwright-advanced]] · [[qa/compliance-testing]] · [[technical-qa/visual-testing]] · [[qa/ci-cd-quality-gates]]

@@ -169,5 +169,27 @@ ArgoCD + Argo Rollouts = full GitOps progressive delivery:
 
 ---
 
+## Common Failure Cases
+
+**Rollout paused indefinitely at a manual gate**
+Why: a `pause: {}` step (no duration) requires an explicit `kubectl argo rollouts promote` command, and no one ran it after the canary looked healthy.
+Detect: `kubectl argo rollouts get rollout myapp` shows `Paused` status with the step counter stuck.
+Fix: add a maximum pause duration (`pause: {duration: 2h}`) for automated promotion fallback, or integrate the promote command into your deployment runbook.
+
+**Analysis fails because Prometheus query returns no data**
+Why: the AnalysisTemplate's Prometheus query references a metric label or job name that doesn't match what the canary pods actually emit, returning an empty result set.
+Detect: the AnalysisRun shows `Error` with message `no data returned` rather than a numeric failure.
+Fix: test the exact PromQL query against Prometheus directly before wiring it into the template; ensure the `job` label and metric name match the canary service's scrape config.
+
+**Traffic not shifting — canary gets 0% despite setWeight step**
+Why: the VirtualService or ingress annotation is not referencing the correct stable/canary service names declared in the Rollout spec, so the traffic routing integration is disconnected.
+Detect: `kubectl describe vs myapp-vs` shows unmodified weights while the Rollout reports the step is active.
+Fix: confirm `canaryService` and `stableService` in the Rollout spec exactly match the Kubernetes Service names, and that the VirtualService exists in the same namespace.
+
+**Rollout controller not installed in the correct namespace**
+Why: the CRDs are installed but the Argo Rollouts controller is deployed in a different namespace than the Rollout resources, so it never reconciles them.
+Detect: `kubectl get rollouts -n production` shows resources but they never transition state; controller logs show no events for that namespace.
+Fix: the controller defaults to watching all namespaces; if it was scoped with `--namespace`, either add the target namespace or remove the flag to restore cluster-wide watch.
+
 ## Connections
 [[cloud-hub]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes-operators]]

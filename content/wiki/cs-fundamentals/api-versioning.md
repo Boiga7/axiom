@@ -205,5 +205,27 @@ def test_v1_client_works_against_v2(client):
 
 ---
 
+## Common Failure Cases
+
+**Silently removing a field and breaking existing clients**
+Why: the field looks unused in internal monitoring, but external or partner clients depend on it without advertising that dependency.
+Detect: add a deprecation header to the field for one full release cycle and log callers who still request it; only remove when traffic reaches zero.
+Fix: treat field removal as a major version bump and communicate a sunset date at least 90 days in advance via `Deprecation` and `Sunset` headers.
+
+**Adding a new required enum value that strict clients reject**
+Why: adding a value to an existing enum is considered non-breaking internally, but clients that deserialise into exhaustive enums (TypeScript, Rust) will throw on the unknown variant.
+Detect: review client SDK code for exhaustive enum handling; send the new value to client test environments before rollout.
+Fix: document that enum additions are semi-breaking; give clients the new value in a beta header before making it live in the stable version.
+
+**v1 API silently kept alive past its sunset date**
+Why: no automated enforcement exists; the sunset date passes but traffic continues and the deadline is quietly ignored.
+Detect: `v1_usage` middleware log shows ongoing traffic after the sunset date.
+Fix: after the sunset date, return `410 Gone` with a `Link` header pointing to the successor version, and enforce it via a gateway rule rather than relying on manual process.
+
+**Version sprawl from date-based versioning with no deprecation policy**
+Why: a new date-stamped version is created for every small change; after two years there are dozens of active versions requiring maintenance.
+Detect: count distinct version values seen in API access logs over the past 30 days.
+Fix: adopt a formal deprecation policy with a minimum support window (e.g., 12 months), enforce it in CI, and cap the number of simultaneously supported versions.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/grpc]] · [[qa/defect-prevention]]

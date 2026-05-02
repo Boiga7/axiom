@@ -258,6 +258,28 @@ settings = Settings()   # Raises ValidationError at startup if config is wrong
 
 ---
 
+## Common Failure Cases
+
+**`extra="ignore"` on a request model silently swallowing mass-assignment attempts**
+Why: setting `extra="ignore"` on an input model discards unknown fields instead of rejecting them; an attacker can pass `is_admin=true` and it is silently dropped rather than raising a 422, making the intent ambiguous and the behaviour unpredictable.
+Detect: send a request with an unexpected field like `{"role": "admin"}` and verify the response is 422, not 200.
+Fix: use `extra="forbid"` on all inbound request models; reserve `extra="ignore"` for responses from external APIs where new fields are expected to appear.
+
+**`model_validator(mode="before")` masking type errors with silent coercion**
+Why: a before-validator that normalises data can hide genuine client errors — e.g., converting `"abc"` to `0` when a number is expected — making debug much harder.
+Detect: pass clearly invalid data to the endpoint and verify the validation error message accurately describes the problem.
+Fix: use `mode="after"` for cross-field checks; use `mode="before"` only for explicit format normalisation (e.g., stripping whitespace), not type coercion.
+
+**Pydantic `ValidationError` propagating as a 500 instead of a 422**
+Why: a validator is called on data from an internal path (e.g., deserialising a database row) rather than a request boundary; an unexpected `ValidationError` is not caught by FastAPI's request handler and surfaces as an unhandled exception.
+Detect: trigger a schema mismatch in a code path that reads from the database and observe whether the response is 422 or 500.
+Fix: catch `ValidationError` at every boundary where you call `model_validate` on external data and return an appropriate error response or log and raise a domain-level exception.
+
+**Regex pattern validator bypassed by leading/trailing whitespace**
+Why: `constr(pattern=r"^[A-Z0-9]+$")` matches the trimmed value, but the raw input `"ABC "` (trailing space) fails the regex and returns a confusing error; or the validator runs before `.strip()`, so valid values with whitespace are rejected.
+Detect: send a valid value with leading/trailing whitespace and observe whether it is accepted or rejected.
+Fix: add a `field_validator` that calls `.strip()` before the pattern check, or use `Field(strip_whitespace=True)` in the model.
+
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/api-security]] · [[web-frameworks/fastapi]] · [[python/instructor]]

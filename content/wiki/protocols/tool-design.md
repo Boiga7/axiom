@@ -12,7 +12,7 @@ tldr: Tool schema design for reliable LLM tool calling — description writes "w
 
 > **TL;DR** Tool schema design for reliable LLM tool calling — description writes "when/when not to use", enums eliminate string ambiguity, clean return values, and tool routing for 20+ tool sets.
 
-How to design tools (functions) that LLMs call reliably. Poor tool schemas are the #1 source of agent failures that aren't model failures — the model misunderstands the tool's purpose, passes wrong arguments, or invokes it at the wrong time.
+How to design tools (functions) that LLMs call reliably. Poor tool schemas are the #1 source of agent failures that aren't model failures. The model misunderstands the tool's purpose, passes wrong arguments, or invokes it at the wrong time.
 
 ---
 
@@ -23,7 +23,7 @@ How to design tools (functions) that LLMs call reliably. Poor tool schemas are t
 3. You execute the tool and return the result
 4. The model uses the result to continue
 
-The model never executes anything — it outputs a structured tool-call request that you execute. This means: the model only knows what you tell it in the schema.
+The model never executes anything. It outputs a structured tool-call request that you execute. This means: the model only knows what you tell it in the schema.
 
 ---
 
@@ -69,7 +69,7 @@ Key principles in this schema:
 
 ## Tool Naming
 
-Names must be `snake_case` (Anthropic) or `camelCase` (OpenAI) — check provider requirements.
+Names must be `snake_case` (Anthropic) or `camelCase` (OpenAI). Check provider requirements.
 
 ```python
 # Good names — verb_noun, specific
@@ -127,7 +127,7 @@ Include:
 }
 ```
 
-Without an enum, the model may generate any string — "Open", "OPEN", "active", "unresolved".
+Without an enum, the model may generate any string. "Open", "OPEN", "active", "unresolved".
 
 ### Make required fields explicit
 
@@ -243,7 +243,7 @@ def select_tools_for_query(query: str, all_tools: list) -> list:
 
 ## MCP Tool Schema
 
-MCP tools use the same JSON Schema format with one addition — the MCP spec requires `inputSchema` (not `parameters`):
+MCP tools use the same JSON Schema format with one addition. The MCP spec requires `inputSchema` (not `parameters`):
 
 ```python
 # MCP server tool definition
@@ -308,6 +308,33 @@ def test_tool_schema(client, tool_schema: dict, test_cases: list[dict]):
 - Tool count threshold: >20 tools increases model confusion; use tool routing to select 3-5 relevant ones
 - Return values: strip metadata (SQL query, execution time, row count) — return only what the model needs
 - Errors: always return structured `{"success": false, "error": "..."}` — not raised exceptions
+
+## Common Failure Cases
+
+**Model calls the wrong tool because two tools have overlapping descriptions**  
+Why: when two tools solve similar problems (e.g., `search_documents` and `search_knowledge_base`), the model chooses between them based on description wording; ambiguous or redundant descriptions cause the wrong tool to be selected on ~20-40% of calls.  
+Detect: tool call logs show alternating selection between two similar tools for the same query type; the "wrong" tool is called and returns irrelevant results.  
+Fix: add explicit disambiguation to both descriptions ("Do not use for X — use `tool_b` instead"); or merge redundant tools into one with a `source` enum parameter.
+
+**Model passes a free-form string for a categorical field instead of a valid enum value**  
+Why: without an enum constraint, the model generates plausible-sounding but non-canonical values ("Active", "in progress", "OPEN" for a status field); your code does a strict equality check and fails.  
+Detect: tool execution errors show unrecognised values for status/type/category fields; the error pattern is inconsistent across runs.  
+Fix: always add `"enum": [...]` to categorical string fields; the model will only select from the provided values.
+
+**Tool returns a 500 error and the model retries indefinitely without escalating to the user**  
+Why: the model's default behaviour on tool errors is to retry with slightly different arguments or rephrase; if the tool returns an error in an exception (not a structured `{"success": false}` dict), the model may loop instead of reporting failure.  
+Detect: agent traces show 5+ consecutive calls to the same tool with similar arguments; the trace runs for an unusually long time.  
+Fix: always return structured error responses from tools; add a retry counter in the agent loop and surface the error to the user after N failed attempts.
+
+**Optional parameter with no default causes the model to hallucinate a plausible value**  
+Why: if an optional parameter has no default and no example, the model infers a value; for fields like `start_date` or `limit`, it may pick a value that seems reasonable but is wrong for the use case.  
+Detect: tool results are unexpectedly filtered or truncated; adding logging shows the optional parameter was set to a non-null value the user never specified.  
+Fix: set sensible `"default"` values on all optional parameters and document them in the field description; if there is no safe default, make the field required.
+
+**Tool result is too large for the context window, causing a mid-generation truncation error**  
+Why: a search tool returning full document content can exceed the remaining context window if the model is already mid-conversation; the model either errors or silently truncates the tool result.  
+Detect: tool calls succeed but the model's response refers to only the first portion of the results; error logs show context length exceeded.  
+Fix: truncate tool results at a safe character limit before returning them (e.g., `content[:2000]` per result); use a `max_results` parameter so the model can request fewer items when context is tight.
 
 ## Connections
 

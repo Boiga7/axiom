@@ -28,7 +28,7 @@ updated: 2026-05-02
 
 ### Root cause analysis
 
-90%+ of broken links are the same 4 patterns — hub pages that don't exist yet:
+90%+ of broken links are the same 4 patterns. Hub pages that don't exist yet:
 
 | Missing page | Broken link count | Affected directory |
 |---|---|---|
@@ -140,7 +140,7 @@ These cover distinct scopes and are both needed. **Action:** Add `[[java/grpc]]`
 
 `safety/constitutional-ai.md` — practical engineering guide: two-phase training walkthrough (SL-CAF + RLAIF), the 16-principle constitution, how to use CAI in practice.
 
-This is the standard vault pattern for seminal papers that also have engineering implications — papers/ holds the citation-level summary, the domain category holds the practical guide. Both pages should exist. **Action:** Verify cross-links exist in both directions.
+This is the standard vault pattern for seminal papers that also have engineering implications. Papers/ holds the citation-level summary, the domain category holds the practical guide. Both pages should exist. **Action:** Verify cross-links exist in both directions.
 
 ---
 
@@ -182,7 +182,7 @@ Pages checked: `apis/aws-bedrock.md`, `agents/mcp-server-development.md`, `infra
 
 Code examples use `anthropic.claude-3-5-sonnet-20240620-v1:0` throughout. As of May 2026, newer Claude models may be available on Bedrock. Not inaccurate (this model ID is valid), but the `Open Questions` section already captures this.
 
-No action needed — `Open Questions` already flags the Claude 4.x availability question.
+No action needed. `Open Questions` already flags the Claude 4.x availability question.
 
 **3. `infra/litellm.md`, `agents/mcp-server-development.md`, `cs-fundamentals/cicd-pipelines.md`** — no issues found.
 

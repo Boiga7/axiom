@@ -10,7 +10,7 @@ tldr: Validating HTTP APIs at the integration layer — below the UI, above the 
 
 # API Testing
 
-Validating HTTP APIs at the integration layer — below the UI, above the database. API tests are faster than E2E tests, more realistic than unit tests, and catch contract and data handling bugs that unit tests miss.
+Validating HTTP APIs at the integration layer. Below the UI, above the database. API tests are faster than E2E tests, more realistic than unit tests, and catch contract and data handling bugs that unit tests miss.
 
 ---
 
@@ -278,7 +278,7 @@ Key GraphQL test considerations:
 
 ## Postman Collections for API Testing
 
-For manual and exploratory API testing, Postman. For automated regression, prefer code (httpx/REST Assured) — code is version-controlled, more maintainable.
+For manual and exploratory API testing, Postman. For automated regression, prefer code (httpx/REST Assured). Code is version-controlled, more maintainable.
 
 Postman is valuable for:
 - Exploratory API testing (understanding undocumented behaviour)
@@ -305,6 +305,28 @@ Postman is valuable for:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Test auth token expires mid-suite, causing a cascade of 401 failures**
+Why: the `auth_token` fixture is scoped to `session` but the token TTL is shorter than the suite runtime in CI.
+Detect: tests pass in the first half of the run and fail with 401 in the second half; re-running from where it broke passes immediately.
+Fix: either increase the test account's token TTL, or implement token refresh logic in the fixture using a `yield`-based approach that re-authenticates when a 401 is received.
+
+**Schema validation passes but the response contains a sensitive field**
+Why: `additionalProperties: False` in JSON Schema blocks unexpected fields, but only if the schema is applied — many teams use spot-check assertions that miss leaking fields entirely.
+Detect: `GET /user` response includes `password_hash` or `internal_cost` but no test asserts their absence.
+Fix: add explicit negative assertions (`assert "internal_cost" not in body`) or set `additionalProperties: False` in your Pydantic/JSON Schema model so unknown fields raise a validation error.
+
+**GraphQL test passes with status 200 but the operation actually failed**
+Why: GraphQL always returns HTTP 200; errors are in the response body under `data.errors`, not in the status code.
+Detect: a query for a deleted resource returns `{"data": null, "errors": [...]}` with status 200 and the test doesn't check `data.errors`.
+Fix: add `assert "errors" not in response.json()` (or `assert data["errors"] is None`) as a standard assertion in every GraphQL test, before checking the `data` field.
+
+**Parameterised negative tests all pass because the endpoint returns 400 for the wrong reason**
+Why: `test_create_product_invalid_price_returns_400` confirms the status code is 400 but doesn't assert which field caused the error; the endpoint might be returning 400 due to a missing auth header rather than the invalid price.
+Detect: remove the invalid-price constraint from the server and the test still passes.
+Fix: assert both the status code and the specific error field in the response body, e.g., `assert error["field"] == "price"`.
 
 ## Connections
 

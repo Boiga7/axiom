@@ -249,5 +249,27 @@ class CreateProductCommand:
 
 ---
 
+## Common Failure Cases
+
+**Pattern applied to a problem it doesn't fit (pattern fever)**
+Why: engineers reach for a named pattern because they know it, not because the problem matches it — adding indirection without benefit.
+Detect: explaining the code requires more sentences than explaining the pattern; the abstraction is never reused.
+Fix: use the pattern only when you can point to the specific force it resolves (e.g., Strategy only when the algorithm genuinely varies at runtime).
+
+**Singleton with mutable shared state causing race conditions**
+Why: the module-level instance is shared across threads; concurrent mutations produce unpredictable state.
+Detect: tests pass in isolation but produce wrong values when run in parallel; data looks corrupted under load.
+Fix: replace mutable singletons with stateless singletons (read-only config) or use thread-local / request-scoped instances for mutable state.
+
+**Observer with synchronous handlers blocking the publisher**
+Why: a slow or failing subscriber handler runs inline with `publish()`, delaying all other subscribers and the publisher's own execution.
+Detect: adding a new subscriber slows down unrelated operations; exceptions in one handler break the publish loop.
+Fix: run handlers asynchronously (thread pool, asyncio tasks, or a proper message bus) and wrap each in its own try/except so one failing handler does not affect others.
+
+**Factory method with an unbounded match/switch block**
+Why: every new type requires editing the factory, creating a maintenance bottleneck and violating the Open-Closed Principle.
+Detect: the factory's match block has 10+ cases; every new feature requires a PR that touches it.
+Fix: use a registry pattern — each subclass registers itself at import time, so the factory stays static.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/architecture-patterns-se]] · [[python/ecosystem]]

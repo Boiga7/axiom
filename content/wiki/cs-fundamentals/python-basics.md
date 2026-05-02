@@ -187,7 +187,7 @@ def divide(a: float, b: float) -> float:
 
 ## Context Managers (`with`)
 
-The `with` statement calls `__enter__` on open and `__exit__` on close — guaranteeing cleanup even if an exception occurs.
+The `with` statement calls `__enter__` on open and `__exit__` on close. Guaranteeing cleanup even if an exception occurs.
 
 ```python
 # File I/O — file is closed automatically
@@ -318,6 +318,28 @@ d.keys(), d.values()
 ```
 
 ---
+
+## Common Failure Cases
+
+**Mutable default argument shared across all calls**
+Why: Python evaluates default argument values once at function definition time, so `def func(items=[])` reuses the same list object across every call.
+Detect: a list or dict default argument accumulates values between calls — first call works, subsequent calls see stale data.
+Fix: use `None` as the default and create the mutable object inside the function body (`items = items if items is not None else []`).
+
+**`finally` block swallowing an exception by returning or raising**
+Why: if a `finally` block contains a `return` statement or raises a new exception, it silently discards any exception that was propagating from the `try` block.
+Detect: exceptions disappear without being logged; the function returns a value even though an error occurred.
+Fix: never use `return` or `raise` in a `finally` block — use it only for cleanup (closing files, releasing locks).
+
+**Decorator missing `@functools.wraps` breaking introspection**
+Why: without `@wraps(func)`, the wrapper function's `__name__`, `__doc__`, and `__module__` replace the original's, breaking logging, pytest reporting, and Sphinx docs.
+Detect: decorated functions all show `wrapper` as their name in tracebacks and logs.
+Fix: always apply `@functools.wraps(func)` to the inner wrapper function.
+
+**Catching `Exception` too broadly and hiding real errors**
+Why: `except Exception` catches `KeyboardInterrupt` subclasses, `SystemExit` is excluded but most programming errors are caught, masking bugs that should propagate.
+Detect: the application silently continues after a logic error; errors only appear in logs rather than crashing visibly.
+Fix: catch the specific exception type(s) you expect; let unexpected exceptions propagate to a top-level error handler.
 
 ## Connections
 

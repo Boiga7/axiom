@@ -10,7 +10,7 @@ tldr: Structural patterns for maintainable automation code. Tests are code — t
 
 # Test Architecture
 
-Structural patterns for maintainable automation code. Tests are code — they need design, abstraction, and refactoring the same as production code. Bad test architecture creates the maintenance nightmare that gives automation a bad reputation.
+Structural patterns for maintainable automation code. Tests are code. They need design, abstraction, and refactoring the same as production code. Bad test architecture creates the maintenance nightmare that gives automation a bad reputation.
 
 ---
 
@@ -343,6 +343,28 @@ tests/
 | No assertions | Test always passes; useless | Assert specific outcomes |
 
 ---
+
+## Common Failure Cases
+
+**Page object stores locators as fields, breaking lazy evaluation**
+Why: `self._email = page.get_by_label("Email")` evaluates the locator at construction time in some frameworks; if the page is not yet loaded, the locator resolves against a blank DOM and subsequent interactions fail.
+Detect: tests fail with `strict mode violation` or `element not found` on the first action, even though navigation succeeds.
+Fix: store the locator expression as a property (lazy getter) or create the locator at the point of use inside each method, not in `__init__`.
+
+**Page objects return `self` and chained calls skip assertions**
+Why: fluent method chains like `.navigate().login(...).wait_for_load()` silently return the wrong page type if a method forgets to return the correct object; the next call executes on the prior page object.
+Detect: assertions on the returned page object pass vacuously or raise `AttributeError` because the wrong page type is in the chain.
+Fix: type-annotate return types on all page object methods and enable mypy/pyright strict mode; mismatched return types become type errors before runtime.
+
+**Session-scoped auth fixture reuses an expired token across tests**
+Why: a session-scoped fixture that obtains a JWT at startup keeps the same token for the entire test session; if the session runs longer than the token TTL, later tests receive 401 errors.
+Detect: the first N tests pass and then an entire block of auth-dependent tests fails with 401.
+Fix: scope the auth fixture to `"module"` or add token expiry checking with automatic refresh inside the fixture.
+
+**Shared staging data causes write-test interference**
+Why: multiple tests that write to the same staging environment rows leave dirty state; tests that run concurrently or in different orders read each other's leftovers.
+Detect: tests pass in isolation but fail when run in parallel with `-n auto`; failures are non-deterministic.
+Fix: use per-test factory-created data with explicit cleanup (yield fixture with teardown), or use testcontainers with a transaction rollback strategy.
 
 ## Connections
 

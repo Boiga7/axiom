@@ -12,7 +12,7 @@ tldr: The OpenAI API is the most widely integrated LLM API — nearly every fram
 
 > **TL;DR** The OpenAI API is the most widely integrated LLM API — nearly every framework supports it, many providers expose compatible endpoints, and it covers chat, function calling, embeddings, vision, audio, and reasoning models (o1/o3).
 
-The API behind GPT-4o, o1/o3, DALL-E 3, Whisper, and the text embedding models. The most widely integrated LLM API — nearly every LLM framework supports it, and many alternative providers (Together, Fireworks, Groq, vLLM) expose an OpenAI-compatible endpoint.
+The API behind GPT-4o, o1/o3, DALL-E 3, Whisper, and the text embedding models. The most widely integrated LLM API. Nearly every LLM framework supports it, and many alternative providers (Together, Fireworks, Groq, vLLM) expose an OpenAI-compatible endpoint.
 
 ---
 
@@ -319,6 +319,33 @@ Same code, different backend.
 - Structured output via `client.beta.chat.completions.parse` enforces Pydantic schema
 - Whisper audio transcription: `whisper-1` model, `language` optional (auto-detected)
 - GPT-4o context window: 128K tokens; o3: 200K tokens
+
+## Common Failure Cases
+
+**`RateLimitError` floods during batch processing despite exponential backoff**  
+Why: concurrent threads all hit rate limits at the same time; exponential backoff without jitter causes them to retry in synchronized waves.  
+Detect: bursts of 429 errors at regular intervals in the logs; retries succeed but the pattern repeats.  
+Fix: add random jitter to the backoff delay: `wait = (2 ** attempt) + random.uniform(0, 1)`; use a token bucket or semaphore to cap concurrency.
+
+**Structured output via `response_format` fails on nested Pydantic models**  
+Why: the `client.beta.chat.completions.parse` method has constraints on Pydantic model complexity; recursive or deeply nested models may fail schema validation.  
+Detect: `BadRequestError: Invalid schema` when using complex Pydantic models with `response_format`.  
+Fix: flatten the schema; avoid recursive references; test the schema with OpenAI's JSON Schema validator before using it.
+
+**o3/o1 reasoning model ignores `temperature` parameter causing unexpected variation**  
+Why: reasoning models don't accept `temperature`; passing it raises a `BadRequestError` or is silently ignored depending on the SDK version.  
+Detect: `BadRequestError: Unsupported parameter: 'temperature'` for o-series models.  
+Fix: remove `temperature` from o-series calls; reasoning models are deterministic by design.
+
+**Whisper transcription is inaccurate for domain-specific terminology**  
+Why: Whisper was trained on general speech; domain jargon (medical, legal, proprietary product names) has high error rates.  
+Detect: proper nouns, product names, and technical terms are consistently misspelled in the transcript.  
+Fix: pass a `prompt` parameter with a list of expected domain terms; Whisper uses this as context for decoding.
+
+**Parallel tool calls return out of order, corrupting the message history**  
+Why: when multiple tool calls are returned in one response, results must be appended in the same order as the `tool_calls` list; out-of-order results cause `Invalid tool_call_id` errors.  
+Detect: `BadRequestError: Invalid tool_call_id` on the follow-up call.  
+Fix: iterate `response.choices[0].message.tool_calls` in order; match each result to its `tool_call_id` explicitly.
 
 ## Connections
 

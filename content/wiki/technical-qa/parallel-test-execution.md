@@ -10,7 +10,7 @@ tldr: Running tests concurrently to compress feedback time — without introduci
 
 # Parallel Test Execution
 
-Running tests concurrently to compress feedback time — without introducing isolation failures.
+Running tests concurrently to compress feedback time. Without introducing isolation failures.
 
 ---
 
@@ -253,6 +253,28 @@ def measure_parallel_speedup(test_path: str) -> dict:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Tests pass serially but fail under `-n auto` without a clear reason**
+Why: a shared global (module-level cache, singleton registry, or environment variable mutation) is written by one worker and read in a corrupt state by another.
+Detect: run with `-n 2` and `--dist=no` alternately to identify which tests conflict; add `-p no:randomly` to eliminate ordering as a factor.
+Fix: move shared state into worker-scoped fixtures or use `worker_id` to namespace all shared resources.
+
+**Port collision when multiple workers start the same server**
+Why: each xdist worker starts the app on port 8000 and only the first worker succeeds; subsequent workers fail immediately with `AddressAlreadyInUse`.
+Detect: all but one worker report a server startup failure; the winning worker's tests pass.
+Fix: derive the port from `worker_id` (e.g., `8000 + worker_num`) or use `find_free_port()` and pass it through fixtures.
+
+**Playwright shards produce no merged report when one shard fails**
+Why: the `merge-reports` job requires all `blob-report-*` artifacts to exist; if a shard fails mid-run and uploads no artifact, the merge step errors.
+Detect: the merge job fails with "artifact not found" even though other shards completed.
+Fix: set `if: always()` on both the artifact upload step and the merge job, and use `continue-on-error: false` only on the final gate step.
+
+**Session-scoped fixtures run once per worker instead of once globally**
+Why: xdist workers are separate processes, so `scope="session"` creates one instance per worker, not one globally — expensive setup (e.g., DB migration) runs N times.
+Detect: DB migration logs appear multiple times in CI output; setup time scales linearly with worker count.
+Fix: use `scope="session"` with `autouse=True` in `conftest.py` and a file lock (`filelock` library) to ensure only one worker performs the migration.
 
 ## Connections
 

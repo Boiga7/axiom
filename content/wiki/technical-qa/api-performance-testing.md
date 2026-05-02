@@ -255,6 +255,28 @@ async def validate_slos() -> list[str]:
 
 ---
 
+## Common Failure Cases
+
+**Baseline captures warm-cache performance, so regression tests always pass**
+Why: the baseline benchmark script is run after the service has already processed requests and warmed its caches, making the baseline artificially fast.
+Detect: the baseline p95 is suspiciously low relative to production p95 values; the first cold-run in CI is measurably slower.
+Fix: flush caches explicitly before capturing a baseline, or record both warm and cold baselines and gate on the appropriate one per environment.
+
+**k6 threshold passes but real user experience is poor because average latency was used**
+Why: k6 default summary shows `avg` prominently; teams set thresholds on `avg` rather than `p95` or `p99`, which masks tail latency.
+Detect: threshold passes, but `p99` in the same run exceeds your SLO by 3-5x.
+Fix: only set thresholds on `p(95)` or `p(99)` — never on `avg` — as shown in the k6 `options.thresholds` config above.
+
+**Performance regression test flags a false positive due to CI runner variance**
+Why: shared CI runners have variable CPU and memory availability; a 25% threshold multiplier is too tight for noisy infrastructure.
+Detect: the regression test fails intermittently on the same commit across successive runs with no code change.
+Fix: raise the multiplier to 1.5 for CI and run the tight regression benchmark (1.25) only on a dedicated performance runner or as a scheduled job, not on every PR.
+
+**Load test saturates the test database instead of the application under test**
+Why: k6 sends 100 concurrent requests each requiring a DB write; the database connection pool exhausts at 20 connections and the app starts returning 503s.
+Detect: error rate spikes while CPU on the app server is below 30%; database connection wait time is high in pg_stat_activity.
+Fix: either configure the load test to use a pre-seeded read-only dataset for read-heavy endpoints, or provision a database with connection pooling matching production (PgBouncer) before running write-heavy load tests.
+
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/load-testing-advanced]] · [[technical-qa/performance-testing]] · [[qa/performance-testing-qa]] · [[qa/continuous-testing]] · [[cs-fundamentals/observability-se]]

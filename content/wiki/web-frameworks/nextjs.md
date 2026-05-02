@@ -100,7 +100,7 @@ export default function ChatPage() {
 
 ## Server Actions
 
-Forms that call server functions directly — no API route needed for simple mutations.
+Forms that call server functions directly. No API route needed for simple mutations.
 
 ```typescript
 // app/actions.ts
@@ -146,7 +146,7 @@ export async function getPageSummary(url: string) {
 }
 ```
 
-For dynamic AI responses, you usually want NO caching. For static summaries, embeddings, or lookup tables — caching makes sense.
+For dynamic AI responses, you usually want NO caching. For static summaries, embeddings, or lookup tables. Caching makes sense.
 
 ---
 
@@ -218,6 +218,28 @@ export const config = { matcher: ["/dashboard/:path*"] };
 - Middleware runs at the CDN edge before every request — use for auth guards and redirects, not heavy logic
 - Vercel auto-detects Next.js; API routes deploy as serverless functions; edge runtime available for low-latency routes
 - Server Actions (`"use server"`) allow forms to invoke server functions directly without a separate API route
+
+## Common Failure Cases
+
+**`ANTHROPIC_API_KEY` exposed to the browser because it was prefixed with `NEXT_PUBLIC_`**  
+Why: `NEXT_PUBLIC_` variables are embedded in the client-side bundle; any variable with this prefix is visible to anyone who inspects the page source or network requests.  
+Detect: `process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY` is accessible in browser DevTools console; the API key appears in the compiled JavaScript bundle.  
+Fix: remove the `NEXT_PUBLIC_` prefix; access the key only in Server Components, API routes, or Server Actions where it stays on the server.
+
+**Server Component accidentally triggers a client-side waterfall by importing a Client Component that fetches data**  
+Why: a Server Component wrapping a Client Component that uses `useEffect` to fetch data creates a server-render → client-hydration → client-fetch waterfall; the data is not available until the third round trip.  
+Detect: DevTools Network tab shows a fetch request fired from the client shortly after initial load; removing the client-side fetch and moving it to the Server Component eliminates the delay.  
+Fix: fetch data in the Server Component and pass it as props to the Client Component; reserve client-side fetching for user-triggered interactions.
+
+**Streaming response from `streamText` stops early because Vercel's serverless function timeout is exceeded**  
+Why: Vercel serverless functions have a maximum execution timeout (10s on Hobby, 60s on Pro); a long LLM response that takes more than the timeout to generate is cut off mid-stream without an error.  
+Detect: streaming responses for long generations end abruptly; the last token is mid-sentence; increasing `maxTokens` makes the problem worse.  
+Fix: switch the API route to use Edge Runtime (`export const runtime = 'edge'`) which has no execution timeout; or reduce `max_tokens` to ensure the response completes within the serverless timeout.
+
+**`use cache` caches an LLM response that should be dynamic, returning stale content to all users**  
+Why: adding `"use cache"` to a Server Component or function caches the return value per argument combination; if a function that calls an LLM is inadvertently wrapped in `"use cache"`, all users get the first user's response.  
+Detect: different users see identical LLM responses for different inputs; the cache key is the same for inputs that should produce different outputs.  
+Fix: never apply `"use cache"` to functions that call LLMs for dynamic content; only cache truly static or slowly-changing data (product descriptions, static summaries).
 
 ## Connections
 

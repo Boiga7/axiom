@@ -10,7 +10,7 @@ tldr: Network design underpins security, performance, and cost in cloud architec
 
 # Cloud Networking
 
-Network design underpins security, performance, and cost in cloud architectures. The same concepts — VPC, subnets, routing, firewalls — appear in all three major clouds with different names.
+Network design underpins security, performance, and cost in cloud architectures. The same concepts (VPC, subnets, routing, firewalls) appear in all three major clouds with different names.
 
 ---
 
@@ -109,13 +109,13 @@ Routing policies (Route 53):
 - **Geolocation** — GDPR compliance (EU users → EU region)
 - **Geoproximity** — bias traffic toward a region
 
-Private hosted zones — DNS resolution only within your VPC. Internal service discovery without public DNS exposure.
+Private hosted zones. DNS resolution only within your VPC. Internal service discovery without public DNS exposure.
 
 ---
 
 ## CDN
 
-CloudFront (AWS) / Cloud CDN (GCP) / Azure Front Door — globally distributed edge caches.
+CloudFront (AWS) / Cloud CDN (GCP) / Azure Front Door. Globally distributed edge caches.
 
 Cache static assets (JS, CSS, images) at the edge. Reduces latency from 200ms to <10ms for repeat visitors. Reduces origin load.
 
@@ -138,7 +138,7 @@ Path pattern: /api/*
 ## Private Connectivity
 
 ### VPC Peering
-Direct, private routing between two VPCs. Not transitive — if A peers B and B peers C, A cannot reach C through B. Use Transit Gateway for hub-and-spoke.
+Direct, private routing between two VPCs. Not transitive, if A peers B and B peers C, A cannot reach C through B. Use Transit Gateway for hub-and-spoke.
 
 ### Transit Gateway (AWS) / Cloud Router / Azure Virtual WAN
 Central hub for VPC-to-VPC and VPC-to-on-premises routing. Transitive routing supported.
@@ -154,7 +154,7 @@ With Private Link:
   App → VPC Endpoint → S3  (free, private, no NAT needed)
 ```
 
-Always add VPC endpoints for S3, DynamoDB, ECR — they eliminate NAT Gateway data charges for high-traffic services.
+Always add VPC endpoints for S3, DynamoDB, ECR. They eliminate NAT Gateway data charges for high-traffic services.
 
 ### VPN / Direct Connect (AWS) / Interconnect (GCP) / ExpressRoute (Azure)
 On-premises to cloud connectivity. VPN: encrypted over internet, up to 1.25 Gbps. Direct Connect: dedicated 1G/10G/100G fibre, private, lower latency, predictable throughput.
@@ -172,7 +172,7 @@ In practice for cloud:
 - Network policies in Kubernetes
 
 ### Service Mesh
-Sidecar proxies (Envoy) injected into every pod. Provides mTLS, retries, circuit breaking, observability (traces, metrics), traffic shaping — without application code changes.
+Sidecar proxies (Envoy) injected into every pod. Provides mTLS, retries, circuit breaking, observability (traces, metrics), traffic shaping. Without application code changes.
 
 Istio adds ~15ms to inter-pod latency and ~5% CPU overhead. Not warranted for simple architectures.
 
@@ -191,6 +191,33 @@ Istio adds ~15ms to inter-pod latency and ~5% CPU overhead. Not warranted for si
 **Cross-AZ traffic is the hidden cost.** A three-AZ RDS cluster with read replicas in each AZ generates cross-AZ traffic on every replica sync. Use the same-AZ endpoint when latency allows; use primary-only for read-heavy non-HA workloads.
 
 ---
+
+## Common Failure Cases
+
+**Subnet exhaustion blocking new EC2/EKS node launches**
+Why: AWS reserves 5 addresses per subnet; a /24 gives only 251 usable addresses, and EKS with the AWS VPC CNI assigns one IP per pod — a 30-node cluster with 30 pods per node needs 900+ addresses in a single subnet.
+Detect: EKS node group scaling fails with `InsufficientFreeAddressesInSubnet` error in the EC2 console; new pods stay in `Pending` with the event `0/0 nodes available: 0 Insufficient pods`.
+Fix: Use /23 or larger subnets for EKS node pools, or enable the VPC CNI prefix delegation mode to assign /28 prefixes per ENI instead of individual IPs; plan CIDRs at VPC creation time since re-CIDRing requires downtime.
+
+**Security group rule referencing a deleted SG ID causes all traffic to drop**
+Why: A security group inbound rule references another SG by ID (e.g., `sg-app-servers`); if that referenced SG is deleted, the rule becomes invalid and AWS implicitly drops matching traffic.
+Detect: Application traffic drops suddenly with no recent infrastructure changes; `aws ec2 describe-security-groups` shows a rule with a stale SG ID that no longer exists.
+Fix: Audit security group rules regularly with `aws ec2 describe-security-groups` and alert on rules referencing non-existent SG IDs; recreate or update the rule to reference the correct SG.
+
+**NAT Gateway charges unexpectedly high due to missing VPC endpoints for S3/DynamoDB**
+Why: Traffic to S3 or DynamoDB from private subnets traverses the NAT Gateway, incurring $0.045/GB processing charges; a busy service moving terabytes per day generates thousands in unplanned costs.
+Detect: NAT Gateway `BytesOutToDestination` metric is high; Cost Explorer shows NAT Gateway as a top-5 cost item.
+Fix: Create Gateway VPC Endpoints for S3 and DynamoDB (free), add them to the private subnet route tables; traffic to these services bypasses the NAT Gateway entirely.
+
+**VPC peering not transitive causes inter-service connectivity gaps**
+Why: Teams assume VPC A can reach VPC C via VPC B (A-B peered, B-C peered) but peering is not transitive, so A-C traffic is dropped.
+Detect: `traceroute` or `nc` from a host in VPC A to VPC C times out; VPC Flow Logs show `REJECT` for the cross-VPC traffic.
+Fix: Establish a direct peering between VPC A and VPC C, or migrate to Transit Gateway which provides transitive routing across all attached VPCs.
+
+**Route 53 failover not triggering because health check is checking the wrong endpoint**
+Why: The health check is configured against the load balancer's IP rather than a meaningful application path, or the path returns 200 even when the backend is degraded (e.g., returns a static HTML page after the app crashes).
+Detect: Region-level outage occurs but Route 53 does not fail over; the health check status in the Route 53 console shows green.
+Fix: Point the health check at a deep health endpoint (`/health/ready`) that validates all critical dependencies (DB, cache); ensure the endpoint returns 5xx when any dependency is unhealthy.
 
 ## Connections
 

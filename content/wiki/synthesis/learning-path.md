@@ -12,7 +12,7 @@ tldr: Four-stage curriculum for software engineers entering AI engineering — F
 
 > **TL;DR** Four-stage curriculum for software engineers entering AI engineering — Foundations (1-2 weeks), Building (2-3 weeks), Production (2-3 weeks), Advanced (ongoing) — each stage has a concrete project to build.
 
-A structured progression for software engineers moving into AI engineering. Assumes Python proficiency and general backend/frontend experience. Organised into four stages — complete each stage before moving to the next.
+A structured progression for software engineers moving into AI engineering. Assumes Python proficiency and general backend/frontend experience. Organised into four stages. Complete each stage before moving to the next.
 
 **Time estimates assume active building, not just reading.** Reading alone won't close the gap. Each stage has a project to build.
 
@@ -61,7 +61,7 @@ You can explain what tokens are, why `max_tokens` matters for cost, and the diff
 
 ## Stage 2 — Building (2–3 weeks)
 
-Goal: build the two most common AI application patterns — RAG and agents. These cover ~80% of production AI systems.
+Goal: build the two most common AI application patterns. RAG and agents. These cover ~80% of production AI systems.
 
 ### Read (in this order)
 
@@ -113,7 +113,7 @@ You can explain what an eval golden set is, why you mock the API in tests, what 
 
 ## Stage 4 — Advanced (ongoing)
 
-Goal: the deeper topics that make you a stronger AI engineer over time. These don't need to be read in strict order — follow what's relevant to what you're building.
+Goal: the deeper topics that make you a stronger AI engineer over time. These don't need to be read in strict order. Follow what's relevant to what you're building.
 
 ### Model internals
 

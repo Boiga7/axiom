@@ -202,6 +202,23 @@ distilabel's value: pipelines are version-controlled, reproducible, and based on
 > [Source: Argilla distilabel documentation and GitHub, 2025]
 > [Source: HuggingFace cookbook — Generate a Preference Dataset with distilabel]
 
+## Common Failure Cases
+
+**`UltraFeedback` step produces all identical ratings (e.g., every response scores 4/5) because the judge model is the same model that generated the responses**  
+Why: when the generator and judge are the same model (e.g., both `claude-sonnet-4-6`), the judge has a self-enhancement bias and rates its own outputs consistently high, producing near-useless preference pairs where chosen and rejected scores are nearly equal.  
+Detect: the output dataset shows `score_chosen` and `score_rejected` differing by less than 0.5 on average; DPO training on this data produces no measurable improvement.  
+Fix: use a stronger model as judge (`claude-opus-4-7`) than the generator (`claude-sonnet-4-6` or `claude-haiku-4-5-20251001`); this hierarchy is the standard pattern in the distilabel documentation.
+
+**`pipeline.run()` silently skips rows with generation errors, inflating perceived dataset size while actually producing fewer preference pairs than expected**  
+Why: distilabel pipelines catch per-row generation errors by default and mark rows as failed without raising an exception at the pipeline level; if 20% of rows fail due to rate limits or content policy refusals, the output dataset is 20% smaller than the input, with no warning.  
+Detect: `len(distiset["train"])` is smaller than `len(input_data)`; checking the output columns reveals a `generation_model_errors` column with non-null values for failed rows.  
+Fix: check `distiset["train"]["generation_model_errors"]` after the run; set a failure rate threshold and raise if it exceeds your tolerance; retry failed rows or use a fallback model for content policy refusals.
+
+**`GroupColumns` step merges responses from two parallel branches in the wrong order, producing mislabelled chosen/rejected pairs**  
+Why: when two `TextGeneration` steps run in parallel and merge via `GroupColumns`, the column order in the merged output is not guaranteed to match the order the steps were defined; if the DPO formatter assumes `generations[0]` is from the stronger model, but order was swapped, chosen and rejected are inverted.  
+Detect: DPO training on the output causes the model's quality to degrade; inspecting the `model_names` column shows the weaker model mapped to `chosen` and the stronger model to `rejected`.  
+Fix: explicitly name the parallel branches and reference them by name in `GroupColumns`; verify the output order with `distiset["train"][0]["model_names"]` before running the full pipeline.
+
 ## Connections
 - [[data/synthetic-data]] — the broader context for synthetic data generation
 - [[data/rlhf-datasets]] — preference datasets that distilabel generates

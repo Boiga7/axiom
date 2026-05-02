@@ -10,7 +10,7 @@ tldr: QA's role doesn't end at release — production is where quality actually 
 
 # Production Monitoring for QA
 
-QA's role doesn't end at release — production is where quality actually matters. Synthetic monitoring, real user monitoring, and SLO tracking extend testing into live systems.
+QA's role doesn't end at release. Production is where quality actually matters. Synthetic monitoring, real user monitoring, and SLO tracking extend testing into live systems.
 
 ---
 
@@ -32,7 +32,7 @@ QA responsibilities post-release:
 
 ## Synthetic Monitoring
 
-Automated checks that run against production on a schedule — simulating user journeys.
+Automated checks that run against production on a schedule. Simulating user journeys.
 
 ```python
 # monitors/checkout_monitor.py — runs every 5 minutes via AWS Lambda / GCP Cloud Scheduler
@@ -223,6 +223,28 @@ def test_gold_users_get_discount():
 ```
 
 ---
+
+## Common Failure Cases
+
+**Synthetic monitor uses a shared test account that gets rate-limited or blocked**
+Why: the monitor fires 12 times per hour using the same credentials; the fraud detection system flags the account as a bot and locks it, causing all monitors to fail simultaneously.
+Detect: all `CheckResult` items return `passed: False` at the same moment with a 401 or 403 status code, not a service degradation.
+Fix: provision a dedicated synthetic-monitoring service account with a static allowlist IP range and ensure the fraud/rate-limit system is configured to exempt that account explicitly.
+
+**SLO targets set at 99.9% without measuring the current baseline first**
+Why: 99.9% sounds reasonable but the application currently achieves only 99.5%; the error budget is exhausted on day one and the alert fires constantly, training the team to ignore it.
+Detect: the `ErrorBudgetBurnRateTooHigh` alert fires within the first week of the SLO going live; the team acknowledges and dismisses it without action.
+Fix: measure actual availability over the previous 30 days before setting an SLO target; start with an achievable target (current baseline - 0.1%) and tighten it quarterly.
+
+**Production regressions not fed back into the test suite — same bug recurs**
+Why: the regression test is written to reproduce the bug but filed in a one-off file outside the main test suite and not added to CI; the fix ships but the test is never run again.
+Detect: the same production bug is reported again in a later sprint with a different trigger path; searching the test suite finds no test named after the original bug.
+Fix: enforce a policy where every production bug fix requires a regression test committed to `tests/regression/` in the same PR as the fix, and that file must be included in the nightly CI run.
+
+**Monitor checks only the happy path — degraded modes go undetected**
+Why: the checkout monitor verifies login and product listing but not payment submission; a payment provider outage causes real checkouts to fail while all monitor checks pass.
+Detect: a spike in production 502 errors from the payment endpoint appears in Grafana but no monitor alert fires; the team learns from a customer complaint.
+Fix: extend synthetic monitors to cover the full critical-path transaction including write operations, using test-mode or sandbox payment tokens that do not charge real money.
 
 ## Connections
 [[qa-hub]] · [[qa/qa-in-devops]] · [[qa/smoke-sanity-testing]] · [[qa/qa-metrics]] · [[cloud/observability-stack]] · [[cloud/cloud-monitoring]] · [[qa/continuous-testing]]

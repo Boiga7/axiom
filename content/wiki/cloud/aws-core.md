@@ -153,7 +153,7 @@ secret = json.loads(client.get_secret_value(SecretId="prod/db")["SecretString"])
 Logs, metrics, alarms, dashboards. Every AWS service emits metrics. Log Insights for ad-hoc queries across log groups. Set alarms on p99 latency, error rate, queue depth.
 
 ### CloudFormation / CDK
-IaC. CloudFormation uses JSON/YAML; CDK uses TypeScript/Python/Java to generate CloudFormation. Prefer CDK for new projects — see [[cloud/aws-cdk]].
+IaC. CloudFormation uses JSON/YAML; CDK uses TypeScript/Python/Java to generate CloudFormation. Prefer CDK for new projects. See [[cloud/aws-cdk]].
 
 ---
 

@@ -10,7 +10,7 @@ tldr: Open-source framework for evaluating LLMs and LLM-powered systems, plus a 
 
 # OpenAI Evals
 
-Open-source framework for evaluating LLMs and LLM-powered systems, plus a registry of community benchmarks. Despite the name, works with any Chat Completions-compatible endpoint — Anthropic, local models, Azure, custom APIs.
+Open-source framework for evaluating LLMs and LLM-powered systems, plus a registry of community benchmarks. Despite the name, works with any Chat Completions-compatible endpoint. Anthropic, local models, Azure, custom APIs.
 
 GitHub: `openai/evals` (17,600+ stars). Also available as a hosted service via the OpenAI Dashboard.
 
@@ -153,6 +153,28 @@ oaieval --completion_fn my_module:ClaudeCompletionFn my-eval-name
 See [[evals/methodology]] for how these frameworks fit into a full eval strategy.
 
 ---
+
+## Common Failure Cases
+
+**`oaieval` fails with `ImportError` because the custom `CompletionFn` module path is wrong**  
+Why: `oaieval --completion_fn my_module:MyClass` requires `my_module` to be importable from the working directory; if the module is in a subdirectory or the package is not installed, Python cannot find it.  
+Detect: `ModuleNotFoundError: No module named 'my_module'` when running `oaieval`.  
+Fix: install the module with `pip install -e .` or set `PYTHONPATH=.` before running; ensure the module path matches exactly: `package.submodule:ClassName`.
+
+**`match` eval type reports 0% accuracy because the ideal answer has different whitespace or casing than the model output**  
+Why: `evals.elsuite.basic.match:Match` uses exact string equality by default; if the ideal string is `"Paris"` and the model returns `"paris"` or `"Paris."`, the match fails.  
+Detect: eval accuracy is suspiciously low (near 0%) for tasks where the model is clearly giving correct answers; inspecting `results.jsonl` shows the model output is correct but formatted differently.  
+Fix: use `fuzzy_match` instead of `match` for free-text answers; or normalise both the ideal and the model output (lower-case, strip punctuation) in a custom grader.
+
+**Model-graded eval fails because the grader model returns "UNKNOWN" instead of "Yes"/"No"**  
+Why: the built-in `closedqa` grader prompt expects the judge model to return exactly "Yes", "No", or "Unsure"; if the judge includes extra explanation or formatting, the classifier fails to parse it.  
+Detect: model-graded eval reports high "UNKNOWN" count in the results; the raw grader output shows the judge is answering correctly but with additional text like "Yes, this is correct because...".  
+Fix: add explicit instructions to the grader prompt to return only "Yes", "No", or "Unsure" without explanation; or use `instructor` to enforce a structured output schema for the grader call.
+
+**JSONL samples file with a missing `ideal` field causes the eval to silently skip those samples**  
+Why: the `match` and `model_graded_closedqa` eval types require an `ideal` key in each sample; samples missing this key are skipped rather than erroring, reducing the effective eval size without warning.  
+Detect: the eval completes with fewer samples than in the JSONL file; no error is raised; the count in the results summary is lower than expected.  
+Fix: validate the JSONL file before running: check that all required fields (`input`, `ideal`) are present; add a pre-run assertion that `len(samples) == expected_count`.
 
 ## Connections
 

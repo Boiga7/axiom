@@ -10,7 +10,7 @@ tldr: Simultaneous learning, test design, and execution. The tester uses their k
 
 # Exploratory Testing
 
-Simultaneous learning, test design, and execution. The tester uses their knowledge of the system to discover behaviours that scripted tests miss. Not ad-hoc — structured exploration with clear goals and time-boxing.
+Simultaneous learning, test design, and execution. The tester uses their knowledge of the system to discover behaviours that scripted tests miss. Not ad-hoc. Structured exploration with clear goals and time-boxing.
 
 Scripted tests verify what you expect. Exploratory testing finds what you didn't expect.
 
@@ -140,7 +140,7 @@ Mental shortcuts experienced testers use to guide exploration.
 
 ## Mind Maps for Exploration
 
-Map the feature before testing. Nodes = areas; branches = sub-areas. Use as a coverage tracker — mark each node as tested, skipped, or needs more.
+Map the feature before testing. Nodes = areas; branches = sub-areas. Use as a coverage tracker. Mark each node as tested, skipped, or needs more.
 
 ```
 User Authentication
@@ -177,7 +177,7 @@ User Authentication
 | No time to write scripts | Exploratory is faster feedback than no testing |
 | Complement existing scripts | Target areas scripts don't cover |
 
-Exploratory testing is not a replacement for automated regression suites. It complements them — automation verifies known scenarios reliably; exploration finds unknown scenarios.
+Exploratory testing is not a replacement for automated regression suites. It complements them. Automation verifies known scenarios reliably; exploration finds unknown scenarios.
 
 ---
 
@@ -192,6 +192,28 @@ Exploratory testing is not a replacement for automated regression suites. It com
 - **Accessibility**: axe DevTools, screen readers (NVDA, VoiceOver)
 
 ---
+
+## Common Failure Cases
+
+**Exploring without a charter and calling it exploratory testing**
+Why: undirected clicking around the application is not exploratory testing — it is ad-hoc testing; without a charter there is no way to know what was covered, what was missed, or whether the session added any value.
+Detect: session notes consist of a list of bugs with no stated mission, no coverage assessment, and no follow-up charters.
+Fix: write the charter before the session starts using the format "Explore [target] with [resources] to discover [information]"; the charter is the minimum unit of structure for an exploratory session.
+
+**Sessions longer than 90 minutes without a break**
+Why: cognitive fatigue degrades the quality of exploratory testing significantly after 90 minutes; testers start following familiar paths and stop noticing anomalies.
+Detect: single session blocks in the test schedule exceed two hours; testers report feeling like they were "just clicking around" by the end.
+Fix: time-box sessions to 45-90 minutes with a mandatory debrief; if more coverage is needed, start a new session with a fresh charter after a break.
+
+**Bugs documented in session notes but never filed in the tracker**
+Why: informal notes taken during a session are not actionable for developers; bugs that remain in a notes document rather than a tracker get lost, duplicated, or forgotten between sprints.
+Detect: session SBTM reports contain bug descriptions that do not correspond to any open ticket in Jira or Linear.
+Fix: file every bug in the tracker before the debrief ends; the session is not complete until every finding has a ticket number.
+
+**Not adjusting charters based on what you find during the session**
+Why: rigid adherence to the original charter when you discover something unexpected causes high-value bugs to be logged but not fully investigated during the session.
+Detect: session notes show "found anomaly in X, continued with charter" repeatedly without follow-up charters to investigate the anomalies.
+Fix: log unexpected findings immediately and note them as follow-up charter candidates; it is acceptable to deviate from the charter for 10-15 minutes to probe a finding before returning.
 
 ## Connections
 

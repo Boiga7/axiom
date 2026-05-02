@@ -12,7 +12,7 @@ tldr: RLHF/DPO training requires chosen/rejected preference pairs — quality of
 
 > **TL;DR** RLHF/DPO training requires chosen/rejected preference pairs — quality of the preference dataset directly determines alignment quality, and a bad dataset is worse than none at all.
 
-The training data behind alignment. RLHF, DPO, and GRPO all require datasets of human (or LLM-judged) preferences — chosen/rejected response pairs or ranked lists. Quality of the preference dataset directly determines alignment quality.
+The training data behind alignment. RLHF, DPO, and GRPO all require datasets of human (or LLM-judged) preferences. Chosen/rejected response pairs or ranked lists. Quality of the preference dataset directly determines alignment quality.
 
 ---
 
@@ -194,7 +194,7 @@ def build_sft_dataset_via_rejection(prompts: list[str], n_samples: int = 8) -> l
 
 ## Data Quality Checks
 
-A bad preference dataset is worse than no preference dataset — it teaches the wrong thing.
+A bad preference dataset is worse than no preference dataset. It teaches the wrong thing.
 
 ```python
 from datasets import Dataset
@@ -258,6 +258,23 @@ split.push_to_hub("your-org/combined-preferences", private=True)
 - Inter-annotator agreement target: κ > 0.7 (below 0.6 = unreliable preferences)
 - Length bias: annotators prefer longer responses regardless of quality — must control for this
 - DPO requires prompt + chosen + rejected triplets; ensure rejected isn't just shorter than chosen
+
+## Common Failure Cases
+
+**`parse_hh_rlhf` extracts an empty `prompt` because the conversation format uses `\n\nHuman:` with double newlines but the split is on `"\n\n"` which also splits on blank lines in the response**  
+Why: `text.split("\n\n")` splits on every double newline, including blank lines that appear within long assistant responses; a multi-paragraph response is split into fragments, causing the parser to create extra pseudo-turns with wrong roles.  
+Detect: some parsed conversations have more `assistant` turns than expected; the `prompt` key is empty for examples where the first assistant response contained a blank line.  
+Fix: use a regex split that only matches the specific `"\n\nHuman: "` and `"\n\nAssistant: "` delimiters rather than any double newline: `re.split(r'\n\n(?=Human:|Assistant:)', text)`.
+
+**Combining Anthropic HH-RLHF and UltraFeedback via `concatenate_datasets` causes training to fail because the DPO schema fields have different types (`str` vs `list[dict]`)**  
+Why: HH-RLHF stores `chosen` and `rejected` as plain strings; UltraFeedback's binarized version stores them as lists of conversation dicts; concatenating without schema alignment causes a `features` mismatch that raises a `pa.ArrowInvalid` error in the TRL DPOTrainer.  
+Detect: `concatenate_datasets([hh, uf])` raises `ArrowInvalid: Schema at index 1 was different`; inspecting `hh.features` vs `uf.features` shows type incompatibility.  
+Fix: normalize both datasets to the same schema before concatenation — convert both `chosen` and `rejected` to plain strings using a `.map()` step that extracts the last assistant turn from the conversation list.
+
+**Length-biased preference pairs cause DPO to train the model to produce longer responses regardless of quality**  
+Why: annotators systematically prefer longer responses even when shorter ones are more accurate; a dataset where `len(chosen.split()) > len(rejected.split())` in 80%+ of examples teaches the model that length equals quality.  
+Detect: plot the distribution of `len(chosen.split()) / len(rejected.split())` ratios; a distribution skewed significantly above 1.0 indicates length bias; train a logistic regression predicting `chosen` from length alone — accuracy > 65% confirms the bias.  
+Fix: filter or reweight examples where the length ratio exceeds 2x; or add a length-controlled baseline (generate chosen and rejected with similar prompt, different quality signals) to counteract the bias.
 
 ## Connections
 

@@ -81,7 +81,7 @@ seen.add("item")    # O(1)
 
 ## Linked Lists
 
-Nodes where each points to the next. No contiguous memory — no indexed access.
+Nodes where each points to the next. No contiguous memory. No indexed access.
 
 ```python
 class Node:
@@ -129,7 +129,7 @@ top = stack[-1]     # peek — O(1)
 
 ## Queues
 
-First-in, first-out (FIFO). Use `collections.deque` — never `list.pop(0)` (that's O(n)).
+First-in, first-out (FIFO). Use `collections.deque`. Never `list.pop(0)` (that's O(n)).
 
 ```python
 from collections import deque
@@ -306,6 +306,28 @@ def dfs(graph, node, visited=None):
 | Sorted sequence with fast insert | `sortedcontainers.SortedList` |
 | Hierarchical data | Tree |
 | Connected relationships | Graph |
+
+## Common Failure Cases
+
+**`list.pop(0)` used as a queue, creating O(n) dequeue operations**
+Why: removing from the front of a Python list shifts all remaining elements; in a tight loop over thousands of items this turns O(n) work into O(n²).
+Detect: profiler shows `list.remove` or `list.pop(0)` dominating CPU time; substitute `collections.deque` and measure the speedup.
+Fix: replace `list` with `collections.deque` for any queue — `deque.popleft()` is O(1).
+
+**`in` operator on a list inside a loop creating O(n²) membership checks**
+Why: `if item in my_list` is O(n) per call; inside a loop over n items the total cost is O(n²), which is tolerable at n=100 but painful at n=10,000.
+Detect: profiler shows the inner `__contains__` call dominating; or input size doubling causes 4x slowdown instead of 2x.
+Fix: convert the list to a `set` before the loop: `my_set = set(my_list)` — `in` on a set is O(1).
+
+**Unbalanced BST degrading to O(n) operations**
+Why: inserting an already-sorted sequence into a naive BST produces a degenerate tree (every node has one child) equivalent to a linked list; search becomes O(n).
+Detect: BST operations slow linearly as elements are inserted in sorted order.
+Fix: use a self-balancing structure — Python's `sortedcontainers.SortedList` or Java's `TreeMap`; never implement a raw BST for production use.
+
+**Max-heap simulated with positive values causing incorrect ordering**
+Why: Python's `heapq` is a min-heap; to simulate a max-heap engineers negate values, but forgetting to negate on both push and pop produces wrong order silently.
+Detect: `heappop` returns a smaller (more negative) value when the largest value is expected.
+Fix: negate consistently on both push (`heappush(heap, -value)`) and pop (`-heappop(heap)`), or use a `(priority, item)` tuple.
 
 ## Connections
 

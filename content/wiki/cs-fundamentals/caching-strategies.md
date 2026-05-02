@@ -10,7 +10,7 @@ tldr: Storing computed or fetched data closer to where it's needed to reduce lat
 
 # Caching Strategies
 
-Storing computed or fetched data closer to where it's needed to reduce latency and backend load. Caching is the most common performance optimisation — and a common source of bugs when done wrong.
+Storing computed or fetched data closer to where it's needed to reduce latency and backend load. Caching is the most common performance optimisation, and a common source of bugs when done wrong.
 
 ---
 
@@ -51,7 +51,7 @@ def get_product(product_id: str) -> dict:
 
 ### Write-Through
 
-Write to cache and DB simultaneously. Cache is always up to date — no stale reads.
+Write to cache and DB simultaneously. Cache is always up to date. No stale reads.
 
 ```python
 def update_product(product_id: str, data: dict) -> None:
@@ -69,13 +69,15 @@ Write to cache immediately; asynchronously flush to DB. Fast writes, eventual pe
 
 ### Read-Through
 
-Cache sits in front of DB; application never calls DB directly — the cache layer handles it. Common in managed cache services (ElastiCache with DAX for DynamoDB).
+Cache sits in front of DB; application never calls DB directly. The cache layer handles it. Common in managed cache services (ElastiCache with DAX for DynamoDB).
 
 ---
 
 ## Cache Invalidation
 
 "There are only two hard things in Computer Science: cache invalidation and naming things."
+
+> **→** [Data as a System](/synthesis/data-as-system) — cache inconsistency is a data contract problem. Covers dual-write hazards, CDC, and freshness SLAs across services.
 
 ```python
 # Strategy 1: TTL expiry — simple, eventually consistent
@@ -214,6 +216,33 @@ def get_with_early_refresh(key: str, ttl: int, beta: float = 1.0):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Cache stampede on cold start**  
+Why: many concurrent requests all miss simultaneously, all hit the origin, and all try to populate the cache at once.  
+Detect: origin CPU spikes to 100% immediately after a cache flush or deployment; cache hit rate drops to near zero briefly.  
+Fix: use a distributed lock (Redis `SET NX EX`) so only one request populates the cache; others wait or serve slightly stale data.
+
+**Stale data served after a write**  
+Why: write-through or explicit invalidation missed a cache key. Commonly due to inconsistent key naming between the write path and the read path.  
+Detect: read after write returns old data in staging; compare cache key generated on write vs read in code.  
+Fix: centralise key generation in a single function; add an integration test that writes then reads and asserts fresh data.
+
+**Wrong key structure causes cache pollution**  
+Why: key includes mutable state (e.g., timestamp or random nonce) so each call gets a unique key, effectively bypassing the cache.  
+Detect: Redis key count grows unboundedly; `INFO keyspace` shows millions of keys with zero hits.  
+Fix: audit key construction; keys should be deterministic from stable inputs only (user_id, resource_id, query params).
+
+**TTL too short kills hit rate**  
+Why: TTL set to seconds instead of minutes; most requests arrive after expiry.  
+Detect: cache hit rate below 30% despite high traffic; origin request rate matches total request rate.  
+Fix: profile access patterns; set TTL to the practical staleness tolerance of the data, not the shortest safe interval.
+
+**Write-behind data loss on cache eviction**  
+Why: write-behind buffers dirty data in memory; if the cache node dies before flushing, writes are lost.  
+Detect: data inconsistency after cache restart; DB shows fewer records than the application created.  
+Fix: use write-behind only for truly disposable data (counters, analytics); use write-through or outbox pattern for anything that must persist.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[cloud/aws-rds-aurora]] · [[cloud/cost-optimisation-cloud]]

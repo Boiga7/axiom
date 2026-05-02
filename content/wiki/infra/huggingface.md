@@ -302,6 +302,33 @@ api.upload_folder(
 - For fine-tuning, use TRL `SFTTrainer` instead of `Trainer` — handles chat templates and packing
 - Streaming datasets: `load_dataset(..., streaming=True)` avoids full downloads for large corpora
 
+## Common Failure Cases
+
+**`OSError: Gated model` or `401 Unauthorized` when loading a gated model**  
+Why: Llama, Mistral, and other gated models require Hub access approval and authentication.  
+Detect: `OSError: You are trying to access a gated repo` or `401 Client Error` when calling `from_pretrained`.  
+Fix: request access on the model's Hub page; run `huggingface-cli login` and paste your token; set `HUGGINGFACE_TOKEN` env var.
+
+**`CUDA out of memory` when loading with `device_map="auto"` on a multi-GPU system**  
+Why: `device_map="auto"` tries to place the model sequentially across GPUs; if the first GPU fills up, subsequent allocations can fail.  
+Detect: `RuntimeError: CUDA out of memory` even though total VRAM across all GPUs is sufficient.  
+Fix: explicitly specify `max_memory` per device: `device_map="auto", max_memory={0: "40GiB", 1: "40GiB"}`; or use `device_map="balanced"`.
+
+**`datasets` `map()` is orders of magnitude slower than expected**  
+Why: `map()` defaults to single-process execution; for large datasets, `num_proc=1` is a bottleneck.  
+Detect: `map()` on 100K rows takes >10 minutes with simple transformations; CPU utilisation is <100%.  
+Fix: set `num_proc=8` (or the number of CPU cores); use `batched=True` for further speedup on most operations.
+
+**Model pushed to Hub overwrites a prior version with no history**  
+Why: `push_to_hub` replaces the current revision; there's no automatic versioning.  
+Detect: prior checkpoint is gone from the Hub; team members lose access to the previous model.  
+Fix: use `commit_message` and tag revisions explicitly; use the Hub's branch feature to preserve prior checkpoints before pushing a new one.
+
+**Tokenizer apply_chat_template omits the generation prompt, causing the model to complete the user message instead of responding**  
+Why: `add_generation_prompt=False` is the default in some versions; the model sees the full user message without an assistant turn marker.  
+Detect: model output continues the user message text instead of generating a response.  
+Fix: always pass `add_generation_prompt=True` when preparing inputs for inference.
+
 ## Connections
 
 - [[fine-tuning/frameworks]] — Axolotl, TRL, Unsloth build on HF transformers and PEFT

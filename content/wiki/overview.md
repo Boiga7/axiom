@@ -22,7 +22,7 @@ updated: 2026-05-02
 
 ## The Field in One Paragraph (April 2026)
 
-The shift is from model-building to system-building. Most engineers don't train models — they compose them. The stack is: a frontier model (Claude, GPT, Gemini) accessed via API, enhanced with RAG for knowledge, wrapped in an agent loop for autonomy, evaluated with LLM-as-judge, monitored with a tracing platform, and secured against prompt injection and tool misuse. MCP is the standard protocol for agent tool connectivity. LangGraph hit v1.0 and is the default runtime for multi-agent systems. Fine-tuning is increasingly displaced by better prompting and RAG — 57% of orgs don't fine-tune at all. Evals are the discipline most teams are behind on (only 52% have them). Observability has become essential infrastructure. AI security is a real and growing attack surface with 30+ MCP CVEs filed in April 2026 alone.
+The shift is from model-building to system-building. Most engineers don't train models. They compose them. The stack is: a frontier model (Claude, GPT, Gemini) accessed via API, enhanced with RAG for knowledge, wrapped in an agent loop for autonomy, evaluated with LLM-as-judge, monitored with a tracing platform, and secured against prompt injection and tool misuse. MCP is the standard protocol for agent tool connectivity. LangGraph hit v1.0 and is the default runtime for multi-agent systems. Fine-tuning is increasingly displaced by better prompting and RAG. 57% of orgs don't fine-tune at all. Evals are the discipline most teams are behind on (only 52% have them). Observability has become essential infrastructure. AI security is a real and growing attack surface with 30+ MCP CVEs filed in April 2026 alone.
 
 ---
 

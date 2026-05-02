@@ -18,7 +18,7 @@ Using a language model to evaluate another language model's outputs. The standar
 
 ## Why LLM-as-Judge Works
 
-For narrow tasks (code execution, SQL correctness, classification), programmatic evaluation is better — run the code, check the output. But for:
+For narrow tasks (code execution, SQL correctness, classification), programmatic evaluation is better. Run the code, check the output. But for:
 - Response quality ("Is this a good explanation?")
 - Helpfulness ("Did this answer the user's intent?")
 - Writing quality, tone, safety
@@ -133,7 +133,7 @@ For ranking models against each other: pairwise. For detecting regression in a s
 
 ## Reference-Free Evaluation
 
-When you don't have an expected answer — common in production monitoring:
+When you don't have an expected answer. Common in production monitoring:
 
 ```python
 def check_faithfulness(question: str, context: str, answer: str) -> dict:
@@ -149,7 +149,7 @@ Return JSON: {{"faithful": true/false, "hallucinated_claims": ["list of claims n
     # ...
 ```
 
-RAGAS provides faithfulness, answer relevancy, context precision, and recall metrics for RAG systems — no reference answer needed for most. See [[evals/methodology]].
+RAGAS provides faithfulness, answer relevancy, context precision, and recall metrics for RAG systems. No reference answer needed for most. See [[evals/methodology]].
 
 ---
 
@@ -191,6 +191,28 @@ You are a precise evaluator of AI responses. Your job is to score responses agai
 - Pairwise scoring is more reliable signal than absolute; absolute is needed for production monitoring
 - Ensemble of 3 judges reduces variance significantly
 - RAGAS provides reference-free faithfulness, answer relevancy, context precision, context recall
+
+## Common Failure Cases
+
+**Calibration skipped because "it's a quick eval" — judge produces scores uncorrelated with human quality**  
+Why: without calibrating against human labels, the judge may rate all responses as 3-4 out of 5 regardless of quality (central tendency bias) or consistently rate good responses lower than humans do; the scores look plausible but carry no signal.  
+Detect: judge scores show low variance (most responses score 3 or 4); when you manually read 20 sampled responses, the scores don't match your own assessment.  
+Fix: always collect 50+ human-labelled examples for any new eval domain before deploying the judge; compute Spearman correlation; do not use the judge if correlation is below 0.7.
+
+**Position bias inflates scores when the judge always sees the model's response first**  
+Why: LLM judges exhibit position bias — they systematically prefer whichever option appears first (or second, depending on the model); in absolute scoring, if your gold examples always appear in a fixed position relative to the model's response, scores are biased.  
+Detect: running the same pairwise eval with swapped order produces different winners 30%+ of the time; absolute scores are higher when the model response appears after a high-quality example.  
+Fix: for pairwise evals, always run both orderings and average; for absolute evals, randomise the position of the response in the prompt across batches.
+
+**JSON parsing fails for 10-20% of judge responses, silently dropping those eval samples**  
+Why: LLMs occasionally wrap their JSON output in markdown code fences, add trailing commas, or include extra explanatory text; naive `json.loads()` fails on all of these.  
+Detect: eval batch reports fewer results than expected; adding a debug log shows `json.JSONDecodeError` for a fraction of judge calls.  
+Fix: use `instructor` or `response_model` with Pydantic to enforce structured output; or add a regex fallback to extract JSON from markdown-fenced code blocks; never silently drop failed parses.
+
+**LLM judge rates its own outputs higher (self-enhancement bias) skewing model comparison results**  
+Why: when comparing Model A vs Model B, using Model A as the judge introduces systematic preference for Model A's outputs; this makes Model A appear to win comparisons it might otherwise lose.  
+Detect: using Model B as the judge produces different win rates than using Model A; the judge consistently rates its own style as more appropriate.  
+Fix: use a third model as the judge when comparing two models; if the same model must judge, use a fine-tuned judge trained on diverse human preference data rather than the base model.
 
 ## Connections
 

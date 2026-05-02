@@ -146,6 +146,33 @@ AG2's AgentOS runtime enables agents from different frameworks to collaborate:
 > [Source: AG2 documentation and release notes, 2025]
 > [Source: DEV Community — AutoGen, LangGraph, CrewAI comparison, 2025-2026]
 
+## Common Failure Cases
+
+**GroupChat enters a loop where two agents exchange turns without making progress**  
+Why: both agents have instructions that defer decision-making to the other; the selector chooses them in alternation indefinitely.  
+Detect: `max_round` is hit without `TERMINATE` appearing; verbose logs show A→B→A→B with no tool calls or task progress.  
+Fix: ensure one agent has explicit authority to conclude the task; add a `TERMINATE` instruction that fires on completion conditions.
+
+**`human_input_mode="NEVER"` causes UserProxyAgent to auto-approve unsafe actions**  
+Why: the UserProxy with NEVER mode executes all code the assistant suggests without confirmation.  
+Detect: in the transcript, code blocks are being executed automatically including file writes and network calls.  
+Fix: use `human_input_mode="ALWAYS"` for any destructive or irreversible tool calls; reserve NEVER for sandboxed environments only.
+
+**v0.4 async agents fail with event loop conflicts in Jupyter notebooks**  
+Why: Jupyter runs its own event loop; `asyncio.run(main())` raises `RuntimeError: This event loop is already running`.  
+Detect: `RuntimeError: This event loop is already running` in Jupyter cell output.  
+Fix: use `nest_asyncio.apply()` before calling `asyncio.run()`; or use `await` directly in Jupyter with `%autoawait asyncio`.
+
+**Agent message context grows unbounded in long GroupChats**  
+Why: all agents receive the full shared conversation thread; at 30+ rounds this exceeds context budgets and degrades quality.  
+Detect: token usage per call increases monotonically with round count; quality of responses degrades after ~20 rounds.  
+Fix: set a lower `max_round` and spawn a fresh GroupChat for new subtasks; summarise prior context and inject as a system message.
+
+**cross-framework agents via AgentOS don't complete tool calls**  
+Why: AG2 and external frameworks use different tool call schemas; AgentOS translation may miss required fields.  
+Detect: tool calls return empty results or errors when the tool is from a different framework.  
+Fix: test each tool call independently in its native framework before mixing; check AgentOS compatibility matrix for supported framework versions.
+
 ## Connections
 - [[agents/langgraph]] — production-grade stateful alternative
 - [[agents/crewai]] — role-based prototype-first alternative

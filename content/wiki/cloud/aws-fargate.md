@@ -10,7 +10,7 @@ tldr: Serverless compute engine for containers — run ECS or EKS workloads with
 
 # AWS Fargate
 
-Serverless compute engine for containers — run ECS or EKS workloads without managing EC2 instances.
+Serverless compute engine for containers. Run ECS or EKS workloads without managing EC2 instances.
 
 ---
 
@@ -242,6 +242,28 @@ container.add_mount_points(ecs.MountPoint(
 ```
 
 ---
+
+## Common Failure Cases
+
+**Fargate Spot task terminated mid-job with no graceful shutdown**
+Why: Spot interruption sends `SIGTERM` and gives 2 minutes to drain, but the application has no signal handler and exits immediately, losing in-flight work.
+Detect: batch jobs show incomplete output in S3; ECS events show `SIGTERM` as the stop reason with very short `lastStatus` durations.
+Fix: implement a `SIGTERM` handler (see `handle_sigterm` example above) that marks the task as draining, finishes in-flight work, and checkpoints state before exiting.
+
+**Task exits with code 137 (OOM kill)**
+Why: the container exceeded the memory limit declared in the task definition; Linux OOM-killed the process.
+Detect: ECS `StopCode: OutOfMemoryError` in task stopped events; container exit code 137.
+Fix: increase `memory` in the task definition, or profile the app to find the leak; also set `memoryReservation` lower than `memory` to allow soft sharing while keeping a hard cap.
+
+**EFS mount times out at task startup**
+Why: the EFS mount target's security group does not allow inbound NFS (2049/TCP) from the Fargate task's security group, or the EFS access point IAM policy is misconfigured.
+Detect: task fails to start with `ResourceInitializationError: failed to invoke EFS utils commands to set up EFS volumes` or hangs at mount.
+Fix: add inbound 2049/TCP from the task security group to the EFS mount target security group, and confirm the access point has `iam: ENABLED` with a matching IAM permission in the task role.
+
+**Health check grace period too short — service restarts loop**
+Why: the default `healthCheckGracePeriod` (0 seconds for manual config) causes the ALB to mark new tasks unhealthy before the app finishes initializing, triggering ECS to replace them.
+Detect: ECS service events show continuous task replacement; ALB target group shows tasks cycling between `initial` and `unhealthy`.
+Fix: set `healthCheckGracePeriod` to at least as long as your app's slowest cold start (typically 30–120 seconds for JVM apps, 10–30 seconds for Python/Node).
 
 ## Connections
 

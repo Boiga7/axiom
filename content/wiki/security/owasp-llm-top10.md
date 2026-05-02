@@ -117,7 +117,7 @@ Adversarial content stored in the agent's long-term memory (vector store, episod
 
 ### A6 — Emergent Autonomous Behaviour
 
-Unexpected behaviours that arise from the interaction of multiple agents, tools, and environment states — not present in any single component.
+Unexpected behaviours that arise from the interaction of multiple agents, tools, and environment states. Not present in any single component.
 
 ### A7 — Resource and Cost Abuse
 
@@ -159,6 +159,33 @@ Agents operate without checkpoints, auditing, or human-in-the-loop for high-stak
 - A3 Delegated Trust Failures: compromised Agent B abuses trust granted by Agent A
 - A5 Persistent Memory Exploitation: adversarial content in vector store activates on future sessions
 - A10 Inadequate Human Oversight: no checkpoints or audit trail for high-stakes autonomous decisions
+
+## Common Failure Cases
+
+**Indirect prompt injection via RAG document goes undetected**  
+Why: a malicious instruction is embedded in a document that gets indexed into the RAG corpus; when retrieved, it is injected into the LLM's context alongside trusted content and executed.  
+Detect: agent takes unexpected actions correlated with a specific document being retrieved; red-team by injecting `Ignore previous instructions: ...` into test documents and observing agent behaviour.  
+Fix: validate and sanitise documents before indexing; use a screening LLM call to check retrieved chunks for injection patterns before passing to the main agent.
+
+**LLM06 Excessive Agency: agent deletes files without confirmation**  
+Why: the tool has write/delete permissions and no confirmation step; the LLM misinterprets an ambiguous user request and takes an irreversible action.  
+Detect: audit logs show destructive tool calls (delete, update, send) triggered without an explicit user confirmation in the same turn.  
+Fix: require human-in-the-loop confirmation for all irreversible actions; scope tools to read-only by default; provide a separate tool with write access that requires an explicit confirmation parameter.
+
+**LLM05 SQL injection via LLM-generated query**  
+Why: LLM output is interpolated directly into a SQL string; the model can be prompted to generate a query that extracts or modifies unintended data.  
+Detect: security scan finds raw string interpolation in DB query construction; penetration test with a prompt that asks the model to "show all users" reveals unintended data.  
+Fix: never interpolate LLM output into SQL; use parameterised queries or an ORM; validate that generated queries match an allow-list of permitted operations.
+
+**A7 Resource abuse: agent spawns subagents in an infinite loop**  
+Why: the orchestration logic has a bug or the agent interprets its goal as requiring continuous operation; it spawns subagents or makes API calls until the account budget is exhausted.  
+Detect: token spend spikes 100x normal; cost gate threshold triggers; trace shows a recursive spawning pattern.  
+Fix: implement hard token/cost gates at the orchestration layer; cap subagent spawn depth; add a circuit breaker that halts if the same tool is called more than N times in one session.
+
+**A5 Persistent memory exploitation: adversarial content stored in vector store**  
+Why: user-controlled content is written directly to the agent's long-term memory without sanitisation; it contains instructions that activate on future sessions.  
+Detect: agent behaviour in a new session is influenced by content from a previous session in unexpected ways; the triggering memory entry contains instruction-like text.  
+Fix: validate all content before writing to long-term memory; apply TTL to memories; use a separate namespace for user-supplied content vs system-generated memories.
 
 ## Connections
 

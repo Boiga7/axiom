@@ -10,7 +10,7 @@ tldr: Credentials, API keys, database passwords, TLS certificates — anything t
 
 # Secrets Management
 
-Credentials, API keys, database passwords, TLS certificates — anything that grants access must be managed, rotated, and audited. Hard-coded secrets in code or config are the most common cause of credential leaks.
+Credentials, API keys, database passwords, TLS certificates. Anything that grants access must be managed, rotated, and audited. Hard-coded secrets in code or config are the most common cause of credential leaks.
 
 ---
 
@@ -82,7 +82,7 @@ resource "aws_secretsmanager_secret_rotation" "db_password" {
 
 ## HashiCorp Vault
 
-Enterprise-grade secrets management. Self-hosted (or HCP Vault — hosted). Two features beyond AWS Secrets Manager: dynamic secrets and fine-grained policies.
+Enterprise-grade secrets management. Self-hosted (or HCP Vault, hosted). Two features beyond AWS Secrets Manager: dynamic secrets and fine-grained policies.
 
 ### KV v2 — Static Secrets with Versioning
 
@@ -145,7 +145,7 @@ Every application instance gets its own unique credentials. Compromised credenti
 
 ### Vault Agent
 
-Sidecar that authenticates to Vault, retrieves secrets, and writes them to a shared volume or injects them into environment variables. Applications read files — no Vault SDK required.
+Sidecar that authenticates to Vault, retrieves secrets, and writes them to a shared volume or injects them into environment variables. Applications read files. No Vault SDK required.
 
 ```hcl
 # vault-agent-config.hcl
@@ -214,7 +214,7 @@ client.set_secret("db-password", "new-value", expires_on=datetime.now(timezone.u
 
 ## External Secrets Operator (Kubernetes)
 
-Kubernetes controller that syncs secrets from AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, or HashiCorp Vault into Kubernetes Secrets. Applications use standard Kubernetes Secret mounts — no cloud SDK required.
+Kubernetes controller that syncs secrets from AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, or HashiCorp Vault into Kubernetes Secrets. Applications use standard Kubernetes Secret mounts. No cloud SDK required.
 
 ```yaml
 apiVersion: external-secrets.io/v1beta1
@@ -249,6 +249,28 @@ spec:
 6. **Don't log secrets** — redact before logging; `structlog.processors.format_exc_info` can expose them.
 
 ---
+
+## Common Failure Cases
+
+**Automatic RDS rotation breaks the application during the rotation window**
+Why: the default "single user" rotation strategy updates the password in Secrets Manager and then in RDS sequentially — any application that cached the old credentials will fail until it re-fetches the secret.
+Detect: application errors with `authentication failed for user` start at the rotation time and resolve within minutes as instances refresh their credentials cache.
+Fix: use the "alternating users" rotation strategy, which maintains two valid credentials and rotates between them so the old credential remains valid until all instances have picked up the new one.
+
+**Vault dynamic database credentials expire mid-request causing connection errors**
+Why: the application creates a database connection pool at startup using credentials with a 1-hour TTL, but the pool holds connections open beyond TTL expiry, and the DB rejects them with `role does not exist`.
+Detect: database errors appear consistently at 1-hour intervals (or at the `max_ttl` boundary) and resolve after application restart.
+Fix: implement Vault lease renewal in the application (call `sys/leases/renew` before the TTL expires), or use Vault Agent to handle token and credential renewal automatically and write fresh credentials to a file the app re-reads.
+
+**External Secrets Operator stops syncing after an AWS IAM policy change**
+Why: the ClusterSecretStore's IRSA role lost the `secretsmanager:GetSecretValue` permission, but the ExternalSecret resource shows no error — it silently retains the last synced value.
+Detect: `kubectl describe externalsecret <name>` shows `SecretSynced=False` with an `AccessDenied` reason; the Kubernetes Secret has a stale version of the value.
+Fix: restore the IAM permission and force a resync by annotating the ExternalSecret with `force-sync: $(date +%s)`; set up an alert on the `SecretSynced` condition to catch future sync failures promptly.
+
+**Secrets committed to Git in CI pipeline debug output**
+Why: a `set -x` or verbose CI log level causes the shell to echo commands, printing environment variables (including injected secrets) to the CI log stream.
+Detect: CI log output contains literal secret values; a trufflehog or gitleaks scan of CI logs finds credential patterns.
+Fix: never use `set -x` in CI steps that handle secrets; mask secret values in CI by registering them as masked variables (GitHub: `add-mask`); audit CI log retention and rotate any exposed credentials immediately.
 
 ## Connections
 

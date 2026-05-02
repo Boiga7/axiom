@@ -95,7 +95,7 @@ elements = partition_pdf("doc.pdf", strategy="hi_res")
 tables = [e for e in elements if e.category == "Table"]
 ```
 
-Tables should be chunked as single units — splitting a table across chunks destroys its meaning.
+Tables should be chunked as single units. Splitting a table across chunks destroys its meaning.
 
 ---
 
@@ -165,7 +165,7 @@ for i, chunk in enumerate(raw_chunks):
     })
 ```
 
-Metadata enables pre-filtering before vector search: `where date > "2025-01-01" AND doc_type = "financial"` — dramatically improves precision for time-sensitive or domain-specific queries.
+Metadata enables pre-filtering before vector search: `where date > "2025-01-01" AND doc_type = "financial"`. Dramatically improves precision for time-sensitive or domain-specific queries.
 
 ---
 
@@ -198,6 +198,33 @@ Metadata enables pre-filtering before vector search: `where date > "2025-01-01" 
 - Late chunking: embed entire document first, pool token embeddings per chunk; best for cross-reference-heavy docs (Jina AI, 2024)
 - Parent-child retrieval: child=200 tokens for matching precision, parent=2000 tokens returned to LLM
 - Metadata on every chunk: source, page, section, date — enables pre-filtering before vector search
+
+## Common Failure Cases
+
+**Answers split across chunk boundaries return incomplete responses**  
+Why: fixed-size chunking with no overlap cuts mid-sentence; the answer spans two consecutive chunks, neither of which retrieves correctly.  
+Detect: retrieval returns chunks that end or begin mid-thought; cosine scores are mediocre even for clearly relevant content.  
+Fix: add 50-token overlap (`chunk_overlap=50`); for table-dense content use structure-aware splitting instead.
+
+**Table rows return as incoherent half-tables**  
+Why: character-based splitters don't understand table structure and cut across rows.  
+Detect: retrieved chunks contain malformed table syntax (orphan `|` characters, partial header rows).  
+Fix: extract tables as atomic units using `unstructured`; never apply recursive splitters to tabular content.
+
+**Semantic chunker is 5-10x slower than expected at ingestion**  
+Why: semantic chunking embeds every sentence via an API call; large documents trigger hundreds of calls.  
+Detect: ingestion pipeline takes >10 minutes per 100-page document; embedding API spend spikes.  
+Fix: use async batching for sentence embeddings; consider fixed-size chunking for documents where topic uniformity is high.
+
+**Chunks from different doc types mixed in the same index, collapsing precision**  
+Why: a financial report and a user manual land in the same vector space; queries retrieve across doc types indiscriminately.  
+Detect: retrieval returns seemingly unrelated documents; RAGAS context precision drops below 0.60.  
+Fix: add `doc_type` metadata to every chunk and use pre-filtering in the vector store query.
+
+**Late chunking fails for documents longer than the embedding model's context**  
+Why: models like `jina-embeddings-v3` have a max input length; documents beyond it are silently truncated.  
+Detect: chunks near the end of long documents have identical embeddings to mid-document chunks (truncation artifact).  
+Fix: split very long documents into sections before applying late chunking; apply late chunking within each section.
 
 ## Connections
 

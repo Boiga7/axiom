@@ -258,6 +258,28 @@ pytest --cov=mcpindex --cov-fail-under=80
 - Markers: `pytest -m "not integration"` for CI; `pytest -m "integration"` for gated real-API tests
 - Coverage: `--cov-fail-under=80` to gate CI on minimum coverage threshold
 
+## Common Failure Cases
+
+**`asyncio_mode = "auto"` setting is placed under the wrong key in pyproject.toml and is silently ignored**  
+Why: pytest-asyncio reads `asyncio_mode` from `[tool.pytest.ini_options]`; if you place it under `[tool.pytest-asyncio]` or a different section, the setting is never applied and every async test requires `@pytest.mark.asyncio` explicitly.  
+Detect: async tests raise `PytestUnraisableExceptionWarning` or fail with `coroutine was never awaited` even though the config file appears correct; removing `asyncio_mode` from the file has no effect.  
+Fix: verify the key is under `[tool.pytest.ini_options]` in `pyproject.toml`, not under a dedicated `[tool.pytest-asyncio]` section, and confirm with `pytest --co -q` that collection succeeds without warnings.
+
+**`respx.mock` context manager is used as a decorator rather than a `with` block, leaving requests unpatched**  
+Why: `respx.mock` used as `@respx.mock` without parentheses creates a decorator that patches synchronous functions only; inside an `async def` test, the mock is not active and the real HTTP call goes through.  
+Detect: the test passes locally against a live server but fails in CI with a network error; adding print statements shows the real API URL is being contacted.  
+Fix: always use `respx.mock` as a context manager inside the test body (`with respx.mock: ...`) or use `@respx.mock` with parentheses for synchronous tests; for async fixtures, use the context manager pattern with `async with`.
+
+**`session`-scoped fixture creates a shared object that is mutated by individual tests, causing state leakage**  
+Why: `scope="session"` creates one instance for the entire run; if a test modifies that object (appending to a list, updating a dict), the next test sees the mutated state, making test order matter.  
+Detect: tests pass when run individually but fail in full suite runs; the failure pattern depends on which tests ran earlier; adding `-p no:randomly` (disable random order) reproduces a consistent failure.  
+Fix: use `scope="function"` for any shared object that tests mutate; only use `session` scope for truly immutable or expensive resources that are never modified (e.g., an SDK client, a loaded model).
+
+**`monkeypatch.setenv` in an `autouse` fixture is overridden by a real environment variable already set in the shell**  
+Why: `monkeypatch.setenv` sets the variable for the test duration, but if the CI environment already has `ANTHROPIC_API_KEY` set to a real value before pytest starts, some SDK initialisation happens at import time — before any fixture runs — using the real key.  
+Detect: tests that should use mocked responses occasionally hit the real API; the failure is non-deterministic and depends on import order.  
+Fix: unset the variable before running the test suite (`unset ANTHROPIC_API_KEY` in CI, or set it to a dummy value in the workflow environment block before `pytest` runs); do not rely solely on the autouse fixture for import-time side effects.
+
 ## Connections
 
 - [[python/ecosystem]] — Python ecosystem fundamentals (uv, asyncio, httpx, structlog)

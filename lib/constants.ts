@@ -65,6 +65,7 @@ export const BRAIN_MAP: Record<string, Brain> = {
   "web-frameworks": "engineering",
   "test-automation": "engineering",
   java: "engineering",
+  javascript: "engineering",
   "cs-fundamentals": "engineering",
   qa: "engineering",
   "technical-qa": "engineering",
@@ -105,6 +106,7 @@ export function slugToLabel(slug: string): string {
     "web-frameworks": "Web Frameworks",
     "technical-qa": "Technical QA",
     qa: "QA",
+    javascript: "JavaScript / TypeScript",
   };
   return (
     overrides[slug] ??

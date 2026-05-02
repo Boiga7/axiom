@@ -251,5 +251,27 @@ CRITICAL: System-level failure. Usually triggers pager.
 
 ---
 
+## Common Failure Cases
+
+**Alert fires on every spike, team becomes desensitised (alert fatigue)**
+Why: alert thresholds set too low (e.g., error rate > 0.1%) trigger on normal traffic variance; the team learns to ignore the pager and misses a real incident.
+Detect: on-call engineers close alerts without investigation more than once per week; the same alert fires > 3 times without a correlated user impact.
+Fix: raise the threshold and add a `for: 2m` duration requirement so transient spikes are ignored; ensure every alert has a runbook and a clear remediation path.
+
+**High-cardinality label on a Prometheus metric causes memory explosion**
+Why: using a user ID, request ID, or URL parameter as a label creates a unique time series per value; Prometheus keeps all active time series in memory.
+Detect: Prometheus memory usage grows unboundedly; `prometheus_tsdb_head_series` reaches millions.
+Fix: never use unbounded values (user IDs, UUIDs, raw URLs) as labels; use low-cardinality labels (endpoint path template, status code, method).
+
+**Trace context not propagated across async boundaries**
+Why: spawning a background task or thread without explicitly passing the OpenTelemetry context loses the parent span; the background work appears as a disconnected root trace.
+Detect: traces in Jaeger/Tempo show orphaned spans with no parent; you cannot correlate a background job to the HTTP request that triggered it.
+Fix: capture `opentelemetry.context.get_current()` before spawning the task and pass it explicitly; use `opentelemetry.context.attach()` inside the task.
+
+**Metrics middleware using raw path causes cardinality explosion**
+Why: using `request.url.path` as a label includes path parameters like `/users/abc123`, producing a unique series per entity.
+Detect: Grafana dashboards show thousands of distinct `endpoint` values; the route `/users/{id}` appears as `/users/abc`, `/users/def`, etc.
+Fix: use the route template (e.g., `/users/{id}`) not the resolved path; extract it from the framework's router metadata.
+
 ## Connections
 [[se-hub]] · [[cloud/observability-stack]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/microservices-patterns]] · [[qa/qa-metrics]] · [[llms/ae-hub]]

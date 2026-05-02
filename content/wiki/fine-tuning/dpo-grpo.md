@@ -85,7 +85,7 @@ trainer.train()
 
 ## GRPO: Group Relative Policy Optimisation
 
-Used to train DeepSeek-R1. Replaces the critic/value network in PPO with group-relative rewards — dramatically simpler and cheaper.
+Used to train DeepSeek-R1. Replaces the critic/value network in PPO with group-relative rewards. Dramatically simpler and cheaper.
 
 **How it works:**
 1. For each prompt, sample a **group** of G responses (G=8 is typical)
@@ -135,7 +135,7 @@ L_ORPO = L_SFT + λ · L_OR
 
 ## KTO: Kahneman-Tversky Optimisation
 
-Uses scalar labels (good/bad) rather than pairwise comparisons. Based on prospect theory — humans weigh losses more than equivalent gains.
+Uses scalar labels (good/bad) rather than pairwise comparisons. Based on prospect theory. Humans weigh losses more than equivalent gains.
 
 **When to use:** When collecting pairwise preferences is impractical. A single human annotation per response (thumbs up/down) is enough.
 
@@ -177,6 +177,28 @@ Need maximum control / frontier model quality?              → PPO
 - KTO: uses scalar good/bad labels; no pairwise comparisons required
 - 500 high-quality preference pairs outperform 5,000 noisy ones for DPO
 - DeepSeek-R1 trained with GRPO achieves o1-level reasoning benchmark performance
+
+## Common Failure Cases
+
+**DPO loss goes to zero early in training, and generation quality does not improve**  
+Why: if chosen and rejected responses in the dataset are too similar (both are reasonable but one is marginally better), the policy cannot learn a meaningful signal; the loss reaches zero without the model learning to consistently prefer the chosen response.  
+Detect: DPO loss drops to near-zero within 100-200 steps; human evaluation shows no improvement in response quality vs the SFT baseline.  
+Fix: audit your preference dataset for quality margin — chosen responses should be clearly better than rejected on a specific dimension; filter pairs where the quality difference is below a threshold.
+
+**GRPO reward function is too sparse, causing most sampled responses to get the same score**  
+Why: if the reward function returns binary 0/1 and almost all G=8 sampled responses score 0 (task is too hard), the advantage signal is near-zero for every sample and the policy does not update meaningfully.  
+Detect: GRPO training loss stays flat; `reward/mean` metric in logs stays near 0 for many batches; generation quality does not improve.  
+Fix: use a partial credit reward function where intermediate steps earn partial scores; alternatively, use curriculum learning — start with easier examples where the model can occasionally score 1/1.
+
+**DPO `beta` set too low causes the policy to diverge and produce incoherent outputs**  
+Why: a low beta (0.01 or lower) allows the policy to drift far from the SFT reference; on small datasets this causes the model to find degenerate solutions — very high reward on training examples but nonsensical generations.  
+Detect: chosen response log probability increases but the model generates repetitive or incoherent text during evaluation; `eval/loss` diverges upward after initially decreasing.  
+Fix: increase beta to 0.1 as a starting point; treat beta as the primary hyperparameter in DPO sweeps; use the SFT model's perplexity on held-out data as an early stopping signal.
+
+**ORPO training improves preference alignment but hurts instruction-following because no SFT warmup was used**  
+Why: ORPO's single-pass training on preference data assumes the model already has reasonable instruction-following behaviour; applied directly to a base model (not an SFT checkpoint), ORPO optimises for preferences without first establishing instruction-following.  
+Detect: ORPO-trained model follows preferences from the training data but fails to follow basic instructions not in the training set.  
+Fix: always start ORPO from an SFT checkpoint (not a base model), even if the SFT training was minimal; the "no warmup needed" claim applies to skipping a second SFT pass, not skipping SFT entirely.
 
 ## Connections
 

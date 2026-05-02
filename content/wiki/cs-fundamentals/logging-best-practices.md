@@ -233,6 +233,28 @@ services:
 
 ---
 
+## Common Failure Cases
+
+**PII written to logs in plain text**
+Why: developers log raw request bodies or user objects for debugging convenience, and those payloads contain email addresses, card numbers, or tokens.
+Detect: run `grep -r "email\|password\|card" /var/log/app/` or enable a static analysis rule that flags logging calls on untrusted input.
+Fix: add the `scrub_pii_processor` to the structlog pipeline and audit every `log.*` call that accepts user-controlled data.
+
+**Missing correlation ID makes incidents undebuggable**
+Why: logs from different services share only a timestamp, which is insufficient to join them into a request trace when clock skew or high concurrency is present.
+Detect: you're spending more than two minutes manually correlating log lines across services for a single failing request.
+Fix: inject a `CorrelationIDMiddleware` at the application entry point and pass the ID in every outbound HTTP header and message queue metadata field.
+
+**DEBUG logs enabled in production, masking signal in noise**
+Why: a developer enables DEBUG temporarily to investigate an issue, forgets to revert, and the log volume increases 100x, making error-rate alerts meaningless and inflating log storage costs.
+Detect: log ingestion cost spikes; `grep level=debug | wc -l` exceeds `grep level=error | wc -l` by orders of magnitude.
+Fix: configure log level via an environment variable with a production default of `INFO`; never hardcode `logging.DEBUG` in application startup.
+
+**Stack traces at INFO or WARNING level**
+Why: logging `exc_info=True` at INFO floods structured log systems with multi-line stack traces, breaking JSON parsing and alerting thresholds.
+Detect: log aggregation shows INFO entries with multi-kilobyte payloads; dashboards miscount error rates.
+Fix: reserve `exc_info=True` for ERROR and above; at WARNING, log the exception type and message as structured fields (`error_type`, `error_message`) without the full traceback.
+
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/observability-se]] · [[cloud/infrastructure-monitoring]] · [[cs-fundamentals/api-security]] · [[web-frameworks/fastapi]] · [[cloud/lambda-powertools]]

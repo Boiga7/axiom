@@ -1,4 +1,4 @@
-﻿---
+---
 type: entity
 category: apis
 tags: [anthropic, api, claude, prompt-caching, batch-api, streaming, tool-use]
@@ -140,7 +140,7 @@ response = client.messages.create(
 
 **Parallel tool use** — Claude can call multiple tools in a single turn when they're independent. Check `response.content` for multiple `tool_use` blocks.
 
-MCP tools integrate via [[protocols/mcp]] — the MCP client translates MCP tool schemas to the Anthropic tool format automatically.
+MCP tools integrate via [[protocols/mcp]]. The MCP client translates MCP tool schemas to the Anthropic tool format automatically.
 
 ---
 
@@ -224,6 +224,33 @@ const client = new Anthropic();
 - Extended thinking: `budget_tokens` controls reasoning spend; thinking block excluded from caching
 - Error code 529 = overloaded; both SDKs retry with backoff automatically
 - `tool_choice` options: `auto`, `any`, `{"type": "tool", "name": "..."}`
+
+## Common Failure Cases
+
+**Prompt cache miss on every call despite `cache_control` set**  
+Why: the cached prefix is not byte-identical across calls — a dynamic timestamp, user ID, or whitespace difference in the system prompt breaks the cache key.  
+Detect: `usage.cache_read_input_tokens` is 0 on every response; log the raw system prompt bytes to find the differing fragment.  
+Fix: move all dynamic content to the user message; keep the system prompt fully static; verify with `usage.cache_creation_input_tokens` on the first call.
+
+**529 error causes agent loop to fail with no retry**  
+Why: the application wraps the call in a try/except that catches before the SDK's built-in retry logic fires.  
+Detect: 529 errors appear in logs without multiple retry attempts; SDK retry count stays at 1.  
+Fix: let the SDK handle 529 retries; if you must catch, do so only after the SDK exhausts its own retries.
+
+**Parallel tool calls return results in wrong order**  
+Why: the caller sends `tool_result` messages in a different order than the `tool_use` blocks were issued; Claude confuses which result belongs to which call.  
+Detect: Claude's response references the wrong tool result; check that each `tool_result` `tool_use_id` exactly matches the corresponding `tool_use` block's `id`.  
+Fix: always match `tool_result` messages to their `tool_use` block by `id`, not by position.
+
+**Extended thinking budget exhausted before the model reaches an answer**  
+Why: `budget_tokens` is too low for the complexity of the task; reasoning is cut off mid-chain.  
+Detect: the `thinking` block ends abruptly; `stop_reason` is `max_tokens` rather than `end_turn`.  
+Fix: increase `budget_tokens`; start at 8,000–10,000 for complex reasoning tasks and tune down.
+
+**Batch job results never collected — 24-hour window expires**  
+Why: the batch was submitted but the polling job failed; results expire after 24 hours.  
+Detect: `batch.request_counts.expired` is non-zero; logs show no polling calls after batch creation.  
+Fix: use a webhook for batch completion notification; or schedule a polling job with a dead-man's-switch alert if results are not collected within 12 hours.
 
 ## Connections
 

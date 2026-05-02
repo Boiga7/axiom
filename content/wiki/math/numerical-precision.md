@@ -39,7 +39,7 @@ The default. Used for:
 - Loss computation
 - Master weights in mixed-precision training
 
-Memory: 4 bytes per parameter. A 7B model in fp32 = 28 GB — doesn't fit on a single A100 (80 GB) with activations and gradients.
+Memory: 4 bytes per parameter. A 7B model in fp32 = 28 GB. Doesn't fit on a single A100 (80 GB) with activations and gradients.
 
 ---
 
@@ -49,7 +49,7 @@ Memory: 4 bytes per parameter. A 7B model in fp32 = 28 GB — doesn't fit on a s
 - **Overflow:** gradients or activations > 65,504 → NaN → training crashes
 - **Underflow:** very small values → round to zero → gradient vanishes
 
-Fix: **loss scaling** — multiply the loss by a large constant before backward pass (keep gradients in fp16 range), then divide the gradients before the optimizer step.
+Fix: **loss scaling**. Multiply the loss by a large constant before backward pass (keep gradients in fp16 range), then divide the gradients before the optimizer step.
 
 Used in: CUDA matrix operations (tensor cores), activations during forward pass.
 
@@ -98,7 +98,7 @@ Memory with AMP (bf16):
 
 ## int8 — Post-Training Quantisation (PTQ)
 
-Quantise weights to 8-bit integers after training. The model was trained in fp32/bf16 — int8 is applied at inference only.
+Quantise weights to 8-bit integers after training. The model was trained in fp32/bf16. Int8 is applied at inference only.
 
 ```
 x_int8 = round(x_fp32 / scale)    # quantise: map float → int
@@ -117,7 +117,7 @@ Memory: 1 byte/param (weights); activations remain fp16 during compute. A 70B mo
 
 ## int4 — Aggressive Quantisation
 
-4-bit quantisation — the frontier of inference efficiency.
+4-bit quantisation. The frontier of inference efficiency.
 
 **GPTQ:** layer-by-layer quantisation with error correction. Calibrate on a small dataset; compute optimal int4 values to minimise output error for each layer.
 
@@ -167,6 +167,28 @@ DeepSpeed and Transformer Engine (NVIDIA) support fp8 training. Requires calibra
 - fp8: H100 native; ~2× memory and speed vs bf16 for training at scale
 
 ---
+
+## Common Failure Cases
+
+**Training in fp16 produces NaN losses after several thousand steps because of gradient overflow**
+Why: fp16 has a maximum representable value of ~65,504; large gradient values (common in attention layers with long sequences or high learning rates) overflow to `inf`, which then propagates through the computation graph and becomes `NaN` in the loss.
+Detect: `loss.item()` returns `nan` after previously healthy training; the NaN appears suddenly rather than gradually; disabling fp16 and running in fp32 eliminates the NaN.
+Fix: switch to bf16 (same range as fp32, no overflow risk); if you must use fp16, add `GradScaler` and set a lower initial loss scale; alternatively, reduce the learning rate and add gradient clipping.
+
+**Quantised model (int4/int8) gives significantly worse quality than expected because calibration data was mismatched**
+Why: post-training quantisation requires calibration data to compute the per-tensor or per-channel scale factors; if the calibration dataset is too small, too narrow in domain, or structurally different from production inputs, the scale factors are mis-calibrated and quantisation error is disproportionately large.
+Detect: the quantised model scores 5-10%+ below the fp16 baseline on your task, far above the expected 1-3% drop; testing with fp16 restores quality; re-running quantisation with a larger calibration set reduces the gap.
+Fix: use 512-1024 diverse calibration samples representative of your actual inference distribution; for domain-specific models, include domain-specific calibration data; use AWQ instead of GPTQ for weights with highly non-uniform activation distributions.
+
+**Mixed precision training on V100 (no bf16 support) silently falls back to fp32, doubling memory usage**
+Why: V100 GPUs do not support bf16 in hardware; `torch.autocast(dtype=torch.bfloat16)` on V100 silently casts to fp32 instead, which doubles memory usage compared to expected fp16 and may cause OOM errors that would not occur on A100.
+Detect: memory profiling shows fp32 activations despite `autocast(dtype=torch.bfloat16)` in the code; the training run OOMs at a batch size that should fit in fp16.
+Fix: use `torch.float16` for V100 training with a `GradScaler`; explicitly check `torch.cuda.get_device_capability()` and select the appropriate dtype at runtime rather than hardcoding bf16.
+
+**fp8 training produces divergence because per-tensor scaling factors are not updated frequently enough**
+Why: fp8 formats (E4M3/E5M2) have very limited dynamic range; accurate training requires per-tensor or per-channel scaling factors that must be updated every forward pass; if the Transformer Engine's scaling factor update schedule is too infrequent, tensors fall outside the representable range and training diverges.
+Detect: loss diverges within a few hundred steps of enabling fp8; reverting to bf16 stabilises training; the divergence correlates with large gradient norm spikes.
+Fix: use NVIDIA Transformer Engine's `FP8GlobalStateManager` with `fp8_autocast` to handle automatic scaling factor management; do not implement fp8 scaling manually; keep bf16 as the fallback for layers with high gradient variance.
 
 ## Connections
 

@@ -1,4 +1,4 @@
-﻿---
+---
 type: concept
 category: agents
 tags: [multi-agent, orchestration, supervisor, swarm, parallelism, handoff]
@@ -93,7 +93,7 @@ Each agent in a multi-agent system gets its own context window. This is both a b
 2. **Shared external store** — Redis, database, or vector store that all agents read/write
 3. **Summarisation before handoff** — compress prior context to fit in the next agent's window
 
-Never pass the full conversation history between agents unless truly necessary — it eats context budget and introduces noise.
+Never pass the full conversation history between agents unless truly necessary. It eats context budget and introduces noise.
 
 ---
 
@@ -142,6 +142,33 @@ The hardest part. Strategies:
 - Each agent gets its own context window — state must be explicitly marshalled between agents
 - Minimum-privilege tool scopes per agent is a security requirement, not an optimisation
 - LangGraph Studio visualises the full agent topology for debugging
+
+## Common Failure Cases
+
+**Supervisor orchestrator exceeds context budget marshalling sub-agent results**  
+Why: each sub-agent returns full verbose output; the supervisor accumulates all results before synthesising, filling its context window.  
+Detect: supervisor token usage exceeds 80% of the context budget on runs with 4+ sub-agents; responses degrade in coherence.  
+Fix: instruct sub-agents to return structured summaries, not raw transcripts; have each sub-agent compress to key findings before returning.
+
+**Swarm handoff creates an infinite loop between two agents**  
+Why: agent A's exit condition matches agent B's entry condition and vice versa; neither has a termination path.  
+Detect: the same two agent names alternate in trace spans indefinitely; token spend keeps climbing.  
+Fix: add a global `step_count` state field; add an explicit `FINISH` transition if step_count exceeds a threshold.
+
+**Parallel fan-out produces conflicting results that the merge step cannot reconcile**  
+Why: two sub-agents independently analyse the same data and reach different conclusions; the merge step receives contradictory facts.  
+Detect: merge step output contains hedging language ("some agents say X, others say Y"); or merge node raises a logic error.  
+Fix: assign non-overlapping data partitions to parallel agents; if overlap is unavoidable, design the merge to resolve conflicts by recency or confidence score.
+
+**State handoff between agents loses fields due to dict serialisation mismatch**  
+Why: agent A returns a dict with extra keys; when deserialized into agent B's TypedDict, extra keys are silently dropped.  
+Detect: agent B behaves as if it didn't receive certain fields that agent A clearly computed.  
+Fix: use a shared `AgentState` TypedDict that all agents in the system reference; avoid ad-hoc dicts for cross-agent payloads.
+
+**Minimum-privilege tool scoping causes sub-agent to fail on an unforeseen capability need**  
+Why: the sub-agent was given read-only tools but discovers it needs to write a result; it either fails silently or calls a forbidden tool.  
+Detect: sub-agent returns an incomplete result with a note that it "couldn't complete step X"; tool call logs show denied calls.  
+Fix: iterate on tool assignments during testing before production; add a structured error return type that surfaces capability gaps to the supervisor.
 
 ## Connections
 

@@ -276,6 +276,28 @@ def emit_daily_costs() -> None:
 
 ---
 
+## Common Failure Cases
+
+**Cost allocation broken because tagging SCP was added after resources were created**
+Why: The SCP that enforces required tags (`team`, `service`) only applies at resource creation time; existing resources created before the SCP are not retroactively tagged and show as unallocated cost.
+Detect: Cost Explorer shows a large "No tag" segment in the tag-breakdown view; `aws resourcegroupstaggingapi get-resources --tag-filters` returns many untagged resources.
+Fix: Run AWS Config rule `required-tags` to identify untagged resources; use AWS Tag Editor to bulk-tag existing resources; enforce the SCP going forward and set a 30-day remediation deadline for untagged legacy resources.
+
+**Budget alert fires too late because it checks monthly actual spend, not forecasted spend**
+Why: An `ACTUAL` spend threshold of 80% only alerts after 80% of the budget is already consumed; a spend spike at month-end can blow the budget before the alert is actionable.
+Detect: Budget alarm fires with less than 5 days left in the month, leaving no time to reduce spending before the threshold is exceeded.
+Fix: Add a `FORECASTED` notification at 80% of the budget in addition to the `ACTUAL` 80% notification (as shown in the code above); the forecast alert gives advance warning when spend trajectory is off.
+
+**Savings Plan purchased against a service that is being migrated, leaving commitment stranded**
+Why: A 1-year EC2 Savings Plan was purchased against an instance family (`c5`) that the platform team plans to migrate to Graviton (`c7g`) within 6 months; EC2 Instance Savings Plans are family-specific and cannot cover Graviton instances.
+Detect: Savings Plans Utilization drops below 70% after the Graviton migration; Cost Explorer shows the old SP covering near-zero usage.
+Fix: Use Compute Savings Plans instead of EC2 Instance Savings Plans — Compute SPs apply to any instance family, any OS, and also cover Fargate and Lambda, providing flexibility across a migration.
+
+**Cost dashboard showing yesterday's data mistaken for real-time spend**
+Why: AWS Cost Explorer and the Billing console have a 24-hour data lag; teams building custom cost dashboards from the Cost Explorer API assume the latest data reflects current-day spend.
+Detect: Cost metrics appear stable during an incident that is clearly generating unusual traffic; the dashboard shows correct totals only after a 24-hour delay.
+Fix: Use CloudWatch `EstimatedCharges` metric (updated multiple times per day) for near-real-time billing alerts; document the 24-hour lag prominently on the cost dashboard so engineers do not mistake stale data for current state.
+
 ## Connections
 
 [[cloud-hub]] · [[cloud/cost-optimisation-cloud]] · [[cloud/aws-core]] · [[cloud/infrastructure-monitoring]] · [[cloud/github-actions]]

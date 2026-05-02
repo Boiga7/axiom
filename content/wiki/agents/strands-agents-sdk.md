@@ -79,7 +79,7 @@ Type hints + docstrings generate the tool schema. The model sees the schema and 
 
 ## Multi-Step Reasoning
 
-Strands automatically runs the ReAct loop — no explicit loop code needed:
+Strands automatically runs the ReAct loop. No explicit loop code needed:
 
 ```python
 @tool
@@ -137,7 +137,7 @@ model = LiteLLMModel(model_id="gpt-4o")
 
 ## MCP Server Integration
 
-Any MCP server can be used as a tool source — thousands of published servers become immediately available:
+Any MCP server can be used as a tool source. Thousands of published servers become immediately available:
 
 ```python
 from strands import Agent
@@ -177,7 +177,7 @@ with agent.stream_async("Summarise last week's deployment logs.") as stream:
 For production serverless deployment, push the agent to Amazon Bedrock AgentCore Runtime. It handles scaling, session management, and secrets automatically:
 
 ```python
-# Deploy locally then push
+# Deploy locally then push [unverified — AgentCoreDeployment API surface not confirmed from second source]
 from strands_deploy import AgentCoreDeployment
 
 deployment = AgentCoreDeployment(
@@ -188,7 +188,7 @@ deployment = AgentCoreDeployment(
 deployment.deploy()
 ```
 
-AgentCore Runtime is compatible with any Python agent framework (LangGraph, CrewAI, Strands, custom) — not Strands-exclusive.
+AgentCore Runtime is compatible with any Python agent framework (LangGraph, CrewAI, Strands, custom). Not Strands-exclusive.
 
 ---
 
@@ -216,6 +216,33 @@ AgentCore Runtime is compatible with any Python agent framework (LangGraph, Crew
 - Open-source at `github.com/strands-agents/sdk-python`
 
 ---
+
+## Common Failure Cases
+
+**Bedrock model not available in the selected region**  
+Why: Claude models on Bedrock are not available in all AWS regions; requesting an unavailable model in a region raises a `ValidationException`.  
+Detect: `botocore.exceptions.ClientError: ValidationException: ... model is not available in your region`.  
+Fix: check the AWS Bedrock model availability table; use `us-east-1` or `us-west-2` for Claude; or specify `region_name` in `BedrockModel`.
+
+**`@tool` decorator silently drops tool if the function has no docstring**  
+Why: FastMCP/Strands generates the tool description from the docstring; without one, the tool may be registered with an empty description or not registered at all.  
+Detect: `agent.tools` shows fewer tools than expected; the tool is not called even when relevant.  
+Fix: always write a docstring for every `@tool`-decorated function; the description is part of the schema the model receives.
+
+**MCP server connection via `MCPClient` fails after the `with` block exits**  
+Why: `MCPClient` manages the connection lifecycle; tools extracted outside the `with` block reference a closed connection.  
+Detect: `ConnectionError` or `TransportClosed` when invoking tools after the `with` block.  
+Fix: keep the agent invocation inside the `with mcp_client:` block; or hold the client open for the agent's full lifetime.
+
+**Streaming with `stream_async` blocks the event loop when called from sync code**  
+Why: `stream_async` is a coroutine generator; calling it from synchronous code without `asyncio.run()` raises `TypeError` or hangs.  
+Detect: no output appears; or `TypeError: 'async_generator' object is not iterable`.  
+Fix: use `asyncio.run()` or `await` in an async context; or use the non-streaming `agent()` call for synchronous code.
+
+**Bedrock AgentCore deployment fails with missing IAM permissions**  
+Why: the deployment role requires `bedrock:InvokeModel` plus additional `bedrock-agentcore:*` permissions that are not obvious from the error.  
+Detect: `AccessDeniedException` during deployment or at runtime; the error message may not name the specific permission.  
+Fix: attach the AWS-managed `AmazonBedrockAgentCoreFullAccess` policy to the execution role during development; scope down for production.
 
 ## Connections
 

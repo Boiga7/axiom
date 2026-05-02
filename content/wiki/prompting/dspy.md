@@ -183,7 +183,7 @@ MIPROv2 uses Bayesian optimisation to search over instruction phrasings and few-
 
 ### BootstrapFewShotWithRandomSearch
 
-Good middle ground — faster than MIPROv2, better than plain Bootstrap:
+Good middle ground. Faster than MIPROv2, better than plain Bootstrap:
 
 ```python
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
@@ -243,6 +243,28 @@ DSPy shines when: the task has a clear metric, you have 20+ labelled examples, a
 - Supported LMs: Anthropic, OpenAI, Ollama (local), Google via `dspy.LM("provider/model")`
 - Optimised programs saved as JSON; load with `.load()` for production serving
 - When DSPy beats manual: repeatable task + clear metric + 1,000+ daily calls
+
+## Common Failure Cases
+
+**MIPROv2 optimisation runs but produces a worse program than the unoptimised baseline**
+Why: MIPROv2 requires enough labelled examples to signal the metric reliably; with fewer than ~30 examples, the Bayesian search overfits to the small training set and the optimised prompt performs worse on held-out data.
+Detect: the optimised program's score on a validation set is lower than the unoptimised `dspy.Predict` baseline; the training score looks good but the val score does not.
+Fix: hold out at least 20% of examples as a validation set and pass it to the optimizer; use `BootstrapFewShot` when you have fewer than 30 training examples and reserve MIPROv2 for 50+ examples.
+
+**Optimised program saved with `.save()` but fails to load correctly because the Signature class definition is not importable at load time**
+Why: DSPy serialises the optimised few-shot examples and instructions to JSON, but the Signature class itself must be defined in the calling module when `.load()` is called; if the Signature is defined inline or in a module that is not imported, loading fails with an `AttributeError` or produces a default (unoptimised) program silently.
+Detect: the loaded program has no few-shot demonstrations and produces results identical to an unoptimised baseline; checking `program.demos` shows an empty list after loading.
+Fix: define all Signature classes at module level in a shared file and import them before calling `.load()`; add an assertion after loading that `len(program.demos) > 0` to catch silent load failures.
+
+**`dspy.ChainOfThought` is used with a reasoning model (o1, Claude Extended Thinking) and the reasoning step conflicts with the model's internal chain-of-thought**
+Why: reasoning models perform internal chain-of-thought before producing output; DSPy's `ChainOfThought` module adds an explicit reasoning field to the prompt, which causes the model to produce a second reasoning trace that may contradict the internal one, reducing quality.
+Detect: reasoning model outputs contain redundant or contradictory reasoning traces; quality on structured tasks is lower than with `dspy.Predict` alone.
+Fix: use `dspy.Predict` instead of `dspy.ChainOfThought` when the underlying LM is a reasoning model; reserve `ChainOfThought` for non-reasoning models.
+
+**Metric function is not deterministic, causing MIPROv2 to optimise toward noise**
+Why: if the metric calls an LLM-as-judge to score examples and that judge produces variable outputs across runs, the optimizer receives inconsistent feedback and converges on prompts that maximise judge noise rather than true task quality.
+Detect: re-running the optimizer with the same training set produces very different optimised programs; the metric score for the same example varies significantly across two calls.
+Fix: set temperature=0 on the judge model in the metric function; run each training example through the judge twice and use the majority vote to reduce variance; or use a deterministic metric (exact match, F1) where the task allows.
 
 ## Connections
 

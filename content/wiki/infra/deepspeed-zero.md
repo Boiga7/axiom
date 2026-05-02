@@ -10,7 +10,7 @@ tldr: Zero Redundancy Optimizer — Microsoft's distributed training system that
 
 # DeepSpeed ZeRO
 
-Zero Redundancy Optimizer — Microsoft's distributed training system that partitions model training state across GPUs to eliminate memory redundancy. Enables training models with billions of parameters on commodity hardware.
+Zero Redundancy Optimizer. Microsoft's distributed training system that partitions model training state across GPUs to eliminate memory redundancy. Enables training models with billions of parameters on commodity hardware.
 
 Part of the DeepSpeed library. Integrates directly with HuggingFace `Trainer`, Axolotl, and PyTorch Lightning.
 
@@ -23,7 +23,7 @@ In standard data-parallel training, every GPU holds a complete copy of:
 - Optimizer states (for Adam: momentum, variance, master weights — 3× the parameter count in fp32)
 - Gradients
 
-For a 7B model with Adam in mixed precision: ~112GB of memory is duplicated across every GPU. A single H100 has 80GB — the model doesn't fit, let alone the optimizer states.
+For a 7B model with Adam in mixed precision: ~112GB of memory is duplicated across every GPU. A single H100 has 80GB. The model doesn't fit, let alone the optimizer states.
 
 ---
 
@@ -152,9 +152,36 @@ PyTorch's Fully Sharded Data Parallel (FSDP) is the native alternative to ZeRO S
 | 70B model, 8× H100 80GB | Stage 3 |
 | 70B+ model, limited GPU RAM | Stage 3 + ZeRO-Infinity |
 
-Start with Stage 2. Go to Stage 3 only if Stage 2 OOMs — Stage 3's all-gather communication adds overhead.
+Start with Stage 2. Go to Stage 3 only if Stage 2 OOMs. Stage 3's all-gather communication adds overhead.
 
 ---
+
+## Common Failure Cases
+
+**Stage 3 training is slower than Stage 2 despite lower memory usage**  
+Why: Stage 3 all-gathers parameters during both forward and backward passes; on nodes with low NVLink bandwidth (e.g., PCIe-connected multi-GPU), the communication overhead exceeds the memory savings benefit.  
+Detect: tokens/second drops >20% when moving from Stage 2 to Stage 3; `nvidia-smi` shows GPUs waiting on communication.  
+Fix: start with Stage 2; only move to Stage 3 when Stage 2 genuinely OOMs; use NVLink-connected nodes for Stage 3.
+
+**`ds_config.json` `train_batch_size` doesn't match `per_device * accumulation * gpus`**  
+Why: DeepSpeed requires `train_batch_size = per_device_train_batch_size * gradient_accumulation_steps * num_gpus`; a mismatch raises a validation error at startup.  
+Detect: `AssertionError: ... train_batch_size` on training job start.  
+Fix: calculate and set `train_batch_size` explicitly in `ds_config.json` to match the product of the three values.
+
+**ZeRO-Infinity NVMe offloading requires nvme_path to exist on all nodes**  
+Why: NVMe offload writes optimizer states to a local path; if the path doesn't exist or has insufficient space, training crashes.  
+Detect: `FileNotFoundError` or `IOError: No space left on device` in training logs; only fails on some nodes.  
+Fix: create the offload directory on all nodes before training; check free space with `df -h`; ensure the path is consistent across the cluster.
+
+**Gradient clipping disabled in `ds_config.json` causes loss explosion**  
+Why: the default DeepSpeed config doesn't enable gradient clipping; without it, large gradients destabilise training.  
+Detect: training loss spikes then diverges (NaN/Inf); `grad_norm` metric exceeds 100 in W&B.  
+Fix: add `"gradient_clipping": 1.0` to the DeepSpeed config; this is standard practice and rarely omitted intentionally.
+
+**FSDP migration from ZeRO requires rewriting the training script structure**  
+Why: ZeRO is configured externally via JSON; FSDP requires explicit wrapping policies in the training code; they're not interchangeable via a config swap.  
+Detect: switching from `deepspeed` to `fsdp` in `TrainingArguments` raises `NotImplementedError` or unexpected behavior.  
+Fix: treat them as separate code paths; use ZeRO for DeepSpeed-only stacks and FSDP for pure PyTorch; don't expect a drop-in switch.
 
 ## Connections
 

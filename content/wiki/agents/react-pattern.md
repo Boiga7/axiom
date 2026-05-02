@@ -84,7 +84,7 @@ For most production use cases, ReAct is the right starting point. Add planning o
 
 ## Extended Thinking + ReAct
 
-With Claude's extended thinking enabled, the `Thought` step is replaced by internal chain-of-thought (more thorough, not visible). Don't add explicit `Thought:` prompts — the model reasons internally before each action. The net result is better tool selection with the same loop structure.
+With Claude's extended thinking enabled, the `Thought` step is replaced by internal chain-of-thought (more thorough, not visible). Don't add explicit `Thought:` prompts. The model reasons internally before each action. The net result is better tool selection with the same loop structure.
 
 ---
 
@@ -96,6 +96,33 @@ With Claude's extended thinking enabled, the `Thought` step is replaced by inter
 - With Claude extended thinking enabled, do not add explicit `Thought:` prompts — model reasons internally
 - Reflexion adds self-critique; Plan-and-Execute plans all steps first; LATS uses tree search over actions
 - For most production cases, ReAct is the correct starting point before adding complexity
+
+## Common Failure Cases
+
+**Infinite loop when no termination condition is reached**  
+Why: the model keeps finding reasons to call another tool without converging; missing or unclear stopping condition.  
+Detect: `max_iterations` limit fires; the agent's last N actions are cyclical (same tools, same arguments).  
+Fix: add a hard `max_iterations` limit (10-15); add explicit "stop when you have enough to answer" language to the system prompt.
+
+**Agent ignores tool observation and anchors on prior Thought**  
+Why: the prior chain-of-thought is "louder" than the tool result; the model continues reasoning from its belief rather than the actual observation.  
+Detect: agent states something contradicted by the immediately prior tool result; observation is present but unused.  
+Fix: add "Based on the OBSERVATION above..." prefix to the next Thought prompt; increase the prominence of the observation in the prompt structure.
+
+**Wrong tool selected due to ambiguous descriptions**  
+Why: two tools have overlapping descriptions and the model picks the wrong one, getting an error response.  
+Detect: tool error responses appear in the trace; the same task succeeds when tested with only one of the two tools.  
+Fix: rewrite descriptions to be mutually exclusive; use verb phrases that clarify the scope: "Search ONLY the internal knowledge base" vs "Search ONLY the public web."
+
+**Hallucinated tool arguments cause tool call to fail**  
+Why: the model constructs arguments for the tool that look plausible but don't match the actual schema (wrong field name, wrong type).  
+Detect: `InputValidationError` or argument-related errors in tool call logs; the model retries with the same wrong argument.  
+Fix: ensure tool input schemas are strict with clear descriptions; add examples in the schema description for complex argument types.
+
+**Extended thinking loop bypasses explicit Thought prompting causing confusion**  
+Why: with Claude extended thinking enabled, adding explicit `Thought:` prompts in the system message conflicts with internal reasoning, causing doubled or confused reasoning traces.  
+Detect: model output contains `Thought:` prefixes even though extended thinking is active; thinking blocks contain meta-commentary about thinking.  
+Fix: remove explicit `Thought:` prompting from system messages when using extended thinking; the internal reasoning replaces it.
 
 ## Connections
 

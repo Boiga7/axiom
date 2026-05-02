@@ -372,6 +372,28 @@ class OrderProjection:
 
 ---
 
+## Common Failure Cases
+
+**Optimistic concurrency conflict ignored, events written with duplicate versions**
+Why: two concurrent requests load the same aggregate, each sees `expected_version=5`, and both successfully append events — one overwrites the other's changes silently if the version check is not atomic.
+Detect: run concurrent write tests against the same aggregate ID and verify only one succeeds; check for version gaps in the events table.
+Fix: enforce the version check inside a database transaction with a row-level lock, or use `INSERT ... WHERE version = expected_version` with an affected-rows check.
+
+**Projection lag causing stale reads after a write**
+Why: the read model is updated asynchronously by a background worker; a user submits a command and immediately queries the read model before the projection has processed the event.
+Detect: write a test that places an order and immediately reads `order_summary` — if the row is missing or shows old state, lag is present.
+Fix: either accept eventual consistency and tell the UI to poll, use an event-driven UI update, or for critical paths read directly from the write model on the first request after a command.
+
+**Aggregate replay slows to seconds for long-lived aggregates**
+Why: an aggregate with 10,000+ events must replay all of them on every load, and there are no snapshots configured; latency grows linearly with event count.
+Detect: measure `EventStore.load()` duration as the event count grows in staging; flag when it exceeds your latency budget (typically 100ms).
+Fix: implement snapshot checkpoints at a fixed interval (e.g., every 100 events) and load only the delta between the latest snapshot and the current version.
+
+**Event schema changed without a migration strategy**
+Why: an `OrderPlaced` event payload had `product_id: str` in v1 but `product_id: UUID` in v2; old events in the store cannot be deserialised by the new aggregate code.
+Detect: run event replay on historical data after a payload field type change; if deserialisation raises, schema migration is needed.
+Fix: use an upcasting pattern — a version field on each event, and a chain of upcasters that transform old event shapes into the current schema during `_apply`.
+
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/database-transactions]] · [[cs-fundamentals/microservices-patterns]] · [[llms/ae-hub]]

@@ -12,7 +12,7 @@ tldr: LLMs read tokens not text — BPE algorithm, tiktoken and Anthropic tokeni
 
 > **TL;DR** LLMs read tokens not text — BPE algorithm, tiktoken and Anthropic tokenisers, non-English cost penalty, and context window budgeting at production scale.
 
-LLMs don't read text — they read tokens. Tokenisation is the step that converts text into integer IDs the model can process. Understanding it matters for: cost estimation, context window budgeting, prompt design, and explaining model failures.
+LLMs don't read text. They read tokens. Tokenisation is the step that converts text into integer IDs the model can process. Understanding it matters for: cost estimation, context window budgeting, prompt design, and explaining model failures.
 
 ---
 
@@ -24,7 +24,7 @@ A token is roughly 3-4 characters of English text. Rules of thumb:
 - 1,000 tokens ≈ 750 words ≈ a page of text
 - 1M tokens ≈ 750K words ≈ a large novel
 
-These are averages. Code tokenises worse than prose (identifiers, operators). Non-Latin scripts tokenise much worse — a single CJK or Arabic character may be 1-4 tokens.
+These are averages. Code tokenises worse than prose (identifiers, operators). Non-Latin scripts tokenise much worse. A single CJK or Arabic character may be 1-4 tokens.
 
 ---
 
@@ -48,7 +48,7 @@ Step 2: 'low' is most frequent → merge → ['low',' ','low','e','s','t',' ','n
 ...
 ```
 
-Common words become single tokens. Rare words split into subword pieces. Unknown words never cause failures — they decompose into bytes.
+Common words become single tokens. Rare words split into subword pieces. Unknown words never cause failures. They decompose into bytes.
 
 ---
 
@@ -115,7 +115,7 @@ Multi-digit arithmetic is hard because numbers tokenise inconsistently. The mode
 
 ### Reversal tasks
 
-"Reverse the string `hello`" is easy. "Reverse `helloworld`" may fail — `helloworld` might be a single token, and the model can't see its internal characters.
+"Reverse the string `hello`" is easy. "Reverse `helloworld`" may fail. `helloworld` might be a single token, and the model can't see its internal characters.
 
 ### Non-English text costs more
 
@@ -196,6 +196,28 @@ Prompt caching (Anthropic) reduces repeated prefixes to 0.1x cost. A 10,000-toke
 - 10,000-token system prompt cached across 1M calls saves ~$27K at Sonnet 4.6 pricing ($3/M)
 - Multi-digit arithmetic fails partly because numbers tokenise inconsistently across models
 - Context window budgeting: tools add 200-500 tokens each; reserve 1,000-4,000 for output
+
+## Common Failure Cases
+
+**Context window budget calculation uses character count instead of token count, causing silent truncation**
+Why: a 200K-token limit is not a 200K-character limit; English prose averages 4 characters per token, but code and structured text are denser, so a character-based guard underestimates token usage and the request is silently truncated or rejected with a 413 error.
+Detect: API calls succeed for English prose but fail with `prompt_too_long` for code-heavy requests of the same character length; checking `client.messages.count_tokens()` before submission reveals the actual count is well above the character-based estimate.
+Fix: always count tokens using `client.messages.count_tokens()` (Anthropic) or `tiktoken.encode()` (OpenAI) before every API call in production; never use `len(text) / 4` as the production guard.
+
+**Non-English user query costs 3-5x more tokens than expected, blowing per-request cost budgets**
+Why: CJK, Arabic, and other non-Latin scripts tokenise at 1-4 tokens per character with BPE vocabularies trained predominantly on English; a 200-word Japanese message may cost as many tokens as a 600-word English message.
+Detect: per-request token cost spikes for non-English users; `count_tokens()` output is 3-5x the word count for the same semantic content in other languages.
+Fix: measure actual token counts for your target languages during system design; apply per-language cost multipliers in your budget calculations; consider whether a model with a multilingual-optimised vocabulary is more cost-efficient for the use case.
+
+**Prompt caching breaks because a model version upgrade changes the tokeniser, invalidating all cached prefixes**
+Why: different model versions may use different BPE vocabularies; the same text can tokenise to different token IDs across model versions, so cached prefixes are incompatible across the version boundary.
+Detect: cache hit rate drops to 0% immediately after a model version change; checking `count_tokens()` before and after the upgrade shows different counts for identical text.
+Fix: treat model upgrades as cache-invalidating events; warm the cache explicitly after upgrading by making one call with each major cached prefix before routing live traffic.
+
+**Tool/function schemas consume far more tokens than expected when many tools are bound to an agent**
+Why: each tool's JSON schema (name, description, parameter names, types, and descriptions) is injected into the context on every call; 10 tools with detailed schemas can add 3,000-5,000 tokens per request.
+Detect: `count_tokens()` output is significantly higher than expected for a short user message; diffing the token count with and without tool bindings shows the tool schemas are the dominant cost.
+Fix: only bind the tools the agent needs for the current task step (dynamic tool loading); write concise tool descriptions (1-2 sentences maximum); remove optional parameter descriptions that don't materially help the model.
 
 ## Connections
 

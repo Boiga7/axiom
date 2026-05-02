@@ -96,7 +96,7 @@ Where F(x) is the sublayer computation (attention or FFN). The gradient through 
 ∂loss/∂x = ∂loss/∂output · (∂F/∂x + 1)
 ```
 
-The `+1` term means gradient always has a direct path through the identity shortcut — regardless of how small `∂F/∂x` is, the gradient is never smaller than `∂loss/∂output`.
+The `+1` term means gradient always has a direct path through the identity shortcut. Regardless of how small `∂F/∂x` is, the gradient is never smaller than `∂loss/∂output`.
 
 In a 96-layer Transformer: gradient flows via 96 identity shortcuts in parallel with 96 learned transformations. Vanishing gradients are prevented architecturally.
 
@@ -135,7 +135,7 @@ Variance = 2 / (n_in + n_out). Keeps activation variance stable through layers.
 ```
 W ~ Normal(0, √(2/n_in))
 ```
-Accounts for ReLU zeroing half of inputs — doubles the variance to compensate.
+Accounts for ReLU zeroing half of inputs. Doubles the variance to compensate.
 
 PyTorch default for Linear layers: Kaiming uniform (He variant).
 
@@ -172,6 +172,28 @@ Per-weight adaptive learning rate: weights with consistently large gradients get
 - Gradient clipping: `clip_grad_norm_(params, 1.0)` — applied before every optimizer step
 
 ---
+
+## Common Failure Cases
+
+**Gradient clipping is placed after `optimizer.step()` instead of before it, so exploding gradients corrupt the weight update before clipping applies**
+Why: `clip_grad_norm_()` must be called after `loss.backward()` (which populates `.grad`) but before `optimizer.step()` (which reads `.grad` to update weights); if the order is wrong, the optimizer applies the uncapped gradient, potentially causing large weight updates that destabilise training.
+Detect: training loss oscillates violently or diverges despite gradient clipping being present in the code; adding a `print(torch.nn.utils.clip_grad_norm_(params, float('inf')))` before the optimizer step reveals large gradient norms.
+Fix: always use the order: `loss.backward()` → `clip_grad_norm_(model.parameters(), max_norm=1.0)` → `optimizer.step()` → `optimizer.zero_grad()`.
+
+**Vanishing gradient in a custom RNN or deep MLP because ReLU was replaced with sigmoid or tanh without adjusting initialisation**
+Why: sigmoid and tanh saturate at large activations and have gradients near zero at those values; combined with default PyTorch initialisation (Kaiming uniform, which assumes ReLU), the activations collapse into the saturation region in the first few layers, killing the gradient signal before it reaches early layers.
+Detect: gradient norms decrease exponentially with depth when inspected via `param.grad.norm()` for each layer; loss is flat despite non-zero gradients at the output layer.
+Fix: use Xavier initialisation (`nn.init.xavier_uniform_`) when using sigmoid or tanh activations; or switch to ReLU/GELU and keep He/Kaiming initialisation; avoid sigmoid in hidden layers of deep networks.
+
+**`optimizer.zero_grad()` is called before `loss.backward()` in an intended gradient accumulation loop, clearing the accumulated gradients prematurely**
+Why: gradient accumulation works by calling `backward()` N times before `optimizer.step()`, accumulating gradients in `.grad` across micro-batches; if `zero_grad()` is called at the start of each micro-batch instead of at the start of each accumulation cycle, the accumulated signal is erased and the effective batch size is just one micro-batch.
+Detect: loss and gradient norms with accumulation are identical to those without accumulation; the training dynamics do not reflect the larger effective batch size.
+Fix: call `zero_grad()` only once at the start of each accumulation cycle (every N micro-batches), not at the start of every micro-batch forward pass.
+
+**Pre-LayerNorm transformer trains stably but Post-LayerNorm equivalent diverges at the same learning rate, mistakenly diagnosed as a learning rate problem**
+Why: Pre-LN (normalise before sublayer) and Post-LN (normalise after residual add, as in the original Transformer) have different gradient flow properties; Post-LN is less stable and requires lower learning rates and learning rate warmup; using a learning rate tuned for Pre-LN on a Post-LN model causes divergence.
+Detect: a model with explicit Post-LN architecture diverges at a learning rate that worked for a Pre-LN baseline; reducing the learning rate by 5-10x stabilises training.
+Fix: use Pre-LN for all new transformer implementations (it is the modern standard); if Post-LN is required, use a longer warmup schedule and a lower peak learning rate; add learning rate as an explicit variable when comparing Pre-LN vs Post-LN architectures.
 
 ## Connections
 

@@ -18,7 +18,7 @@ Using LLMs to generate training data for smaller models or fine-tuning runs. The
 
 ## Why Synthetic Data
 
-Collecting human-labelled data is slow (weeks), expensive ($1–$50 per example), and requires domain experts for technical domains. LLMs can generate thousands of high-quality examples per hour for pennies — if you can define what "high quality" means.
+Collecting human-labelled data is slow (weeks), expensive ($1–$50 per example), and requires domain experts for technical domains. LLMs can generate thousands of high-quality examples per hour for pennies, if you can define what "high quality" means.
 
 **Proven use cases:**
 - Instruction-following datasets (GPT-3 → Alpaca → Orca pipeline)
@@ -182,6 +182,28 @@ For critical applications, mix synthetic and human-labelled data (50/50 or 70/30
 - Mix synthetic and human-labelled 50/50 or 70/30 (human-heavy) for critical applications
 - Batch API provides 50% cost reduction for large-scale generation runs
 - Quality filter: keep top 70-80% by LLM-as-judge score
+
+## Common Failure Cases
+
+**`json.loads(response.content[0].text)` raises `JSONDecodeError` because the model wraps its output in a markdown code fence**  
+Why: even when explicitly instructed to return JSON, Claude occasionally wraps the JSON in triple-backtick code blocks (`\`\`\`json ... \`\`\``); `json.loads` fails on the fence characters.  
+Detect: the `except json.JSONDecodeError: continue` block skips 10-30% of examples; printing the raw `response.content[0].text` shows fence-wrapped JSON.  
+Fix: strip the fence before parsing: use a regex `re.search(r'\{.*\}', text, re.DOTALL)` to extract the JSON object; or use `instructor` to enforce structured output without relying on string parsing.
+
+**Self-Instruct generates semantically near-identical instructions because the seed diversity is too low and the model pattern-matches**  
+Why: with fewer than 50 seeds covering only 2-3 topic areas, the model generates variations on the same template rather than genuinely diverse instructions; ROUGE deduplication removes the obvious duplicates but many semantically identical examples survive.  
+Detect: after deduplication, plot an embedding UMAP of the generated instructions; tight clusters indicate low diversity; topic coverage is narrow relative to the original seed diversity goal.  
+Fix: increase the seed set to 175+ instructions across 10+ domains before generating; prompt the model to explicitly avoid generating instructions similar to the provided examples; add embedding-based deduplication with a cosine similarity threshold of 0.85.
+
+**LLM-as-judge quality filter scores all generated examples 4-5 out of 5, passing garbage through because the judge prompt does not provide calibration examples**  
+Why: without concrete examples of what a score-2 or score-3 response looks like in the prompt, the judge model applies a liberal interpretation and rates almost everything high; this is the same calibration problem that affects LLM-as-judge in evals.  
+Detect: the quality filter retains 95%+ of examples; spot-checking filtered examples manually shows responses that are clearly low quality; the distribution of scores is heavily right-skewed.  
+Fix: include 2-3 concrete examples at each score level (1, 3, 5) in the judge prompt with explanations; or use a comparative rating (rank A vs B vs C) rather than absolute scoring to force discrimination.
+
+**Benchmark contamination occurs because synthetic data was generated from prompts that include eval benchmark examples as seeds**  
+Why: if any of the 175 seed instructions are drawn from HumanEval, MBPP, or another standard benchmark, the generated dataset may contain near-duplicates of eval examples; fine-tuning on this data inflates benchmark scores without genuine capability improvement.  
+Detect: run the generated dataset through an n-gram overlap check against the benchmark test sets; overlap > 5% with any benchmark indicates potential contamination.  
+Fix: explicitly exclude known benchmark examples from the seed set; run contamination checks before publishing or training on the dataset; keep a held-out test set that was never used as seed material.
 
 ## Connections
 

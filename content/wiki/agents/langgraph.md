@@ -138,6 +138,33 @@ LangGraph traces are automatically sent to [[observability/platforms|LangSmith]]
 - Traces auto-sent to LangSmith when `LANGCHAIN_TRACING_V2=true`; every node appears as a span
 - LangGraph wins vs alternatives on control and observability; CrewAI wins on time-to-first-demo
 
+## Common Failure Cases
+
+**Graph state grows unbounded, context window overflows on long runs**  
+Why: messages are appended to state on every node but never pruned; after 50+ turns the full message history exceeds the model's context limit.  
+Detect: `InvalidRequestError: prompt is too long` or silent truncation; trace shows state size growing linearly with turn count.  
+Fix: add a summarisation node that compresses old messages; or use a message trimmer that keeps the last N turns plus the system prompt.
+
+**Conditional edge routes to a non-existent node**  
+Why: a routing function returns a string key that doesn't match any registered node name (typo, or node was renamed).  
+Detect: `KeyError` or `GraphValueError` when the conditional edge fires; only manifests on the branch that wasn't exercised in testing.  
+Fix: use an enum or a constant for node names; write a test that exercises every conditional branch.
+
+**Checkpointer backend not set — resume fails after crash**  
+Why: `MemorySaver` was used in development; in production the graph crashes and all state is lost; no resumption is possible.  
+Detect: agent restart begins from scratch instead of resuming mid-task; thread ID exists in the application but not in the checkpoint store.  
+Fix: use `PostgresSaver` in production with the thread ID stored by the caller; add a startup health check that validates the checkpoint backend is reachable.
+
+**Tool error inside a node aborts the whole graph**  
+Why: an unhandled exception in a tool call propagates up through the node function and terminates the graph run.  
+Detect: graph terminates with a tool error instead of retrying or routing to an error-handling node.  
+Fix: wrap tool calls in `try/except` inside the node; return an error message in the state so the LLM can reason about the failure and retry.
+
+**Parallel node writes conflict on the same state key**  
+Why: two nodes executing in parallel both write to the same state field; the second write silently overwrites the first.  
+Detect: data from one parallel branch disappears from state; add logging at the end of each parallel node to capture state snapshots.  
+Fix: give each parallel branch a distinct state key; merge the results in a join node after the parallel section.
+
 ## Connections
 
 - [[agents/langchain]] — LangChain is the base framework LangGraph is built on; use LangChain for simple chains, LangGraph for stateful workflows

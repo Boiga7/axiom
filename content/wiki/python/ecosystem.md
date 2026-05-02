@@ -284,6 +284,28 @@ conn.execute("SELECT model, AVG(score) FROM 'eval_results.parquet' GROUP BY 1")
 - duckdb: in-process SQL on Parquet/CSV/JSON without a server; ideal for eval result analysis
 - structlog: JSON output in production, ConsoleRenderer for development; machine-readable from day one
 
+## Common Failure Cases
+
+**`uv run pytest` fails because dev dependencies were not added with `--dev` flag**  
+Why: `uv add pytest` adds pytest as a regular dependency that ships with the package; `uv add --dev pytest` adds it to the dev dependency group only; if tests run in a clean `uv run` environment without dev deps, pytest is not found.  
+Detect: `ModuleNotFoundError: No module named 'pytest'` when running `uv run pytest`; pytest is listed under `[project.dependencies]` rather than `[tool.uv.dev-dependencies]` in pyproject.toml.  
+Fix: remove pytest from regular dependencies with `uv remove pytest`; re-add as dev: `uv add --dev pytest pytest-asyncio respx`.
+
+**`asyncio_mode = "auto"` in pyproject.toml not picked up because the config is in the wrong section**  
+Why: pytest-asyncio configuration must be in `[tool.pytest.ini_options]`, not in `[tool.asyncio]` or `[pytest]`; if placed in the wrong section, the setting is silently ignored and async tests fail with "coroutine was never awaited".  
+Detect: async tests fail with `RuntimeWarning: coroutine 'test_...' was never awaited` despite `asyncio_mode = "auto"` being set; checking `pytest --co` shows the tests are not marked async.  
+Fix: verify the pyproject.toml section is exactly `[tool.pytest.ini_options]` with `asyncio_mode = "auto"` inside; run `pytest --co -v` to confirm pytest-asyncio is active.
+
+**`respx.mock` context manager not entered, causing real HTTP requests to fire in tests**  
+Why: `respx.mock` must be used as a context manager (`async with respx.mock:`) or decorator; calling `respx.post().mock()` outside of `respx.mock` context registers the mock but does not activate it, so real requests are made.  
+Detect: tests make real HTTP requests and fail with network errors or unexpected responses; `respx.calls` shows zero recorded calls despite `respx.post().mock()` being called.  
+Fix: always wrap the test body in `async with respx.mock:` or use the `@respx.mock` decorator on the test function.
+
+**Pydantic `model_validator(mode="after")` raises `ValidationError` before field validators have run**  
+Why: `mode="after"` runs after all field validators and type coercions; but if a field validator raises a `ValueError`, the model validator is skipped entirely; code that relies on the model validator for final cross-field checks may silently not run when individual fields fail.  
+Detect: a cross-field constraint (e.g., `end_date > start_date`) is never checked because an unrelated field validator fails first; invalid cross-field combinations slip through.  
+Fix: handle the case where the model validator may be skipped by also validating critical constraints in individual field validators; or use `mode="wrap"` to access the validator call chain.
+
 ## Connections
 
 - [[apis/anthropic-api]] — AsyncAnthropic streaming patterns

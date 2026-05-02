@@ -18,7 +18,7 @@ Google's open protocol for agent-to-agent communication. Announced April 2025 wi
 
 ## What Problem It Solves
 
-MCP handles tool connectivity (agent ↔ tool). A2A handles peer connectivity (agent ↔ agent). When you have a network of specialised agents — a planning agent, a coding agent, a web research agent — A2A gives them a standard way to communicate without tight coupling.
+MCP handles tool connectivity (agent ↔ tool). A2A handles peer connectivity (agent ↔ agent). When you have a network of specialised agents. A planning agent, a coding agent, a web research agent. A2A gives them a standard way to communicate without tight coupling.
 
 ---
 
@@ -124,6 +124,28 @@ An alternative agent-to-agent protocol, developed by IBM and BeeAgent. More opin
 - ADK agents automatically expose an A2A endpoint when deployed
 - ACP (IBM/BeeAgent): alternative agent protocol; smaller ecosystem [unverified]
 - LangGraph: unofficial A2A adapter via Python SDK; not natively integrated
+
+## Common Failure Cases
+
+**Agent Card not discovered because `/.well-known/agent.json` returns 404 behind a path-prefix reverse proxy**  
+Why: if the agent is deployed at `https://example.com/agents/research/`, the A2A client looks for `https://example.com/.well-known/agent.json` at the root, not at the agent's sub-path; the route does not exist.  
+Detect: `A2AClientError: Failed to fetch agent card from /.well-known/agent.json`; the card is accessible at the sub-path URL but not the root.  
+Fix: configure the reverse proxy to serve the Agent Card at the domain root `/.well-known/agent.json`; or register the agent with its full canonical URL including the path prefix in your agent registry.
+
+**Task stuck in `working` state indefinitely because the remote agent crashed without sending a terminal state**  
+Why: A2A has no built-in heartbeat or timeout; if the remote agent process dies during execution, the task remains `working` forever and the calling agent waits indefinitely.  
+Detect: tasks with `working` state older than the expected maximum execution time; the remote agent's health endpoint is down.  
+Fix: implement a task timeout in the calling agent (poll task state and cancel after N seconds); remote agents must catch exceptions and transition to `failed` state rather than crashing silently.
+
+**SSE streaming connection drops mid-task, and the calling agent re-submits the task, causing duplicate execution**  
+Why: SSE connections drop on network interruption; the A2A spec does not guarantee exactly-once delivery; a calling agent that re-submits after a disconnection may trigger the remote agent to run the task twice.  
+Detect: remote agent logs show two executions of the same task ID; side effects (API calls, file writes) occur twice.  
+Fix: implement idempotency on the remote agent using the task ID as the idempotency key; check whether the task ID already exists before starting execution; return the existing result if found.
+
+**`input-required` task state ignored by the calling agent, causing the task to time out**  
+Why: `input-required` signals that the remote agent needs clarification; if the calling agent's loop only handles `completed` and `failed` states, it never sends the required input and the task stalls.  
+Detect: tasks consistently time out on multi-turn workflows; remote agent logs show state transition to `input-required` with no subsequent input message.  
+Fix: handle all five task states in the calling agent's polling loop; implement a handler for `input-required` that either asks the user for clarification or provides a default response.
 
 ## Connections
 

@@ -10,7 +10,7 @@ tldr: AWS Cloud Development Kit. Define AWS infrastructure in TypeScript, Python
 
 # AWS CDK
 
-AWS Cloud Development Kit. Define AWS infrastructure in TypeScript, Python, Java, or Go. CDK synthesises down to CloudFormation templates — you get all CloudFormation's reliability with a proper programming language instead of YAML.
+AWS Cloud Development Kit. Define AWS infrastructure in TypeScript, Python, Java, or Go. CDK synthesises down to CloudFormation templates. You get all CloudFormation's reliability with a proper programming language instead of YAML.
 
 ---
 
@@ -24,7 +24,7 @@ AWS Cloud Development Kit. Define AWS infrastructure in TypeScript, Python, Java
 | Provider scope | AWS only | 3,000+ providers | AWS only |
 | Best for | AWS-native teams; constructs save boilerplate | Multi-cloud; mature ecosystem | Already invested in CF |
 
-CDK's winning argument: L2/L3 constructs encode AWS best practices by default. A single `new ApplicationLoadBalancedFargateService()` creates the ECS cluster, Fargate service, task definition, ALB, security groups, IAM roles, and target group — all correctly wired.
+CDK's winning argument: L2/L3 constructs encode AWS best practices by default. A single `new ApplicationLoadBalancedFargateService()` creates the ECS cluster, Fargate service, task definition, ALB, security groups, IAM roles, and target group. All correctly wired.
 
 ---
 
@@ -270,6 +270,28 @@ test('Lambda function created with correct runtime', () => {
 ```
 
 ---
+
+## Common Failure Cases
+
+**`cdk deploy` fails with "Export X cannot be deleted as it is in use by stack Y"**
+Why: a cross-stack CloudFormation export is still referenced by a consumer stack; you cannot update or remove the producer stack until the consumer is updated first.
+Detect: CloudFormation error `Export ... cannot be deleted` during deploy.
+Fix: deploy the consumer stack first (removing or updating its reference to the old export), then redeploy the producer stack; reverse the normal dependency order for this one change.
+
+**`cdk bootstrap` required but not run — "No ECR repository found"**
+Why: CDK assets (Lambda code, Docker images) are staged to an S3 bucket and ECR repo created by `cdk bootstrap`; if bootstrap hasn't run in the account/region, asset upload fails.
+Detect: `cdk deploy` errors with `No bucket named 'cdk-...'` or `No ECR repository found`.
+Fix: run `cdk bootstrap aws://<account>/<region>` once per account/region pair before the first deploy.
+
+**Circular dependency between stacks causes synth to hang or fail**
+Why: Stack A passes a value to Stack B, and Stack B also passes a value back to Stack A, creating a CloudFormation circular cross-stack reference.
+Detect: `cdk synth` throws `Circular dependency between stacks`.
+Fix: extract the shared resource into a third stack that both A and B depend on, breaking the cycle.
+
+**Lambda code changes not deployed — asset hash unchanged**
+Why: CDK uses a content hash of the asset directory; if the directory contains compiled artifacts checked into git (e.g., `.pyc` files), non-code changes can invalidate the hash unexpectedly — or vice versa, stale bytecode can prevent a code change from being detected.
+Detect: Lambda behavior doesn't change after `cdk deploy` even though source was edited.
+Fix: add compiled artifacts to `.cdk-staging` excludes or use `lambda.Code.fromAsset('src/', {exclude: ['**/__pycache__']})` to ensure only source files contribute to the hash.
 
 ## Connections
 

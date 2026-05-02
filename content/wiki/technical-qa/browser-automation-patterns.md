@@ -235,6 +235,28 @@ def test_checkout_page_accessible(page: Page) -> None:
 
 ---
 
+## Common Failure Cases
+
+**Auth state file is stale, causing the entire test session to fail with 401s**
+Why: the `auth_state` fixture is session-scoped and the saved `state.json` includes an expired JWT stored in localStorage; the fixture never re-authenticates because the file already exists on disk.
+Detect: all tests in the session fail with redirect to `/login` on the first page navigation; the `state.json` file is from a previous day's run.
+Fix: either delete `state.json` in CI (it should not be cached between runs), or verify the token is still valid in the fixture before yielding by making a lightweight API call.
+
+**`page.route` intercept silently stops matching after a URL change mid-test**
+Why: `page.route` patterns with `**/api/**` only apply to the page context in which they were registered; if the test navigates to a new URL that triggers a context reload, the route handler is dropped.
+Detect: the mock handler fires on the first request but subsequent API calls go through to the real server.
+Fix: register all route handlers before any navigation, or use `context.route` instead of `page.route` so the intercept survives across page loads within the same context.
+
+**Infinite scroll loader returns the same `loaded` count on slow machines**
+Why: the `load_all_items` function reads `len(items)` immediately after `scrollTo`, but the new content hasn't appended yet — on slow CI machines, the timing window is missed and the loop exits early.
+Detect: the function returns fewer items than the known dataset size; running locally returns more.
+Fix: replace the bare `wait_for_timeout(500)` with `page.wait_for_function(f"document.querySelectorAll('{item_selector}').length > {loaded}")` to wait for the DOM to actually update.
+
+**Stripe iframe interaction fails because the frame locator matches before the iframe content loads**
+Why: `page.frame_locator("iframe[src*='stripe.com']")` resolves to the iframe element but the inner document is still loading; filling the card number field throws because the input doesn't exist yet.
+Detect: test fails with `TimeoutError` on the first `fill()` inside the stripe frame even though the iframe is visible.
+Fix: chain a `wait_for` on the first element inside the frame before interacting: `stripe_frame.get_by_placeholder("Card number").wait_for()` before `.fill()`.
+
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/e2e-framework-design]] · [[technical-qa/accessibility-automation]] · [[qa/end-to-end-testing]]

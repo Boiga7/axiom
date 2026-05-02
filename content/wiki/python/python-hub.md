@@ -10,7 +10,7 @@ tldr: Central hub for all Python-specific knowledge. Covers the production AI Py
 
 # Python Brain
 
-Central hub for all Python-specific knowledge. Covers the production AI Python stack — async I/O, data tooling, structured outputs, packaging, CLI frameworks, and testing.
+Central hub for all Python-specific knowledge. Covers the production AI Python stack. Async I/O, data tooling, structured outputs, packaging, CLI frameworks, and testing.
 
 Pages here focus on Python tools and patterns. Deep-dives with Python code that live in the SE brain are cross-linked below.
 
@@ -31,6 +31,13 @@ Pages here focus on Python tools and patterns. Deep-dives with Python code that 
 ## Testing
 
 [[test-automation/pytest-patterns]] · [[test-automation/testing-llm-apps]]
+
+## Common Failure Cases
+
+**Wikilink to a Python sub-page returns a 404 in Obsidian because the file is in a subdirectory and the link lacks the prefix**  
+Why: Obsidian resolves `[[ecosystem]]` to the first file named `ecosystem.md` in the vault; if two categories have an `ecosystem.md` the wrong one may be resolved without the full path `[[python/ecosystem]]`.  
+Detect: clicking a wikilink from this hub page opens the wrong page or shows "File not found"; the link text is unqualified (e.g., `[[ecosystem]]` instead of `[[python/ecosystem]]`).  
+Fix: always use fully qualified wikilinks for cross-category references; use `[[python/ecosystem]]` not `[[ecosystem]]`.
 
 ## Connections
 

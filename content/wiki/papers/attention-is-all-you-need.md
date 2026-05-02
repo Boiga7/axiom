@@ -20,7 +20,7 @@ The paper that introduced the Transformer architecture. Published June 2017. Eve
 
 ## What It Proposed
 
-Before this paper, sequence-to-sequence models (machine translation, text generation) used RNNs (LSTMs, GRUs). RNNs process sequences token by token — fundamentally sequential, cannot parallelise.
+Before this paper, sequence-to-sequence models (machine translation, text generation) used RNNs (LSTMs, GRUs). RNNs process sequences token by token. Fundamentally sequential, cannot parallelise.
 
 The Transformer dispenses with recurrence entirely. It processes entire sequences in parallel using attention mechanisms. This unlocked massive parallelisation on GPUs.
 
@@ -44,7 +44,7 @@ Compared to RNNs:
 
 Run H attention operations in parallel, each learning different relationships (syntactic, semantic, co-reference). Concatenate outputs.
 
-"The cat sat on the mat" — one head attends to subject-verb relationships, another to noun-pronoun co-reference, another to positional proximity.
+"The cat sat on the mat". One head attends to subject-verb relationships, another to noun-pronoun co-reference, another to positional proximity.
 
 ### 3. Positional Encoding
 
@@ -61,7 +61,7 @@ Added to token embeddings. Modern models use RoPE instead (learned, extrapolates
 
 The original Transformer was designed for translation (encoder encodes source, decoder generates target). For language modelling (GPT family), only the decoder is used. For understanding tasks (BERT), only the encoder.
 
-Modern LLMs are **decoder-only Transformers** with causal (masked) attention — each token only attends to prior tokens.
+Modern LLMs are **decoder-only Transformers** with causal (masked) attention. Each token only attends to prior tokens.
 
 ### 5. Feed-Forward Sublayers
 

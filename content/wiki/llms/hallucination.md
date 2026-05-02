@@ -12,7 +12,7 @@ tldr: Hallucination is a fundamental property of LLMs (not a bug) — covering w
 
 > **TL;DR** Hallucination is a fundamental property of LLMs (not a bug) — covering why it happens, six types, detection methods (faithfulness checks, self-consistency sampling), and six mitigation strategies with RAG as the most effective.
 
-When a model generates confident, fluent, plausible-sounding output that is factually wrong. The model isn't lying — it has no concept of truth. It's pattern-matching on training data and producing statistically likely continuations. Hallucination is a fundamental property of how LLMs work, not a bug to be fixed.
+When a model generates confident, fluent, plausible-sounding output that is factually wrong. The model isn't lying. It has no concept of truth. It's pattern-matching on training data and producing statistically likely continuations. Hallucination is a fundamental property of how LLMs work, not a bug to be fixed.
 
 ---
 
@@ -128,7 +128,7 @@ def probe_uncertainty(claim: str) -> str:
     return response.content[0].text
 ```
 
-Claude is better calibrated than most models — it will often express genuine uncertainty when it has it. Don't suppress this with prompts like "answer confidently".
+Claude is better calibrated than most models. It will often express genuine uncertainty when it has it. Don't suppress this with prompts like "answer confidently".
 
 ---
 
@@ -170,7 +170,7 @@ At the end, list your sources.
 If you cannot cite a source for a claim, do not make that claim."""
 ```
 
-Citations serve two purposes: they let humans verify, and they force the model to stay grounded — if it can't cite something, it shouldn't say it.
+Citations serve two purposes: they let humans verify, and they force the model to stay grounded, if it can't cite something, it shouldn't say it.
 
 ### 3. Constrain the Output Space
 
@@ -268,14 +268,14 @@ def extract_and_verify_claims(text: str) -> list[dict]:
 
 ## Claude Specifics
 
-Claude is better calibrated than average for expressing uncertainty. It tends to say "I'm not certain but..." rather than fabricating confidently. This is partly from Constitutional AI training — honesty is an explicit value.
+Claude is better calibrated than average for expressing uncertainty. It tends to say "I'm not certain but..." rather than fabricating confidently. This is partly from Constitutional AI training. Honesty is an explicit value.
 
 Claude's hallucination rate drops significantly on tasks where you:
 - Provide the context it should answer from
 - Ask it to cite specific quotes
 - Explicitly tell it to say "I don't know" when uncertain
 
-Do not prompt Claude to "always give a confident answer" — this actively increases hallucination.
+Do not prompt Claude to "always give a confident answer". This actively increases hallucination.
 
 ---
 
@@ -287,6 +287,28 @@ Do not prompt Claude to "always give a confident answer" — this actively incre
 - Never prompt Claude to "always give a confident answer" — actively increases hallucination rate
 - Citation fabrication (real author, fake paper) is very high risk — never trust LLM-generated citations
 - Claude expresses genuine uncertainty more than average models (Constitutional AI honesty training)
+
+## Common Failure Cases
+
+**RAG system returns retrieved context but the model ignores it and answers from parametric memory**
+Why: if the retrieved context and the model's parametric knowledge conflict, the model may default to what it "knows" especially when the context is long or the key fact is buried; without an explicit grounding instruction, the model treats context as optional.
+Detect: the faithfulness check shows `faithful: false` and flags claims not supported by the retrieved documents; the answer matches common training-data patterns rather than the provided source.
+Fix: add an explicit system instruction — "Answer using ONLY the provided context. If the answer is not in the context, say so." — and test with a faithfulness checker on every production RAG response.
+
+**Self-consistency check reports high confidence (1.0) but the answer is still wrong**
+Why: self-consistency detects uncertainty, not factual error; if the training data consistently contained the same wrong fact (e.g., a widely repeated misconception), all five samples will agree on the wrong answer.
+Detect: self-consistency confidence is 1.0 but an external ground-truth check or human review shows the answer is incorrect; the claim is a commonly repeated misconception.
+Fix: self-consistency cannot substitute for external verification on high-stakes facts; always pair it with a source-grounded check or a Perplexity/web lookup for claims where being wrong has consequences.
+
+**LLM-as-judge faithfulness checker itself hallucinates, classifying unfaithful responses as faithful**
+Why: the judge model is subject to the same hallucination tendencies as the target model; on short or poorly specified contexts, the judge may convince itself that a fabricated claim is implicit in the document.
+Detect: manual audit of a random 10% sample of judge outputs shows disagreement rate above 10%; the judge systematically misses false citations or numeric errors.
+Fix: calibrate the judge on a gold set of known faithful and unfaithful examples before deploying it; use Haiku for cost, but spot-check Haiku judge outputs against Sonnet on a sample to confirm calibration.
+
+**Citation-forcing instruction causes the model to fabricate citations rather than admit it cannot cite**
+Why: when instructed to always cite sources, models under pressure to provide an answer may generate plausible-sounding but non-existent citations (real author name, invented paper title) rather than refusing to answer.
+Detect: the citation URLs or DOIs return 404 errors; the paper title does not appear in Google Scholar or Semantic Scholar; the model cited a real researcher for a paper they did not write.
+Fix: instruct the model explicitly that "I cannot cite a source for this claim" is a valid and required response; add a post-generation citation verification step that checks cited URLs before the response is returned to the user.
 
 ## Connections
 

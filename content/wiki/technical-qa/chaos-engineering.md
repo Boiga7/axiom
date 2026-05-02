@@ -10,7 +10,7 @@ tldr: Deliberately injecting failure into a system to verify it behaves correctl
 
 # Chaos Engineering
 
-Deliberately injecting failure into a system to verify it behaves correctly under stress — before production does it for you. Chaos is a quality practice, not an ops stunt.
+Deliberately injecting failure into a system to verify it behaves correctly under stress, before production does it for you. Chaos is a quality practice, not an ops stunt.
 
 ---
 
@@ -257,6 +257,28 @@ jobs:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Experiment rollback fails silently, leaving latency or packet loss injected permanently**
+Why: the `rollbacks` block in a chaos experiment runs as a best-effort cleanup; if the rollback action itself encounters an error (e.g., the toxiproxy process was restarted), the failure is logged but the toxic remains active.
+Detect: after a chaos run, make a baseline health check request and compare latency against pre-experiment metrics; a systematically elevated baseline means a rollback didn't execute.
+Fix: treat rollbacks as critical paths — add an explicit health-check probe after the rollback step and alert if latency doesn't return to within 10% of steady state.
+
+**Steady-state hypothesis is too lenient, masking real degradation**
+Why: a 2-second timeout threshold passes even when the service is serving degraded responses from a stale cache, because the hypothesis only checks that the endpoint returns 200 within 2 seconds — not that the response is fresh.
+Detect: the experiment reports steady state held, but downstream consumers report stale or incomplete data during the window.
+Fix: include a data freshness probe in the hypothesis (e.g., check a `Last-Modified` header or a monotonic counter) alongside the latency check.
+
+**FIS experiment affects production traffic because the resource selector tag is too broad**
+Why: `resourceTags: {"Service": "product-service"}` matches both staging and production ECS tasks if both environments share the same tag key without an environment qualifier.
+Detect: a production alert fires during a chaos experiment scheduled against staging.
+Fix: always include an environment qualifier in the resource selector (`"Env": "staging"`) and add a CloudWatch alarm stop condition tuned to production error rate so the experiment halts automatically if blast radius escapes.
+
+**Toxiproxy test gives false confidence because the app bypasses the proxy at startup**
+Why: the application initialises its database connection pool at startup using the real `postgres:5432` address; the toxiproxy fixture only redirects requests made after setup, so the connection pool is already healthy when latency is injected.
+Detect: the test passes (cache hit reported) even without a working cache, because the already-pooled connections are unaffected by the toxiproxy latency.
+Fix: configure the application's `DATABASE_URL` to point at `0.0.0.0:25432` (the proxy address) from process start, not just during the test body.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/load-testing-advanced]] · [[technical-qa/infrastructure-testing]] · [[qa/non-functional-testing]] · [[cloud/observability-stack]] · [[cloud/aws-step-functions]]

@@ -10,7 +10,7 @@ tldr: Production-grade observability, idempotency, and batch processing for Lamb
 
 # AWS Lambda Powertools
 
-Production-grade observability, idempotency, and batch processing for Lambda — the standard library for serious Lambda work.
+Production-grade observability, idempotency, and batch processing for Lambda. The standard library for serious Lambda work.
 
 ---
 
@@ -224,6 +224,28 @@ def handler(event: SqsModel, context) -> dict:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Idempotency decorator raises `IdempotencyItemAlreadyExistsError` and blocks legitimate retries**
+Why: a previous invocation wrote an `INPROGRESS` record to DynamoDB but the Lambda was killed before completing, leaving a stale in-progress lock that has not yet expired.
+Detect: idempotency errors appear in logs for requests that are clearly new or retried after a genuine failure; DynamoDB scan shows rows with `status = INPROGRESS` whose TTL has not expired.
+Fix: reduce `expires_after_seconds` to a value shorter than the Lambda timeout so stale locks self-clean quickly; implement a manual cleanup job for abnormally stuck records.
+
+**`@tracer.capture_lambda_handler` causes X-Ray errors in unit tests**
+Why: the X-Ray SDK requires a running daemon or valid context; when tests invoke the handler directly without a trace context, `capture_lambda_handler` raises `SegmentNotFoundException`.
+Detect: unit tests fail with `SegmentNotFoundException` only when the tracer decorator is applied.
+Fix: set the environment variable `POWERTOOLS_TRACE_DISABLED=true` in test configuration, or mock the tracer using `tracer.disable_tracer()` in a pytest fixture.
+
+**Batch processor marks all records as failed even when only one record handler raises**
+Why: an exception escapes from outside the `record_handler` function (e.g., in shared setup code before the loop), bypassing the per-record failure isolation.
+Detect: Lambda returns all items in `batchItemFailures` even though individual records process correctly in isolation; the error originates before `process_partial_response` is called.
+Fix: move any shared pre-processing code inside the `record_handler`, or wrap the setup code in a try/except that raises a non-retriable exception to fail fast rather than misreporting partial failure.
+
+**Metrics are silently dropped when `@metrics.log_metrics` is not the outermost decorator**
+Why: decorator order matters — if `@logger.inject_lambda_context` is outermost and `@metrics.log_metrics` is inner, an exception in the logger decorator prevents metrics from being flushed.
+Detect: metrics are absent in CloudWatch after invocations that raised exceptions; swapping decorator order in a test confirms the metrics appear.
+Fix: always place `@metrics.log_metrics` as the outermost decorator so metrics are flushed even when inner decorators raise.
 
 ## Connections
 

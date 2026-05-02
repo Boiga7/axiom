@@ -152,7 +152,7 @@ results = collection.query.hybrid(
 
 ## Multi-Tenancy
 
-Weaviate supports tenant isolation — each tenant has their own shard within a collection. Essential for SaaS RAG applications.
+Weaviate supports tenant isolation. Each tenant has their own shard within a collection. Essential for SaaS RAG applications.
 
 ```python
 # Create collection with multi-tenancy enabled
@@ -206,6 +206,33 @@ Tiers: Sandbox (free, 14-day expiry), Standard (SLA, auto-scaling), Enterprise (
 - v4 Python client (current): `weaviate.connect_to_local()`, `collection.query.hybrid()`
 
 ---
+
+## Common Failure Cases
+
+**Hybrid search returns worse results than pure vector search due to BM25/vector score mismatch**  
+Why: BM25 scores and cosine similarity scores are on different scales; Weaviate's default weighted fusion can over-weight BM25 for short keyword queries where BM25 variance is high.  
+Detect: `alpha=0.75` hybrid results have lower relevance than `near_vector` alone on your eval set; top results contain exact keyword matches that are semantically irrelevant.  
+Fix: tune `alpha` — start at 0.5 and evaluate; for semantic queries, increase alpha toward 1.0; for keyword-critical queries (product codes, IDs), decrease toward 0.
+
+**Multi-tenancy query returns results from the wrong tenant**  
+Why: querying `collection` directly (without `.with_tenant()`) runs across all tenants; in a multi-tenant setup this leaks cross-tenant data.  
+Detect: search results include documents from other users; `source` property shows an unexpected tenant's data.  
+Fix: always use `collection.with_tenant(tenant_id)` before any query or insert in multi-tenant collections; add an assertion that `tenant_id` is non-empty before constructing the tenant collection reference.
+
+**Batch insert silently drops objects when a property value exceeds the data type constraint**  
+Why: `batch.add_object()` in dynamic batch mode buffers failures and continues; objects with invalid property values (e.g., a TEXT property receiving a list) are silently skipped.  
+Detect: inserted object count is lower than expected; `batch.number_errors` is non-zero after the `with` block exits.  
+Fix: check `batch.failed_objects` after every batch; log failed objects with their error messages; validate property types before insertion.
+
+**Weaviate Docker container loses all data on restart because persistence path is not mounted**  
+Why: `PERSISTENCE_DATA_PATH=/var/lib/weaviate` inside the container is not mapped to a host volume; container restart wipes the data.  
+Detect: collections and objects disappear after `docker compose restart`; starting fresh with an empty collection.  
+Fix: add `- ./weaviate_data:/var/lib/weaviate` to the volumes section in `docker-compose.yml`; verify the path is writable.
+
+**v4 Python client `connect_to_local()` raises `WeaviateConnectionError` when gRPC port is not exposed**  
+Why: Weaviate v4 client uses gRPC (port 50051) for data operations; if only port 8080 is mapped, the v4 client fails to connect even though the REST API is reachable.  
+Detect: `WeaviateConnectionError: Failed to connect to Weaviate` despite the container running; the REST endpoint responds on 8080 but the client errors.  
+Fix: expose both ports in docker-compose: `- "8080:8080"` and `- "50051:50051"`; or use `connect_to_local(grpc_port=50051)` to confirm the gRPC channel explicitly.
 
 ## Connections
 

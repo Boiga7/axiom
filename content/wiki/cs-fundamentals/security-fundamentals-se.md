@@ -10,7 +10,7 @@ tldr: Application security principles every engineer must know — not a special
 
 # Security Fundamentals for Software Engineers
 
-Application security principles every engineer must know — not a specialisation, a baseline. The OWASP Top 10 describes the same classes of vulnerabilities, year after year, because developers keep introducing them.
+Application security principles every engineer must know. Not a specialisation, a baseline. The OWASP Top 10 describes the same classes of vulnerabilities, year after year, because developers keep introducing them.
 
 ---
 
@@ -215,6 +215,33 @@ def create_product(body: CreateProductRequest):  # Pydantic validates on entry
 ```
 
 ---
+
+## Common Failure Cases
+
+**Parameterised query bypassed for dynamic ORDER BY or table names**
+Why: query parameters only protect value positions; column names and table names cannot be parameterised and must be validated by allowlist.
+Detect: a `sort_by` or `table` URL parameter is interpolated directly into SQL without an allowlist check.
+Fix: validate the value against an explicit set of permitted identifiers before interpolating, as shown in the SQL injection section above.
+
+**Password hashed with a fast algorithm (SHA-256, MD5)**
+Why: fast hashing algorithms allow billions of guesses per second on a GPU; a leaked database is cracked in hours.
+Detect: the password hashing call is `hashlib.sha256(...)` or `hashlib.md5(...)` rather than bcrypt/argon2/scrypt.
+Fix: replace with `passlib.context.CryptContext(schemes=["bcrypt"], bcrypt__rounds=12)` and re-hash on next login.
+
+**TLS verification disabled in outbound HTTP client**
+Why: `verify=False` (requests/httpx) or `ssl=False` (aiohttp) eliminates certificate validation, enabling man-in-the-middle attacks on every downstream API call.
+Detect: any `verify=False` or `ssl=False` in the codebase; check with `grep -r "verify=False"`.
+Fix: remove the flag; if a custom CA is required, pass the CA bundle path: `verify="/etc/ssl/certs/ca-bundle.crt"`.
+
+**Secret exposed through environment variable visible in Docker inspect**
+Why: `ENV` instructions in a Dockerfile bake the value into every image layer and are visible via `docker inspect`; passing secrets as `--build-arg` exposes them in the build history.
+Detect: `docker inspect <image> | grep -i password` returns a value; or `docker history <image>` shows a build arg containing a credential.
+Fix: load secrets at container runtime from a secrets manager (AWS Secrets Manager, Vault) or Docker secrets mount; never set them in `ENV` or `--build-arg`.
+
+**CSRF protection absent on state-changing API endpoints**
+Why: APIs using cookie-based session auth are vulnerable to cross-site requests from any origin unless CSRF tokens or `SameSite=Strict` cookies are enforced.
+Detect: a `POST /api/transfer` endpoint accepts requests from a third-party domain without any token validation.
+Fix: set `SameSite=Strict` on session cookies and add a `X-Requested-With` custom header check, or use a CSRF middleware as shown above.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/auth-patterns]] · [[qa/security-testing-qa]] · [[technical-qa/security-automation]] · [[cloud/cloud-security]] · [[security/owasp-llm-top10]]

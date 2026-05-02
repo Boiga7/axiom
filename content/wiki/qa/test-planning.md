@@ -10,7 +10,7 @@ tldr: The discipline of deciding what to test, how to test it, and what "done" m
 
 # Test Planning
 
-The discipline of deciding what to test, how to test it, and what "done" means — before writing a single test.
+The discipline of deciding what to test, how to test it, and what "done" means, before writing a single test.
 
 ---
 

@@ -202,5 +202,32 @@ flux diff kustomization myapp
 
 ---
 
+## Common Failure Cases
+
+**Flux reconciliation stuck in "not ready" permanently**
+Why: the GitRepository source cannot authenticate to the remote — the deploy key or PAT was rotated but not updated in the Flux secret.
+Detect: `flux get sources git -A` shows `failed to checkout` or `authentication required`.
+Fix: delete and recreate the `flux-system/flux-system` secret with the new credentials, then `flux reconcile source git flux-system`.
+
+**HelmRelease upgrade fails and blocks all subsequent reconciliations**
+Why: a pre-upgrade hook job failed or the chart rendered invalid manifests, leaving the release in a `failed` state with retries exhausted.
+Detect: `flux get helmreleases -A` shows `upgrade retries exhausted`; `kubectl describe helmrelease <name>` shows the failing hook.
+Fix: fix the underlying chart issue, then `flux suspend helmrelease <name> && flux resume helmrelease <name>` to reset the retry counter.
+
+**SOPS-encrypted secret fails to decrypt in cluster**
+Why: the KSOPS or Flux SOPS provider cannot access the KMS key because the controller's IAM role lost the `kms:Decrypt` permission.
+Detect: `flux get kustomizations -A` shows `decryption failed`; CloudTrail shows `AccessDenied` on the KMS key ARN.
+Fix: verify and restore the `kms:Decrypt` IAM policy on the Flux controller's service account role.
+
+**Image Automation writes to Git but deployment never updates**
+Why: the `ImagePolicy` semver range excludes the newly pushed tag (e.g., range is `>=1.0.0 <2.0.0` but image was tagged `2.0.0`).
+Detect: `flux get imagerepositories -A` shows the image is detected; `flux get imagepolicies -A` shows `no latest image`.
+Fix: update the `ImagePolicy` semver range to include the new tag, or re-tag the image to match the existing range.
+
+**Drift correction loops endlessly and thrashes the cluster**
+Why: a resource has a field that Kubernetes mutates after creation (e.g., `status`, or a webhook-injected annotation), and the GitOps source does not match what the cluster returns — causing Flux to re-apply every interval.
+Detect: `flux events` shows continuous reconciliation of the same resource; pod disruptions occur on a regular cycle.
+Fix: add the drifting field to the `.spec.patches` ignore list in the Kustomization, or use `kustomize.toolkit.fluxcd.io/force: disabled` on the resource.
+
 ## Connections
 [[cloud-hub]] · [[cloud/argocd]] · [[cloud/argo-rollouts]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[cloud/secrets-management]] · [[cloud/helm-advanced]]

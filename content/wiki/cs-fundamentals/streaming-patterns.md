@@ -10,7 +10,7 @@ tldr: Server-Sent Events, chunked responses, and backpressure — the mechanics 
 
 # Streaming Patterns
 
-Server-Sent Events, chunked responses, and backpressure — the mechanics of real-time data delivery.
+Server-Sent Events, chunked responses, and backpressure. The mechanics of real-time data delivery.
 
 ---
 
@@ -254,6 +254,28 @@ async def test_streaming_response():
 ```
 
 ---
+
+## Common Failure Cases
+
+**Nginx or a reverse proxy buffers the SSE stream, delaying delivery**
+Why: many reverse proxies buffer response bodies before forwarding, which prevents SSE chunks from reaching the client until the buffer fills.
+Detect: SSE events arrive in large batches rather than one by one; no events appear until the connection closes or after a multi-second delay.
+Fix: add `X-Accel-Buffering: no` to the response headers and set `proxy_buffering off` in the Nginx config for the SSE route.
+
+**SSE client not handling partial chunks, causing JSON parse errors**
+Why: TCP does not respect SSE message boundaries; a single `read()` call can deliver part of one message concatenated with part of the next.
+Detect: intermittent `JSON.parse` errors in the browser, especially on slow connections or large payloads.
+Fix: buffer received bytes and only parse after splitting on `\n\n` (the SSE message terminator), as shown in the TypeScript consumer above.
+
+**Generator not cleaned up when the client disconnects mid-stream**
+Why: if the async generator holds an open database cursor or external API connection, a client disconnect that raises `CancelledError` inside the generator may skip the `finally` block if the exception is not propagated correctly.
+Detect: connection pool exhaustion or resource leak warnings after clients drop connections during long streams.
+Fix: wrap resource acquisition in an `async with` block inside the generator's `try/finally` so cleanup always runs, regardless of how the generator is exited.
+
+**Unbounded queue causes OOM when consumer is slower than producer**
+Why: `asyncio.Queue()` with no `maxsize` grows without limit; a slow consumer paired with a fast producer will exhaust available memory.
+Detect: process RSS grows continuously during streaming; memory alerts fire on the host.
+Fix: always set `maxsize` on the queue to enforce backpressure — the producer blocks when the buffer is full rather than growing indefinitely.
 
 ## Connections
 

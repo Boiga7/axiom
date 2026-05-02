@@ -52,7 +52,7 @@ streamingModel.generate("Tell me a story", new StreamingResponseHandler<AiMessag
 
 ### AI Services
 
-The most ergonomic API — define an interface and LangChain4j generates the implementation:
+The most ergonomic API. Define an interface and LangChain4j generates the implementation:
 
 ```java
 interface AssistantService {
@@ -221,6 +221,28 @@ dependencies {
 - MCP Java SDK: `StdioMcpTransport` for subprocess MCP servers
 - Java 21 virtual threads: `Executors.newVirtualThreadPerTaskExecutor()` parallelises LLM calls without blocking OS threads
 - Spring AI: use for existing Spring Boot projects; LangChain4j for standalone or richer agent capabilities
+
+## Common Failure Cases
+
+**`AiServices.builder(AssistantService.class)` throws at runtime because the interface method return type is not supported by LangChain4j's proxy**  
+Why: LangChain4j's AI Services proxy supports a limited set of return types (`String`, `AiMessage`, extracted POJO via `@ExtractWith`); returning a custom class without a registered extractor causes an `UnsupportedReturnTypeException` that only appears at invocation time, not at build time.  
+Detect: the `AiServices.builder(...).build()` call succeeds but the first method invocation throws `UnsupportedReturnTypeException`; adding print statements confirms the proxy was created successfully.  
+Fix: either return `String` and parse the JSON manually, or annotate the method with `@ExtractWith(MyClass.class)` and ensure `MyClass` has a no-args constructor and public fields that match the model's JSON output.
+
+**Chat memory leaks across users because `@MemoryId` is on the wrong parameter or the `chatMemoryProvider` is not configured**  
+Why: if `chatMemoryProvider` is omitted from `AiServices.builder()`, LangChain4j uses a single shared in-memory store for all calls; every user's conversation history is merged into one shared context window, causing cross-user data leakage.  
+Detect: conversation history from user A appears in user B's responses; removing the `@MemoryId` annotation and using a constant ID reproduces the single-shared-memory behaviour.  
+Fix: always configure `chatMemoryProvider(userId -> MessageWindowChatMemory.withMaxMessages(20))` when using `@MemoryId`; verify isolation by calling the service with two different user IDs in a test and confirming separate history.
+
+**MCP `StdioMcpTransport` subprocess fails silently when the Python MCP server prints to stderr before the JSON handshake**  
+Why: the stdio transport reads JSON-RPC messages from the subprocess's stdout; any non-JSON output on stdout (debug prints, import warnings) before the handshake breaks the protocol parser; stderr output is discarded silently.  
+Detect: `client.initialize()` hangs or throws a JSON parse exception; adding `python -W ignore` or checking the server's startup sequence reveals non-JSON output on stdout.  
+Fix: ensure the MCP server writes only valid JSON-RPC to stdout; redirect all debug/log output to stderr or a log file; run the server manually and pipe its output through `jq .` to verify the first bytes are valid JSON.
+
+**`EmbeddingStoreIngestor.ingest()` creates duplicate embeddings on repeated ingestion because the store has no deduplication**  
+Why: `InMemoryEmbeddingStore` and most vector store implementations do not deduplicate on insert; calling `ingest()` twice with the same documents doubles the stored vectors, causing search results to return duplicate chunks with inflated similarity scores.  
+Detect: search results show identical content chunks appearing multiple times; the embedding store size doubles with each ingest run; cosine similarity scores are correct but the same text appears twice.  
+Fix: either clear the store before re-ingestion, or track ingested document IDs and skip already-present documents; for production stores, use a content-hash as the vector ID to enforce deduplication at the store level.
 
 ## Connections
 

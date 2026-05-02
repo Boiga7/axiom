@@ -62,7 +62,7 @@ The dot product measures "alignment" between vectors. Cosine similarity normalis
 cosine_similarity(a, b) = dot(a, b) / (|a| · |b|)
 ```
 
-Range: -1 (opposite) to +1 (identical direction). This is why cosine similarity is the standard for embedding search — it measures semantic similarity regardless of magnitude.
+Range: -1 (opposite) to +1 (identical direction). This is why cosine similarity is the standard for embedding search. It measures semantic similarity regardless of magnitude.
 
 ---
 
@@ -106,7 +106,7 @@ Embedding models map text into a high-dimensional vector space. The geometry of 
 - **Directions encode features:** There exist directions in embedding space for "sentiment", "formality", "syntactic role"
 - **Subspaces:** Attention heads project into subspaces of the residual stream (from mechanistic interpretability)
 
-Understanding the residual stream as a shared vector space helps explain why circuits can compose — each attention head and MLP "writes" to this shared space.
+Understanding the residual stream as a shared vector space helps explain why circuits can compose. Each attention head and MLP "writes" to this shared space.
 
 ---
 

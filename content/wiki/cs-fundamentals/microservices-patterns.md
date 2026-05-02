@@ -10,7 +10,7 @@ tldr: Architectural patterns for systems composed of independently deployable se
 
 # Microservices Patterns
 
-Architectural patterns for systems composed of independently deployable services. Microservices solve deployment coupling but introduce distributed systems complexity — use them when the deployment independence benefit outweighs the cost.
+Architectural patterns for systems composed of independently deployable services. Microservices solve deployment coupling but introduce distributed systems complexity. Use them when the deployment independence benefit outweighs the cost.
 
 ---
 
@@ -198,6 +198,33 @@ spec:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Saga compensation fails partway through, leaving inconsistent state**  
+Why: compensating transaction for step 2 succeeds but step 3 compensation fails (downstream service is down); the system is in a partially-rolled-back state.  
+Detect: order status is neither fully committed nor fully rolled back; monitoring shows saga stuck in `compensating` state.  
+Fix: compensating transactions must also be idempotent and retried; implement a dead-letter queue for failed compensations with an alert and manual recovery path.
+
+**Outbox publisher creates duplicate events after DB failover**  
+Why: the outbox publisher crashes after marking an event as `published=True` but before the DB commit; on restart it re-publishes the same event.  
+Detect: downstream consumers receive duplicate `order.created` events for the same order ID; consumer idempotency check catches it but alerts on the anomaly.  
+Fix: mark `published=True` and commit atomically; consumers must be idempotent. Check for the event ID before processing.
+
+**CQRS read model drifts from write model**  
+Why: the event handler that updates the read model fails silently; the read DB is not updated; queries return stale data indefinitely.  
+Detect: read-side data does not match write-side data for recently mutated records; read model lag metric climbs.  
+Fix: monitor event handler failure rate; use a dead-letter queue for failed read model updates with an alerting threshold; add a reconciliation job.
+
+**Strangler fig routes traffic to wrong service after partial migration**  
+Why: the facade routing rule for a migrated endpoint was not updated; traffic still goes to the monolith for a path owned by the new service.  
+Detect: new service shows zero traffic for an endpoint that should be active; logs show the monolith handling requests it should no longer own.  
+Fix: implement contract tests at the facade layer; verify each migrated route in the facade config before disabling the monolith handler.
+
+**API Gateway single point of failure takes down all services**  
+Why: the gateway is deployed as a single instance without health checks or failover; a crash takes down the entire API surface.  
+Detect: all services return 502/503 simultaneously; gateway instance health check fails.  
+Fix: deploy the gateway in an HA configuration (2+ instances behind a load balancer); implement circuit breakers on the gateway for individual backend services.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/design-patterns]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]]

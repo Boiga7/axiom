@@ -10,7 +10,7 @@ tldr: Agentless configuration management and automation tool. Uses SSH to push c
 
 # Ansible
 
-Agentless configuration management and automation tool. Uses SSH to push configuration to remote hosts — no daemon, no agent installed on targets. Written in Python; tasks are YAML playbooks.
+Agentless configuration management and automation tool. Uses SSH to push configuration to remote hosts. No daemon, no agent installed on targets. Written in Python; tasks are YAML playbooks.
 
 ---
 
@@ -212,7 +212,7 @@ ansible-playbook site.yaml -vvv
 
 ## Idempotency
 
-Ansible modules are idempotent by default — running the same playbook twice produces the same result without side effects. The `shell` and `command` modules are NOT idempotent unless you add `creates:` or `when:` conditions. Prefer purpose-built modules over shell wherever possible.
+Ansible modules are idempotent by default. Running the same playbook twice produces the same result without side effects. The `shell` and `command` modules are NOT idempotent unless you add `creates:` or `when:` conditions. Prefer purpose-built modules over shell wherever possible.
 
 ---
 
@@ -232,6 +232,33 @@ Ansible modules are idempotent by default — running the same playbook twice pr
 ```
 
 ---
+
+## Common Failure Cases
+
+**SSH connection refused on first run**
+Why: the target host's `authorized_keys` doesn't include the key pair Ansible is using, or `sshd` is not running.
+Detect: `ansible all -m ping` returns `UNREACHABLE` with `Connection refused` or `Permission denied (publickey)`.
+Fix: verify the key in `ansible_ssh_private_key_file` matches an entry in `~/.ssh/authorized_keys` on the target, and confirm `sshd` is running with `systemctl status sshd`.
+
+**Non-idempotent `shell` task re-runs on every play**
+Why: the `shell` and `command` modules always report `changed` unless told otherwise, so handlers fire and downstream tasks run unnecessarily.
+Detect: the task shows `changed` on repeated runs even though the system state hasn't changed.
+Fix: add a `creates: /path/to/sentinel-file` argument or wrap with `when: not (result.stat.exists)` after a `stat` check.
+
+**Vault password not found in CI**
+Why: the pipeline has no `--vault-password-file` argument and no `ANSIBLE_VAULT_PASSWORD_FILE` env var set.
+Detect: playbook exits with `ERROR! Decryption failed (no vault secrets were found that could decrypt)`.
+Fix: store the vault password as a CI secret, write it to a temp file at runtime, and pass `--vault-password-file` or set `ANSIBLE_VAULT_PASSWORD_FILE`.
+
+**Role dependency version conflict via `ansible-galaxy`**
+Why: two roles declare incompatible versions of the same collection dependency, and `ansible-galaxy install` resolves to an incompatible version.
+Detect: tasks fail with `module not found` or unexpected parameter errors after a fresh install in CI.
+Fix: pin collection versions in `requirements.yml` and commit the file; run `ansible-galaxy collection install -r requirements.yml --force` to reproduce the exact environment.
+
+**Handler not triggered because task was skipped**
+Why: when a `when:` condition skips the task that contains `notify`, the handler is never queued even if the underlying file changed.
+Detect: config was manually changed on the host but the handler (e.g., `Reload nginx`) never ran; service is using the stale config.
+Fix: use `listen` on the handler and trigger it explicitly with `meta: flush_handlers` at a defined checkpoint, or run the task unconditionally and guard logic inside it.
 
 ## Connections
 [[cloud-hub]] · [[cloud/github-actions]] · [[cloud/kubernetes]] · [[cloud/pulumi]] · [[cloud/aws-cdk]]

@@ -112,7 +112,7 @@ print(response.content[0].text)
 #  and entanglement to process information differently than classical computers."
 ```
 
-Without the system prompt, the model gives a longer answer. The system prompt is not magic — it's an instruction the model follows. Write it like you'd brief a new colleague.
+Without the system prompt, the model gives a longer answer. The system prompt is not magic. It's an instruction the model follows. Write it like you'd brief a new colleague.
 
 ---
 
@@ -140,13 +140,13 @@ print(chat("My name is Lewis."))
 print(chat("What's my name?"))  # Correctly says "Lewis" — it has the history
 ```
 
-The `messages` list grows with every turn. In production you'll need to trim it — see [[prompting/context-engineering]].
+The `messages` list grows with every turn. In production you'll need to trim it. See [[prompting/context-engineering]].
 
 ---
 
 ## 7. Streaming
 
-Without streaming, you wait for the full response before seeing anything. With streaming, text appears word by word — much better UX for longer responses.
+Without streaming, you wait for the full response before seeing anything. With streaming, text appears word by word. Much better UX for longer responses.
 
 ```python
 with client.messages.stream(

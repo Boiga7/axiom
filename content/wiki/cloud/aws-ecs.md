@@ -10,7 +10,7 @@ tldr: AWS-native container orchestration. Simpler than Kubernetes — no control
 
 # AWS ECS — Elastic Container Service
 
-AWS-native container orchestration. Simpler than Kubernetes — no control plane to manage, no YAML manifests. Two launch types: Fargate (serverless, AWS manages the EC2) and EC2 (you manage the underlying instances).
+AWS-native container orchestration. Simpler than Kubernetes. No control plane to manage, no YAML manifests. Two launch types: Fargate (serverless, AWS manages the EC2) and EC2 (you manage the underlying instances).
 
 ---
 
@@ -152,6 +152,28 @@ aws ecr put-lifecycle-policy \
 ```
 
 ---
+
+## Common Failure Cases
+
+**Tasks fail to start with "CannotPullContainerError"**
+Why: the task execution role lacks `ecr:GetAuthorizationToken` or `ecr:BatchGetImage` permissions, or the task is in a private subnet without a NAT Gateway or VPC endpoint for ECR.
+Detect: ECS service events show `CannotPullContainerError: ... no basic auth credentials` or `RequestError: send request failed`.
+Fix: verify `ecsTaskExecutionRole` has the `AmazonECSTaskExecutionRolePolicy` managed policy attached, and confirm the subnet has internet access (via NAT) or Interface VPC Endpoints for `ecr.api` and `ecr.dkr`.
+
+**Service rolls back immediately — health check failing during deployment**
+Why: the new task revision starts but fails the ALB health check before `minimumHealthyPercent` is maintained; ECS drains it and the service reverts to the previous revision.
+Detect: ECS events show repeated `service ... has stopped N running tasks` followed by rollback; ALB target group shows the new task as `unhealthy`.
+Fix: check the container logs for startup errors; if the app needs more init time, increase `healthCheck.startPeriod` in the task definition and the ALB health check grace period.
+
+**Secrets not injected — task crashes with missing env var**
+Why: the `secrets` array in the task definition references a Secrets Manager ARN that the task execution role cannot access, so ECS fails to inject the value and the container starts without it.
+Detect: ECS event `ResourceInitializationError: unable to pull secrets or registry auth: execution resource retrieval failed`.
+Fix: add `secretsmanager:GetSecretValue` (and `kms:Decrypt` if the secret is KMS-encrypted) to the `executionRoleArn`'s policy for the exact secret ARN.
+
+**Service stuck at desired count due to ENI exhaustion**
+Why: each Fargate task in `awsvpc` mode consumes one ENI; if the subnet's available IP addresses are exhausted, new tasks cannot be placed.
+Detect: ECS placement failures with `Timeout waiting for network interface to be attached` or the subnet shows 0 available IPs in the VPC console.
+Fix: use a larger subnet CIDR (at least `/24` for services with >20 tasks), or distribute tasks across multiple subnets.
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/docker]] · [[cloud/cloud-networking]] · [[cloud/secrets-management]] · [[cloud/github-actions]]

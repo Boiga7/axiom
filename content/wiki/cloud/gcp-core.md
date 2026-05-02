@@ -17,10 +17,10 @@ Google Cloud Platform. Second cloud for most teams; first cloud for ML/AI worklo
 ## Compute
 
 ### Compute Engine
-Virtual machines. Machine types: general purpose (N2, E2), compute-optimised (C3), memory-optimised (M3), accelerator (A3 — H100 GPUs). Preemptible VMs (Spot) up to 91% cheaper, interrupted with 30s notice.
+Virtual machines. Machine types: general purpose (N2, E2), compute-optimised (C3), memory-optimised (M3), accelerator (A3, H100 GPUs). Preemptible VMs (Spot) up to 91% cheaper, interrupted with 30s notice.
 
 ### Cloud Run
-Serverless containers. Bring your own container image, GCP handles scaling from zero. Request-driven (min-instances=0 for cost) or always-on. No 15-minute cap like Lambda — requests timeout at 60 min max. Ideal for APIs and event-driven workloads.
+Serverless containers. Bring your own container image, GCP handles scaling from zero. Request-driven (min-instances=0 for cost) or always-on. No 15-minute cap like Lambda. Requests timeout at 60 min max. Ideal for APIs and event-driven workloads.
 
 ```bash
 # Deploy a container
@@ -134,7 +134,7 @@ Managed message queue / event streaming. Guaranteed at-least-once delivery. Push
 Same concept as AWS VPC. GCP VPCs are global (subnets are regional). Shared VPC for org-wide network management. VPC peering and Cloud Interconnect (dedicated 10G/100G links).
 
 ### Cloud Load Balancing
-Global anycast L7 (HTTPS LB) — single IP, traffic routed to nearest healthy backend. Regional L4 (TCP/UDP). Cloud Armor for WAF and DDoS protection (integrated with L7 LB).
+Global anycast L7 (HTTPS LB). Single IP, traffic routed to nearest healthy backend. Regional L4 (TCP/UDP). Cloud Armor for WAF and DDoS protection (integrated with L7 LB).
 
 ### Cloud DNS
 Managed DNS. 100% SLA. Private zones for VPC-internal resolution.
@@ -148,7 +148,7 @@ Managed DNS. 100% SLA. Private zones for VPC-internal resolution.
 Principal → Role → Permissions → Resources
 ```
 
-Principals: Google Accounts, Service Accounts, Google Groups, Cloud Identity domains. Roles: Basic (Owner/Editor/Viewer — avoid), Predefined (e.g., `roles/storage.objectViewer`), Custom.
+Principals: Google Accounts, Service Accounts, Google Groups, Cloud Identity domains. Roles: Basic (Owner/Editor/Viewer, avoid), Predefined (e.g., `roles/storage.objectViewer`), Custom.
 
 **Workload Identity Federation** — allow external identities (GitHub Actions OIDC, AWS IAM, Azure AD) to impersonate GCP service accounts without keys.
 
@@ -209,6 +209,28 @@ gcloud iam service-accounts list
 | Secret Manager | Secrets Manager |
 
 ---
+
+## Common Failure Cases
+
+**Cloud Run container exits immediately with exit code 1 because the port does not match PORT env var**
+Why: Cloud Run injects the `PORT` environment variable (default 8080) and expects the container to listen on it; a hardcoded port in the `CMD` that differs from `PORT` causes the health check to fail and the container to be restarted in a loop.
+Detect: Cloud Run deployment shows `Container failed to start. Failed to start and then listen on the port defined by the PORT environment variable`; the service never reaches a healthy state.
+Fix: Read the port from `os.environ.get("PORT", "8080")` in the application startup code rather than hardcoding; confirm with `gcloud run services describe <service> --format="value(status.conditions)"`.
+
+**Workload Identity binding on the wrong namespace or service account causes 403s**
+Why: The Kubernetes service account annotated with `iam.gke.io/gcp-service-account` must match exactly the Google service account bound in IAM; a typo in the namespace or KSA name means the binding never matches at token request time.
+Detect: Pod logs show `Permission denied` when calling GCP APIs despite the pod using the correct service account; `gcloud iam service-accounts get-iam-policy` shows a binding that references a different namespace or KSA.
+Fix: Verify the annotation on the KSA with `kubectl get sa <ksa-name> -n <namespace> -o yaml`; ensure the IAM binding format is exactly `serviceAccount:<project>.svc.id.goog[<namespace>/<ksa-name>]`.
+
+**BigQuery on-demand query cost blows the monthly budget due to a missing partition filter**
+Why: A scheduled query or BI tool query omits the partition column in the WHERE clause; BigQuery scans the entire table (potentially petabytes) and charges $5/TB scanned.
+Detect: BigQuery job history shows `Total bytes billed` in the TB range for a single query; the cost spike appears in the daily FinOps report.
+Fix: Enable `require_partition_filter` on the BigQuery table so unpartitioned queries are rejected at the API level; set a per-project or per-user custom cost control in the BigQuery console to cap bytes billed per query.
+
+**Cloud Run min-instances=0 causing P99 latency spikes from cold starts on bursty traffic**
+Why: With `min-instances=0` a period of inactivity causes all containers to scale to zero; the next burst of traffic triggers cold starts (300-2000ms for Python/Java) while new containers initialise.
+Detect: Cloud Run latency metrics show spikes to 1-3 seconds at irregular intervals correlating with periods of low traffic preceding a burst; P50 is fine but P99 is high.
+Fix: Set `min-instances=1` for latency-sensitive APIs to keep one warm instance always running; use Cloud Run's startup CPU boost (`--cpu-boost`) to reduce cold start duration for Python/JVM apps.
 
 ## Connections
 

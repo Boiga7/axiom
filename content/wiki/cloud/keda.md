@@ -10,7 +10,7 @@ tldr: KEDA (Kubernetes Event-Driven Autoscaling) extends Kubernetes HPA to scale
 
 # KEDA — Kubernetes Event-Driven Autoscaling
 
-KEDA (Kubernetes Event-Driven Autoscaling) extends Kubernetes HPA to scale workloads based on external event sources — Kafka consumer lag, SQS queue depth, Prometheus metrics, Redis list length, and 60+ other scalers.
+KEDA (Kubernetes Event-Driven Autoscaling) extends Kubernetes HPA to scale workloads based on external event sources. Kafka consumer lag, SQS queue depth, Prometheus metrics, Redis list length, and 60+ other scalers.
 
 ---
 
@@ -159,6 +159,28 @@ spec:
 - Combine with Karpenter or Cluster Autoscaler — scaling pods and nodes
 
 ---
+
+## Common Failure Cases
+
+**ScaledObject created but HPA is not scaling — stuck at zero or minReplicas**
+Why: KEDA creates the HPA successfully but the metrics adapter cannot reach the external scaler endpoint (e.g., Kafka broker unreachable, wrong bootstrap server, auth misconfigured).
+Detect: `kubectl describe hpa <name>` shows `unable to get external metric`; `kubectl logs -n keda deployment/keda-operator` shows connection refused or auth errors.
+Fix: verify the scaler endpoint is reachable from within the cluster (`kubectl exec` into a pod and test connectivity), and confirm the TriggerAuthentication secret contains the correct credentials.
+
+**Scale-to-zero causes thundering herd when traffic returns**
+Why: with `minReplicaCount: 0` the first batch of events must wait for pod cold start (image pull + init) before being processed, and if the queue filled up during idle time all events arrive simultaneously.
+Detect: queue depth spikes to a large value after a quiet period; consumer lag metric shows a sudden large value before any pods are running.
+Fix: set `minReplicaCount: 1` for latency-sensitive workloads, or pre-warm by setting `cooldownPeriod` high enough to keep at least one warm pod through expected idle periods.
+
+**IRSA credentials on KEDA operator fail after cluster upgrade**
+Why: the KEDA operator pod was not restarted after the IRSA token was refreshed following a node group rotation, and the mounted token has expired.
+Detect: SQS or DynamoDB scaler logs show `ExpiredTokenException` or `InvalidClientTokenId`.
+Fix: restart the KEDA operator pod to force a fresh token mount: `kubectl rollout restart deployment/keda-operator -n keda`.
+
+**Kafka scaler reports zero lag but consumers are actually behind**
+Why: `offsetResetPolicy: latest` combined with a consumer group that has never committed an offset causes KEDA to compute lag against the latest offset rather than the committed position, reporting zero lag.
+Detect: Kafka consumer group `kafka-consumer-groups.sh --describe` shows `CURRENT-OFFSET = -` (no committed offset) while the partition `LOG-END-OFFSET` is much higher.
+Fix: change `offsetResetPolicy` to `earliest` for new consumer groups, or ensure the consumer group commits an initial offset before KEDA begins evaluating lag.
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/aws-sqs-sns]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes-operators]] · [[llms/ae-hub]]

@@ -10,7 +10,7 @@ tldr: "The HuggingFace datasets library is the standard way to load, stream, and
 
 # Datasets
 
-Training data for LLMs and AI systems. The HuggingFace Hub is the central registry — over 150,000 public datasets. The `datasets` library provides a unified API to load, stream, filter, and push them.
+Training data for LLMs and AI systems. The HuggingFace Hub is the central registry. Over 150,000 public datasets. The `datasets` library provides a unified API to load, stream, filter, and push them.
 
 ---
 
@@ -43,7 +43,7 @@ my_data.push_to_hub("your-username/my-dataset", private=True)
 
 ## Instruction-Following Datasets
 
-Used for SFT (supervised fine-tuning) — teach the model to follow instructions.
+Used for SFT (supervised fine-tuning). Teach the model to follow instructions.
 
 | Dataset | Size | Notes |
 |---|---|---|
@@ -112,7 +112,7 @@ ds = load_dataset(
 
 ## Synthetic Data Generation
 
-Generating training data with a stronger model — now the dominant approach for instruction and preference data.
+Generating training data with a stronger model. Now the dominant approach for instruction and preference data.
 
 ```python
 import anthropic
@@ -192,6 +192,23 @@ print(f"Unique ratio: {unique_ratio:.2%}")
 - The Stack v2 (3TB+) is the largest open code dataset; use `data_dir` to select a single language
 - `push_to_hub` requires `huggingface-cli login` or `HF_TOKEN` environment variable
 - Synthetic data at scale: GPT-4 or Claude Sonnet as the generator, reward model or LLM judge for filtering
+
+## Common Failure Cases
+
+**`load_dataset` with `streaming=True` silently returns only the first shard of a multi-shard dataset when `data_files` is a glob pattern**  
+Why: in streaming mode, some dataset loaders resolve glob patterns lazily and may only resolve the first matching shard if the pattern is not fully expanded before iteration; the result is an iterator that yields only a fraction of the expected data with no error.  
+Detect: iterating the stream yields far fewer examples than the dataset documentation claims; `next(iter(ds))` works but the stream ends after the first shard.  
+Fix: list shard files explicitly in `data_files` rather than using a glob; or use non-streaming mode with `load_dataset(..., split="train")` and verify `len(ds)` matches the expected count.
+
+**`push_to_hub` uploads a dataset that looks correct locally but has all string columns truncated to 512 characters because the `features` schema was auto-inferred**  
+Why: when `features` is not explicitly specified, `push_to_hub` auto-infers column types from the first batch; if the first batch has responses under 512 characters, the schema infers `Value("string")` with a length hint, silently truncating longer values during serialisation.  
+Detect: downloading the dataset from the Hub shows `response` values truncated mid-sentence; comparing the Hub version to the local version reveals the truncation.  
+Fix: explicitly define `Features({"instruction": Value("string"), "response": Value("string")})` when creating the dataset; `Value("string")` in HuggingFace datasets has no length limit when schema is explicit.
+
+**MinHash deduplication removes semantically distinct examples that share a high word-overlap because the hash is computed on unigrams only**  
+Why: MinHash with unigrams is sensitive to shared boilerplate vocabulary (e.g., "The capital of X is Y" across many geography questions); two semantically different instructions with high common word overlap are incorrectly classified as duplicates and one is removed.  
+Detect: after deduplication, the dataset loses coverage of specific domains (e.g., all geography questions removed); inspecting removed pairs shows they are semantically distinct despite high ROUGE overlap.  
+Fix: use 2-gram or 3-gram MinHash shingles to capture phrase-level similarity; or use a combination of MinHash for near-duplicates and an embedding similarity threshold to catch only true duplicates.
 
 ## Connections
 

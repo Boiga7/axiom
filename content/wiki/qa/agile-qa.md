@@ -10,7 +10,7 @@ tldr: How quality assurance integrates with Scrum and agile delivery. QA is not 
 
 # QA in Agile
 
-How quality assurance integrates with Scrum and agile delivery. QA is not a phase at the end of a sprint — it's a continuous activity woven through every sprint ceremony and development step.
+How quality assurance integrates with Scrum and agile delivery. QA is not a phase at the end of a sprint. It's a continuous activity woven through every sprint ceremony and development step.
 
 ---
 
@@ -74,7 +74,7 @@ A story is ready for sprint when:
 - [ ] Edge cases discussed in refinement
 - [ ] Story estimated
 
-QA should reject stories that don't meet DoR from entering the sprint — ambiguous stories create bugs.
+QA should reject stories that don't meet DoR from entering the sprint. Ambiguous stories create bugs.
 
 ---
 
@@ -145,7 +145,7 @@ Commit → Unit tests (30 seconds)
         → Manual exploratory (ongoing)
 ```
 
-Every stage gates the next. A failing unit test blocks integration tests from running — fail fast, fix fast.
+Every stage gates the next. A failing unit test blocks integration tests from running. Fail fast, fix fast.
 
 ---
 

@@ -209,6 +209,33 @@ LazyGraphRAG: 95-99% cheaper at index time. Use LazyGraphRAG unless you need the
 - Global search: uses community reports for synthesis questions; Local search: entity subgraph + related chunks
 - LangGraph vs GraphRAG: different things — LangGraph is a graph-based agent runtime, not a retrieval system
 
+## Common Failure Cases
+
+**Indexing cost blows past budget on first run**  
+Why: entity extraction runs one LLM call per chunk; a 10,000-chunk corpus easily costs $50-500 with a capable model.  
+Detect: check LLM API spend after the first `graphrag index` run; `$10+` is a warning sign.  
+Fix: use LazyGraphRAG for the first pass, or index a 100-chunk sample before committing to full indexing.
+
+**Graph quality collapses on noisy/boilerplate documents**  
+Why: LLM extracts entities from headers, footers, and disclaimers, polluting the graph with low-signal nodes.  
+Detect: inspect the graph's entity list; if you see "Page 1 of 10" or "Confidential" as entities, the input is too noisy.  
+Fix: clean and deduplicate documents before indexing; filter short/boilerplate chunks upstream.
+
+**Local search returns irrelevant results despite correct global search**  
+Why: entity subgraph traversal depends on correct entity extraction; proper nouns or technical terms the LLM misses become orphan nodes.  
+Detect: run the same query as both local and global search; if global is accurate and local is not, the entity graph is incomplete.  
+Fix: review entity extraction prompts; add domain-specific examples for rare technical entities.
+
+**Cypher queries fail or return empty results with LangChain integration**  
+Why: the LLM-generated Cypher query syntax doesn't match the Neo4j schema or uses relationship names that don't exist.  
+Detect: enable `verbose=True` on `GraphCypherQAChain`; read the generated Cypher and run it manually in Neo4j Browser.  
+Fix: provide the schema explicitly in the chain's system prompt; restrict allowed relationship types.
+
+**LazyGraphRAG quality gap is unacceptable for synthesis queries**  
+Why: NLP noun-phrase extraction misses semantic relationships that full LLM entity extraction captures.  
+Detect: run the same synthesis query on LazyGraphRAG and a 100-doc full GraphRAG sample; compare coherence.  
+Fix: if quality gap exceeds tolerance, invest in full GraphRAG indexing for the high-value subset of documents.
+
 ## Connections
 
 - [[rag/pipeline]] — standard RAG pipeline, where GraphRAG fits as an alternative

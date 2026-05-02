@@ -84,51 +84,26 @@ export default function HomePage() {
               and the infrastructure that keeps them running.
             </p>
 
-            <div className="flex items-center justify-center gap-3">
-              <Link
-                href="/learn/ai-engineer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all bg-ae/10 text-ae border border-ae/20 hover:bg-ae/20 hover:border-ae/40"
-              >
-                Start learning
-              </Link>
+            <div className="flex items-center justify-center">
               <a
                 href="#browse"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all text-secondary border border-white/[0.08] hover:border-white/[0.16] hover:text-primary"
               >
-                Browse topics
+                Browse Topics
               </a>
             </div>
           </div>
         </section>
 
-        {/* ── Start Here strip ────────────────────────────────── */}
-        <div className="mb-10 rounded-lg border border-white/[0.05] bg-elevated px-5 py-4 flex items-center justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-ae/70 mb-1">New here?</p>
-            <p className="text-secondary text-sm">
-              Pick a path for your role below. Each one builds from fundamentals to production.
-            </p>
-          </div>
-          <Link
-            href="/synthesis/getting-started"
-            className="shrink-0 font-mono text-xs text-ae/70 hover:text-ae transition-colors whitespace-nowrap"
-          >
-            What is this? →
-          </Link>
-        </div>
-
         {/* ── Role-Based Learning Paths ───────────────────────── */}
         <section className="mb-16" id="learn-paths">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-6">
             <div className="w-1.5 h-5 rounded-full bg-ae/60" />
             <h2 className="font-mono text-[11px] uppercase tracking-widest text-ae/80">
               Learning Paths
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
-          <p className="text-secondary text-xs font-mono mb-6 ml-4">
-            Structured routes from fundamentals to production — pick the one for your role
-          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {LEARNING_PATHS.map((path) => (
@@ -147,7 +122,7 @@ export default function HomePage() {
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
           <p className="text-secondary text-xs font-mono mb-6 ml-4">
-            How systems behave under real load — reach for these when something breaks or doesn&apos;t scale
+            How systems behave under real load. Reach for these when something breaks or doesn&apos;t scale
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -254,7 +254,7 @@ class VoiceAgent:
 
 ## OpenAI Realtime API
 
-GPT-4o's real-time audio API — handles ASR + LLM + TTS in one WebSocket connection. Lowest latency for voice applications.
+GPT-4o's real-time audio API. Handles ASR + LLM + TTS in one WebSocket connection. Lowest latency for voice applications.
 
 ```python
 import websockets
@@ -327,6 +327,28 @@ Optimisations:
 - Human conversation target: <300ms response; realistic full pipeline: 300-700ms
 - Sentence-boundary streaming (synthesise at `.`, `!`, `?`) is the primary latency optimisation
 - OpenAI Realtime API: WebSocket, PCM16 audio, handles ASR+LLM+TTS in one connection
+
+## Common Failure Cases
+
+**Sentence-boundary TTS synthesis misses the boundary because the LLM streams tokens that end with `".` (closing quote + period) but the check only tests for `"."`**  
+Why: the `text_buffer.endswith((".", "!", "?", "\n"))` check fails when the period is followed by a closing quote (`"`) or bracket (`)`); the buffer grows past the sentence boundary and TTS receives a much longer chunk, introducing latency spikes.  
+Detect: the voice agent has inconsistent latency; some responses start speaking almost immediately while others pause for several seconds; adding `print(repr(text_buffer))` shows the buffer accumulating across multiple sentences before synthesis.  
+Fix: use a regex pattern to detect sentence boundaries regardless of trailing punctuation: `re.search(r'[.!?]["\')]?\s*$', text_buffer)`; or synthesise at a word count threshold (e.g., every 15 words) as a fallback.
+
+**Whisper `model.transcribe()` on a file with long silences produces repeated text hallucinations**  
+Why: Whisper hallucinates during long silence regions, producing repeated phrases like "Thank you for watching" or "Subscribe to our channel"; this is a known Whisper bug on audio with gaps or low-speech content.  
+Detect: the transcript contains repeated short phrases that don't appear in the original audio; the hallucination rate increases with silence duration and with smaller Whisper models.  
+Fix: use `faster-whisper` with `vad_filter=True` (Voice Activity Detection) to skip silent segments before transcription; or use Deepgram which handles silences without hallucinating.
+
+**OpenAI Realtime API audio buffer fills up and drops frames because the PCM16 chunk size is too large for the WebSocket message loop**  
+Why: the Realtime API expects small PCM16 chunks (~8KB at a time); if the audio capture library sends large chunks (e.g., 100ms at 48kHz = ~9.6KB per chunk), some WebSocket implementations queue them and delay processing, increasing perceived latency.  
+Detect: increasing microphone sample rate makes latency worse instead of better; the `input_audio_buffer.append` events arrive at the server with irregular timing.  
+Fix: cap chunk size to 4096 bytes per `input_audio_buffer.append` event; break large audio captures into smaller chunks before sending.
+
+**ElevenLabs TTS audio chunks are played in the wrong order because concurrent sentence synthesis calls return out of order**  
+Why: if multiple TTS synthesis calls are fired concurrently (one per sentence), network latency causes them to return in a different order than they were sent; the audio stream plays the second sentence before the first.  
+Detect: the voice response sounds garbled with sentences out of sequence; slowing down synthesis (one call at a time) resolves the issue.  
+Fix: synthesise sentences sequentially, not concurrently; use an `asyncio.Queue` to order synthesis requests and play them in arrival order.
 
 ## Connections
 

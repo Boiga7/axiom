@@ -46,7 +46,7 @@ export const LEARNING_PATHS: LearningPath[] = [
     id: "software-engineer",
     title: "Software Engineer",
     description:
-      "Clean code, design patterns, system design, databases, and APIs — plus the behaviour-under-stress topics most paths skip.",
+      "Clean code, design patterns, system design, databases, and APIs. Plus the behaviour-under-stress topics most paths skip.",
     brain: "engineering",
     estimatedHours: 7,
     steps: [
@@ -109,7 +109,7 @@ export const LEARNING_PATHS: LearningPath[] = [
   },
   {
     id: "technical-qa-engineer",
-    title: "Technical QA Engineer",
+    title: "SDET",
     description:
       "API testing, performance, test architecture, Playwright, and the distributed-systems debugging skills that separate senior engineers.",
     brain: "engineering",
@@ -130,7 +130,7 @@ export const LEARNING_PATHS: LearningPath[] = [
   },
   {
     id: "sql-engineer",
-    title: "SQL Engineer",
+    title: "Analytics Engineer",
     description:
       "SQL, schema design, transactions, NoSQL tradeoffs, Python data tools, and the performance analysis skills production demands.",
     brain: "engineering",
@@ -221,7 +221,7 @@ export const TOPIC_BUNDLES: LearningPath[] = [
     id: "production-thinking",
     title: "Production Thinking",
     description:
-      "System-level reasoning across the full stack — request flow anatomy, debugging under pressure, failure engineering, and the tradeoff decisions that define senior engineers.",
+      "System-level reasoning across the full stack: request flow anatomy, debugging under pressure, failure engineering, and the tradeoff decisions that define senior engineers.",
     brain: "engineering",
     estimatedHours: 5,
     steps: [

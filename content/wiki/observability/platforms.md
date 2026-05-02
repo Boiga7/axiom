@@ -198,6 +198,33 @@ Build an annotation queue for human review of borderline scores. Use the scored 
 - Cost gates: soft warn at 80% of token budget, hard stop at 100%
 - OTel GenAI conventions: gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, gen_ai.request.model are the key attributes
 
+## Common Failure Cases
+
+**Traces missing for async code — spans never close**  
+Why: an `async def` function creates a span but an unhandled exception exits before the span's context manager closes it; the span is never exported.  
+Detect: trace shows parent spans with no children for async code paths; unclosed span warnings appear in the OTel SDK debug log.  
+Fix: always use context managers (`with tracer.start_as_current_span(...)`) not manual `start_span`/`end_span`; add a `finally` block if you must use the manual API.
+
+**Cost gate threshold triggers on input tokens, ignores cached tokens**  
+Why: the cost calculation uses `usage.input_tokens` but doesn't subtract `cache_read_input_tokens`; cached reads are counted at full price.  
+Detect: cost gate fires earlier than expected; actual Anthropic invoice is lower than the internal cost estimate.  
+Fix: calculate cost as `(input_tokens - cache_read_input_tokens) * full_price + cache_read_input_tokens * 0.1 * full_price + output_tokens * output_price`.
+
+**Langfuse callback not attached to LangGraph nested subgraph**  
+Why: the callback handler was passed to the top-level graph's `invoke` but not propagated to compiled subgraphs; subgraph node spans are missing from the trace.  
+Detect: top-level spans appear in Langfuse but subgraph tool calls are absent; trace shows gaps in the timeline.  
+Fix: pass the callback handler in `config={"callbacks": [handler]}` to every `subgraph.invoke()` call, not just the root graph.
+
+**Online eval judge introduces systematic bias for a user segment**  
+Why: the LLM judge was calibrated on English responses; it scores non-English or code-heavy responses lower regardless of correctness.  
+Detect: judge scores correlate with language or content type; human review shows judge disagrees with humans at higher rate for non-English users.  
+Fix: calibrate the judge separately per content type; use language-aware judges for multilingual products; monitor judge accuracy by segment.
+
+**High-cardinality span attributes cause ClickHouse/storage blowout**  
+Why: a span attribute includes a raw user query string or a UUID per request; the attribute column has millions of unique values, exploding storage and slowing analytical queries.  
+Detect: Langfuse/ClickHouse storage grows faster than request volume; query performance degrades on the attributes table.  
+Fix: hash or bucket high-cardinality values before attaching as span attributes; keep user identifiers as trace-level metadata, not per-span attributes.
+
 ## Connections
 
 - [[observability/tracing]] — OTel instrumentation and Langfuse/LangSmith integration patterns

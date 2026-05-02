@@ -10,7 +10,7 @@ tldr: Prioritise testing effort toward areas of highest risk. You never have eno
 
 # Risk-Based Testing
 
-Prioritise testing effort toward areas of highest risk. You never have enough time to test everything — risk-based testing ensures the most critical and failure-prone areas get the most attention.
+Prioritise testing effort toward areas of highest risk. You never have enough time to test everything. Risk-based testing ensures the most critical and failure-prone areas get the most attention.
 
 ---
 
@@ -21,7 +21,7 @@ Prioritise testing effort toward areas of highest risk. You never have enough ti
 High likelihood and high impact → test first, test thoroughly.
 Low likelihood and low impact → test last, test lightly.
 
-Without risk analysis, teams tend to test what's easiest or what they're most familiar with — not what matters most.
+Without risk analysis, teams tend to test what's easiest or what they're most familiar with. Not what matters most.
 
 ---
 
@@ -105,7 +105,7 @@ For a checkout feature:
 - Low risks: test opportunistically; skip if time-pressured
 
 **At release:**
-Risk-based regression — don't retest everything on every release. Focus regression effort on:
+Risk-based regression. Don't retest everything on every release. Focus regression effort on:
 - Areas changed in this release
 - Areas that were High/Critical risk in previous sprints
 - Areas with historical defect density
@@ -170,6 +170,28 @@ rollback plan ready. These areas are scheduled for test coverage next sprint."
 This makes risk visible. Stakeholders can accept it with awareness, or delay the release. Either is a valid outcome.
 
 ---
+
+## Common Failure Cases
+
+**Risk scores not updated mid-sprint after scope change — resources stay on original priorities**
+Why: a new third-party dependency is added on day 3 of the sprint but the risk register is not updated; testing effort stays concentrated on the originally scored areas and the new integration ships untested.
+Detect: the risk register was last updated at sprint planning; any story that introduced a new external dependency since then is not represented.
+Fix: make risk register review a standing agenda item at the mid-sprint sync; any new dependency, new endpoint, or changed algorithm added after planning triggers a risk re-score before the sprint ends.
+
+**Impact scores consistently underestimated for payment and auth flows**
+Why: teams score payment impact as 4 instead of 5 because "we have fraud detection downstream"; the downstream mitigation is real but does not reduce the immediate impact of a checkout failure on revenue.
+Detect: compare post-incident impact assessments with pre-sprint risk scores; if critical incidents are consistently happening in areas scored 3 or below, the scoring criteria need calibration.
+Fix: define explicit scoring anchors for impact 5 — any flow that directly handles money, credentials, or PII is automatically impact 5 regardless of downstream mitigations; mitigations reduce likelihood, not impact.
+
+**Risk register stays as a spreadsheet never referenced during test execution**
+Why: the register is created during test planning as a documentation artefact; testers work from their usual checklists during execution and the risk scores are never used to prioritise which scenarios to run first.
+Detect: ask a tester which risk areas they covered in their last session; if they cannot map their activities to items in the risk register, the register is decorative.
+Fix: derive the test execution order directly from the risk register: sort by risk score descending, and start testing from the top; if time runs out, the lowest-risk items are what gets cut.
+
+**FMEA performed once at project start and never revisited**
+Why: the FMEA captures the architecture at launch; six months later, a new caching layer and two new integrations have been added, but RPN scores still reflect the original architecture.
+Detect: compare FMEA component list against the current architecture diagram; components present in the diagram but absent from the FMEA are unscored risk.
+Fix: trigger an FMEA review whenever a new component is added to the architecture (new service, new dependency, new data store); the review need not redo the whole FMEA — add only the new components and re-score affected neighbours.
 
 ## Connections
 

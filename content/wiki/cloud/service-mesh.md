@@ -10,7 +10,7 @@ tldr: "A service mesh handles cross-cutting network concerns for microservices: 
 
 # Service Mesh
 
-A service mesh handles cross-cutting network concerns for microservices: mTLS, retries, circuit breaking, traffic shaping, and observability — without touching application code. Implemented via sidecar proxies injected alongside every pod.
+A service mesh handles cross-cutting network concerns for microservices: mTLS, retries, circuit breaking, traffic shaping, and observability. Without touching application code. Implemented via sidecar proxies injected alongside every pod.
 
 ---
 
@@ -57,7 +57,7 @@ istioctl install --set profile=default
 kubectl label namespace production istio-injection=enabled
 ```
 
-Labelling a namespace enables automatic sidecar injection — any pod created in that namespace gets an Envoy sidecar added.
+Labelling a namespace enables automatic sidecar injection. Any pod created in that namespace gets an Envoy sidecar added.
 
 **Traffic management — VirtualService:**
 ```yaml
@@ -132,7 +132,7 @@ spec:
 
 ## Linkerd
 
-Simpler and lighter than Istio. Rust-based proxy (not Envoy) — 10× lower resource usage. Fewer features, but covers 80% of use cases.
+Simpler and lighter than Istio. Rust-based proxy (not Envoy). 10× lower resource usage. Fewer features, but covers 80% of use cases.
 
 ```bash
 linkerd install | kubectl apply -f -
@@ -166,6 +166,28 @@ Service mesh adds latency (~1–5ms per hop), CPU overhead (~5%), and operationa
 Use network policies + RBAC + application-level retries instead.
 
 ---
+
+## Common Failure Cases
+
+**Sidecar injection is not applied to existing pods after namespace labelling**
+Why: `istio-injection=enabled` and `linkerd.io/inject=enabled` labels only affect new pods; existing pods must be restarted to get the sidecar injected.
+Detect: `kubectl get pods -n production -o jsonpath='{..annotations}'` shows no `sidecar.istio.io/status` annotation on running pods; mTLS enforcement blocks traffic to un-injected pods.
+Fix: run a rolling restart: `kubectl rollout restart deployment -n production`; all pods will be recreated with sidecars injected.
+
+**mTLS STRICT mode blocks traffic from a job or external service that cannot be injected**
+Why: `PeerAuthentication` is set to `STRICT` across the namespace, but a CronJob, batch job, or third-party pod does not have a sidecar and cannot negotiate mTLS — all its requests are rejected with a TLS handshake error.
+Detect: the affected pod logs show `connection reset by peer` or TLS errors; Istio access logs show `PEER_NOT_AUTHENTICATED` for those connections.
+Fix: set `PERMISSIVE` mode on the specific service's `PeerAuthentication` for the transition period, or inject the sidecar into the batch job; do not revert the entire namespace to PERMISSIVE.
+
+**Canary VirtualService routing sends more than the configured weight to the canary**
+Why: a Kubernetes Service with the same selector as both subsets is also in use alongside the VirtualService; requests that bypass Istio's VirtualService (direct DNS to the ClusterIP) go to random pods, not the weighted subsets.
+Detect: actual canary traffic share measured in Grafana is higher than configured; requests from non-mesh clients (e.g., external load balancer) are not weighted.
+Fix: ensure all traffic to the service flows through the mesh VirtualService; for external entry points, use an Istio Gateway + VirtualService bound to the ingress rather than direct Service access.
+
+**Circuit breaker ejects all pods simultaneously under load, causing complete service outage**
+Why: `outlierDetection.consecutive5xxErrors` is set too low (e.g., 1–2) and a brief latency spike causes all pods to return a few 5xx errors simultaneously, triggering ejection of every pod in the pool.
+Detect: all pods are ejected (visible in `istioctl proxy-config cluster <pod>` as `EJECTED`); the service returns 503 for all requests; traffic returns only after `baseEjectionTime` passes.
+Fix: increase `consecutive5xxErrors` to 5 or more and set `maxEjectionPercent` to 50 so at most half the pool can be ejected at once, preserving minimum capacity.
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/cloud-networking]] · [[cloud/cloud-monitoring]]

@@ -27,7 +27,7 @@ Python's batteries-included web framework. The right choice when you need: a pro
 | Management commands, celery tasks | You need native async throughout |
 | Team knows Django | Team prefers type-first development |
 
-Django's async support (3.1+) is still maturing — not every ORM operation is truly async. FastAPI is async-native from the ground up.
+Django's async support (3.1+) is still maturing. Not every ORM operation is truly async. FastAPI is async-native from the ground up.
 
 ---
 
@@ -219,6 +219,28 @@ Run: `python manage.py embed_documents`
 - Django Admin: no extra code needed for AI ops internal tooling — review agent actions, flag training data, manage prompts
 - Management commands: `python manage.py embed_documents` — standard pattern for batch embedding jobs
 - N+1 prevention: `select_related` for FK/OneToOne (JOIN), `prefetch_related` for ManyToMany/reverse FK (2 queries)
+
+## Common Failure Cases
+
+**`sync_to_async(list)(queryset)` creates a new database connection per request because the connection is not reused**  
+Why: `sync_to_async` runs the synchronous function in a thread pool; each thread may get its own database connection from Django's connection pool rather than sharing the async view's connection; under high load this exhausts the pool.  
+Detect: database connection count grows with concurrent requests; `django.db.connection.queries` shows duplicate connections; the pool exhausts under moderate load.  
+Fix: use Django 4.1+ async ORM iteration (`async for obj in queryset`) instead of `sync_to_async(list)`; or configure `CONN_MAX_AGE` and the async connection handling for your database backend.
+
+**Django Channels WebSocket consumer crashes silently when the Anthropic stream raises an exception mid-generation**  
+Why: if an exception occurs inside `async with client.messages.stream()`, the WebSocket connection is left open but the generator stops; the client receives no error and waits indefinitely.  
+Detect: WebSocket connections hang after a certain number of tokens; no error message is sent to the client; the server logs show an unhandled exception inside the consumer.  
+Fix: wrap the streaming block in `try/except` and send an error message over the WebSocket before closing; always `await self.close()` in the exception handler.
+
+**N+1 query with `prefetch_related` on a filtered related set invalidates the prefetch cache**  
+Why: `queryset.prefetch_related("tags")` fetches all related tags in one query; if you then filter `document.tags.filter(active=True)`, Django issues a new query rather than using the prefetch cache, re-introducing N+1.  
+Detect: `django.test.utils.CaptureQueriesContext` shows more queries than expected when filtering on a prefetched relationship.  
+Fix: use `Prefetch("tags", queryset=Tag.objects.filter(active=True))` to pre-filter in the prefetch itself; avoid calling `.filter()` on a prefetched related manager.
+
+**Management command runs synchronous ORM code from an async context, causing `SynchronousOnlyOperation`**  
+Why: if a management command calls `asyncio.run(async_function())` and that async function calls synchronous Django ORM methods, Django raises `SynchronousOnlyOperation` because async context is detected.  
+Detect: `django.core.exceptions.SynchronousOnlyOperation: You cannot call this from an async context` in management command output.  
+Fix: use `sync_to_async` to wrap ORM calls within async functions; or keep management commands fully synchronous and use `asyncio.run()` only for I/O-bound non-ORM work.
 
 ## Connections
 

@@ -242,5 +242,27 @@ ls -la /proc/$(pgrep -f gunicorn | head -1)/fd | wc -l
 
 ---
 
+## Common Failure Cases
+
+**Script fails silently because `set -euo pipefail` is missing**
+Why: without these flags, a failed command in the middle of a script is ignored and execution continues with a broken state; the script exits 0 even though work was skipped.
+Detect: a deploy script reports success but the application binary was never copied; intermediate commands failed without stopping the script.
+Fix: add `set -euo pipefail` as the second line of every bash script (after the shebang) so any non-zero exit, unbound variable, or pipe failure immediately halts execution.
+
+**Service crashes repeatedly because `Restart=always` masks the root cause**
+Why: systemd's `Restart=always` respawns the service immediately; the service enters a fast crash loop that consumes resources and buries the actual error in a flood of identical log entries.
+Detect: `systemctl status myapp` shows "Active: activating (auto-restart)" cycling every few seconds; the same error fills `journalctl`.
+Fix: add `RestartSec=10` to throttle restarts and give yourself time to read the logs; fix the root cause rather than tuning the restart policy.
+
+**File descriptor exhaustion kills the process**
+Why: each open socket, file, or pipe consumes an fd; the default `ulimit -n` of 1024 is hit quickly by connection-heavy services, causing `OSError: [Errno 24] Too many open files`.
+Detect: `lsof -p <pid> | wc -l` is close to the limit; errors mention "too many open files".
+Fix: raise the limit in the systemd unit with `LimitNOFILE=65536`, and ensure connections are properly closed (use context managers for files and sockets).
+
+**`kill -9` leaves zombie processes and locked files**
+Why: SIGKILL bypasses the process's signal handlers, so cleanup code (releasing locks, flushing buffers, closing sockets) never runs.
+Detect: a pid file or socket lock remains on disk after the process is gone; a subsequent start fails with "address already in use" or "lock file exists".
+Fix: always send SIGTERM (`kill -15`) first and wait for graceful shutdown; only escalate to SIGKILL if the process does not exit within the grace period.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cloud/cloud-security]] · [[cs-fundamentals/security-fundamentals-se]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/concurrency]]

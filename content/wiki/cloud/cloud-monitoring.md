@@ -10,7 +10,7 @@ tldr: "Observability for cloud infrastructure. You cannot improve what you canno
 
 # Cloud Monitoring
 
-Observability for cloud infrastructure. You cannot improve what you cannot measure. The three pillars: metrics (what is happening), logs (why it happened), traces (where time was spent). Alerting closes the loop — tells you when something needs attention.
+Observability for cloud infrastructure. You cannot improve what you cannot measure. The three pillars: metrics (what is happening), logs (why it happened), traces (where time was spent). Alerting closes the loop. Tells you when something needs attention.
 
 ---
 
@@ -227,6 +227,28 @@ Good production dashboards have four panels per service (USE method):
 4. **Request rate + latency** — p50, p95, p99 by endpoint
 
 ---
+
+## Common Failure Cases
+
+**Alert storm from a single root-cause failure triggering hundreds of downstream alarms**
+Why: Each downstream metric (latency, error rate, queue depth) fires its own alarm independently, burying the actual root cause under noise and exhausting on-call capacity.
+Detect: Dozens of alarms fire within seconds of each other all pointing to different symptoms of the same event; Alertmanager or PagerDuty incident timeline shows a cascade.
+Fix: Add inhibition rules in Alertmanager that suppress downstream alarms when a root-cause alarm (e.g., `DatabaseUnavailable`) is already firing; group related alarms and route to a single incident.
+
+**Prometheus high-cardinality label causes OOM crash**
+Why: A label with unbounded cardinality (user ID, trace ID, request path with path parameters) creates millions of unique time series; Prometheus heap grows until the process is OOM-killed.
+Detect: Prometheus container restarts frequently; `prometheus_tsdb_head_series` metric climbs continuously; queries against the cardinality offender time out.
+Fix: Remove or hash the high-cardinality label at the instrumentation layer; use `metric_relabel_configs` in the scrape config to drop the label before ingestion; set `--query.max-samples` to limit query memory.
+
+**CloudWatch Logs Insights query returning incomplete results on large log groups**
+Why: Logs Insights has a 10,000-record limit per query result set; queries without a time filter or with broad patterns silently truncate.
+Detect: Query results show exactly 10,000 rows with no error; totals do not match the expected event volume.
+Fix: Add tighter time ranges, use `stats` aggregation queries instead of raw `fields` queries, or export log groups to S3 and query with Athena for full result sets.
+
+**OpenTelemetry spans dropped under high load due to full export queue**
+Why: The `BatchSpanProcessor` has a default queue size of 2,048 spans; under traffic bursts the queue fills and new spans are silently dropped without any error raised to the application.
+Detect: Trace coverage drops (fewer spans per trace than expected) during traffic peaks; `otelcol_processor_dropped_spans` metric on the collector rises.
+Fix: Increase `maxQueueSize` and `maxExportBatchSize` in the `BatchSpanProcessor` config, or switch to a head-based sampling policy that reduces volume before enqueueing.
 
 ## Connections
 

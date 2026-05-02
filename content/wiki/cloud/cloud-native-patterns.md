@@ -257,5 +257,27 @@ async def fetch_product_data(product_id: str):
 
 ---
 
+## Common Failure Cases
+
+**Liveness probe kills a pod during a legitimate slow startup**
+Why: `initialDelaySeconds` is shorter than the app's actual initialisation time (DB migrations, schema loading, model warm-up), causing Kubernetes to restart the pod in a restart loop before it ever becomes ready.
+Detect: Pod status shows `CrashLoopBackOff` with exit code 0 or the liveness probe error in `kubectl describe pod`; the app logs show successful startup just before the kill signal.
+Fix: Add a `startupProbe` with a generous `failureThreshold` (e.g., `failureThreshold: 30, periodSeconds: 10` = 5-minute allowance) so the liveness probe does not activate until startup is confirmed complete.
+
+**Circuit breaker opens permanently because the timeout is shorter than the half-open test duration**
+Why: If `timeout` (seconds before half-open) is shorter than the upstream's actual recovery time, the circuit reopens immediately on the half-open probe and never closes.
+Detect: Circuit stays in OPEN state indefinitely; half-open attempts always fail even after the upstream is healthy again; all requests are rejected with `Circuit OPEN`.
+Fix: Set `timeout` to at least 2-3x the upstream's typical recovery SLA; use a success threshold greater than 1 so a single flaky probe does not prematurely close the circuit.
+
+**Retry decorator amplifies load during an outage instead of protecting the origin**
+Why: If all callers retry without jitter, they all fire at the same instant after each backoff interval, creating a thundering herd that overwhelms a recovering service.
+Detect: Upstream service metrics show repeated traffic spikes at regular intervals (backoff period) rather than gradual recovery; error rate stays high during what should be a quiet period.
+Fix: The existing code already adds `jitter = random.uniform(0, delay * 0.2)` — ensure this is present; also cap `max_attempts` and combine with a circuit breaker so retries stop entirely when the circuit is open.
+
+**Stateful config in environment variables violating twelve-factor factor III**
+Why: Config values that vary between environments are baked into Dockerfile `ENV` instructions or container images rather than injected at runtime, making the same image behave differently across environments impossible.
+Detect: Deploying the "same" image to staging produces different behaviour than production; `docker inspect` shows `ENV` contains non-default config values.
+Fix: Remove all environment-specific `ENV` from Dockerfiles; inject config exclusively via Kubernetes ConfigMaps, Secrets, or platform environment variables at deployment time.
+
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/serverless-patterns]] · [[cloud/service-mesh]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/microservices-patterns]] · [[llms/ae-hub]]

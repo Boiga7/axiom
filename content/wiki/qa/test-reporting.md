@@ -10,7 +10,7 @@ tldr: Making test results visible, actionable, and historically trackable. Raw t
 
 # Test Reporting
 
-Making test results visible, actionable, and historically trackable. Raw test output in a terminal window is not a report — good reporting surfaces trends, assigns ownership, and drives decisions.
+Making test results visible, actionable, and historically trackable. Raw test output in a terminal window is not a report. Good reporting surfaces trends, assigns ownership, and drives decisions.
 
 ---
 
@@ -196,6 +196,28 @@ Automation growth: new automated tests added this sprint
 ```
 
 ---
+
+## Common Failure Cases
+
+**Allure history is not persisted between runs, so trend charts always show one data point**
+Why: the `allure-history` directory is not cached or stored as a branch artifact between CI runs, so each run starts fresh and the historical trend view is empty.
+Detect: the Allure report opens but the "Trend" and "History" sections show only the current run.
+Fix: use the `simple-elf/allure-report-action` with `allure_history` pointing to a separate `gh-pages` branch, or store the `allure-history` folder in an S3 bucket and restore it at the start of each run.
+
+**JUnit XML is not published when tests fail, hiding the failure detail in CI**
+Why: the `publish-unit-test-result-action` step runs only on success (`if: success()` is the default), so when tests fail the XML is never parsed and the PR check shows a generic failure with no test-level detail.
+Detect: a failing PR shows no failed test breakdown in the checks panel — only "build failed."
+Fix: add `if: always()` to the publish step so it runs regardless of whether tests passed or failed; this is the most common missing flag on reporting steps.
+
+**Coverage threshold set globally but measured against a subset of files**
+Why: `pytest --cov=src --cov-fail-under=80` passes because it only measures coverage over files actually imported during the test run, missing modules that have no tests at all.
+Detect: add a new module with zero tests — the coverage report doesn't mention it and the threshold still passes.
+Fix: configure `[tool.coverage.run] source = ["src"]` in `pyproject.toml` to force coverage to report all files under `src/` regardless of whether they were imported, so truly untested modules appear as 0% and drag the overall score down.
+
+**Flaky test tracker identifies the same tests repeatedly but they are never quarantined**
+Why: the tracking script runs and posts results, but there is no automated action that quarantines or skips tests above the flakiness threshold, leaving them to pollute the suite indefinitely.
+Detect: the same three tests appear in every weekly flaky report but remain in the main suite.
+Fix: add a CI step that reads the flaky test list and applies `@pytest.mark.skip(reason="flaky — quarantined TICKET-XXX")` automatically via a script, or use pytest-quarantine to move them to a separate marked group that runs in a non-blocking job.
 
 ## Connections
 [[qa-hub]] · [[qa/qa-metrics]] · [[qa/qa-in-devops]] · [[qa/regression-testing]] · [[cloud/github-actions]] · [[technical-qa/flaky-test-management]]

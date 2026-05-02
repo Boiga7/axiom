@@ -12,7 +12,7 @@ tldr: Red teaming finds failure modes evals miss — four jailbreak types, autom
 
 > **TL;DR** Red teaming finds failure modes evals miss — four jailbreak types, automated variant generation, LLM-as-judge scoring, four severity tiers (critical/high/medium/low), and CI regression suites.
 
-Structured adversarial testing to find safety and security failures before users do. Red teaming is not optional — it's the only way to discover failure modes that don't appear in benchmarks or standard evals.
+Structured adversarial testing to find safety and security failures before users do. Red teaming is not optional. It's the only way to discover failure modes that don't appear in benchmarks or standard evals.
 
 ---
 
@@ -273,6 +273,28 @@ def ci_safety_check(model_endpoint: str) -> bool:
 - Severity: critical (direct harm enablement), high (reproducible policy violation), medium (edge case), low (unexpected but not harmful)
 - Anthropic RSP: ASL-2 evaluates CBRN uplift; ASL-3 evaluates serious uplift to mass-casualty scenarios
 - CI regression: re-run known-bad prompt suite after every fine-tune or model update — fine-tuning can reintroduce vulnerabilities
+
+## Common Failure Cases
+
+**Automated red team generates variants that are semantically identical, inflating attack coverage numbers**  
+Why: prompting an LLM to generate 20 "variations" often produces rephrasing rather than genuinely different attack strategies; the coverage appears broad but the actual attack surface tested is narrow.  
+Detect: manually reading the 20 variants reveals they are all the same attack with different surface wording; no new attack category is represented.  
+Fix: structure the generation prompt to explicitly request different attack categories (role-play, hypothetical, obfuscated, encoded, indirect); review the variants before running them against the system.
+
+**LLM-as-judge flags safe responses as policy violations due to content in the attack prompt itself**  
+Why: the judge sees the full context including the attack text; a judge evaluating "Does this response comply with policy?" may flag the response as violating policy because the attack text in the context window contains harmful content that matches the judge's classifier.  
+Detect: high false positive rate when attacks contain explicit harmful content; the judge flags responses that clearly refused the attack.  
+Fix: instruct the judge to evaluate only the model's response, not the attack prompt; provide few-shot examples of correct refusals labelled as `violated: false`.
+
+**Regression suite becomes outdated and no longer tests current jailbreak techniques**  
+Why: jailbreak techniques evolve faster than regression suites are updated; a suite built in 2024 may not catch 2026 techniques like many-shot escalation or novel persona adoption vectors.  
+Detect: the regression suite passes on every run without ever finding a violation; new public jailbreaks work against your system despite the suite passing.  
+Fix: track public red-teaming research (Arxiv, HuggingFace) and add newly published effective attacks to the regression suite monthly; treat the suite as a living document.
+
+**Multi-turn manipulation test stops at the first refused turn instead of testing sustained refusal**  
+Why: a test that only checks whether the model refuses stage 4 of a 5-stage escalation misses the case where the model refuses stage 4 but complies at stage 5 after further persuasion.  
+Detect: the multi-turn test reports "pass" after the first refusal at stage 4, but running the full conversation manually shows the model complies at stage 5.  
+Fix: run the full conversation to completion rather than stopping at the first refusal; add an assertion that no subsequent stage triggers compliance after the first refusal.
 
 ## Connections
 

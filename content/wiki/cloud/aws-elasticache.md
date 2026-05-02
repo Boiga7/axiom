@@ -10,7 +10,7 @@ tldr: Managed Redis and Memcached in AWS. ElastiCache handles node provisioning,
 
 # AWS ElastiCache
 
-Managed Redis and Memcached in AWS. ElastiCache handles node provisioning, patching, failure detection, and replication. Use Redis for most workloads — richer data structures, persistence, pub/sub.
+Managed Redis and Memcached in AWS. ElastiCache handles node provisioning, patching, failure detection, and replication. Use Redis for most workloads. Richer data structures, persistence, pub/sub.
 
 ---
 
@@ -224,6 +224,28 @@ cloudwatch.put_metric_alarm(
 ```
 
 ---
+
+## Common Failure Cases
+
+**Connection refused from application — security group not open**
+Why: the Redis security group only allows inbound 6379 from specific sources, and the application's security group is not listed.
+Detect: `redis.exceptions.ConnectionError: Error 111 connecting to <host>:6379. Connection refused.` in application logs.
+Fix: add an inbound rule to the ElastiCache security group allowing TCP 6379 from the application's security group ID (not its IP).
+
+**TLS handshake failure after enabling `transit_encryption_enabled`**
+Why: the redis-py client is connecting without `ssl=True` after encryption was enabled on the cluster, or the wrong port is used (ElastiCache TLS uses 6379 not 6380 by default).
+Detect: `ssl.SSLError: [SSL: WRONG_VERSION_NUMBER]` or `ConnectionRefusedError` after enabling TLS.
+Fix: set `ssl=True` in the redis-py connection and ensure `REDIS_HOST` points to the primary endpoint, not an individual node endpoint.
+
+**Cache stampede on cold start — all keys expired simultaneously**
+Why: all cache keys were set with the same TTL (e.g., after a deploy flush or a bulk-load), so they expire at the same time and all requests hit the database at once.
+Detect: CloudWatch `CacheHits` drops to zero while `DatabaseConnections` spikes; latency p99 spikes immediately after the TTL window.
+Fix: add random jitter to TTLs (`ttl = base_ttl + random.randint(0, 30)`) so expirations are spread over time.
+
+**`KEYS` pattern scan causes latency spikes in production**
+Why: `KEYS *` or `KEYS pattern:*` blocks the Redis event loop for the duration of the scan — a single call on a large keyspace can freeze Redis for hundreds of milliseconds.
+Detect: CloudWatch `EngineCPUUtilization` spikes coincide with latency spikes; `SLOWLOG GET` shows the KEYS command.
+Fix: replace `KEYS` with `SCAN` (cursor-based, non-blocking) for all production pattern lookups; the `invalidate_pattern` helper in the code above is an example of this anti-pattern to fix.
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/caching-strategies]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/cost-optimisation-cloud]]

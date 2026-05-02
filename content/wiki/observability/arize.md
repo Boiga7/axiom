@@ -10,7 +10,7 @@ tldr: Open-source AI observability platform from Arize AI ($70M Series C, 2024).
 
 # Arize Phoenix
 
-Open-source AI observability platform from Arize AI ($70M Series C, 2024). The best choice when you need unified observability for both traditional ML models and LLM applications — one platform across the full model lifecycle.
+Open-source AI observability platform from Arize AI ($70M Series C, 2024). The best choice when you need unified observability for both traditional ML models and LLM applications. One platform across the full model lifecycle.
 
 Arize has two products:
 - **Arize AI** — managed cloud platform for production ML/LLM monitoring (paid)
@@ -48,7 +48,7 @@ docker run -p 6006:6006 -p 4317:4317 arizephoenix/phoenix:latest
 
 ## OpenTelemetry Integration
 
-Phoenix uses OTel natively — any OpenTelemetry-instrumented code sends traces to Phoenix.
+Phoenix uses OTel natively. Any OpenTelemetry-instrumented code sends traces to Phoenix.
 
 ```python
 import phoenix as px
@@ -141,7 +141,7 @@ px.Client().log_evaluations(eval_df)
 
 ## Embedding Visualisation
 
-Phoenix's killer feature — visualise embedding spaces to diagnose retrieval problems:
+Phoenix's killer feature. Visualise embedding spaces to diagnose retrieval problems:
 
 ```python
 import phoenix as px
@@ -202,6 +202,33 @@ px.launch_app(primary=inferences)
 - UI port: 6006 (HTTP); 4317 (gRPC OTel endpoint)
 
 ---
+
+## Common Failure Cases
+
+**Phoenix spans not appearing in the UI despite `AnthropicInstrumentor().instrument()` being called**  
+Why: the OTel exporter sends to `http://localhost:4317` by default; if Phoenix is not running or the gRPC port is not reachable, spans are silently dropped by the `BatchSpanProcessor`.  
+Detect: no traces appear in the Phoenix UI; no error is raised in application logs; Phoenix container health check shows port 4317 not listening.  
+Fix: confirm Phoenix is running with `curl http://localhost:6006`; set `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317`; switch to `SimpleSpanProcessor` in development to surface export failures immediately.
+
+**`px.launch_app()` fails in a Docker container because it tries to open a browser**  
+Why: `px.launch_app()` attempts to open the UI in the system browser; in a headless container this raises an error or hangs.  
+Detect: `OSError: [Errno 99] Cannot assign requested address` or the process hangs at the `launch_app` call in a containerised environment.  
+Fix: use `python -m phoenix.server.main` to start Phoenix as a standalone server instead of calling `px.launch_app()` from application code; use the Docker image for production deployments.
+
+**`run_evals()` returns all `None` labels when the LLM-as-judge model quota is exceeded**  
+Why: `run_evals()` calls the judge model for every row; if rate limits are hit mid-evaluation, subsequent calls fail silently and return `None` rather than raising.  
+Detect: eval DataFrame has a mix of valid labels and `None`; the proportion of `None` corresponds to rows processed after the rate limit was hit.  
+Fix: add `max_retries` and `concurrency` parameters to `run_evals()`; use a model with a higher rate limit for large-scale evaluations; chunk the DataFrame and evaluate in batches with delays.
+
+**Embedding visualisation shows all points clustered in one region, hiding retrieval problems**  
+Why: UMAP projection requires enough data points to reveal structure; with fewer than ~100 embeddings the projection collapses; also occurs when the embedding model produces near-identical vectors (too little variance).  
+Detect: UMAP plot shows a single dense blob; no meaningful clusters visible.  
+Fix: ensure at least 200+ data points before interpreting UMAP output; if variance is artificially low, check whether embeddings are normalised or post-processed before upload; try t-SNE as an alternative projection.
+
+**Phoenix `get_spans_dataframe()` returns empty DataFrame for recent traces**  
+Why: `BatchSpanProcessor` buffers spans before export; recently-generated spans may not have been flushed when `get_spans_dataframe()` is called.  
+Detect: `px.Client().get_spans_dataframe()` returns 0 rows immediately after generating traces; waiting 30 seconds and re-calling returns the expected rows.  
+Fix: call `tracer_provider.force_flush()` before reading spans programmatically in scripts; in production rely on the UI which polls continuously rather than programmatic span reads.
 
 ## Connections
 

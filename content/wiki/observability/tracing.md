@@ -12,7 +12,7 @@ tldr: OTel GenAI semantic conventions, manual and auto-instrumentation for Anthr
 
 > **TL;DR** OTel GenAI semantic conventions, manual and auto-instrumentation for Anthropic/LangChain, Langfuse native SDK patterns, cost tracking per trace, and Prometheus alerting thresholds.
 
-Distributed tracing for LLM systems. Every LLM call, retrieval, tool execution, and agent step should be a span. Without tracing you're flying blind — you can't debug latency, cost overruns, or quality regressions.
+Distributed tracing for LLM systems. Every LLM call, retrieval, tool execution, and agent step should be a span. Without tracing you're flying blind. You can't debug latency, cost overruns, or quality regressions.
 
 ---
 
@@ -233,6 +233,33 @@ with llm_latency.labels(model="claude-sonnet-4-6", operation="chat").time():
 - LangSmith auto-tracing: set LANGCHAIN_TRACING_V2=true — every LangChain/LangGraph call is captured
 - Alerting thresholds: P99 latency >10s, error rate >1%, cached token ratio below expected
 - Cost tracking: Sonnet 4.6 $3/$15 per M, Haiku 4.5 $1/$5, Opus 4.7 $5/$25
+
+## Common Failure Cases
+
+**`AnthropicInstrumentor().instrument()` called after the `anthropic.Anthropic()` client is constructed, so no traces are captured**  
+Why: OpenTelemetry instrumentation patches the SDK at import/construction time; calling `instrument()` after the client is already instantiated does not patch existing instances.  
+Detect: no spans appear in the tracing backend despite `instrument()` being called; adding a log line before the first LLM call shows the instrumentor registered, but spans are missing.  
+Fix: call `AnthropicInstrumentor().instrument()` before creating any `anthropic.Anthropic()` instances; place it at the top of your application entry point, before other imports that trigger client construction.
+
+**`BatchSpanProcessor` silently drops spans during high-throughput bursts**  
+Why: `BatchSpanProcessor` has a fixed queue size (default 2048 spans); when the queue fills faster than the exporter can flush, spans are dropped without errors.  
+Detect: span count in the tracing backend is consistently lower than expected during load tests; no errors in application logs.  
+Fix: increase `max_queue_size` and `max_export_batch_size` in `BatchSpanProcessor`; or switch to `SimpleSpanProcessor` for lower-throughput applications where latency from synchronous export is acceptable.
+
+**Langfuse `@observe()` decorator creates a new root trace for every nested function call instead of nesting spans**  
+Why: `@observe()` creates a root trace when no parent context exists in the current thread; if the decorated function is called from a thread pool executor or background task, the parent trace context is not propagated.  
+Detect: Langfuse shows dozens of single-span traces instead of one nested trace per user request; the hierarchy is flat.  
+Fix: propagate the OTel context explicitly to background tasks using `contextvars.copy_context()`; or use `langfuse_context.update_current_trace()` to attach orphan spans to the correct parent trace.
+
+**Cost tracking shows incorrect amounts because token pricing table is not updated after a model price change**  
+Why: the hardcoded pricing dictionary in application code is not updated when providers change their pricing; the computed cost is wrong for months without anyone noticing.  
+Detect: calculated cost per call diverges from the provider's invoice; the delta matches the gap between hardcoded and current prices.  
+Fix: load pricing from an external source (LiteLLM's cost database, or a config file) rather than hardcoding; add a CI test that validates the pricing table against the provider's published API pricing page.
+
+**LangSmith traces appear empty (no messages) for LangChain LCEL chains using `.batch()`**  
+Why: `.batch()` runs chains in parallel using a thread pool; each thread gets a new LangSmith trace context, orphaning spans from the parent run.  
+Detect: individual LCEL steps show as separate root-level runs in LangSmith rather than children of the batch run.  
+Fix: pass `config={"callbacks": parent_run_manager.get_child()}` to `.batch()` calls to propagate the parent callback context; or use `RunnableConfig` to thread the run manager through.
 
 ## Connections
 

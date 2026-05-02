@@ -10,7 +10,7 @@ tldr: Two people testing together — more perspectives, fewer assumptions, fast
 
 # Pair Testing
 
-Two people testing together — more perspectives, fewer assumptions, faster knowledge transfer.
+Two people testing together. More perspectives, fewer assumptions, faster knowledge transfer.
 
 ---
 
@@ -175,6 +175,28 @@ Rotating pairs:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Developer dominates the session — QA never drives**
+Why: the developer knows the feature best and naturally takes over when the QA hesitates or asks a question; the "observer" role collapses and the developer ends up testing their own assumptions.
+Detect: after the session the session notes contain no bugs the developer didn't already know about; the QA can't summarise what they would test differently next time.
+Fix: enforce the swap rule explicitly at the 20-minute mark with a visible timer; the driver hands over the keyboard — no exceptions — even mid-scenario.
+
+**Charter too broad — session drifts and produces shallow coverage**
+Why: a charter like "test the checkout flow" has no focus, so the pair keeps returning to the happy path instead of probing specific risk areas.
+Detect: 60 minutes in and the session notes show the same three happy-path scenarios repeated; no edge cases or negative scenarios were attempted.
+Fix: rewrite the charter to include a specific mission and scope constraint, e.g., "Explore multi-currency checkout with focus on currency switching mid-session and discount stacking"; a good charter fits in one sentence.
+
+**Session notes not written during the session — insights lost**
+Why: both people agree to write up notes "after," but after the session ends the details are forgotten and only the bugs are recorded; coverage gaps and open questions disappear.
+Detect: the session notes filed in the bug tracker contain bug IDs but no "what we tested" or "what we didn't test" sections.
+Fix: designate the observer role as the live note-taker using the session note template; notes must be filled in before the debrief conversation ends.
+
+**Pair testing replaces exploratory testing for stable, low-risk areas**
+Why: teams pair on everything regardless of risk level because it feels thorough; this wastes two people's time on routine regression areas.
+Detect: the sprint retrospective flags that pairing sessions are running over schedule and finding no new bugs on the areas tested.
+Fix: apply the rule: pair when the cost of a miss exceeds the cost of pairing; for stable, well-covered areas run solo exploratory instead and reserve pairing for complex or high-stakes features.
 
 ## Connections
 

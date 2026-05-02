@@ -10,7 +10,7 @@ tldr: Offloading work from the request/response cycle — email sending, report 
 
 # Background Jobs and Task Queues
 
-Offloading work from the request/response cycle — email sending, report generation, data processing.
+Offloading work from the request/response cycle. Email sending, report generation, data processing.
 
 ---
 
@@ -257,6 +257,28 @@ def get_queue_lengths() -> dict[str, int]:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Task acknowledged before completion, lost on worker crash**
+Why: the default Celery setting `task_acks_early=True` (pre-4.x default) acknowledges the task when it is received, not when it finishes; if the worker process dies mid-execution the task is silently dropped.
+Detect: kill a worker mid-task and check whether the task re-runs; if it does not, acks are early.
+Fix: set `task_acks_late=True` and `task_reject_on_worker_lost=True` in Celery config so tasks are only acknowledged after successful completion.
+
+**Unbounded retry loop exhausting the broker queue**
+Why: `autoretry_for=(Exception,)` with `max_retries=None` or a very high limit retries indefinitely on a permanent failure (e.g., malformed payload), filling the queue and starving other tasks.
+Detect: queue length grows without bound; the same task ID appears in Flower logs hundreds of times.
+Fix: set an explicit `max_retries` (3-5 is typical), use exponential backoff with `retry_backoff=True`, and route exhausted tasks to a DLQ for human inspection.
+
+**FastAPI `BackgroundTasks` used for work that must survive a crash**
+Why: `BackgroundTasks` runs in the same process and thread pool as the web server; a server restart or crash drops all pending tasks with no recovery.
+Detect: restart the server while a background task is pending and verify whether it completed.
+Fix: use Celery or arq for any task that must complete reliably; reserve `BackgroundTasks` only for best-effort fire-and-forget work (e.g., logging an analytics event).
+
+**Multiple Celery Beat instances running simultaneously**
+Why: deploying more than one Celery Beat process against the same Redis broker causes every scheduled task to fire multiple times — once per beat instance.
+Detect: scheduled tasks show duplicate rows in result backend; beat logs from two different hosts have overlapping schedule timestamps.
+Fix: ensure exactly one Beat process runs at any time — use a deployment constraint (single replica), a distributed lock (RedBeat), or a managed scheduler like AWS EventBridge.
 
 ## Connections
 

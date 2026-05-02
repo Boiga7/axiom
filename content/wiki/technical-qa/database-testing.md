@@ -10,7 +10,7 @@ tldr: Testing database schema, migrations, constraints, stored procedures, and d
 
 # Database Testing
 
-Testing database schema, migrations, constraints, stored procedures, and data integrity — not just whether the application layer works. Database bugs discovered in production are expensive and often irreversible.
+Testing database schema, migrations, constraints, stored procedures, and data integrity. Not just whether the application layer works. Database bugs discovered in production are expensive and often irreversible.
 
 ---
 
@@ -171,6 +171,28 @@ def test_search_uses_index(db_engine):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Migration idempotency test passes but the migration is not truly idempotent in production**
+Why: `test_migration_is_idempotent` runs both executions inside the same transaction; Postgres rolls back the second execution's error automatically, so the test sees no exception even if `CREATE TABLE` (without `IF NOT EXISTS`) would fail outside a transaction.
+Detect: run the migration SQL file against a live database twice in separate transactions — the second run fails with "relation already exists".
+Fix: wrap each migration in an explicit `BEGIN`/`COMMIT` in the test, and verify the SQL uses `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, or `DO $$ IF NOT EXISTS ... $$` guards.
+
+**Schema test catches missing columns but not wrong column types**
+Why: `inspector.get_columns("products")` is used only to check that column names exist; the test never asserts `c["type"]` for any column.
+Detect: a migration changes `price` from `NUMERIC(10,2)` to `TEXT` and no schema test fails.
+Fix: extend the schema assertion to check `c["type"]` — e.g., `assert str(col["type"]) == "NUMERIC(precision=10, scale=2)"` for monetary columns.
+
+**Volume test seeds data but forgets to `ANALYZE`, causing the planner to pick a sequential scan**
+Why: Postgres's query planner uses table statistics last updated by `ANALYZE`; seeding 100k rows without running `ANALYZE` leaves the planner with stale stats that underestimate table size, and it chooses a sequential scan.
+Detect: `test_search_uses_index` fails immediately after the volume seed step; re-running after manually running `ANALYZE products` makes it pass.
+Fix: always call `conn.execute(text("ANALYZE products"))` after bulk inserts in test setup, as shown in the volume test example above.
+
+**Cascade delete test gives false confidence because the FK constraint has `ON DELETE SET NULL` instead of `ON DELETE CASCADE`**
+Why: the test asserts `order_items` count is 0 after deleting the parent order, but if the real schema uses `SET NULL` instead of `CASCADE`, the count remains non-zero and the test fails — but only if the constraint was actually applied.
+Detect: add a row to `order_items` with a non-null `order_id`, delete the parent order, then check both the row count and the `order_id` value of surviving rows.
+Fix: test the actual cascade behaviour your application depends on; if items should be deleted, assert count is 0 and that no rows with `order_id IS NULL` exist as orphan artifacts.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/testcontainers]] · [[technical-qa/test-architecture]] · [[cs-fundamentals/database-design]] · [[qa/test-data-management]] · [[cloud/aws-rds-aurora]]

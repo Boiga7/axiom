@@ -10,7 +10,7 @@ tldr: Testing integrated throughout the entire software delivery lifecycle — n
 
 # Continuous Testing
 
-Testing integrated throughout the entire software delivery lifecycle — not a phase at the end. Shift left to catch bugs earlier; shift right to validate in production. The goal is sub-15-minute feedback at every stage.
+Testing integrated throughout the entire software delivery lifecycle. Not a phase at the end. Shift left to catch bugs earlier; shift right to validate in production. The goal is sub-15-minute feedback at every stage.
 
 ---
 
@@ -228,6 +228,28 @@ Level 5 — Continuous verification:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Pre-commit hooks disabled by developers because they're too slow**
+Why: hooks that take over 30 seconds cause developers to run `git commit --no-verify` or uninstall the hook entirely, removing the earliest quality gate entirely.
+Detect: `git log` shows `--no-verify` in commit messages, or `pre-commit` is not listed in the dev onboarding docs.
+Fix: profile the hook and split heavy checks (mypy, full test suite) to the PR pipeline; keep pre-commit under 30 seconds by running only linting and secrets detection locally.
+
+**Path-filter test selection that excludes shared infrastructure from triggering tests**
+Why: changes to shared utilities, database models, or config files don't match any specific path filter, so no tests run for the commit most likely to cause a broad regression.
+Detect: a refactor of a shared module lands on main without any CI test run, and the regression is caught by a developer who manually runs the suite.
+Fix: add a catch-all rule that runs the full test suite when files outside the named path filters change; never allow a merge with zero test coverage.
+
+**Staging smoke suite so broad that it takes 30+ minutes**
+Why: staging verification is meant to give a fast go/no-go signal after a deploy; a slow suite means the team either waits or ships to production before the suite completes.
+Detect: staging deploys are blocked for over 20 minutes waiting for smoke results, or developers bypass the gate during urgent releases.
+Fix: limit the staging suite to the 10-15 most critical happy-path checks; move extended regression to a post-deploy async job that doesn't block production promotion.
+
+**Flaky test rate above 5% but no remediation process**
+Why: once flakiness normalises, developers start re-running failures by default rather than investigating, which masks real failures and erodes trust in the entire pipeline.
+Detect: the CI dashboard shows frequent "re-run" button usage, or the team cannot distinguish real failures from noise without a second run.
+Fix: enforce a flaky test SLA: any test failing non-deterministically in 3 of the last 10 runs is quarantined within 48 hours; track flaky test count as a team metric.
 
 ## Connections
 [[qa-hub]] · [[qa/qa-in-devops]] · [[qa/smoke-sanity-testing]] · [[qa/test-automation-strategy]] · [[qa/defect-prevention]] · [[cloud/gitops-patterns]] · [[technical-qa/ci-cd-quality-gates]]

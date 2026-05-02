@@ -12,13 +12,13 @@ tldr: CI/CD pipeline design as a discipline — stage ordering (lint→build→t
 
 > **TL;DR** CI/CD pipeline design as a discipline — stage ordering (lint→build→test→scan→staging→prod), artifact promotion, Jenkins Declarative Pipeline, Azure DevOps YAML stages, and the four DORA metrics that measure delivery performance.
 
-The vault covers GitHub Actions in [[cloud/github-actions]], GitOps workflows in [[cloud/argocd]] and [[cloud/gitops-patterns]], and deployment strategies in [[cloud/blue-green-deployment]]. This page covers CI/CD pipeline design as a discipline — what stages to include, how to structure them across tools, and how to measure delivery performance.
+The vault covers GitHub Actions in [[cloud/github-actions]], GitOps workflows in [[cloud/argocd]] and [[cloud/gitops-patterns]], and deployment strategies in [[cloud/blue-green-deployment]]. This page covers CI/CD pipeline design as a discipline. What stages to include, how to structure them across tools, and how to measure delivery performance.
 
 ---
 
 ## The Pipeline Contract
 
-One artefact, all environments. Build the Docker image once; push it with a content-addressed SHA tag. Promote the same image through dev → staging → prod. Never rebuild per environment — rebuilding introduces drift.
+One artefact, all environments. Build the Docker image once; push it with a content-addressed SHA tag. Promote the same image through dev → staging → prod. Never rebuild per environment. Rebuilding introduces drift.
 
 ```
 Build:    myapp:sha-abc123  →  push to registry
@@ -50,6 +50,8 @@ The standard pipeline progression:
 | **10. Post-Deploy Verification** | synthetic monitoring | Confirm prod is healthy | Alert |
 
 Stages 1–4 can run in parallel (lint + unit test + security scan are independent). Stages 6+ are sequential.
+
+> **→** [Engineering Tradeoffs](/synthesis/engineering-tradeoffs) — when to gate a deployment vs accept risk, rollback cost vs velocity, and how pipeline decisions compound into production reliability.
 
 ---
 
@@ -284,7 +286,7 @@ Feature flags are the enabler: incomplete features can land in `main` behind a f
   registry        to main       to main
 ```
 
-Same image (`sha-abc123`) at every stage. Environment-specific config via Helm values files or Kubernetes Secrets — never baked in.
+Same image (`sha-abc123`) at every stage. Environment-specific config via Helm values files or Kubernetes Secrets. Never baked in.
 
 ---
 
@@ -311,6 +313,33 @@ See [[technical-qa/ci-cd-quality-gates]] for the full implementation with YAML e
 - Build once, promote everywhere — never rebuild per environment
 
 ---
+
+## Common Failure Cases
+
+**Jenkins executor starvation in parallel stages**  
+Why: `agent { label 'docker' }` is declared on the parent pipeline instead of each stage; the parent holds an executor while waiting for parallel children.  
+Detect: builds queue indefinitely; Jenkins executor count shows all slots occupied by waiting parent pipelines.  
+Fix: set `agent none` at the top-level pipeline block; declare `agent` on each individual stage.
+
+**Different image deployed to production than tested in staging**  
+Why: the pipeline rebuilt the Docker image for production instead of promoting the staging-tested image; environment variables or base image were different.  
+Detect: `docker inspect` shows different layer SHA between staging and production images; check the pipeline for duplicate `docker build` steps.  
+Fix: build once, tag with `git commit SHA`, promote the same image through all environments; never rebuild per environment.
+
+**Secret exposed in build logs**  
+Why: a `--build-arg` or `echo` in a shell step printed a secret to stdout; CI logs are publicly accessible.  
+Detect: search build log output for credential patterns; run `detect-secrets` in the scan stage.  
+Fix: pass secrets via environment variables from the secret store, never as build args; add `detect-secrets` as a pipeline gate.
+
+**Flaky integration test blocks every PR**  
+Why: integration test relies on a real external service or timing; it passes locally but fails ~20% of the time in CI due to network variability.  
+Detect: same test fails and passes on re-run without code changes; failure rate > 5% on a single test.  
+Fix: mock the external dependency with testcontainers or a mock server; add the test to a quarantine suite until it's made deterministic.
+
+**DORA lead time metric is inaccurate — commit timestamp is wrong**  
+Why: `git log` returns the author date, not the committer date; rebased commits have author dates weeks in the past.  
+Detect: DORA dashboard shows lead times of days for commits that deployed in hours.  
+Fix: use `git show -s --format=%ct` for the committer timestamp, not author timestamp; validate against a known-good deploy.
 
 ## Connections
 

@@ -52,6 +52,8 @@ When to upgrade:
   SERIALIZABLE:    financial transactions, inventory decrement under contention
 ```
 
+> **→** [Engineering Tradeoffs](/synthesis/engineering-tradeoffs) — when to choose stronger isolation vs accept contention cost, and when to push that tradeoff to the application layer. [Data as a System](/synthesis/data-as-system) — duplicate writes from retries and the outbox pattern for cross-service consistency.
+
 ---
 
 ## PostgreSQL Isolation in Python
@@ -252,6 +254,33 @@ def get_session():
 ```
 
 ---
+
+## Common Failure Cases
+
+**Deadlock kills transaction silently under load**  
+Why: two concurrent transactions acquire locks in opposite order; PostgreSQL kills one and raises `DeadlockDetected`. Uncaught, this surfaces as a 500 to the user.  
+Detect: `pg_stat_activity` shows cancelled backends; application logs show `psycopg2.errors.DeadlockDetected` without a retry.  
+Fix: always acquire locks in a consistent canonical order; wrap the transaction in a retry loop with exponential backoff on `DeadlockDetected`.
+
+**Optimistic lock retry storm under contention**  
+Why: many concurrent writers all read the same version, all try to commit, all but one get `StaleDataError`, all retry. Amplifying the contention.  
+Detect: `StaleDataError` rate climbs with concurrency; DB CPU spikes; successful commit rate stays flat as retries scale.  
+Fix: switch to pessimistic locking (`SELECT ... FOR UPDATE`) when write contention is consistently high; or add jitter to retry backoff.
+
+**Long-running transaction holds locks and blocks reads**  
+Why: a transaction opened for a batch job holds row locks for minutes while other requests wait for the same rows.  
+Detect: `pg_locks` shows many waiting processes; API latency spikes only for endpoints touching the locked table.  
+Fix: break batch jobs into smaller transactions (commit every 1,000 rows); never hold a transaction open while waiting on external I/O.
+
+**Connection pool exhaustion causes 500s under traffic spike**  
+Why: `pool_size + max_overflow` connections are all in use; new requests wait until `pool_timeout` (default 30s) then raise `TimeoutError`.  
+Detect: `QueuePool limit of size X overflow Y reached` in logs; latency percentiles jump at the traffic spike boundary.  
+Fix: tune `pool_size` to match expected concurrency; reduce transaction duration; add a connection pool proxy (PgBouncer) for high-concurrency workloads.
+
+**Savepoint rollback silently swallows the inner error**  
+Why: `except: savepoint.rollback()` catches all exceptions including programming errors, masking bugs.  
+Detect: inner operation silently fails; the outer transaction commits successfully but the expected side effect never occurred.  
+Fix: only catch the specific expected exceptions (e.g., `EmailError`); re-raise anything unexpected.
 
 ## Connections
 

@@ -12,7 +12,7 @@ tldr: OpenAI's official Python framework for multi-agent systems (March 2025) �
 
 > **TL;DR** OpenAI's official Python framework for multi-agent systems (March 2025) — lightweight, model-driven handoffs, built-in guardrails; trade-off vs LangGraph is simplicity at the cost of persistence and HITL support.
 
-OpenAI's official Python framework for building multi-agent systems, released March 2025. The spiritual successor to their experimental **Swarm** library (late 2024). Lightweight by design — it doesn't try to do everything LangGraph does, but it's idiomatic, well-documented, and you'll encounter it in production repos.
+OpenAI's official Python framework for building multi-agent systems, released March 2025. The spiritual successor to their experimental **Swarm** library (late 2024). Lightweight by design. It doesn't try to do everything LangGraph does, but it's idiomatic, well-documented, and you'll encounter it in production repos.
 
 Install: `pip install openai-agents`
 
@@ -85,7 +85,7 @@ agent = Agent(
 )
 ```
 
-The SDK automatically extracts the function signature and docstring into a JSON schema that the model receives. Keep docstrings clear — they're part of the prompt.
+The SDK automatically extracts the function signature and docstring into a JSON schema that the model receives. Keep docstrings clear. They're part of the prompt.
 
 ---
 
@@ -120,7 +120,7 @@ print(result.final_output)
 # Triage agent routes to billing_agent, which handles the payment issue
 ```
 
-The triage agent decides when to hand off — it's still model-driven, not rule-based. For rule-based routing, use Python logic in a tool instead.
+The triage agent decides when to hand off. It's still model-driven, not rule-based. For rule-based routing, use Python logic in a tool instead.
 
 ---
 
@@ -163,7 +163,7 @@ agent = Agent(
 )
 ```
 
-If `tripwire_triggered=True`, the SDK raises a `GuardrailTripwireTriggered` exception — catch it to return a safe fallback response.
+If `tripwire_triggered=True`, the SDK raises a `GuardrailTripwireTriggered` exception. Catch it to return a safe fallback response.
 
 ---
 
@@ -197,7 +197,7 @@ print(ticket.sentiment)  # negative
 
 ## Context and State
 
-Pass shared state through the `context` parameter — available to all tools and agents in the run:
+Pass shared state through the `context` parameter. Available to all tools and agents in the run:
 
 ```python
 from dataclasses import dataclass
@@ -228,7 +228,7 @@ result = Runner.run_sync(agent, "What features do I have access to?", context=us
 
 ## Tracing
 
-Built-in tracing with OpenAI's platform — automatic when you have `OPENAI_API_KEY` set.
+Built-in tracing with OpenAI's platform. Automatic when you have `OPENAI_API_KEY` set.
 
 ```python
 from agents import Agent, Runner
@@ -364,6 +364,33 @@ async def research_and_write(topic: str) -> str:
 - Built-in tracing exports to OpenAI platform only; not self-hostable
 - No built-in checkpointing/persistence — use LangGraph if you need durable state
 - Can use Claude via LiteLLM proxy as an OpenAI-compatible endpoint
+
+## Common Failure Cases
+
+**Model-driven handoff routes to the wrong agent for edge-case inputs**  
+Why: the triage agent decides which specialist to use based on semantics; ambiguous inputs may not match any agent's description clearly.  
+Detect: enable tracing; check which agent handled ambiguous requests; user reports receiving wrong-specialist answers.  
+Fix: add rule-based pre-routing for well-defined categories using a Python tool; only fall back to model-driven handoff for genuinely ambiguous cases.
+
+**`GuardrailTripwireTriggered` exception not caught, returning a 500 error**  
+Why: guardrail exceptions bubble up to the caller; if the outer request handler doesn't catch them, the user gets an unhandled error.  
+Detect: HTTP 500 responses when requests trigger a guardrail; exception in logs: `GuardrailTripwireTriggered`.  
+Fix: wrap `Runner.run()` calls in try/except for `GuardrailTripwireTriggered`; return a graceful "I can't help with that" response.
+
+**Structured output (`output_type`) fails when model adds explanation text before JSON**  
+Why: some models preface structured output with "Here is the JSON:" before the actual JSON block; the parser fails on the prefix.  
+Detect: `ValidationError` in `result.final_output` parsing; raw model output shows text before the JSON.  
+Fix: add a system instruction: "Return only valid JSON with no preamble or explanation text"; or use a post-processing step to extract JSON from the response.
+
+**No built-in checkpointing means agent state is lost on process crash**  
+Why: the SDK has no persistence layer; if the process crashes mid-run, all context and progress is lost.  
+Detect: long-running agents resume from the beginning after any error; no recovery mechanism.  
+Fix: for fault-tolerant workflows, checkpoint state to an external store (Redis/database) at key steps; or switch to LangGraph for durable state.
+
+**Tracing only exports to OpenAI platform, blocking self-hosted observability**  
+Why: built-in tracing hardcodes export to `api.openai.com`; teams using Langfuse or Jaeger need an alternative path.  
+Detect: traces don't appear in your self-hosted observability stack; only OpenAI's dashboard has data.  
+Fix: instrument via OpenTelemetry manually; wrap `Runner.run()` in an OTEL span; export to any OTLP-compatible backend.
 
 ## Connections
 

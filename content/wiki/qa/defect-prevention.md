@@ -171,5 +171,27 @@ This creates a learning loop — each prod bug makes the prevention layer strong
 
 ---
 
+## Common Failure Cases
+
+**Static analysis configured in warn-only mode in CI**
+Why: linters and type checkers that emit warnings but never fail the build produce a wall of ignored output; developers learn to scroll past them, and the signal disappears.
+Detect: CI logs contain hundreds of static analysis warnings that have never been acted on; the `--max-warnings` flag is set to a large number or absent entirely.
+Fix: set `--max-warnings 0` (or equivalent) and treat new warnings as build failures; reduce the existing warning count to zero before flipping the switch.
+
+**Code review checklist exists on a wiki page but is not linked to the PR template**
+Why: checklists not surfaced at review time are rarely consulted; reviewers rely on memory, and systematic gaps in coverage (missing null checks, unvalidated input) recur across PRs.
+Detect: the same class of bug (e.g., missing authentication check on a new endpoint) appears in multiple production incidents over a quarter.
+Fix: embed the checklist directly in the `.github/pull_request_template.md` so it appears as a checkbox list on every PR; reviewers must actively uncheck or address each item.
+
+**Mutation testing run manually as a one-off rather than as a CI gate on critical modules**
+Why: mutation scores in critical modules (payment, auth, data export) decay as new code paths are added without corresponding test coverage; a one-time pass gives false confidence.
+Detect: the mutation score for a critical module drops below 70% over a quarter without anyone noticing.
+Fix: add mutation testing to the nightly CI job for the top 3-5 highest-risk modules; alert if mutation score drops more than 5 points below baseline.
+
+**Acceptance criteria reviewed only by QA rather than as a Three Amigos session**
+Why: QA-only review catches testability gaps but misses technical constraints the developer would flag and business nuances the product owner would clarify; ambiguities survive into implementation.
+Detect: developers frequently request story clarification mid-sprint, or bugs are filed against stories as "wrong implementation" rather than "edge case missed."
+Fix: mandate a Three Amigos review for any story estimated at 3+ points before it enters sprint; QA writes draft acceptance criteria, but the final version requires sign-off from all three roles.
+
 ## Connections
 [[qa-hub]] · [[qa/agile-qa]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/security-testing-qa]] · [[qa/bdd-gherkin]] · [[technical-qa/mutation-testing]]

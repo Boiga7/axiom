@@ -36,14 +36,14 @@ The 34% who are deeply transforming are compounding their advantage. The 37% at 
 
 ## Why Transformation Is Hard
 
-Internal friction is the dominant failure mode — not technology:
+Internal friction is the dominant failure mode. Not technology:
 
 - 68% report friction between IT and business departments
 - 72% have AI developed in silos with no cross-functional coordination
 - 74% cite data governance and accessibility as the primary scaling barrier (BCG)
 - 42% of C-suite say AI adoption is creating internal division, not cohesion
 
-The skills gap is the most cited integration barrier. Organisations are addressing it primarily through education (53% pursuing workforce AI education) rather than role redesign (33%). McKinsey's finding is that role redesign has more ROI impact — so most organisations are solving the wrong problem.
+The skills gap is the most cited integration barrier. Organisations are addressing it primarily through education (53% pursuing workforce AI education) rather than role redesign (33%). McKinsey's finding is that role redesign has more ROI impact, so most organisations are solving the wrong problem.
 
 ## The ROI Insight Most Teams Miss
 
@@ -57,7 +57,7 @@ Implications:
 
 ## The Governance Gap
 
-Only 20% of companies have mature governance for autonomous AI agents. This is the most dangerous gap in enterprise AI right now — organisations are deploying agentic systems without the controls to manage them.
+Only 20% of companies have mature governance for autonomous AI agents. This is the most dangerous gap in enterprise AI right now. Organisations are deploying agentic systems without the controls to manage them.
 
 What mature agentic governance requires:
 - Scope limits: what can the agent do without human approval
@@ -93,7 +93,7 @@ Asia Pacific is leading early physical AI implementation.
 
 ## Sovereign AI
 
-Emerging as an enterprise and national requirement: deploy AI under your own laws, infrastructure, and data governance. Not just model ownership — full-stack control:
+Emerging as an enterprise and national requirement: deploy AI under your own laws, infrastructure, and data governance. Not just model ownership. Full-stack control:
 - Data residency compliance (GDPR, sector-specific rules)
 - Audit rights over model behaviour
 - Independence from hyperscaler lock-in
@@ -109,6 +109,23 @@ The AI skills gap is real and current. See [[synthesis/software-engineer-to-ai-e
 
 > [Source: Deloitte State of AI in the Enterprise 2026] [unverified]
 > [Source: McKinsey State of AI 2025] [unverified]
+
+## Common Failure Cases
+
+**AI tool deployed without workflow redesign, achieving only surface-level productivity gains that erode over time**
+Why: deploying a chat interface or copilot on top of an unchanged process captures the easiest 20% of value; without redesigning the workflow around AI capabilities, workers use AI as a slightly faster search engine and the productivity gain plateaus.
+Detect: usage metrics are high in the first 90 days then plateau; workers describe AI as "helpful for drafting" but cannot point to measurable process changes; the use case is in the "surface-level" tier (37% of enterprises).
+Fix: before deployment, map the full workflow and identify which steps AI can eliminate (not just accelerate); redesign the process so AI output feeds directly into the next step without human reformatting; measure cycle time reduction, not just user satisfaction.
+
+**Agentic system deployed to production without audit trails, making it impossible to debug incorrect autonomous actions**
+Why: only 20% of organisations have mature governance for autonomous AI agents; most teams deploy agents with logging that captures the final output but not the intermediate tool calls, reasoning steps, or which context was used for a decision.
+Detect: an agent makes an incorrect autonomous action (wrong data modified, wrong email sent, wrong ticket created) and the team cannot reconstruct what the agent saw or why it acted; post-incident investigation relies on user recollection.
+Fix: log every tool call, the input context for each call, and the model's response in a structured trace (OpenTelemetry or a platform like Langfuse) before deploying any agent that takes write actions; make traceability a deployment gate, not an afterthought.
+
+**AI adoption project blocked at data access because use case was scoped before data governance was consulted**
+Why: 74% of organisations cite data governance and accessibility as the primary scaling barrier; AI engineers often scope use cases based on business value and assume data will be available, only discovering access restrictions when implementation begins.
+Detect: the project is paused 4-6 weeks into implementation waiting for data access approval; IT or legal is reviewing the data request for the first time; the original project plan has no data governance sign-off milestone.
+Fix: make data access approval the first milestone of every AI use case — before design, before implementation; identify the data required, who owns it, and what governance approval is needed within the first week of scoping.
 
 ## Connections
 - [[landscape/ai-labs]] — the vendors competing for enterprise AI spend

@@ -292,6 +292,33 @@ def permutations(nums):
 | Contains duplicate / fast lookup | Hash set/dict |
 | k-th largest/smallest | Heap |
 
+## Common Failure Cases
+
+**Quicksort degrades to O(n²) on sorted input**
+Why: a naive pivot choice (last element) creates maximally unbalanced partitions on already-sorted or reverse-sorted data.
+Detect: profiling shows unexpectedly slow sort performance; input arrays are often pre-sorted or nearly sorted.
+Fix: randomise pivot selection before partitioning, or use the median-of-three strategy.
+
+**Binary search returns wrong index due to off-by-one**
+Why: using `low < high` instead of `low <= high` causes single-element arrays to be skipped entirely.
+Detect: unit tests on arrays of length 1, or searches for the last element, return -1 incorrectly.
+Fix: use `while low <= high` and derive mid as `low + (high - low) // 2` to prevent integer overflow in fixed-width languages.
+
+**Stack overflow from unbounded recursion**
+Why: missing or unreachable base case, or input too deep for Python's default recursion limit of 1000 frames.
+Detect: `RecursionError: maximum recursion depth exceeded` at runtime.
+Fix: add an explicit base case, convert to an iterative loop with an explicit stack, or call `sys.setrecursionlimit()` with a reasoned bound.
+
+**DP memoisation cache shared across requests in a web app**
+Why: `@lru_cache` on a module-level function persists for the lifetime of the process, not the request — different callers share state.
+Detect: test isolation failures; one test's cached result bleeds into another; memory grows unbounded under load.
+Fix: scope the cache to the call site, use `functools.lru_cache` only on pure stateless functions, or call `.cache_clear()` in teardown.
+
+**O(n²) inner loop slipping into a hot path**
+Why: a nested loop (e.g., `if item in some_list`) looks innocent at small scale but becomes a bottleneck when `n` exceeds a few thousand.
+Detect: profiler shows the inner loop dominating latency; response times degrade non-linearly as data grows.
+Fix: convert the list to a `set` before the loop for O(1) membership checks, reducing the block to O(n) overall.
+
 ## Connections
 
 - [[cs-fundamentals/data-structures]] — algorithms operate on these structures

@@ -224,6 +224,28 @@ await expect(page).toHaveScreenshot('homepage.png', {
 
 ---
 
+## Common Failure Cases
+
+**TestRail and Jira fall out of sync — bugs logged in Jira have no linked test case**
+Why: testers log bugs directly in Jira without marking the corresponding TestRail test case as failed; the traceability matrix shows no link between defects and test coverage.
+Detect: query Jira for `issuetype = Bug AND "Test Case" is EMPTY` — a high count signals the sync workflow is not being followed.
+Fix: configure the TestRail-Jira integration to auto-create Jira bugs when a test case is marked Failed, and require the Jira bug to reference the TestRail case ID in a custom field; make the field mandatory before the bug can be closed.
+
+**Postman collection environment variables contain production credentials**
+Why: a developer sets up the Postman collection using their personal production API key and exports the environment file including the key value; the file is committed to git.
+Detect: run `detect-secrets scan` on the repository and look for any `.postman_environment.json` files; also check `.gitignore` to confirm environment files are excluded.
+Fix: add `*.postman_environment.json` to `.gitignore`; use `{{CLIENT_SECRET}}` placeholder variables in the environment file and document that the actual values must be injected from a password manager or CI secrets store.
+
+**Playwright visual regression tests update snapshots on every CI run — baseline never stable**
+Why: the CI pipeline is configured with `--update-snapshots` to avoid blocking on pixel differences; every run accepts the current state as the new baseline, so visual regressions pass silently.
+Detect: check the git log for `*.png` snapshot files; if they are modified in nearly every CI commit, snapshots are being auto-updated rather than reviewed.
+Fix: remove `--update-snapshots` from CI; snapshots should only be updated intentionally via a separate manual step (`playwright test --update-snapshots`) that produces a PR for human review.
+
+**Test data tool (factory-boy or Mockaroo) generates data that fails validation rules**
+Why: the factory generates random email addresses in the format `user@example` (missing TLD), and the application's email validator rejects them, causing all factory-based tests to fail with 422 errors unrelated to the feature under test.
+Detect: tests fail on `status_code == 201` assertions with `422` responses; the error body references the `email` field, not the field the test is exercising.
+Fix: validate all factory or fixture data against the application's own validation rules as a one-time check when the factory is first created; use `Faker('email')` which always produces valid format addresses.
+
 ## Connections
 
 - [[qa/test-strategy]] — tools implement the strategy; strategy defines tool requirements

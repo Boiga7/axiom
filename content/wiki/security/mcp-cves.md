@@ -79,7 +79,7 @@ Mitigations: URL allowlisting, block cloud metadata endpoints, network policy re
 
 ### Cross-Origin Tool Escalation
 
-Combining two trusted servers in ways that weren't anticipated. Server A reads files; Server B sends HTTP requests. Together they can exfiltrate file contents to an external endpoint — neither server is individually dangerous.
+Combining two trusted servers in ways that weren't anticipated. Server A reads files; Server B sends HTTP requests. Together they can exfiltrate file contents to an external endpoint. Neither server is individually dangerous.
 
 Mitigations: isolate server contexts, limit what data can flow between servers.
 
@@ -125,6 +125,28 @@ mcpindex scan https://your-mcp-server.com
 - Five attack categories: Tool Poisoning, Rug Pull, SSRF via Tool Input, Cross-Origin Tool Escalation, Namespace Shadowing
 - 66% of 1,808 scanned MCP servers had security findings (per CLAUDE.md domain notes)
 - Key mitigations: pin server versions, validate tool descriptions before registration, URL allowlisting, isolate server contexts
+
+## Common Failure Cases
+
+**Tool poisoning injected through a third-party MCP server installed from an unverified source**  
+Why: MCP server packages from npm or PyPI are not audited by default; a malicious or compromised package embeds injection payloads in tool descriptions that the LLM executes when it reads the tool list.  
+Detect: unexpected tool calls appear in agent logs that were never requested by the user; tool descriptions in `tools/list` contain imperative instructions beyond the functional description.  
+Fix: install MCP servers only from verified publishers; review all tool descriptions in `tools/list` before connecting a server to a production agent; use `mcpindex scan` to check descriptions for injection patterns.
+
+**Rug pull undetected because MCP server version was not pinned in configuration**  
+Why: auto-updating MCP packages silently change tool behaviour after a trusted server passes security review; the server previously behaved safely but the update introduces malicious logic.  
+Detect: agent behaviour changes after an automatic package update; the server's tool behaviour no longer matches the reviewed description; git blame on the package shows recent commits to tool handler logic.  
+Fix: pin MCP server versions in your config or package lock file; treat MCP server updates as code changes requiring review; use checksums to verify server integrity on startup.
+
+**SSRF via MCP tool that accepts user-controlled URLs reaches internal cloud metadata endpoints**  
+Why: an MCP tool that fetches URLs (e.g., `fetch_url`, `web_search_raw`) can be directed at `http://169.254.169.254/` (AWS metadata) or `http://localhost:8080/admin` by an attacker who controls the URL input.  
+Detect: server logs show outbound requests to RFC-1918 addresses or cloud metadata endpoints; the requests were triggered by a tool call with a crafted URL argument.  
+Fix: allowlist permitted URL prefixes in the tool handler; block requests to RFC-1918 addresses, loopback, and well-known metadata endpoints; use a network-level egress policy as a second layer.
+
+**Cross-origin tool escalation using two trusted servers to exfiltrate file contents**  
+Why: Server A (file reader) and Server B (HTTP sender) are individually safe, but together an attacker can craft a prompt that instructs the agent to read a file via Server A and send its content via Server B.  
+Detect: agent logs show a file read followed immediately by an HTTP POST to an unexpected endpoint; neither operation was requested by the user.  
+Fix: isolate server contexts by running each in a separate execution environment; use a tool call auditing layer that flags suspicious sequences (read file → send HTTP); apply principle of least privilege — the file reader should not have network access.
 
 ## Connections
 

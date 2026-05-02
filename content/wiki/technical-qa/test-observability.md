@@ -10,7 +10,7 @@ tldr: Treating the test suite as a system to be monitored — tracking health, t
 
 # Test Observability
 
-Treating the test suite as a system to be monitored — tracking health, trends, and failure patterns over time.
+Treating the test suite as a system to be monitored. Tracking health, trends, and failure patterns over time.
 
 ---
 
@@ -216,6 +216,28 @@ Alerts:
 ```
 
 ---
+
+## Common Failure Cases
+
+**`pytest_sessionfinish` DB flush blocks and times out in slow CI environments**
+Why: `asyncio.run(self._flush())` inside a synchronous pytest hook creates a new event loop; if the DB connection takes longer than the hook timeout, the flush is silently abandoned and no results are recorded.
+Detect: the `test_results` table shows gaps for specific CI runs; the pytest process exits cleanly but rows are missing.
+Fix: use a synchronous `asyncpg` connection in `_flush`, or write results incrementally in `pytest_runtest_logreport` rather than batching everything at session end.
+
+**Flakiness rate calculation is skewed by tests that are always skipped**
+Why: the flakiness query computes `failures / total_runs`; if a test is skipped 90% of the time (e.g., environment-gated), the denominator is artificially small and a single failure produces a misleadingly high flakiness rate.
+Detect: flakiness report shows environment-gated tests at the top of the list with high rates but only 1-2 actual failures.
+Fix: add `AND outcome != 'skipped'` to the `WHERE` clause and require a minimum run count (`HAVING COUNT(*) >= 10`) before a test qualifies for the flakiness report.
+
+**Datadog CI Visibility drops spans when `ddtrace-run` version mismatches the pytest plugin**
+Why: `ddtrace-run` injects tracing at the process level; if `ddtrace` is pinned to one version in `requirements.txt` and the `pytest-ddtrace` plugin expects another, spans are emitted but not correlated correctly and the CI Visibility dashboard shows partial data.
+Detect: some test spans appear in Datadog but the run-level summary shows zero tests; span parentage is broken.
+Fix: pin both `ddtrace` and `pytest-ddtrace` to the same minor version and verify the Datadog agent endpoint is reachable from the CI runner before tests start.
+
+**Duration trend query is polluted by reruns of flaky tests**
+Why: `pytest-rerunfailures` records multiple attempts for a single test node; the `test_results` table stores each attempt, so the duration trend includes short retry attempts that skew the P95 metric downward.
+Detect: P95 duration drops suspiciously for known slow tests on days with high flakiness.
+Fix: add a `is_rerun BOOLEAN` column to `test_results`, set it based on the `report.rerun` attribute in the plugin, and filter `WHERE is_rerun = FALSE` in all analytics queries.
 
 ## Connections
 

@@ -64,7 +64,7 @@ describe('Login', () => {
 
 ## Network Intercepts
 
-Intercept and stub HTTP requests — removes dependency on the backend for frontend tests.
+Intercept and stub HTTP requests. Removes dependency on the backend for frontend tests.
 
 ```javascript
 it('shows products from API', () => {
@@ -107,7 +107,7 @@ it('calls correct endpoint', () => {
 
 ## Custom Commands
 
-Reusable operations — keeps tests DRY.
+Reusable operations. Keeps tests DRY.
 
 ```javascript
 // cypress/support/commands.js
@@ -231,6 +231,28 @@ module.exports = defineConfig({
 ```
 
 ---
+
+## Common Failure Cases
+
+**`cy.intercept` stub is registered after `cy.visit`, so the first API call is real and the stub never fires**
+Why: Cypress intercepts must be registered before the navigation that triggers the request; `cy.visit('/products')` fires the `GET /api/products` request synchronously before `cy.intercept` is set up.
+Detect: the test passes in development but the UI shows real data, not the stubbed data; adding a breakpoint before `visit` makes it pass.
+Fix: always call `cy.intercept(...)` before `cy.visit(...)` — the intercept registration is the first line in the test body.
+
+**Custom `cy.login()` command stores the token in `localStorage`, but the app reads it from `sessionStorage` or a cookie**
+Why: the custom command does `window.localStorage.setItem('auth_token', ...)` but the application was migrated to use `sessionStorage` or `httpOnly` cookies; the stored token is invisible to the application.
+Detect: the login command completes without error but every subsequent navigation redirects to `/login`.
+Fix: match the storage mechanism the application actually uses — check the production login flow to confirm whether it writes to `localStorage`, `sessionStorage`, or sets a cookie, then mirror that in the command.
+
+**Component test fails in CI but passes locally because the test imports a path alias not resolved by Cypress webpack config**
+Why: the component test imports `@/components/ProductCard` using a path alias configured in `tsconfig.json`, but the Cypress `devServer` webpack config doesn't include the same `resolve.alias` entries.
+Detect: the error is `Cannot find module '@/components/ProductCard'`; running the same import in Playwright or Vitest works.
+Fix: add the path aliases to `cypress.config.js`'s `devServer` configuration, mirroring the project's `tsconfig.json` `paths` entries.
+
+**Test retries mask a genuine flake instead of fixing it**
+Why: `retries: { runMode: 2 }` causes Cypress to silently retry failing tests in CI; a genuinely broken feature appears as a pass on the second attempt and the real failure is never investigated.
+Detect: check CI run output for tests that passed "on retry 2 of 2" — these are hidden failures.
+Fix: retries are acceptable only for known infrastructure flakiness (network timeouts); use `cy.intercept` to eliminate real network calls from E2E tests, then set `retries: 0` and fix each flake at the root cause.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[technical-qa/flaky-test-management]] · [[qa/bdd-gherkin]] · [[cloud/github-actions]]

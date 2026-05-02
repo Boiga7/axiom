@@ -271,5 +271,32 @@ def process_with_dlq(event: dict, max_retries: int = 3):
 
 ---
 
+## Common Failure Cases
+
+**Lost events on service crash (no outbox pattern)**
+Why: the service writes to the database and then publishes to the broker as two separate operations; a crash between them leaves the DB updated but the event never sent.
+Detect: downstream consumers show gaps in event sequences; data in the DB doesn't match what consumers have processed.
+Fix: use the outbox pattern — write the event to an `outbox` table in the same DB transaction, then relay it to the broker asynchronously.
+
+**Consumer commits offset before processing succeeds**
+Why: auto-commit (or committing immediately on receipt) marks the message as processed even if the handler throws an exception, causing silent data loss.
+Detect: events appear consumed in Kafka/SQS but the expected side effects (DB writes, emails) are missing.
+Fix: set `enable.auto.commit=False` and commit only after the handler returns successfully; route failures to the DLQ after N retries.
+
+**Missing idempotency key causes duplicate processing**
+Why: at-least-once delivery means the same event can arrive twice (network retry, requeue after visibility timeout); if the handler is not idempotent, it processes the duplicate.
+Detect: double charges, duplicate email sends, or inflated row counts that correlate with retry events.
+Fix: store the `event_id` in a processed-events table and skip events whose ID has already been seen.
+
+**Event schema change breaks consumers**
+Why: a producer adds a required field or renames one without coordinating with consumers, causing deserialization errors across all downstream services.
+Detect: consumers start throwing `KeyError` / deserialization exceptions after a producer deploy.
+Fix: use Schema Registry (Avro / Protobuf) with compatibility enforcement set to `BACKWARD`; never rename or remove required fields without a deprecation cycle.
+
+**Consumer group rebalance causes processing stalls**
+Why: adding or removing consumers in a Kafka consumer group triggers a rebalance; during rebalance, no partition is being consumed, causing visible lag spikes.
+Detect: consumer lag metric spikes periodically in Grafana, correlating with deployment events.
+Fix: use cooperative (incremental) rebalancing (`partition.assignment.strategy=cooperative-sticky`) to reduce stop-the-world pauses.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]] · [[llms/ae-hub]]

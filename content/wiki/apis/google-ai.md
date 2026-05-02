@@ -202,7 +202,7 @@ result = genai.embed_content(
 embedding = result["embedding"]  # list of 768 floats
 ```
 
-Task types affect the embedding — use `retrieval_query` for queries and `retrieval_document` for documents being indexed.
+Task types affect the embedding. Use `retrieval_query` for queries and `retrieval_document` for documents being indexed.
 
 ---
 
@@ -287,6 +287,33 @@ Gemini is the natural choice for teams already on GCP or deeply integrated with 
 - Vertex AI adds IAM/VPC, regional data residency, audit logging, and private endpoints
 - `task_type` matters for embeddings: `retrieval_query` vs `retrieval_document` produce different vectors
 - Thinking mode configured via `ThinkingConfig(thinking_budget=N)` in generation config
+
+## Common Failure Cases
+
+**`generate_content` raises `BlockedPromptException` with no useful message**  
+Why: Gemini's safety filters block the request; the error message often doesn't specify which filter triggered.  
+Detect: `google.generativeai.types.BlockedPromptException`; `response.prompt_feedback.block_reason` contains the actual reason.  
+Fix: check `response.prompt_feedback.safety_ratings` to identify the triggering category; adjust content or use `SafetySettings` to lower thresholds for the relevant category.
+
+**Vertex AI ADC credentials fail in GitHub Actions**  
+Why: Application Default Credentials require `gcloud auth application-default login` which is interactive; GitHub Actions can't run it.  
+Detect: `google.auth.exceptions.DefaultCredentialsError` in CI; the workflow works locally but not in Actions.  
+Fix: use Workload Identity Federation (OIDC) in Actions; or set `GOOGLE_APPLICATION_CREDENTIALS` to a service account JSON key file stored in GitHub Secrets.
+
+**Thinking mode significantly exceeds expected token budget**  
+Why: `thinking_budget=5000` sets a maximum, not a minimum; complex reasoning problems may use the full budget, multiplying cost unexpectedly.  
+Detect: `response.usage_metadata.thoughts_token_count` is consistently near the budget limit; cost per call is higher than expected.  
+Fix: lower `thinking_budget` for simpler queries; use a tiered approach — start with Flash (no thinking), escalate to Pro with thinking only for hard problems.
+
+**Function calling loop fails because Gemini passes `None` for optional parameters**  
+Why: Gemini includes optional parameters with `null` value in the function call payload; the Python function receiving `None` for a required-looking param raises an error.  
+Detect: tool function raises `TypeError: expected str, got None`; the function call in the trace shows `null` for an optional argument.  
+Fix: use `Optional[str] = None` type hints and handle `None` explicitly in the function body; or set `"nullable": True` in the schema.
+
+**`text-embedding-004` `task_type` mismatch degrades retrieval quality by 5-10%**  
+Why: using `retrieval_document` type for both indexing and querying, or omitting `task_type`, bypasses Google's asymmetric embedding training.  
+Detect: retrieval quality doesn't match Google's benchmarks; swap types and compare recall on a test set.  
+Fix: always use `task_type="retrieval_query"` for user queries and `task_type="retrieval_document"` for documents being indexed.
 
 ## Connections
 

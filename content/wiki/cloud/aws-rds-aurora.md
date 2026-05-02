@@ -39,7 +39,7 @@ Choose RDS for cost sensitivity or specific engine versions. Choose Aurora for h
 
 ## Aurora Architecture
 
-Aurora separates compute from storage. 6 storage copies across 3 AZs; writes require 4/6 quorum, reads require 3/6. Storage auto-repairs corrupted blocks. The writer instance and up to 15 reader instances share the same storage — readers see writes within milliseconds.
+Aurora separates compute from storage. 6 storage copies across 3 AZs; writes require 4/6 quorum, reads require 3/6. Storage auto-repairs corrupted blocks. The writer instance and up to 15 reader instances share the same storage. Readers see writes within milliseconds.
 
 ```
 Writer Endpoint  →  Primary instance
@@ -87,7 +87,7 @@ rds.create_db_instance(
 
 ## RDS Proxy
 
-Manages connection pooling between application and database. Critical for Lambda workloads (Lambda creates new DB connections per invocation — Proxy prevents connection exhaustion).
+Manages connection pooling between application and database. Critical for Lambda workloads (Lambda creates new DB connections per invocation, Proxy prevents connection exhaustion).
 
 ```python
 # Lambda connecting via RDS Proxy with IAM auth
@@ -170,6 +170,28 @@ aws rds modify-db-instance \
 ```
 
 ---
+
+## Common Failure Cases
+
+**Multi-AZ failover takes longer than expected — app down for 60+ seconds**
+Why: the application's connection is cached to the primary endpoint's IP; DNS TTL on the RDS endpoint is 5 seconds but the app's DNS resolver or connection pool caches the old IP.
+Detect: failover completes in ~30s but the app reports connection errors for 60-120s; `dig +noall +answer <rds-endpoint>` shows a different IP than the cached one.
+Fix: configure the connection pool to use short TCP keepalive and reconnect on failure; never cache the resolved IP address — always re-resolve the DNS name.
+
+**Aurora Serverless v2 scales to max ACU without returning to minimum**
+Why: a long-running transaction or an idle connection with an open transaction prevents the serverless instance from scaling down.
+Detect: ACU count stays near `MaxCapacity` even during off-hours; CloudWatch `ACUUtilization` is high but `DatabaseConnections` is low.
+Fix: set `idle_in_transaction_session_timeout` in the parameter group (e.g., 60000ms) to kill idle-in-transaction sessions; use connection pooling (RDS Proxy) to avoid long-lived idle connections.
+
+**RDS Proxy returns "max connections exceeded" under Lambda burst**
+Why: RDS Proxy has its own connection limit (`max_connections_percent` on the target group, default 100%), and if too many Lambda invocations are waiting for a borrow from the pool simultaneously, requests queue or fail.
+Detect: Lambda logs show `too many connections` errors even with Proxy; CloudWatch `ProxyMaxConnectionsExceeded` metric rises.
+Fix: increase `max_connections_percent` on the Proxy target group up to the DB's actual `max_connections` parameter value, or reduce Lambda concurrency with reserved concurrency.
+
+**Read replica lag causes stale reads**
+Why: asynchronous replication means the replica can be seconds (or minutes during write spikes) behind the primary; reads from the reader endpoint return outdated data.
+Detect: `SELECT * FROM pg_stat_replication` on Aurora or `SHOW SLAVE STATUS` shows `Seconds_Behind_Master > 0`; CloudWatch `AuroraReplicaLag` metric exceeds your tolerance.
+Fix: route time-sensitive reads (e.g., post-write confirmations) to the writer endpoint; use the reader endpoint only for analytics, reports, and other reads where eventual consistency is acceptable.
 
 ## Connections
 [[cloud-hub]] · [[cloud/secrets-management]] · [[cloud/aws-lambda-patterns]] · [[cloud/cloud-monitoring]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]]

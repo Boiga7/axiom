@@ -232,7 +232,7 @@ parser = PydanticOutputParser(pydantic_object=Summary)
 chain = prompt | model | parser
 ```
 
-For more robust structured output, prefer [[python/instructor]] over PydanticOutputParser — instructor has retry logic and works directly against the API.
+For more robust structured output, prefer [[python/instructor]] over PydanticOutputParser. Instructor has retry logic and works directly against the API.
 
 ---
 
@@ -259,6 +259,33 @@ Different providers are split into separate packages:
 - `langchain-google-genai` — Gemini
 
 ---
+
+## Common Failure Cases
+
+**LCEL pipe chain raises `TypeError` on incompatible output/input types between steps**  
+Why: each Runnable in `|` must accept the output type of the prior step; passing a `str` to a step expecting `dict` raises a type error at runtime, not at construction time.  
+Detect: `TypeError` or `ValidationError` is thrown when calling `.invoke()`; the chain appears valid until execution.  
+Fix: add `RunnablePassthrough` or a lambda to reshape data between steps; test each step individually with `.invoke()` before chaining.
+
+**WebBaseLoader silently fetches empty content from JavaScript-rendered pages**  
+Why: `WebBaseLoader` uses `requests`, which doesn't execute JavaScript; single-page apps return empty HTML.  
+Detect: `doc.page_content` is empty or contains only HTML boilerplate with no body text.  
+Fix: use Playwright-based loaders or fetch a pre-rendered URL; `AsyncChromiumLoader` from `langchain_community` for JS-rendered pages.
+
+**PydanticOutputParser fails when the model adds markdown formatting around JSON**  
+Why: the model wraps JSON output in `\`\`\`json ... \`\`\``; the parser receives a non-JSON string and raises a `OutputParserException`.  
+Detect: `OutputParserException: Got invalid JSON` in logs; the raw response shows markdown code fences.  
+Fix: use `JsonOutputParser` with `RunnableLambda` to strip fences first; or switch to [[python/instructor]] which uses constrained decoding.
+
+**`RunnableWithMessageHistory` grows the in-memory store unboundedly in long-running servers**  
+Why: `InMemoryChatMessageHistory` stores all sessions in a dict that is never evicted; a long-running server accumulates all conversations.  
+Detect: memory usage grows monotonically with request count; the server eventually OOMs.  
+Fix: use an external store (Redis, PostgreSQL) with TTL; or implement LRU eviction in the custom `get_history` function.
+
+**Batch `.batch()` calls ignore errors silently when `max_concurrency` > 1**  
+Why: by default, exceptions in concurrent batch calls are captured and returned as error objects, not raised; the caller receives a mix of results and errors.  
+Detect: some batch results are `LangChainException` objects instead of strings; no exception is raised at the call site.  
+Fix: check result types after `.batch()`; pass `config={"raise_on_error": True}` to surface errors immediately.
 
 ## Connections
 

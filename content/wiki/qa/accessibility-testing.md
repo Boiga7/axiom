@@ -124,7 +124,7 @@ Automated tools miss ~60% of accessibility issues. Manual testing with assistive
 
 ## ARIA
 
-Accessible Rich Internet Applications — HTML attributes for communicating semantics to assistive technology.
+Accessible Rich Internet Applications. HTML attributes for communicating semantics to assistive technology.
 
 ```html
 <!-- Button that doesn't look like a button -->
@@ -194,6 +194,33 @@ Run axe on every PR:
 Set a policy: zero new Critical/Serious violations merged on any PR.
 
 ---
+
+## Common Failure Cases
+
+**Treating axe-core as a complete accessibility audit**
+Why: automated tools catch ~40% of WCAG issues; the remaining 60% require manual verification with screen readers and keyboard navigation.
+Detect: accessibility sign-off exists but no screen reader or keyboard testing is documented in the test plan.
+Fix: add a mandatory manual testing checklist (keyboard nav + NVDA/VoiceOver) as part of the Definition of Done for every UI story.
+
+**Running axe only on the page root instead of dynamic states**
+Why: axe scans the DOM as it exists at scan time — modals, error messages, and expanded dropdowns are untested if they haven't been triggered.
+Detect: axe passes but screen reader users report unlabelled dialogs or inaccessible error states.
+Fix: trigger each interactive state (open modal, submit invalid form, expand accordion) before calling `checkA11y`.
+
+**Suppressing violations with global axe rules disabled**
+Why: developers silence noisy violations by disabling entire rules rather than fixing the underlying issue, leaving real failures hidden.
+Detect: axe config contains a `disableRules` list with more than one or two entries.
+Fix: review each disabled rule; fix the underlying HTML rather than suppressing it, or add a tracked exception with a linked ticket.
+
+**Testing only Chrome when Safari has distinct accessibility behaviour**
+Why: VoiceOver on macOS/iOS interacts differently with ARIA roles compared to NVDA on Windows; a page that works in Chrome may be unusable with VoiceOver.
+Detect: accessibility tests pass in Chromium but no testing is done with Safari + VoiceOver.
+Fix: include at least one manual VoiceOver session on macOS per release cycle for high-traffic flows.
+
+**Using ARIA attributes on the wrong element type**
+Why: adding `role="button"` to a `<div>` requires manually adding `tabindex`, keyboard handlers, and focus management — omitting any one breaks the contract.
+Detect: screen readers announce elements as interactive but they cannot be activated with keyboard or do not receive focus.
+Fix: use native `<button>` elements; add ARIA only when no native HTML element fits, and verify the full keyboard contract is implemented.
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/qa-tools]] · [[technical-qa/test-architecture]] · [[test-automation/playwright]]

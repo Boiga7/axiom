@@ -12,7 +12,7 @@ tldr: Fine-tuning decision framework — 57% of AI organisations never fine-tune
 
 > **TL;DR** Fine-tuning decision framework — 57% of AI organisations never fine-tune; the decision tree runs prompting, then RAG, then SFT, then DPO/GRPO, escalating only when the prior approach genuinely fails.
 
-Updating a pretrained model's weights on a domain-specific dataset to change its behaviour, style, or capabilities. The last resort after prompting and RAG have been exhausted — but the right tool when they genuinely can't solve the problem.
+Updating a pretrained model's weights on a domain-specific dataset to change its behaviour, style, or capabilities. The last resort after prompting and RAG have been exhausted, but the right tool when they genuinely can't solve the problem.
 
 ---
 
@@ -46,7 +46,7 @@ Train on (input, output) pairs. The model learns to produce outputs that look li
 
 ### DPO (Direct Preference Optimisation)
 
-Train on (prompt, preferred_response, rejected_response) triples. Optimises the policy directly to prefer one output over another — no reward model required.
+Train on (prompt, preferred_response, rejected_response) triples. Optimises the policy directly to prefer one output over another. No reward model required.
 
 **Why DPO over PPO:** No RL instability, no reward model to train separately, 2–3x cheaper to run. Near-equivalent results for most alignment tasks. See [[fine-tuning/dpo-grpo]].
 
@@ -56,7 +56,7 @@ Used in DeepSeek-R1. Samples a group of responses for each prompt, ranks them, o
 
 ### ORPO (Odds Ratio Preference Optimisation)
 
-Combines SFT and preference learning in a single loss. Simpler pipeline than DPO — no separate SFT warmup required.
+Combines SFT and preference learning in a single loss. Simpler pipeline than DPO. No separate SFT warmup required.
 
 ### KTO (Kahneman-Tversky Optimisation)
 
@@ -152,6 +152,28 @@ Run [[evals/methodology]] before and after. A 2% improvement on the target task 
 - Single QLoRA run on a 7B model: ~$5-15 on rented A100
 - Catastrophic forgetting is the most common post-fine-tuning failure — always run evals before and after
 - Quality penalty for QLoRA vs full LoRA: ~1-3% on most benchmarks
+
+## Common Failure Cases
+
+**Fine-tuning a model for format compliance when few-shot prompting would have worked**  
+Why: teams jump to fine-tuning for output formatting tasks (JSON, markdown tables) without first testing with 3-5 few-shot examples; fine-tuning adds cost and latency for something prompting handles reliably.  
+Detect: running the same task with 5 formatted examples in the prompt achieves >90% format compliance; the fine-tuned model adds only marginal improvement.  
+Fix: always test prompting + few-shot before fine-tuning; fine-tune only when format compliance with prompting falls below 85% on a representative test set.
+
+**SFT fine-tuning improves target task metrics but degrades general instruction-following capability**  
+Why: catastrophic forgetting — training only on narrow domain examples reduces the model's performance on tasks not represented in the training set; the gradient updates overwrite general capabilities.  
+Detect: target task accuracy improves by 10-15% but MMLU or instruction-following benchmarks degrade 5-10% post-fine-tuning.  
+Fix: include 5-10% general instruction-following examples in the SFT dataset to preserve broad capability; use a lower learning rate and fewer epochs; evaluate on a general benchmark before and after.
+
+**Fine-tuning to inject proprietary knowledge into model weights when RAG would have been correct**  
+Why: fine-tuning bakes a snapshot of knowledge into weights; when the underlying knowledge changes (prices, policies, product specs), the fine-tuned model is immediately stale and requires retraining.  
+Detect: fine-tuned model answers based on training-time information when users ask about recently updated facts; RAG with the same knowledge base answers correctly.  
+Fix: use RAG for knowledge that changes more frequently than your retraining cycle; reserve fine-tuning for stable stylistic or structural patterns.
+
+**QLoRA training chosen because of hardware constraints, but quality gap is unacceptable for production**  
+Why: QLoRA's 1-3% quality penalty on most benchmarks is acceptable for general tasks but can be significant for narrow precision-critical tasks (legal, medical, code generation with correctness checks).  
+Detect: QLoRA-tuned model achieves 82% pass@1 on your code eval; full LoRA on the same adapter achieves 89%; the gap matters for your use case.  
+Fix: evaluate QLoRA vs full LoRA on your specific eval suite before committing to hardware; rent an A100 80GB for full LoRA if the quality gap is critical and the model is 7-13B.
 
 ## Connections
 

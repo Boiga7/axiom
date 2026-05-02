@@ -255,6 +255,28 @@ async def test_create_order_returns_201(api_client: httpx.AsyncClient, auth_head
 
 ---
 
+## Common Failure Cases
+
+**Collection variable `order_id` not set when a chained request runs**
+Why: the `pm.collectionVariables.set("order_id", ...)` call in request A's test script runs asynchronously; request B in the same run fires before A's script completes and receives `undefined`.
+Detect: request B returns a 404 or validation error referencing `{{order_id}}` being literal text or empty.
+Fix: ensure `pm.collectionVariables.set` is called synchronously inside `pm.test`, and add a null-check test that fails early if the variable is not set before request B executes.
+
+**Pre-request auth script silently fails, sending requests without a token**
+Why: the `pm.sendRequest` callback receives an error but the script does not throw or fail the request, so subsequent requests use a blank `auth_token` and all return 401.
+Detect: every request in the run returns 401; the Newman output shows no auth-related failure in the pre-request phase.
+Fix: add `if (err) { throw new Error("Login failed: " + err); }` in the `pm.sendRequest` callback, which causes Newman to mark the pre-request as failed and halt the run.
+
+**Newman `--bail` stops the run before teardown deletes test data**
+Why: `--bail` exits on the first test failure, skipping the teardown folder that deletes created resources, leaving orphaned records in the test database.
+Detect: the test database accumulates duplicate test orders or users after failed CI runs.
+Fix: use Newman's `--folder` flag to run teardown explicitly in a separate Newman invocation that runs unconditionally as a CI step after the main run, regardless of exit code.
+
+**Environment JSON committed with real credentials**
+Why: developers export environments from Postman including populated secret values and commit the JSON to version control.
+Detect: the environment file in the repo contains non-empty `auth_token`, `password`, or API key values.
+Fix: export environments with all secret values cleared (empty string), use `--env-var "password=$SECRET"` in the Newman CLI to inject values from CI secrets at runtime.
+
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[technical-qa/api-testing]] · [[technical-qa/api-performance-testing]] · [[technical-qa/api-contract-testing]] · [[qa/test-reporting]] · [[technical-qa/test-reporting-dashboards]]

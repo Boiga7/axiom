@@ -269,6 +269,33 @@ async def test_external_service_error_does_not_leak_details(
 
 ---
 
+## Common Failure Cases
+
+**Bare `except Exception: pass` swallows a critical failure**  
+Why: developer intended to suppress one specific transient error and used a catch-all; a completely different exception (DB down, config missing) is silently discarded.  
+Detect: operation appears to succeed (no error returned) but produces no output or side effect; add logging inside the except block.  
+Fix: always catch the most specific exception class; if you must catch broadly, at minimum `log.exception(...)` before continuing.
+
+**Error logged at the wrong layer — same error logged 3 times**  
+Why: each function in the call stack logs the exception before re-raising; the aggregator shows 3 entries for one user-visible error.  
+Detect: log search for a request ID shows identical error messages from multiple functions.  
+Fix: log only at the boundary where the exception is handled (the API layer); functions that raise or re-raise should not log.
+
+**`ExternalServiceError` leaks internal detail in the response**  
+Why: the API handler passes `str(exc)` directly into the JSON response; the exception message contains internal service names, stack traces, or IDs.  
+Detect: curl the endpoint while it's failing and inspect the response body for internal hostnames, SQL, or stack traces.  
+Fix: always return a generic user-facing message for 5xx errors; log the full internal detail server-side with the request ID.
+
+**Retry with backoff retries non-retryable errors**  
+Why: the retry decorator catches all exceptions including validation errors (400) that will never succeed on retry; the caller blocks for 3 × backoff before getting an error.  
+Detect: 400-class errors take 3–5 seconds instead of being immediate; retry count in logs for requests that should fail fast.  
+Fix: whitelist only retryable exception classes in the `exceptions` tuple (`ExternalServiceError`, `TimeoutError`); raise validation errors immediately.
+
+**Result type `Err` variant ignored by caller**  
+Why: caller pattern-matches only on `Ok` and has no `case Err` branch; the error is silently dropped when the function fails.  
+Detect: mypy/pyright reports unhandled cases in the match statement; or operation silently produces no output on failure.  
+Fix: use exhaustive pattern matching; pyright with `--strict` will flag missing `Err` cases as unreachable code warnings.
+
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/software-design-principles]] · [[web-frameworks/fastapi]] · [[cs-fundamentals/logging-best-practices]]

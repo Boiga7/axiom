@@ -10,7 +10,7 @@ tldr: Test doubles — mocks, stubs, fakes, spies — are the tool for isolating
 
 # Mock Strategies
 
-Test doubles — mocks, stubs, fakes, spies — are the tool for isolating units from their dependencies. Choosing the wrong double leads to tests that pass but miss real bugs.
+Test doubles (mocks, stubs, fakes, spies) are the tool for isolating units from their dependencies. Choosing the wrong double leads to tests that pass but miss real bugs.
 
 ---
 
@@ -196,6 +196,28 @@ def reset_email_mock(mock_email_service):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Mocking without `spec=` hides renamed methods**
+Why: `MagicMock()` accepts any attribute access, so `mock.sned()` (typo) returns another mock instead of raising `AttributeError`, and the test passes while the real bug is invisible.
+Detect: a test asserts on a method call but the assertion always passes regardless of whether the code under test actually calls anything.
+Fix: always pass `spec=RealClass` when creating mocks so typos and renamed methods raise immediately.
+
+**Patching the wrong import path**
+Why: `patch("myapp.utils.requests.get")` patches the original module, but the code under test imported `from requests import get`, so it holds a reference to the unpatched function.
+Detect: the mock is configured but the real HTTP call still fires (network error in tests or real API called).
+Fix: patch where the name is used, not where it is defined: `patch("myapp.orders.get")` to patch `get` as imported in `myapp.orders`.
+
+**Fake repository diverges from the real interface**
+Why: the real `ProductRepository.save()` is updated to raise a `DuplicateKeyError` on conflict, but `FakeProductRepository` silently overwrites, so tests never exercise the error path.
+Detect: a bug reaches production that the tests should have caught; the fake and real implementations handle edge cases differently.
+Fix: write an abstract base class or Protocol for the repository and run a shared contract test suite against both the fake and the real implementation.
+
+**AsyncMock used where a sync mock is needed (or vice versa)**
+Why: wrapping a synchronous method with `AsyncMock` makes the code `await` a mock that was never meant to be awaited, raising `TypeError` or producing an unexpected coroutine object.
+Detect: `TypeError: object MagicMock can't be used in await expression` at test runtime.
+Fix: use `MagicMock` for sync callables and `AsyncMock` for coroutines; check which the real method is before choosing.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/testcontainers]] · [[technical-qa/wiremock]] · [[technical-qa/flaky-test-management]] · [[qa/test-data-management]] · [[cs-fundamentals/clean-code]]

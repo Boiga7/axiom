@@ -10,9 +10,9 @@ tldr: Java is a compiled, statically typed language that runs on the JVM — wri
 
 # What is Java?
 
-Java is a compiled, statically typed programming language that runs on the Java Virtual Machine (JVM). You write `.java` files, compile them to `.class` bytecode, and the JVM executes that bytecode on any OS. One build, any machine — that's the "write once, run anywhere" promise.
+Java is a compiled, statically typed programming language that runs on the Java Virtual Machine (JVM). You write `.java` files, compile them to `.class` bytecode, and the JVM executes that bytecode on any OS. One build, any machine. That's the "write once, run anywhere" promise.
 
-Java is everywhere in enterprise — banking, insurance, telecoms, logistics, government. When you're integrating AI into an existing system, that system is often Java. That's why it's in this wiki.
+Java is everywhere in enterprise. Banking, insurance, telecoms, logistics, government. When you're integrating AI into an existing system, that system is often Java. That's why it's in this wiki.
 
 ---
 
@@ -102,7 +102,7 @@ tokenCounts.put("output", 300);
 
 ## Java 21 Matters for AI
 
-Java 21 (LTS, released 2023) introduced **virtual threads** — lightweight threads managed by the JVM, not the OS. This is significant for LLM work:
+Java 21 (LTS, released 2023) introduced **virtual threads**. Lightweight threads managed by the JVM, not the OS. This is significant for LLM work:
 
 ```java
 // Before Java 21: 100 LLM API calls = 100 OS threads (expensive)
@@ -120,7 +120,7 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 }
 ```
 
-Each LLM call blocks while waiting for the network response. With OS threads, 100 blocked threads means 100 OS threads pinned. With virtual threads, those 100 blocks are nearly free — the JVM schedules work around them.
+Each LLM call blocks while waiting for the network response. With OS threads, 100 blocked threads means 100 OS threads pinned. With virtual threads, those 100 blocks are nearly free. The JVM schedules work around them.
 
 ---
 
@@ -154,6 +154,23 @@ See [[java/build-tools]] for full setup with AI frameworks.
 - Maven central: Java's package registry (equivalent to PyPI); all AI SDKs publish there
 - Java compiles to `.class` files; JVM JIT compiles hot code paths to native at runtime
 - `record` type (Java 16+): immutable data class in one line — useful for structured LLM outputs
+
+## Common Failure Cases
+
+**Virtual thread pool is created inside a hot code path and never closed, leaking thread pool resources on each invocation**  
+Why: `Executors.newVirtualThreadPerTaskExecutor()` creates a new executor on each call; if the executor is not closed (via `try-with-resources`), submitted virtual threads remain alive until GC, and repeated invocations accumulate many open executors each holding references to pending tasks.  
+Detect: heap usage grows with each batch of LLM calls; `jstack` shows many virtual threads in a parked state with no active work; restarting the application clears the leak.  
+Fix: always wrap the executor in `try (var executor = Executors.newVirtualThreadPerTaskExecutor())` so `close()` is called on exit; if the executor needs to be shared, create it once at application startup and shut it down on application stop.
+
+**`record` type fields are not accessible from LangChain4j or Spring AI reflection-based extractors because they lack traditional getter methods**  
+Why: Java `record` components expose accessors named after the field (e.g., `sentiment()` not `getSentiment()`); some AI framework parsers use JavaBeans reflection conventions (`get*`) and fail to find the accessors, returning null for all fields.  
+Detect: structured output extraction returns an object where all fields are null despite correct JSON from the model; switching to a regular POJO class with `getSentiment()` methods fixes it.  
+Fix: check the framework's documentation for record support; for LangChain4j, records are supported from v0.32+; for Spring AI, add `@JsonProperty` annotations to record components to ensure Jackson can deserialise them.
+
+**`NullPointerException` occurs when accessing `System.getenv("ANTHROPIC_API_KEY")` because the variable is not set and Java returns null rather than an empty string**  
+Why: unlike Python's `os.environ.get("KEY", "")`, `System.getenv()` returns `null` for absent variables; passing null to the SDK's `.apiKey(null)` call either throws immediately or causes a null dereference later in the HTTP client.  
+Detect: the exception stacktrace points into the SDK's HTTP client setup, not the application code; the variable name is spelled correctly but was not exported in the shell session or CI environment.  
+Fix: use a null check: `Objects.requireNonNullElseThrow(System.getenv("ANTHROPIC_API_KEY"), () -> new IllegalStateException("ANTHROPIC_API_KEY not set"))`; set environment variables explicitly in CI workflow files rather than assuming they are inherited.
 
 ## Connections
 

@@ -215,5 +215,27 @@ class OrderSummaryHandler:
 
 ---
 
+## Common Failure Cases
+
+**ORM models leaked into the controller layer**
+Why: in layered architecture, returning raw SQLAlchemy model objects from service methods lets the HTTP layer depend on the persistence model, coupling all three layers together.
+Detect: controller code references ORM model attributes directly, or lazy-loaded relationships trigger database queries inside JSON serialisation.
+Fix: define explicit response schemas (Pydantic models or dataclasses) and map from ORM to schema inside the repository or service layer before the object crosses the boundary.
+
+**Hexagonal core importing framework code**
+Why: an import of `fastapi`, `sqlalchemy`, or `celery` inside `domain/` or `application/` violates the port/adapter boundary and makes the core untestable without the full stack.
+Detect: run `grep -r "import fastapi\|import sqlalchemy" domain/ application/`; any hit is a violation.
+Fix: move the dependency to an adapter, expose only a protocol/interface to the core, and inject the concrete implementation at the composition root.
+
+**Premature microservices extraction creating chatty services**
+Why: an application is split into services before domain boundaries are clear; services make multiple synchronous calls to each other per user request, adding network latency and failure points.
+Detect: distributed trace shows a single user request fanning out to 5+ downstream service calls in series.
+Fix: merge chatty services back into a modular monolith; only extract when a module has a clear bounded context, independent scaling needs, and a dedicated team.
+
+**Shared database between nominally independent services**
+Why: two services connect to the same database schema for convenience, creating invisible coupling; a schema migration by one service breaks the other.
+Detect: more than one service listed in the connection string for the same database host and schema.
+Fix: give each service its own schema or database; share data via events or API calls, not direct table access.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/ddd-se]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/clean-code]]

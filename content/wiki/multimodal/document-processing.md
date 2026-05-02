@@ -60,7 +60,7 @@ print(response.content[0].text)
 
 ## Files API for Large or Repeated Documents
 
-The Files API avoids re-encoding base64 on every call — upload once, reference by ID:
+The Files API avoids re-encoding base64 on every call. Upload once, reference by ID:
 
 ```python
 import anthropic
@@ -278,7 +278,7 @@ result = converter.convert("document.pdf")
 markdown = result.document.export_to_markdown()
 ```
 
-Docling handles complex layouts, tables, and figures better than raw PyMuPDF. Uses a local vision model — no API costs.
+Docling handles complex layouts, tables, and figures better than raw PyMuPDF. Uses a local vision model. No API costs.
 
 ---
 
@@ -304,6 +304,28 @@ Docling handles complex layouts, tables, and figures better than raw PyMuPDF. Us
 - Unstructured: handles 20+ file formats including scanned images; slower but broadest format coverage
 - Docling (IBM, 2024): best open-source document pipeline; handles complex layouts with a local vision model
 - OCR limit: Claude vision handles handwriting better than Tesseract; Tesseract is free and local but accuracy drops on non-standard text
+
+## Common Failure Cases
+
+**`json.loads(response.content[0].text)` raises `JSONDecodeError` when Claude includes a preamble before the JSON in its table extraction response**  
+Why: Claude occasionally prefixes structured output with an explanation like "Here are the tables I found:" before the JSON block; `json.loads` fails on any non-JSON prefix, even a single sentence.  
+Detect: `JSONDecodeError` occurs intermittently (10-20% of requests); printing `response.content[0].text` shows the JSON preceded by a natural language sentence.  
+Fix: extract JSON using a regex: `re.search(r'\{.*\}', text, re.DOTALL).group()`; or instruct the model explicitly: "Return only valid JSON, no preamble or explanation."
+
+**Files API `file_id` returns a 404 error because the file expired — Files API files are deleted after 30 days**  
+Why: the Anthropic Files API stores files for a maximum of 30 days; if an application caches `file_id` values in a database without tracking expiry, requests using old IDs fail after the file is automatically deleted.  
+Detect: requests that worked previously start returning `404 Not Found` for the file reference; the `created_at` timestamp on the file object is over 30 days old.  
+Fix: store `created_at` alongside `file_id` and re-upload when `created_at + 30 days < now()`; or call `client.beta.files.list()` at startup to validate which IDs are still valid.
+
+**PyMuPDF `page.find_tables()` returns empty results for a PDF that clearly contains tables because the tables are embedded as images**  
+Why: `find_tables()` uses structural heuristics to detect tables drawn with vector lines; tables that are screenshots or scanned images embedded in the PDF are invisible to this method, which only operates on text and drawing commands.  
+Detect: the PDF visually shows a table but `find_tables()` returns an empty list; opening the PDF in a text editor (or running `page.get_text()`) shows no text in the table region.  
+Fix: for image-embedded tables, use the direct Claude PDF approach (send the PDF as a document block) rather than PyMuPDF text extraction; Claude's vision handles image-embedded tables correctly.
+
+**Truncating the document text to 100,000 characters cuts in the middle of a sentence or a table row, corrupting the context sent to Claude**  
+Why: `text[:100_000]` slices at a byte offset without regard to word or sentence boundaries; the truncated text may end mid-word, mid-sentence, or mid-table-row, reducing extraction quality for the last visible content.  
+Detect: Claude's extraction for the last section of the document is incomplete or garbled; the truncation boundary falls inside a structured element (table row, numbered list item).  
+Fix: truncate at a paragraph boundary using `text[:100_000].rsplit('\n', 1)[0]`; or use PyMuPDF's page-by-page extraction to truncate at a page boundary instead of a character offset.
 
 ## Connections
 

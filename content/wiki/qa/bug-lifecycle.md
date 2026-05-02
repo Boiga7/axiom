@@ -120,20 +120,20 @@ Regular meeting (or async process) where new bugs are assessed:
 4. **Assignment** — which developer owns it?
 5. **Version/sprint** — target fix version
 
-Bugs that cannot be reproduced move to `Deferred` with label "cannot reproduce" — they're kept open so if another reporter hits the same issue, we reopen with additional context.
+Bugs that cannot be reproduced move to `Deferred` with label "cannot reproduce". They're kept open so if another reporter hits the same issue, we reopen with additional context.
 
 ---
 
 ## Reopening a Bug
 
-When `Retest` fails — the fix didn't resolve the issue, or introduced a regression:
+When `Retest` fails. The fix didn't resolve the issue, or introduced a regression:
 
 1. Add a new retest comment with: build version, retest steps, actual result
 2. Attach new evidence (screenshot, log)
 3. Change status back to `Reopened` (→ `Open`)
 4. Tag the original developer
 
-Do not close a bug without verifying it on the fixed build. "Fixed" means the developer believes it's fixed — "Closed" means QA confirmed it.
+Do not close a bug without verifying it on the fixed build. "Fixed" means the developer believes it's fixed. "Closed" means QA confirmed it.
 
 ---
 
@@ -184,6 +184,28 @@ Jira workflow mapping:
 Custom Jira fields to add: `Severity`, `Root Cause`, `Found in Version`, `Fixed in Version`, `Reproducibility`.
 
 ---
+
+## Common Failure Cases
+
+**Closing a bug without QA verification on the fixed build**
+Why: developers mark bugs Fixed based on local testing; the fix may not have been deployed to the environment QA uses, or the fix only addresses one reproduction path.
+Detect: reopen rate is above 15%, or bugs are found Closed without a retest comment from QA.
+Fix: enforce a workflow rule that only QA can transition a ticket from Fixed/Retest to Closed; require a retest comment with the build version and result.
+
+**Bug reports with vague steps that cannot be reproduced**
+Why: "it crashed when I clicked around" is not reproducible; developers cannot fix what they cannot reproduce, so the bug lingers or gets rejected.
+Detect: developers mark bugs as "Cannot Reproduce" and move them to Deferred more than once per sprint.
+Fix: require all bug reports to include exact reproduction steps, environment details, build version, and reproducibility rate before the ticket leaves New status; use the template in this page.
+
+**Severity and priority conflated, leading to wrong triage decisions**
+Why: when QA sets severity and priority to the same value reflexively, low-traffic critical data-loss bugs get deprioritised while highly visible cosmetic issues get P1 treatment.
+Detect: all Critical severity bugs are also P1 and all Low severity bugs are P4 — there are no severity/priority mismatches in the backlog.
+Fix: review severity and priority independently during triage; the product owner sets priority, QA sets severity, and the two dimensions are discussed explicitly for any mismatch.
+
+**"Cannot Reproduce" bugs closed instead of deferred**
+Why: a bug that cannot be reproduced today may be caused by an intermittent condition (race condition, environment state, data edge case) that will recur; closing it loses the history.
+Detect: the same symptoms appear in a new bug report weeks later with no link to the original.
+Fix: move unreproduce bugs to Deferred with a "Cannot Reproduce" label rather than closing them; link new reports with similar symptoms to the original on creation.
 
 ## Connections
 

@@ -246,6 +246,28 @@ async def test_error_responses_are_structured(client: httpx.AsyncClient) -> None
 
 ---
 
+## Common Failure Cases
+
+**Schemathesis generates requests that always hit auth failures, never testing the actual schema**
+Why: `schemathesis run` without `--auth` sends unauthenticated requests; every generated request returns 401 and schemathesis marks them as passing because 401 is a valid status code.
+Detect: run with `--checks response_schema_conformance`; if every single operation returns 401 and none return 200/422, authentication is not configured.
+Fix: pass `--auth "Bearer $TOKEN"` or configure auth via `schemathesis.auth` in the pytest plugin; verify at least one endpoint returns a 2xx in the schemathesis run output.
+
+**Hypothesis fuzz test finds a 500 but the payload is too complex to reproduce manually**
+Why: Hypothesis generates a minimised failing example, but the reproduction code path involves a multi-field interaction that isn't obvious from the printed output.
+Detect: the Hypothesis output shows a `@given` failing example but re-running the test with those exact values doesn't fail.
+Fix: add `@settings(database=ExampleDatabase(".hypothesis"))` to persist failing examples; run with `--hypothesis-seed` to fix the random seed and reproduce the exact sequence.
+
+**Schema drift CI check passes on every PR but catches nothing because it only runs happy-path requests**
+Why: the `check_schema_conformance` function sends minimal unauthenticated GET requests; endpoints requiring request bodies or path parameters return 4xx and are skipped as "not in schema".
+Detect: the drift check always completes with zero violations even after a developer renames a response field.
+Fix: build request fixtures from the OpenAPI `example` values for required parameters and provide auth headers; or use Schemathesis in CI which handles request construction automatically.
+
+**Version migration test `test_v2_rejects_legacy_field_names` is a false safety net**
+Why: the test asserts the v2 endpoint rejects `snake_case` with 422, but the actual migration risk is that v1 clients receive a 422 after accidentally being routed to v2 (e.g., after a misconfigured reverse proxy).
+Detect: running the v1 client payload against the v2 endpoint returns 422 in tests but goes undetected in production traffic until alerts fire.
+Fix: add a routing test that verifies v1 traffic stays on the v1 path end-to-end, not just that v2 rejects v1 fields in isolation.
+
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[technical-qa/api-testing]] · [[technical-qa/api-contract-testing]] · [[technical-qa/api-performance-testing]] · [[technical-qa/security-automation]] · [[qa/negative-testing]] · [[cs-fundamentals/api-versioning]]

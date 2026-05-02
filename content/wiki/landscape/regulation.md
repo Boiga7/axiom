@@ -12,7 +12,7 @@ tldr: AI regulation overview covering the EU AI Act (in force, phased to 2027), 
 
 > **TL;DR** AI regulation overview covering the EU AI Act (in force, phased to 2027), US EO 14110 and state laws, UK sector-based approach, and practical compliance checklist for teams building LLM products.
 
-The regulatory landscape every enterprise AI engineer needs to know. Laws are moving faster than most engineers realise — the EU AI Act is in force, US federal guidance is real, and state-level bills are proliferating.
+The regulatory landscape every enterprise AI engineer needs to know. Laws are moving faster than most engineers realise. The EU AI Act is in force, US federal guidance is real, and state-level bills are proliferating.
 
 ---
 
@@ -114,7 +114,7 @@ Not legally binding but effectively mandatory for federal procurement.
 | Illinois | AIIA | **Active** | AI in employment decisions |
 | New York | Local Law 144 | **Active** | Automated employment decision tools |
 
-SB 1047's failure was significant — it would have required safety testing and kill switches for large AI models. The AI industry lobbied heavily against it.
+SB 1047's failure was significant. It would have required safety testing and kill switches for large AI models. The AI industry lobbied heavily against it.
 
 ---
 

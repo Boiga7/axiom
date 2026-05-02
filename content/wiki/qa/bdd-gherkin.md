@@ -216,9 +216,31 @@ Each scenario must be independent. Use `Background` only for setup that every sc
 3. **Automation** — step definitions link Gherkin to implementation
 4. **Execution** — run in CI on every PR; failing scenario = failing acceptance criterion
 
-Scenarios should run in CI. A failing scenario is equivalent to a failing unit test — the PR cannot merge until the feature matches its acceptance criteria.
+Scenarios should run in CI. A failing scenario is equivalent to a failing unit test. The PR cannot merge until the feature matches its acceptance criteria.
 
 ---
+
+## Common Failure Cases
+
+**Scenarios written imperatively at UI interaction level**
+Why: steps that describe clicking and typing rather than user intent break every time the UI is restyled, and they communicate nothing about the business rule being tested.
+Detect: step definitions contain locators or UI element names (`click the button with ID "submit-btn"`); scenarios need updating after visual redesigns.
+Fix: rewrite steps at the intent level (`When I submit the order`); push all locator knowledge into step definitions and Page Objects.
+
+**Step definitions that grow into test logic dungeons**
+Why: without a clear boundary, business rules accumulate inside step definitions rather than being delegated to helper classes, making them impossible to reuse across scenarios.
+Detect: a single `@when` or `@then` function exceeds 30 lines or contains conditionals that branch on the scenario's data.
+Fix: step definitions should call domain helper functions; keep each step to under 10 lines of coordination code.
+
+**Scenarios with shared state via Background that every scenario doesn't actually need**
+Why: a Background block that seeds data for one scenario's happy path makes all other scenarios depend on state they don't need, introducing invisible coupling that causes random failures under parallel execution.
+Detect: removing a Background step causes an apparently unrelated scenario to fail.
+Fix: put shared setup only in Background if it genuinely applies to every scenario; use per-scenario fixtures for state that's specific to one or two cases.
+
+**Writing Gherkin without a Three Amigos session**
+Why: scenarios authored by QA alone capture QA's assumptions, not the product owner's intent or the developer's technical constraints; ambiguities survive until the step definition is written and the bug is already in the code.
+Detect: step definitions require significant interpretation beyond the scenario text, or developers reject scenarios as misrepresenting requirements during review.
+Fix: treat scenario authoring as a synchronous Three Amigos conversation, not an async handoff document.
 
 ## Connections
 

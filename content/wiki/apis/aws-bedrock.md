@@ -25,7 +25,7 @@ updated: 2026-05-02
 
 ## Converse API
 
-The recommended primary interface for all new Bedrock applications. Unified request format across all models — switch from Claude to Llama to Amazon Nova without changing call structure.
+The recommended primary interface for all new Bedrock applications. Unified request format across all models. Switch from Claude to Llama to Amazon Nova without changing call structure.
 
 ```python
 import boto3
@@ -135,7 +135,7 @@ models = bedrock.list_foundation_models()["modelSummaries"]
 
 ## Knowledge Bases
 
-Managed RAG service. AWS handles document ingestion (from S3), chunking, embedding, and vector storage. You query at runtime — no vector DB to maintain.
+Managed RAG service. AWS handles document ingestion (from S3), chunking, embedding, and vector storage. You query at runtime. No vector DB to maintain.
 
 ### Two Query Modes
 
@@ -315,7 +315,7 @@ Minimum permissions needed:
 }
 ```
 
-Use OIDC (GitHub Actions → AWS role assumption) — never embed AWS credentials in code.
+Use OIDC (GitHub Actions → AWS role assumption). Never embed AWS credentials in code.
 
 ---
 
@@ -338,9 +338,36 @@ Use OIDC (GitHub Actions → AWS role assumption) — never embed AWS credential
 
 ## Project Mantle (2026)
 
-AWS announced Project Mantle to allow teams using the OpenAI API format to run on Bedrock without code changes. Provides an OpenAI-compatible endpoint (`/v1/chat/completions`) backed by Bedrock models. Useful for migrating existing OpenAI-based applications. [unverified — check current availability]
+AWS announced Project Mantle to allow teams using the OpenAI API format to run on Bedrock without code changes. Provides an OpenAI-compatible endpoint (`/v1/chat/completions`) backed by Bedrock models. Useful for migrating existing OpenAI-based applications. [unverified. Check current availability]
 
 ---
+
+## Common Failure Cases
+
+**`botocore.exceptions.NoCredentialsError` in local dev after IAM role works in production**  
+Why: local dev uses no role assumption by default; the SDK looks for credentials in env vars, `~/.aws/credentials`, or instance metadata — none are present.  
+Detect: `NoCredentialsError: Unable to locate credentials` when running locally.  
+Fix: run `aws configure` with a dev IAM user; or set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` env vars; never use production credentials locally.
+
+**Converse API returns `ModelNotReadyException` for a newly requested model**  
+Why: Claude models on Bedrock require explicit enablement in the AWS console before use; they're not available by default.  
+Detect: `ValidationException: Access denied to model ... model access has not been enabled for this model`.  
+Fix: go to Bedrock → Model access → enable the specific model in each region you need it; enablement takes 1-5 minutes.
+
+**Knowledge Base `retrieve` returns empty results despite documents being ingested**  
+Why: the S3 sync job may still be in progress; or the document format isn't supported natively (e.g., password-protected PDFs).  
+Detect: `retrieve()` returns `retrievalResults: []`; check the Knowledge Base sync job status in the console.  
+Fix: wait for the ingestion job to reach `COMPLETE` status; check that documents are in supported formats (PDF, DOCX, TXT, HTML, CSV).
+
+**Guardrail blocks a legitimate request because a topic policy is too broad**  
+Why: topic policy definitions use LLM-based classification; overly broad definitions ("anything legal-related") block valid business questions.  
+Detect: user complaints about blocked requests that shouldn't be blocked; `guardrailAction: BLOCKED` in the trace response.  
+Fix: add negative examples to the topic policy (`examples` field); narrow the definition; use `trace: "enabled"` to inspect what triggered the block.
+
+**Converse API tool call loop fails when tool result is too large for the context**  
+Why: Bedrock has a per-message size limit; if a tool returns a large JSON response (>50KB), the follow-up Converse call raises a `ValidationException`.  
+Detect: `ValidationException: Input is too long` after a tool result is appended to the messages list.  
+Fix: truncate or summarise tool results before returning them to the model; use pagination for large tool outputs.
 
 ## Connections
 

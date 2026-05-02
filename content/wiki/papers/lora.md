@@ -18,9 +18,9 @@ tldr: Instead of fine-tuning all model weights, freeze the original weights and 
 
 ## What Problem It Solved
 
-Full fine-tuning a 175B model requires 175B parameter gradients in memory — impractical for most organisations. Previous approaches (adapters, prefix tuning) added latency at inference or reduced quality.
+Full fine-tuning a 175B model requires 175B parameter gradients in memory. Impractical for most organisations. Previous approaches (adapters, prefix tuning) added latency at inference or reduced quality.
 
-LoRA fine-tunes by injecting small trainable matrices that are mathematically equivalent to a low-rank update to the frozen weight matrices. At inference, the LoRA weights can be merged back into the original weights — **zero inference overhead**.
+LoRA fine-tunes by injecting small trainable matrices that are mathematically equivalent to a low-rank update to the frozen weight matrices. At inference, the LoRA weights can be merged back into the original weights. **zero inference overhead**.
 
 ---
 
@@ -68,7 +68,7 @@ At inference, merge the LoRA update into the base weights:
 ```
 W_merged = W₀ + BA
 ```
-The merged model is identical in structure to the base model. No adapter layers, no branching — same inference speed.
+The merged model is identical in structure to the base model. No adapter layers, no branching. Same inference speed.
 
 ### Applied to Attention Matrices
 

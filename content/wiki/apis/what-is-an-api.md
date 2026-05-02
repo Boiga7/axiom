@@ -10,9 +10,9 @@ tldr: An API is a contract that lets two pieces of software talk to each other w
 
 # What is an API?
 
-An API (Application Programming Interface) is a contract that lets two pieces of software talk to each other. You don't need to know how the other system works internally — you just need to know what to send and what you'll get back.
+An API (Application Programming Interface) is a contract that lets two pieces of software talk to each other. You don't need to know how the other system works internally. You just need to know what to send and what you'll get back.
 
-When you call Claude, you're using an API. You send a request (your prompt, model name, settings). The Anthropic servers process it and send a response (the generated text, token counts). You never see how Claude actually works — the API is the boundary.
+When you call Claude, you're using an API. You send a request (your prompt, model name, settings). The Anthropic servers process it and send a response (the generated text, token counts). You never see how Claude actually works. The API is the boundary.
 
 ---
 
@@ -30,7 +30,7 @@ You                       The API server
  │     (what you got back)      │
 ```
 
-In web APIs (the kind you'll use for AI), requests and responses travel over HTTP — the same protocol your browser uses to load web pages.
+In web APIs (the kind you'll use for AI), requests and responses travel over HTTP. The same protocol your browser uses to load web pages.
 
 ---
 
@@ -69,7 +69,7 @@ Web APIs use HTTP verbs to signal intent:
 | **PUT** | Replace something | Update your settings |
 | **DELETE** | Remove something | Delete a conversation |
 
-Most AI API calls use POST — you're submitting data to trigger work.
+Most AI API calls use POST. You're submitting data to trigger work.
 
 ---
 
@@ -120,7 +120,7 @@ Content-Type: application/json
 
 ## API Keys
 
-APIs need to know who you are — mostly so they can bill you and enforce rate limits. You prove identity with an **API key**: a long secret string that acts like a password for your account.
+APIs need to know who you are, mostly so they can bill you and enforce rate limits. You prove identity with an **API key**: a long secret string that acts like a password for your account.
 
 ```python
 # Never hard-code the key in your code
@@ -134,7 +134,7 @@ Keep API keys in environment variables, never in source code. If you commit a ke
 
 ## Rate Limits
 
-APIs limit how fast you can call them — to protect their servers and ensure fair access. You'll see limits like:
+APIs limit how fast you can call them. To protect their servers and ensure fair access. You'll see limits like:
 - **Requests per minute (RPM)**: how many calls you can make per minute
 - **Tokens per minute (TPM)**: total tokens (input + output) per minute
 
@@ -155,7 +155,7 @@ for attempt in range(5):
 
 ## REST vs Other Styles
 
-Most AI APIs are **REST** APIs — they use HTTP verbs and URLs to represent actions on resources. REST is the dominant style because it's simple and works everywhere.
+Most AI APIs are **REST** APIs. They use HTTP verbs and URLs to represent actions on resources. REST is the dominant style because it's simple and works everywhere.
 
 You may also encounter:
 - **GraphQL**: one endpoint, you specify exactly what data you want in the query (GitHub's API uses this)
@@ -174,6 +174,33 @@ For LLM APIs, REST + Server-Sent Events (SSE) for streaming is the standard patt
 - API keys authenticate you — treat them like passwords, store in environment variables
 - Rate limits are per account; 429 means slow down; use exponential backoff
 - REST is the dominant API style; most AI APIs are REST + SSE for streaming
+
+## Common Failure Cases
+
+**API key committed to source control and abused within minutes**  
+Why: developers test locally by hardcoding keys and accidentally commit them; automated scanners find them almost instantly.  
+Detect: receive an unexpected billing alert or see API usage you didn't make; GitHub sends a secret scanning alert.  
+Fix: rotate the key immediately in the provider's dashboard; use `git filter-repo` to scrub the history; move all keys to env vars or a secrets manager.
+
+**Requests hang indefinitely when the server doesn't respond**  
+Why: no timeout is set on the HTTP client; a stalled server leaves the connection open and the client waits forever.  
+Detect: the process hangs on an API call with no error; logs show no progress for >30 seconds.  
+Fix: always set `timeout` on HTTP clients (`httpx.Client(timeout=30.0)`); handle `httpx.TimeoutException` with a retry or fallback.
+
+**Exponential backoff retries hit the max before the rate limit window resets**  
+Why: the rate limit window is 60 seconds; with 3 retries at 1s/2s/4s, total wait is 7 seconds — too short.  
+Detect: all retries exhaust before the 429 window resets; the final retry still gets a 429.  
+Fix: read the `Retry-After` header from 429 responses; back off for at least that duration instead of using a fixed exponential schedule.
+
+**JSON body sent without `Content-Type: application/json` header causes 400 error**  
+Why: some API servers reject requests with JSON body but missing or wrong `Content-Type`.  
+Detect: `HTTP 400 Bad Request` or `415 Unsupported Media Type` when the body looks correct.  
+Fix: always set `Content-Type: application/json` in headers; most SDK clients do this automatically but raw `requests` calls sometimes forget.
+
+**Streaming SSE response parsed as a single chunk, missing intermediate tokens**  
+Why: `requests.get(...).text` buffers the entire response; for streaming endpoints the response is never complete until the stream ends.  
+Detect: no output appears until the full generation is complete; time-to-first-token is equal to total generation time.  
+Fix: use `stream=True` with `requests` and iterate `response.iter_lines()`; or use the provider SDK's streaming method.
 
 ## Connections
 

@@ -56,7 +56,7 @@ page.locator("div.btn-primary > span")  # CSS
 page.locator("//button[contains(@class,'submit')]")  # XPath
 ```
 
-Role-based locators mirror the accessibility tree. They survive visual redesigns and work with screen readers — two benefits in one.
+Role-based locators mirror the accessibility tree. They survive visual redesigns and work with screen readers. Two benefits in one.
 
 ---
 
@@ -83,7 +83,7 @@ export default defineConfig({
 
 **Success rate:** ~75% for locator failures (broken CSS/XPath). Does not fix logic failures or missing features.
 
-This is why mcpindex's flakefix concept was dropped — Playwright shipped the core value prop natively.
+This is why mcpindex's flakefix concept was dropped. Playwright shipped the core value prop natively.
 
 ---
 
@@ -150,7 +150,7 @@ async def test_chat():
 
 ## Network Mocking
 
-Intercept and mock API calls in tests — don't hit real LLM APIs in E2E tests (slow, expensive, non-deterministic):
+Intercept and mock API calls in tests. Don't hit real LLM APIs in E2E tests (slow, expensive, non-deterministic):
 
 ```typescript
 test("handles API error gracefully", async ({ page }) => {
@@ -212,7 +212,7 @@ The trace viewer shows: timeline, screenshots at each step, network requests, co
 
 ## MCP Server
 
-Playwright ships an official MCP server — enables LLM agents to browse the web:
+Playwright ships an official MCP server. Enables LLM agents to browse the web:
 
 ```bash
 claude mcp add playwright -- npx @playwright/mcp@latest
@@ -231,6 +231,28 @@ Claude Code (or any MCP host) can then control a browser, take screenshots, fill
 - Trace viewer: `trace: "on-first-retry"` in config; inspect via `npx playwright show-trace trace.zip`
 - MCP server install: `claude mcp add playwright -- npx @playwright/mcp@latest`
 - Playwright vs Selenium: auto-wait / trace viewer / Healer / MCP on Playwright; legacy suites / Java enterprise / IE on Selenium
+
+## Common Failure Cases
+
+**`getByRole("button", { name: "Submit" })` finds zero elements because the button uses an icon without accessible text**  
+Why: role-based locators query the accessibility tree; a button that contains only an SVG icon with no `aria-label` or visible text has no accessible name, so `getByRole` returns an empty match.  
+Detect: the locator throws `locator.click: Error: strict mode violation — 0 elements found`; inspecting the accessibility tree in DevTools shows the button has role `button` but name `""`.  
+Fix: add an `aria-label` to the icon button in the component (`<button aria-label="Submit">`); this fixes both the test and screen reader support simultaneously.
+
+**Healer agent opens a pull request with a wrong replacement locator because the DOM has multiple visually similar elements**  
+Why: Healer's LLM analyses the DOM snapshot and proposes the most likely match; in pages with repeated patterns (lists of cards, table rows), the model may match the wrong instance, producing a locator that passes on the first item but fails for the intended one.  
+Detect: the Healer-proposed PR makes the test pass locally but fails on a different test input; the locator targets index `[0]` instead of a unique identifying attribute.  
+Fix: review every Healer PR before merging; prefer `getByRole` with a unique `name` over index-based selectors; if the page lacks unique accessible names, add `data-testid` attributes.
+
+**`page.route("**/api/chat", ...)` mock is not applied because the request URL does not match the glob pattern**  
+Why: glob matching in `page.route` is case-sensitive and path-prefix dependent; if the Next.js dev server proxies the API under a different path or the test runs against a deployed URL with a subdirectory prefix, the pattern misses all requests.  
+Detect: network requests to `/api/chat` appear in the trace viewer as real HTTP calls, not intercepted; the mock handler's callback is never executed.  
+Fix: use `**/api/chat**` (double wildcard on both sides) or an exact URL; verify the intercept is active by asserting `expect(interceptedRequests).toHaveLength(1)` before the interaction.
+
+**Streaming LLM response causes `expect(...).toContainText(...)` to fail because the assertion runs before the stream completes**  
+Why: Playwright's auto-wait retries the assertion until the timeout, but if the streaming response appends tokens incrementally, the assertion may match a partial token that temporarily contains the expected substring and then disappear as more text is appended via a re-render.  
+Detect: the test passes intermittently; the failure screenshots show the final text present but the assertion reports mismatch; the timeout is 5 seconds but the stream takes 8 seconds.  
+Fix: increase the `timeout` to exceed the expected maximum stream duration; or wait for a done indicator element (`await expect(page.getByTestId("stream-complete")).toBeVisible()`) before asserting on the content.
 
 ## Connections
 

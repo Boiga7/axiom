@@ -10,7 +10,7 @@ tldr: Beyond `await` — task groups, cancellation, timeouts, and structured con
 
 # Advanced Async Patterns in Python
 
-Beyond `await` — task groups, cancellation, timeouts, and structured concurrency.
+Beyond `await`. Task groups, cancellation, timeouts, and structured concurrency.
 
 ---
 
@@ -260,6 +260,33 @@ async def update_analytics(event: Event) -> None:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Swallowing `CancelledError` and blocking clean shutdown**
+Why: catching `Exception` inside an async task catches `CancelledError` in Python 3.7, silently suppressing the cancellation signal and leaving tasks running after `TaskGroup` or timeout expects them to be done.
+Detect: `asyncio.TaskGroup` hangs indefinitely on exit; or `wait_for` raises `TimeoutError` but the underlying coroutine keeps running.
+Fix: always re-raise `CancelledError` — catch it only to clean up, then `raise`.
+
+**Using `asyncio.gather()` when one failure should cancel siblings**
+Why: by default `gather(return_exceptions=False)` propagates the first exception but does not cancel the other running coroutines, leaving them orphaned.
+Detect: orphaned tasks appear in `asyncio.all_tasks()` after an exception; resources (DB connections, file handles) are not released.
+Fix: switch to `asyncio.TaskGroup` (Python 3.11+), which cancels all siblings automatically on first failure.
+
+**Creating a `Semaphore` or `Lock` outside the running event loop**
+Why: asyncio synchronisation primitives capture the event loop at construction time; creating them at module import time (before `asyncio.run()`) attaches them to a different or non-existent loop.
+Detect: `RuntimeError: no running event loop` or `got Future attached to a different loop`.
+Fix: create `Semaphore` / `Lock` / `Queue` inside an `async` function or as an instance variable initialised on first use.
+
+**Blocking the event loop with a synchronous call**
+Why: any blocking I/O or CPU-heavy call (`requests.get`, `time.sleep`, heavy pandas operation) stalls the entire event loop for its duration, defeating the purpose of async.
+Detect: request latency spikes correlate with CPU usage; `asyncio` debug mode logs `Executing <Task>` taking longer than 100ms.
+Fix: use `await asyncio.to_thread(blocking_func)` (Python 3.9+) or `loop.run_in_executor(None, blocking_func)` to offload to a thread pool.
+
+**`RateLimiter` not working correctly across concurrent callers**
+Why: the `asyncio.Lock` serialises callers, but if two coroutines both acquire the lock and calculate `wait = interval - elapsed`, the second one measures elapsed time from when the first *released* the lock, not from when it made its call, so bursts can still exceed the target rate.
+Detect: actual call rate measured externally exceeds the configured `calls_per_second` under concurrency.
+Fix: record `_last_call` *before* releasing the lock and calculate the next permitted time as an absolute timestamp, not a relative elapsed window.
 
 ## Connections
 

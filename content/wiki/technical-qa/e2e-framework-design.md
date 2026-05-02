@@ -10,7 +10,7 @@ tldr: Architecting a maintainable E2E test framework — the code behind the tes
 
 # E2E Framework Design
 
-Architecting a maintainable E2E test framework — the code behind the tests.
+Architecting a maintainable E2E test framework. The code behind the tests.
 
 ---
 
@@ -265,6 +265,33 @@ Framework anti-patterns:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Layer violation — tests reach through the abstraction**
+Why: tests import page object internals or directly call `page.locator()` when page objects exist, coupling tests to DOM structure.
+Detect: grep the test layer for `page.locator`, `page.fill`, or CSS selectors that should live in layer 1 or 2.
+Fix: move every selector and low-level interaction into the appropriate page object or component object.
+
+**Over-abstracted journey for a one-off flow**
+Why: developers journey-ise a flow used in only one test file, adding indirection with no reuse benefit.
+Detect: a journey class referenced from exactly one test file.
+Fix: inline the flow back into the test or a simple helper function.
+
+**Shared user state across parallel test files**
+Why: fixtures use a single hardcoded test account, so two parallel workers overwrite each other's session or cart state.
+Detect: tests pass in serial but fail intermittently under `-n auto`; failure messages reference wrong data.
+Fix: create per-test or per-worker user accounts via the API fixture at the appropriate scope.
+
+**Locators instantiated at import time instead of call time**
+Why: page object locators stored as attributes before `page.goto()` is called can resolve against the wrong DOM or throw if the context is not ready.
+Detect: `TimeoutError` on the first interaction of a test that looks like it should work.
+Fix: store the locator references in `__init__` after calling `goto`, or use lazy property evaluation.
+
+**Page object navigates to a different page on action**
+Why: `place_order()` returns a new page object by importing it internally, tightly coupling two page objects.
+Detect: cross-file circular imports, or refactoring one page requiring changes in unrelated pages.
+Fix: return only the new page object from the method; the caller owns navigation logic, not the current page.
 
 ## Connections
 

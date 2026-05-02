@@ -10,7 +10,7 @@ tldr: Evaluating a product by testing it with real users to find where the inter
 
 # Usability Testing
 
-Evaluating a product by testing it with real users to find where the interface confuses, frustrates, or fails them. Distinct from functional testing — you're testing whether the product can be used effectively, not whether it works correctly.
+Evaluating a product by testing it with real users to find where the interface confuses, frustrates, or fails them. Distinct from functional testing. You're testing whether the product can be used effectively, not whether it works correctly.
 
 ---
 
@@ -202,6 +202,28 @@ async def checkout_page(user: User):
 ```
 
 ---
+
+## Common Failure Cases
+
+**SUS score calculated incorrectly because odd/even indexing is off-by-one**
+Why: the standard SUS formula uses 1-based question numbering (odd questions are positive, even are negative), but a 0-indexed implementation reverses this for every question, producing a score that is systematically wrong.
+Detect: test `calculate_sus([5,1,5,1,5,1,5,1,5,1])` — the expected score is 100; if it returns 0 the odd/even logic is inverted.
+Fix: use the explicit formula: for questions at 0-indexed positions 0, 2, 4, 6, 8 (1-based odd) apply `response - 1`; for positions 1, 3, 5, 7, 9 (1-based even) apply `5 - response`; add a unit test for the known boundary cases (all 5s = 100, all 1s = 0).
+
+**A/B test declares a winner before reaching statistical significance**
+Why: the team checks conversion rates after 3 days and declares the green button a winner at 60% vs 55%, not realising the p-value is 0.3 with a sample size of 200.
+Detect: the experiment was ended with fewer participants than the pre-calculated sample size required for 80% power at the minimum detectable effect.
+Fix: calculate required sample size before launching the experiment (`scipy.stats.tt_ind_solve_power`); block the "declare winner" action in the feature flag tool until the minimum participant count and p < 0.05 are both met.
+
+**Moderated usability session moderator helps participants, contaminating results**
+Why: the moderator answers "click the blue button" when a participant hesitates for 30 seconds because they feel uncomfortable watching someone struggle.
+Detect: session recordings show the moderator speaking during task execution; participant success rate is unusually high (>95%) compared to unmoderated benchmarks for the same flow.
+Fix: set a strict non-intervention rule with a 3-minute silence threshold before any prompt; if a participant is completely blocked, ask "what would you try next?" rather than pointing at the answer.
+
+**Unmoderated test task descriptions are leading, skewing completion rates upward**
+Why: task wording like "use the search bar to find Widget Pro" tells participants which UI element to use, making the task easier than real-world usage and inflating completion rates.
+Detect: compare completion rates between moderated and unmoderated sessions — if unmoderated rates are 20+ points higher, the task wording is likely leading.
+Fix: write tasks as goal-based scenarios ("find a product called Widget Pro and add it to your cart") without naming UI elements; pilot the wording with 2 internal users before the main run.
 
 ## Connections
 [[qa-hub]] · [[qa/exploratory-testing]] · [[qa/non-functional-testing]] · [[qa/accessibility-testing]] · [[qa/uat]] · [[qa/test-strategy]]

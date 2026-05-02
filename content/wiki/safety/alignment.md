@@ -47,7 +47,7 @@ If a model passes ASL-3 evaluations, Anthropic commits to either deploy with add
 
 ### Constitutional AI
 
-See [[safety/constitutional-ai]] — the training methodology that produces Claude's harmlessness.
+See [[safety/constitutional-ai]]. The training methodology that produces Claude's harmlessness.
 
 ### Mechanistic Interpretability
 
@@ -100,7 +100,7 @@ Using mechanistic interpretability findings to build safety tools: feature-based
 
 ## Safety vs Helpfulness Trade-off
 
-Overtly safe models are less useful. Overly helpful models are more dangerous. Anthropic's thesis: this is mostly a false trade-off at the frontier — a well-designed AI can be both helpful and safe. Evidence: Claude scores high on both helpfulness benchmarks and safety evaluations.
+Overtly safe models are less useful. Overly helpful models are more dangerous. Anthropic's thesis: this is mostly a false trade-off at the frontier. A well-designed AI can be both helpful and safe. Evidence: Claude scores high on both helpfulness benchmarks and safety evaluations.
 
 The real tension is at the edge cases: requests with both legitimate and illegitimate uses. Claude handles this by considering the full population of people likely to ask a given question.
 

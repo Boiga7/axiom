@@ -230,6 +230,28 @@ tg = elbv2.ApplicationTargetGroup(self, "TG",
 
 ---
 
+## Common Failure Cases
+
+**Targets flap between healthy and unhealthy causing intermittent 502s**
+Why: the health check `timeout` is equal to or greater than the `interval`, so a slow response to one check immediately starts the next check cycle before the TCP connection closes, producing false failures.
+Detect: ALB access logs show 502s with no corresponding application errors; the target group console shows targets cycling between healthy/unhealthy every few intervals.
+Fix: ensure `timeout` is strictly less than `interval` (e.g., timeout=5s, interval=30s); also verify the health check path returns 200 within the timeout under normal load.
+
+**Blue-green cutover causes a surge of 502s during deregistration**
+Why: the `deregistration_delay` is shorter than the p99 request duration, so in-flight long-running requests are cut off when the old target is deregistered before they complete.
+Detect: 502 spike in ALB access logs immediately after the target group swap; the spike duration matches the configured deregistration delay.
+Fix: set `deregistration_delay` to at least 2× the p99 request duration; for long-polling or streaming endpoints, consider per-endpoint drain logic rather than relying solely on the deregistration delay.
+
+**Weighted canary routing does not distribute traffic proportionally at low request rates**
+Why: ALB sticky sessions are enabled on the target group and existing clients are pinned to the stable target group, so new traffic weight settings do not apply to returning clients.
+Detect: traffic distribution in ALB access logs shows nearly all requests going to one target group despite a 90/10 weight; the discrepancy disappears for brand-new clients.
+Fix: disable sticky sessions for target groups participating in weighted canary routing, or factor in the sticky session duration when evaluating canary metrics.
+
+**Global Accelerator health check marks a region unhealthy too aggressively**
+Why: Global Accelerator uses its own health checks independent of the ALB, with a default threshold of 3 failures at 30s intervals; a brief regional hiccup triggers failover before the incident is confirmed.
+Detect: Global Accelerator console shows a region going unhealthy and traffic shifting to the secondary region during what was a transient event.
+Fix: increase `ThresholdCount` in the endpoint group health check configuration to 5, and confirm health check ports and paths match the ALB listener configuration exactly.
+
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-ecs]] · [[cloud/kubernetes]] · [[cloud/blue-green-deployment]] · [[cloud/aws-api-gateway]] · [[cloud/cloud-networking]]

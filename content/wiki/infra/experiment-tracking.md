@@ -10,7 +10,7 @@ tldr: "Logging and comparing ML training runs. Distinct from production LLM obse
 
 # Experiment Tracking
 
-Logging and comparing ML training runs. Distinct from production LLM observability (see [[observability/platforms]]): experiment tracking is for the training phase — comparing hyperparameter runs, catching overfitting, reproducing results.
+Logging and comparing ML training runs. Distinct from production LLM observability (see [[observability/platforms]]): experiment tracking is for the training phase. Comparing hyperparameter runs, catching overfitting, reproducing results.
 
 The two dominant tools: **Weights & Biases (W&B)** (industry standard, richer UX) and **MLflow** (open-source, self-hostable).
 
@@ -217,6 +217,33 @@ config = {
 Metrics to log every N steps: `train/loss`, `eval/loss`, `learning_rate`, `grad_norm`.
 
 ---
+
+## Common Failure Cases
+
+**W&B run starts but logs nothing because `WANDB_API_KEY` is not set in the training container**  
+Why: the API key is set locally but not passed to the Docker container or CI job environment.  
+Detect: W&B silently creates an offline run; metrics appear in local `wandb/` directory but not on wandb.ai.  
+Fix: pass `WANDB_API_KEY` as an environment variable to the container; set it as a GitHub Actions secret for CI training jobs.
+
+**MLflow `log_artifact` fails silently when the path doesn't exist**  
+Why: `log_artifact("./output/checkpoint")` quietly succeeds without validating the path; if training failed before saving the checkpoint, nothing is uploaded.  
+Detect: MLflow run shows no artifacts; checkpoint directory is empty or absent.  
+Fix: verify the artifact path exists before calling `log_artifact`; add an assertion or raise an explicit error if the checkpoint is missing.
+
+**Two concurrent training jobs corrupt each other's W&B run**  
+Why: `wandb.init()` called without `name` or `id` generates a random run ID; if two jobs share the same project and one resumes the wrong run, metrics are interleaved.  
+Detect: W&B run shows step numbers that are non-monotonic or jump unexpectedly.  
+Fix: set a deterministic `name` tied to the experiment config hash; use `resume="allow"` only when intentionally resuming a specific run.
+
+**Hyperparameter sweep logs incorrect `eval/loss` because evaluation runs less frequently**  
+Why: `evaluation_strategy="epoch"` logs eval loss once per epoch, but `logging_steps=10` logs train loss every 10 steps; the sweep's metric `eval/loss` has fewer data points and a slower update rate.  
+Detect: sweep convergence looks artificially slow; eval loss curve is flat between epochs.  
+Fix: use `evaluation_strategy="steps"` with `eval_steps` matching `logging_steps` for sweep runs; ensures the sweep metric is updated regularly.
+
+**MLflow model registry promotion silently fails under concurrent promotion requests**  
+Why: two CI jobs promoting different versions to "Production" at the same time may leave the registry in an inconsistent state.  
+Detect: `get_latest_versions(stage="Production")` returns two models; or the "Production" model is the wrong version.  
+Fix: serialize promotion through a deployment job that checks current production before promoting; add a mutex or use compare-and-swap via the MLflow REST API.
 
 ## Connections
 

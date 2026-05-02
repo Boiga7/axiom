@@ -12,7 +12,7 @@ tldr: Test the plumbing, not the model — use respx to mock the Anthropic SDK's
 
 > **TL;DR** Test the plumbing, not the model — use respx to mock the Anthropic SDK's HTTP calls at zero cost, test RAG retrieval and prompt assembly independently, verify agent loop termination and max_steps enforcement, and never use a real API key in CI.
 
-The hardest part of testing AI features is that the LLM itself is non-deterministic and expensive. The discipline is: **test the plumbing, not the model**. Your job is to verify that your application correctly handles inputs, routes requests, parses outputs, and manages state — not to re-evaluate the LLM on every test run. Evals (see [[evals/methodology]]) handle model quality separately from the test suite.
+The hardest part of testing AI features is that the LLM itself is non-deterministic and expensive. The discipline is: **test the plumbing, not the model**. Your job is to verify that your application correctly handles inputs, routes requests, parses outputs, and manages state. Not to re-evaluate the LLM on every test run. Evals (see [[evals/methodology]]) handle model quality separately from the test suite.
 
 ---
 
@@ -194,7 +194,7 @@ def test_retrieval_on_empty_store():
 
 ### Test Prompt Assembly
 
-The prompt builder is pure logic — test it without any API call:
+The prompt builder is pure logic. Test it without any API call:
 
 ```python
 def test_rag_prompt_includes_context():
@@ -315,7 +315,7 @@ def test_tool_result_formatted_correctly():
 
 ## Testing Streaming Responses
 
-Streaming is pure plumbing — test that your consumer handles chunks correctly.
+Streaming is pure plumbing. Test that your consumer handles chunks correctly.
 
 ```python
 def fake_stream_chunks(texts: list[str]):
@@ -351,7 +351,7 @@ def test_stream_consumer_yields_chunks_incrementally():
 
 ## Testing Structured Outputs
 
-If your code parses the LLM's JSON output, test the parsing logic with fixed inputs — never trust the model to always produce valid JSON in tests.
+If your code parses the LLM's JSON output, test the parsing logic with fixed inputs. Never trust the model to always produce valid JSON in tests.
 
 ```python
 import pytest
@@ -470,7 +470,7 @@ jobs:
       - run: uv run pytest tests/ -x --tb=short
 ```
 
-Key rule: **never use a real API key in CI**. If a test requires a real key, it's an eval, not a unit test — run it in a separate job gated on main branch only.
+Key rule: **never use a real API key in CI**. If a test requires a real key, it's an eval, not a unit test. Run it in a separate job gated on main branch only.
 
 ---
 
@@ -498,6 +498,28 @@ Test that your code correctly calls the API, handles the response, routes based 
 - CI rule: `ANTHROPIC_API_KEY: "sk-test-fake-key"` in environment; any test requiring a real key is an eval, not a unit test
 - Hypothesis `@given(st.text(...))` for prompt builders: finds edge cases (empty string, 10K chars, unicode) automatically
 - `asyncio_mode = "auto"` in pyproject.toml removes need for `@pytest.mark.asyncio` on every async test
+
+## Common Failure Cases
+
+**`respx.mock` is active but the Anthropic SDK bypasses it because the SDK uses its own `httpx.Client` instance created before the mock context**  
+Why: `respx.mock` patches the default `httpx` transport at the module level; if the Anthropic client is instantiated at module import time (as a global), the client's internal transport is bound before `respx.mock` can intercept it.  
+Detect: the test raises `ConnectionError: All connection attempts failed` even with `respx.mock` active; removing the global client and constructing it inside the test or fixture fixes the error.  
+Fix: never instantiate `anthropic.AsyncAnthropic()` at module level in application code that will be tested; construct clients inside functions or use dependency injection so the fixture controls the client's lifetime.
+
+**The mock tool-use fixture returns `MOCK_TOOL_USE_RESPONSE` on every call, causing the agent loop to never terminate**  
+Why: a stateless mock returns the same tool-use response on every API call; an agent loop that checks `stop_reason == "end_turn"` never sees it and loops indefinitely until `max_steps` is exceeded or the test times out.  
+Detect: the test hangs for the full pytest timeout duration; adding a call count assertion shows the mock was called far more than `expected_steps` times.  
+Fix: use a stateful counter (as shown in the tool-use fixture pattern) that returns `MOCK_TOOL_USE_RESPONSE` on call 1 and `MOCK_FINAL_RESPONSE` on call 2+; always assert on `mock.calls.call_count` to verify the loop terminated at the expected step.
+
+**RAG retrieval test passes in isolation but fails in CI because the vector store fixture is `scope="session"` and seeded data persists between tests**  
+Why: a session-scoped vector store fixture that inserts documents on setup does not clean up between tests; a test that deletes documents or runs a destructive query leaves the store in a modified state for subsequent tests, causing ordering-dependent failures.  
+Detect: the retrieval test passes when run alone (`pytest tests/test_rag.py::test_retrieval`) but fails in full suite runs; the failure shows fewer documents returned than expected.  
+Fix: use `scope="function"` for vector store fixtures that tests mutate; or add explicit teardown that deletes all seeded documents after `yield`; reserve session scope for read-only fixtures.
+
+**`test_agent_respects_max_steps` does not actually verify termination because the agent swallows the `MaxStepsError` and returns `None`**  
+Why: if the agent catches all exceptions and returns `None` on failure, the test assertion `assert result is not None` passes even when the loop exited abnormally; the test verifies the mock call count but not the agent's reported outcome.  
+Detect: changing `max_steps=3` to `max_steps=1` still makes the test pass; the assertion is too weak to distinguish graceful termination from error swallowing.  
+Fix: assert on the specific return value or exception type — either `assert "Max steps" in result` or `with pytest.raises(MaxStepsError)` depending on the desired contract; never accept `result is not None` as proof of correct termination.
 
 ## Connections
 

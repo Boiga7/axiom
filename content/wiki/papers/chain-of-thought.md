@@ -20,7 +20,7 @@ tldr: Adding intermediate reasoning steps to few-shot examples — "chain-of-tho
 
 Standard few-shot prompting (input → output, no intermediate steps) fails on tasks requiring multi-step reasoning: maths word problems, symbolic reasoning, commonsense inference. The model jumps to the answer without the steps and gets them wrong.
 
-Chain-of-thought provides a mechanism for the model to "show its work" — decomposing complex problems into intermediate steps that are individually simpler.
+Chain-of-thought provides a mechanism for the model to "show its work". Decomposing complex problems into intermediate steps that are individually simpler.
 
 ---
 
@@ -51,7 +51,7 @@ The reasoning chain is part of the prompt context. The model learns the *format*
 
 Chain-of-thought produced almost no improvement on models below ~50B parameters. At ~100B parameters (PaLM 540B, GPT-3 175B), performance on GSM8K (grade school math) jumped dramatically.
 
-This was one of the early demonstrations of **emergent abilities** — capabilities that appear suddenly at scale.
+This was one of the early demonstrations of **emergent abilities**. Capabilities that appear suddenly at scale.
 
 ### 2. Outperforms Fine-Tuning at Scale
 

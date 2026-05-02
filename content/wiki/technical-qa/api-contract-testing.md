@@ -236,5 +236,27 @@ Still need:
 
 ---
 
+## Common Failure Cases
+
+**Provider state setup is missing or wrong, causing all verifications to fail**
+Why: the provider verifier calls the `provider_states_setup_url` endpoint before each interaction, and if that endpoint does not seed the exact data the contract expects, the API returns 404/500 instead of the expected response.
+Detect: pact verification logs show the correct request was made but the response status doesn't match — check the provider state endpoint's database insert logic.
+Fix: add a dedicated test that calls the provider state endpoint directly and asserts the expected database row exists before running full pact verification.
+
+**Consumer uses exact-value assertions instead of matchers, causing contracts to break on irrelevant data changes**
+Why: hardcoding `"id": 123` instead of `Like(123)` means the contract fails whenever the provider's test data changes, not when the structure changes.
+Detect: verification failures correlate with test data updates on the provider side rather than API shape changes.
+Fix: replace exact values with Pact matchers (`Like`, `EachLike`, `Term`) for any field that isn't a literal contract requirement (status codes and enum values are fine as exact matches).
+
+**`can-i-deploy` blocks a deploy even though the relevant pact was already verified**
+Why: the pacticipant version tag in the broker doesn't match the `--version` flag used during verification, so the broker has no verification record for that exact version.
+Detect: `pact-broker can-i-deploy` returns "no results" rather than "failed" — the version exists but has no verification results attached.
+Fix: ensure `--provider-version` in the verification step uses the same `$GIT_SHA` that `can-i-deploy --version` will query; never use branch names as versions.
+
+**Message contract test passes but the real Kafka consumer fails**
+Why: the message pact test exercises the handler with an in-memory message object, but the production consumer uses a Kafka deserializer that applies different null handling or type coercion.
+Detect: pact verification passes; production consumer throws a deserialization error on the first real message.
+Fix: in the provider message pact setup, produce messages through the same serializer the production Kafka producer uses rather than constructing plain dicts.
+
 ## Connections
 [[tqa-hub]] · [[technical-qa/wiremock]] · [[technical-qa/ci-cd-quality-gates]] · [[cs-fundamentals/microservices-patterns]] · [[qa/qa-in-devops]] · [[cs-fundamentals/event-driven-architecture]]

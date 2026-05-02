@@ -274,6 +274,33 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 ---
 
+## Common Failure Cases
+
+**BOLA: ownership not checked on every request**
+Why: authentication middleware verifies identity but route handlers query by resource ID without filtering to the current user, so any authenticated user can access any record.
+Detect: security test — log in as user A, capture a resource ID belonging to user B, and request it; if it succeeds, BOLA is present.
+Fix: always include `user_id = current_user.id` in the DB filter, not just an existence check.
+
+**JWT algorithm confusion (alg:none or RS256/HS256 confusion)**
+Why: if the server accepts any algorithm named in the token header, an attacker can forge tokens using `alg:none` or sign an RS256 token with the public key as an HS256 secret.
+Detect: review whether `jwt.decode` specifies an explicit `algorithms=["HS256"]` allowlist, or accepts the algorithm from the header.
+Fix: always pass `algorithms=[EXPECTED_ALGORITHM]` to the decode call; never allow `none`.
+
+**Rate limiting applied per-IP but not per-authenticated-user**
+Why: IP-based limits are trivially bypassed via rotating proxies; a single attacker with many IPs can brute-force credentials or drain quotas.
+Detect: attempt login 100 times from different IPs against the same account; if all succeed without blocking, the control is IP-only.
+Fix: add a per-user-id (or per-email) rate limit as a second layer alongside the IP limit.
+
+**CORS wildcard left in production**
+Why: `allow_origins=["*"]` is set during development and never tightened; combined with `allow_credentials=True` this allows any origin to make credentialed cross-site requests.
+Detect: inspect the `Access-Control-Allow-Origin` response header from a production request.
+Fix: replace the wildcard with an explicit allowlist; note that `allow_credentials=True` and `allow_origins=["*"]` together is a CORS spec violation that browsers block anyway — but the intent is still dangerous.
+
+**Stack traces exposed in production error responses**
+Why: framework debug mode is left enabled, or exception handlers are not overridden, so internal paths, library versions, and SQL queries leak in 500 responses.
+Detect: send a malformed request and inspect the response body for file paths or tracebacks.
+Fix: set `debug=False` in production config and add a global exception handler that returns a generic error message without internal detail.
+
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/security-fundamentals-se]] · [[security/owasp-llm-top10]] · [[cs-fundamentals/api-versioning]] · [[cloud/cloud-security]]

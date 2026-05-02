@@ -180,6 +180,23 @@ response = client.chat.completions.create(
 - DeepSeek V3: 671B MoE, $5.6M claimed training cost; competitive with GPT-4o and Claude Sonnet
 - Cohere Command R+: 104B, purpose-built for enterprise RAG with built-in citation support
 
+## Common Failure Cases
+
+**Selecting a model by parameter count instead of benchmark score leads to a quality regression when switching providers**  
+Why: a "70B" Llama model and a "70B" Qwen model are not interchangeable; the same parameter count yields very different capability levels depending on training data, training compute, and alignment tuning; comparing benchmarks (SWE-bench, MMLU) is the correct selection criterion.  
+Detect: after switching from one model family to another at the same parameter tier, output quality degrades measurably on your eval set despite the same apparent size.  
+Fix: always compare models on a task-specific eval subset before switching; treat parameter count as hardware cost guidance, not quality guidance.
+
+**Using `deepseek-reasoner` (DeepSeek R1) in production without streaming causes multi-minute hangs because R1's extended chain-of-thought reasoning is silently included in `max_tokens`**  
+Why: DeepSeek R1 emits internal reasoning tokens before the final answer; if `max_tokens` is set for the expected output length only, the model may run out of token budget mid-reasoning and return an empty or truncated final answer; without streaming, the entire timeout plays out before returning.  
+Detect: requests to `deepseek-reasoner` time out or return partial responses; reducing `max_tokens` makes it worse; the model's response appears to start mid-sentence.  
+Fix: set `max_tokens` to include both the reasoning trace length and the expected answer length; use streaming to see reasoning tokens as they arrive; or use DeepSeek V3 (non-reasoning) when the reasoning trace is not needed.
+
+**Llama 3.1 405B deployed locally causes out-of-memory errors because the full BF16 weights require ~810GB VRAM**  
+Why: 405B parameters × 2 bytes (BF16) = ~810GB; a single A100 80GB has insufficient VRAM; even 8× A100 (640GB) is not enough; only tensor parallelism across 10+ GPUs or INT8 quantisation (405GB) makes local deployment feasible.  
+Detect: the model fails to load with `CUDA out of memory`; `nvidia-smi` shows VRAM usage near capacity even before any inference.  
+Fix: use INT8 or INT4 quantisation via `bitsandbytes` or GGUF quantisation via `llama.cpp`; or use the API rather than self-hosting for 405B-scale models.
+
 ## Connections
 
 - [[llms/claude]] — Claude family in depth

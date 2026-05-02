@@ -234,5 +234,27 @@ deny contains msg if {
 
 ---
 
+## Common Failure Cases
+
+**Terratest resources left orphaned after a test panic**
+Why: when `terraform.InitAndApply` succeeds but the test panics before `defer terraform.Destroy` runs, real cloud resources are created and never cleaned up, incurring cost and hitting quotas.
+Detect: manual audit of the test account shows resources tagged `environment=test` that have no corresponding active test run.
+Fix: always use `defer terraform.Destroy` as the first statement after `InitAndApply`, and set up a nightly cleanup Lambda or scheduled job to delete stale test resources by tag.
+
+**Checkov false negatives from dynamic references**
+Why: Checkov's static analysis cannot resolve Terraform `var.*` or `data.*` references, so a resource that looks unconfigured at scan time is actually correct at plan time.
+Detect: Checkov reports a failing check for a resource that is correctly configured when you examine the actual plan.
+Fix: combine Checkov static analysis with OPA policies that evaluate the `terraform plan -json` output, which has all references resolved.
+
+**`terraform validate` passes but `terraform plan` fails in CI**
+Why: `validate` only checks syntax and schema; plan requires provider credentials and may fail on missing IAM permissions, missing remote state backends, or quota limits.
+Detect: CI pipeline passes the validate step but the apply step fails with an authentication or resource error.
+Fix: add a `terraform plan -detailed-exitcode` step in CI after validate, using appropriately scoped credentials with read-only access to the state backend.
+
+**OPA policy input schema mismatch after Terraform version upgrade**
+Why: `terraform show -json` output structure changes between major Terraform versions, so OPA rules that reference `input.resource_changes[_].change.after` may silently skip evaluations on the new schema.
+Detect: OPA `deny` rules return no violations even for clearly non-compliant plans after a Terraform upgrade.
+Fix: pin the OPA policy input schema with a unit test that asserts the expected keys are present in a known-bad plan fixture.
+
 ## Connections
 [[tqa-hub]] · [[technical-qa/security-automation]] · [[technical-qa/chaos-engineering]] · [[cloud/gitops-patterns]] · [[cloud/platform-engineering]] · [[cloud/cloud-security]]

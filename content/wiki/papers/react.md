@@ -18,9 +18,9 @@ tldr: Interleave chain-of-thought reasoning with tool-use actions in a single ge
 
 ## What Problem It Solved
 
-Chain-of-thought reasoning is purely internal — the model can only use information in its context and weights. This fails for tasks requiring up-to-date information, multi-step lookups, or external computation.
+Chain-of-thought reasoning is purely internal. The model can only use information in its context and weights. This fails for tasks requiring up-to-date information, multi-step lookups, or external computation.
 
-Separately, "acting" approaches (letting models call APIs) had no reasoning trace — the model would blindly call tools without deliberation, making it hard to understand or debug.
+Separately, "acting" approaches (letting models call APIs) had no reasoning trace. The model would blindly call tools without deliberation, making it hard to understand or debug.
 
 ReAct combines reasoning and acting: the model produces a trajectory of (Thought → Action → Observation) triplets, grounding its reasoning in real retrieved information.
 
@@ -57,7 +57,7 @@ With both: the model can recover from errors, revise plans, and produce interpre
 
 ### 2. Human-Interpretable Trajectories
 
-Every step of reasoning is visible. When a ReAct agent fails, you can read the thought chain and see exactly where it went wrong — unlike black-box tool-use approaches.
+Every step of reasoning is visible. When a ReAct agent fails, you can read the thought chain and see exactly where it went wrong. Unlike black-box tool-use approaches.
 
 ### 3. Outperforms Pure CoT and Pure Acting
 

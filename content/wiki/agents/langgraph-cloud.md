@@ -162,6 +162,33 @@ Don't need it when:
 > [Source: LangGraph Platform GA announcement, LangChain Blog, 2025]
 > [Source: LangGraph 1.0 release notes, October 2025]
 
+## Common Failure Cases
+
+**Agent checkpoint size grows unboundedly, slowing Postgres queries**  
+Why: every graph node execution writes a full state snapshot; if the state dict contains large blobs (retrieved documents, image bytes), checkpoint rows become multi-MB.  
+Detect: Postgres `pg_relation_size('checkpoints')` grows faster than expected; checkpoint writes exceed 100ms.  
+Fix: exclude large blobs from the state TypedDict; store large artifacts in S3 and keep only their URIs in state.
+
+**LangGraph Studio shows incorrect graph topology for dynamic edges**  
+Why: Studio renders the graph statically from the compiled structure; conditional edges that depend on runtime state are shown as static paths.  
+Detect: Studio shows all edges as solid lines even when logic clearly conditionalises the path.  
+Fix: treat Studio as an approximation for dynamic graphs; add node-level logging to trace actual paths at runtime.
+
+**Deployed agent resumes from a stale checkpoint after schema change**  
+Why: if you change the `AgentState` TypedDict between deployments, old checkpoint rows have incompatible schemas; deserialization silently drops fields.  
+Detect: agent behaves incorrectly on resumed threads; missing fields that should have persisted.  
+Fix: version the state schema; on breaking schema changes, create new threads rather than resuming old ones; or write a migration script.
+
+**Scheduled cron runs overlap when an agent run exceeds the cron interval**  
+Why: the platform spawns a new cron run at the scheduled time even if the prior run is still active.  
+Detect: two concurrent runs for the same assistant ID visible in LangSmith traces; outputs are duplicated.  
+Fix: implement an idempotency check at the start of the agent; or use a mutex pattern by checking for an active run before starting.
+
+**SSE streaming stops mid-response on long-running Cloud deployments**  
+Why: load balancer idle timeout (typically 60-120s) closes the SSE connection if no data flows for that duration during long agent steps.  
+Detect: the browser or client receives a truncated stream; the agent continues running on the server but the client sees `ReadableStream` closed.  
+Fix: set `maxDuration` or timeout beyond the load balancer's idle timeout; emit periodic keepalive events from the agent during long tool calls.
+
 ## Connections
 - [[agents/langgraph]] — the framework this platform runs
 - [[agents/multi-agent-patterns]] — multi-agent patterns that the platform scales

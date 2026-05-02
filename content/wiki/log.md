@@ -599,3 +599,21 @@ gap-report.md updated to v5. Both active projects fully covered. 5 sprint gaps r
 
 ## [2026-05-02] lint | Vault audit — 134 broken links, 0 semantic duplicates, 197 frontmatter fixes
 Full vault audit run. Rule-based: 134 broken links (90% from 4 missing hub pages: cloud-hub, se-hub, qa-hub, tqa-hub), 167 frontmatter issues. Semantic: 3 flagged duplicate pairs all confirmed complementary (grpc: cs-fundamentals vs java; constitutional-ai: papers vs safety; mechanistic-interpretability: papers vs safety). Accuracy: 1 minor [unverified] gap in strands-agents-sdk. Frontmatter: 197 pages patched with tldr values (auto-extracted from first paragraph or one-sentence field). Audit report at [[synthesis/audit-report]].
+
+## [2026-05-02] ingest | 3 execution-layer pages — request flow anatomy, debugging systems, engineering tradeoffs
+- Added [[synthesis/request-flow-anatomy]] — full request chain from user to DB, latency at each layer, failure modes, where retries apply
+- Added [[cs-fundamentals/debugging-systems]] — debugging as a first-class skill: correlation IDs, distributed tracing, systematic elimination, incident workflow
+- Added [[synthesis/engineering-tradeoffs]] — cache vs recompute, RAG vs fine-tuning, scale up/out, consistency vs availability, sync vs async, build vs buy, AI cost tradeoffs
+- Updated [[wiki/index]] — 306 → 309 pages
+- Updated learning paths: Production Thinking bundle added (threads new pages with existing observability, error handling, distributed systems)
+
+## [2026-05-02] ingest | 3 more execution-layer pages — OS internals, data-as-system, technical communication
+- Added [[cs-fundamentals/os-internals]] — processes vs threads, virtual memory, OOM kills, CPU scheduling, file descriptors
+- Added [[synthesis/data-as-system]] — lineage, contracts, freshness SLAs, ownership, dual-write problem, CDC, ETL failure modes
+- Added [[synthesis/technical-communication]] — ADRs, RFCs, postmortems, stakeholder translation, code review communication
+- Updated [[wiki/index]] — 309 → 312 pages
+
+## [2026-05-02] lint | Gap intelligence refresh — JavaScript/TypeScript flagged as critical gap, index patched (5 pages), Gist updated
+
+## [2026-05-02] research | JavaScript/TypeScript section — 5 pages written covering async, types, npm, Node.js runtime, AI SDK patterns
+- Added: [[javascript/javascript-hub]], [[javascript/typescript-fundamentals]], [[javascript/nodejs-async]], [[javascript/npm-pnpm-ecosystem]], [[javascript/ai-sdk-patterns]]

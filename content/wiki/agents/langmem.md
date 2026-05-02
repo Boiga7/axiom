@@ -41,7 +41,7 @@ Facts extracted from specific conversations. "User prefers pytest over unittest.
 General knowledge the agent has accumulated about a domain, user, or codebase. Structured knowledge base built over many interactions.
 
 ### Procedural Memory
-How the agent should behave — updated system prompt fragments that reflect learned preferences. "Always check for existing tests before writing new ones."
+How the agent should behave. Updated system prompt fragments that reflect learned preferences. "Always check for existing tests before writing new ones."
 
 ## Core API
 
@@ -112,7 +112,7 @@ await bg_manager.aprocess(thread_id="thread_456")
 # Extracts, deduplicates, and merges new memories with existing ones
 ```
 
-The background manager handles deduplication — if the user has mentioned mcpindex in 10 sessions, it doesn't store 10 identical facts.
+The background manager handles deduplication, if the user has mentioned mcpindex in 10 sessions, it doesn't store 10 identical facts.
 
 ## LangGraph Integration
 
@@ -168,6 +168,33 @@ LangMem adds complexity. Only add it when users would genuinely benefit from the
 
 > [Source: LangMem SDK launch blog post, LangChain, 2025]
 > [Source: LangMem documentation, langchain-ai.github.io/langmem]
+
+## Common Failure Cases
+
+**Background memory manager extracts wrong facts from ambiguous conversations**  
+Why: the extraction model misinterprets pronouns, negations, or hypotheticals as facts ("I wouldn't use PostgreSQL" → stores "uses PostgreSQL").  
+Detect: stored memories contain statements the user explicitly rejected or discussed hypothetically; review extracted memories after edge-case sessions.  
+Fix: review and curate memories via the managed API after extraction; add a minimum confidence threshold if the extraction model supports it.
+
+**Memory deduplication fails, storing dozens of near-identical facts**  
+Why: if the extraction model generates slightly different phrasings of the same fact across sessions, the dedup logic (embedding similarity) may not recognise them as duplicates.  
+Detect: `search_memory_tool` returns 5+ results for "user's preferred language" that all say essentially the same thing.  
+Fix: lower the similarity threshold for deduplication; or implement a "merge" pass that collapses near-duplicates weekly.
+
+**`InMemoryStore` loses all memories on process restart**  
+Why: development storage backend is not persistent; it's only for testing and local development.  
+Detect: memories are present during a session but gone after restarting the server.  
+Fix: switch to `PostgresStore` or `RedisStore` for any deployment that needs persistence; this is clearly documented but easy to forget.
+
+**Memory retrieval injects stale context that contradicts current session**  
+Why: memories from 6 months ago are retrieved because they're semantically relevant, even though the user's situation has changed.  
+Detect: agent refers to an old project or preference the user changed; retrieval timestamps are old.  
+Fix: add recency weighting to memory retrieval; filter memories older than N days for volatile preference types; let users explicitly "forget" stale facts.
+
+**LangMem adds latency on every session start due to slow vector search**  
+Why: retrieving memories at session start involves an embedding call + vector search; on slow hardware this adds 200-500ms before the first response.  
+Detect: trace shows memory retrieval span at session start taking >200ms consistently.  
+Fix: run memory retrieval asynchronously and stream the response while retrieval completes; or cache recently-retrieved memories per user for the session duration.
 
 ## Connections
 - [[agents/memory]] — in-context, episodic, semantic, procedural memory taxonomy

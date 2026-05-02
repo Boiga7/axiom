@@ -214,6 +214,33 @@ Always rerank the expanded result set with a cross-encoder before generating. Qu
 
 > [Source: zilliz.com — HyDE for RAG; Medium — Retrieval Is the Bottleneck, 2025]
 
+## Common Failure Cases
+
+**HyDE degrades precision on factual lookups**  
+Why: the hypothetical answer hallucinate facts; the hallucinated embedding retrieves plausible-but-wrong documents.  
+Detect: faithfulness scores drop sharply on queries with unique proper nouns, dates, or numbers.  
+Fix: gate HyDE behind query type detection; skip it for queries that contain entity names, version numbers, or numeric facts.
+
+**Multi-query generates redundant variants, not diverse ones**  
+Why: the generator model defaults to minor paraphrases rather than genuinely different interpretations.  
+Detect: log the generated queries; if >50% share the same key noun phrases, they are redundant.  
+Fix: add explicit diversity instruction: "each phrasing must emphasise a different aspect and avoid repeating the same subject-verb structure."
+
+**Latency budget exceeded by expansion LLM calls**  
+Why: each expansion technique adds 1-5 LLM calls before retrieval; at 500ms each, this adds 2-3 seconds to every query.  
+Detect: trace end-to-end query latency; expansion calls should show in spans before the retrieval span.  
+Fix: use the cheapest/fastest model for expansion (Haiku, GPT-4o-mini); cache expansion results for repeated queries.
+
+**RRF tuning parameter k=60 over-penalises top-1 results**  
+Why: with very few documents in the result list, k=60 flattens the score distribution inappropriately.  
+Detect: compare final ranked order from RRF against individual retriever rankings; if rank-1 from both retrievers ends up in position 3+, k is too high.  
+Fix: lower k to 10-20 when first-pass retrieval returns <20 candidates.
+
+**Step-back produces overly general queries that retrieve off-topic results**  
+Why: the model generalises too aggressively, turning a specific implementation question into a philosophical principle.  
+Detect: log the step-back query; if it no longer contains any terms from the original query, it over-generalised.  
+Fix: add an instruction to retain at least one key term from the original in the step-back form.
+
 ## Connections
 - [[rag/pipeline]] — query expansion plugs into the retrieval stage
 - [[rag/reranking]] — always rerank after expanding; expansion improves recall, reranking restores precision

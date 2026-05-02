@@ -159,7 +159,7 @@ npx stryker run
 
 ## CI Integration
 
-Mutation testing is slow — don't run on every PR. Run nightly or on release branches.
+Mutation testing is slow. Don't run on every PR. Run nightly or on release branches.
 
 ```yaml
 # .github/workflows/mutation.yaml
@@ -197,6 +197,28 @@ jobs:
 Run mutation testing on your most critical business logic (payment, auth, pricing) rather than the whole codebase.
 
 ---
+
+## Common Failure Cases
+
+**Running mutation testing on the full codebase causes unacceptably long CI runs**
+Why: mutmut generates hundreds of mutants per file; running across a large codebase can take hours, blocking CI feedback.
+Detect: the mutation job takes more than 30 minutes, causing developers to skip or disable it.
+Fix: scope mutation testing to critical business logic modules only (e.g., `--paths-to-mutate src/payments,src/pricing`) and schedule it nightly rather than on every PR.
+
+**High mutation score on code that never runs critical paths**
+Why: trivial getter/setter code inflates the score, giving a false sense of test quality on the logic that actually matters.
+Detect: mutation score is high overall but surviving mutants cluster in the discount, auth, or payment calculation modules.
+Fix: report mutation scores per module and gate on the score for high-risk modules separately from the overall score.
+
+**Equivalent mutants inflate the "survived" count**
+Why: some mutations produce logically equivalent code (e.g., changing `i += 1` to `i -= -1`), so they survive by design, not because of missing tests.
+Detect: surviving mutants look nonsensical when viewed with `mutmut show <id>` — the mutated code is semantically identical to the original.
+Fix: use mutmut's `--no-progress` mode to review survivors manually and mark confirmed equivalents as `# mutmut: skip` in source to exclude them from the score denominator.
+
+**Stryker thresholds set too low allow degrading test quality**
+Why: `"break": 50` means tests can degrade from 80% to 51% mutation score before CI fails, masking a steady erosion.
+Detect: mutation score trends downward over weeks without CI ever failing.
+Fix: tighten thresholds progressively as the score improves (`"high": 80, "low": 75, "break": 70`) and track the trend in your test quality dashboard.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[qa/regression-testing]] · [[qa/qa-metrics]] · [[qa/test-strategy]]

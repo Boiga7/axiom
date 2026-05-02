@@ -10,7 +10,7 @@ tldr: Automating security checks as part of CI/CD — SAST (static analysis), DA
 
 # Security Automation
 
-Automating security checks as part of CI/CD — SAST (static analysis), DAST (dynamic scanning), dependency auditing, container scanning, and secrets detection. Shift-left security means catching vulnerabilities before they reach production.
+Automating security checks as part of CI/CD. SAST (static analysis), DAST (dynamic scanning), dependency auditing, container scanning, and secrets detection. Shift-left security means catching vulnerabilities before they reach production.
 
 ---
 
@@ -233,6 +233,28 @@ def test_rate_limit_enforced(client):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Secrets detection baseline goes stale and stops catching new secrets**
+Why: `detect-secrets` compares against `.secrets.baseline`; once a real secret is committed and added to the baseline to silence the alert, it is permanently ignored.
+Detect: `.secrets.baseline` grows over time with entries that are marked `is_secret: false` without a comment explaining why.
+Fix: treat every baseline entry as a finding to investigate; rotate any credential that was ever committed, then add it to the baseline only after rotation.
+
+**DAST scan authenticates but loses the session mid-scan**
+Why: ZAP's authenticated scan uses a login script that obtains a token; if the token expires during a long scan, subsequent requests return 401 and ZAP reports false negatives (pages appear to return errors, not vulnerabilities).
+Detect: ZAP scan log shows a spike in 401 responses after the first few minutes; coverage drops sharply for auth-protected routes.
+Fix: configure a token refresh script in ZAP or set `ZAP_AUTH_HEADER_VALUE` to a long-lived staging token; verify post-scan that authenticated routes were actually reached.
+
+**Trivy exits 0 on `ignore-unfixed: true` even when CRITICAL CVEs exist with available fixes**
+Why: `ignore-unfixed` suppresses all unfixed vulnerabilities regardless of severity; if a fix ships to the base image but the image has not been rebuilt, the CVE now has a fix but the flag still suppresses it.
+Detect: run Trivy without `ignore-unfixed` in a scheduled job and diff against the gated CI run to find newly fixable CVEs.
+Fix: use `ignore-unfixed: false` in the gated CI job and a separate scheduled job with `ignore-unfixed: true` to track upstream-blocked items separately.
+
+**Semgrep custom rules match too broadly and create alert fatigue**
+Why: rules using overly generic patterns (e.g., any string assignment) produce hundreds of findings per run; engineers start ignoring the entire output.
+Detect: PR pipelines show 50+ Semgrep findings; engineers add `# nosemgrep` comments indiscriminately.
+Fix: scope custom rules with `metavariable-regex` constraints and set `severity: WARNING` rather than `ERROR` until the rule is tuned; track suppression comment growth as a metric.
 
 ## Connections
 [[tqa-hub]] · [[qa/security-testing-qa]] · [[cloud/cloud-security]] · [[security/guardrails]] · [[cloud/github-actions]] · [[cloud/kubernetes]] · [[cs-fundamentals/auth-patterns]]

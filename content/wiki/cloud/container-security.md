@@ -243,5 +243,27 @@ cosign sign --rekor-url https://rekor.sigstore.dev \
 
 ---
 
+## Common Failure Cases
+
+**Trivy scan blocking on a CVE with no upstream fix, stalling deploys indefinitely**
+Why: `ignore-unfixed: false` (the default) fails the pipeline on HIGH/CRITICAL CVEs even when no patched version of the affected package exists, blocking all releases.
+Detect: Pipeline fails at the scan step with a CVE that has been present for weeks; the CVE advisory page shows "No fix available" or "Fix in progress".
+Fix: Set `ignore-unfixed: true` in the Trivy action config so unfixable CVEs do not block; track unfixed CVEs in a `.trivyignore` file with a review date comment, and use OS base image updates as the primary remediation path.
+
+**readOnlyRootFilesystem breaking an application that writes to its own directory**
+Why: The app writes temp files, sockets, or compiled artifacts to paths like `/tmp`, `/app/cache`, or `/usr/local/lib`; setting `readOnlyRootFilesystem: true` causes runtime failures on those writes.
+Detect: Container exits immediately with `Permission denied` errors on file writes; `kubectl describe pod` shows the container terminated with exit code 1.
+Fix: Mount an `emptyDir` volume at every path the app writes to (at minimum `/tmp`); audit write paths during testing by running `strace -e trace=openat,write` against the container.
+
+**Falco rule producing false-positive alerts on legitimate shell use**
+Why: A rule fires on `Shell Spawned in Container` but init containers, health check scripts, or sidecar management processes legitimately spawn shells.
+Detect: Falco alert volume is so high that real threats are buried; `proc.pname` in the alert output shows `s6-overlay` or `docker-entrypoint.sh` rather than an unexpected process.
+Fix: Add the legitimate parent processes to the `allowed_parent_processes` macro in the Falco rule, or scope the rule with `container.image.repository` to exclude known management images.
+
+**Image signing verification not enforced at admission, only in CI**
+Why: Cosign sign/verify runs in CI but no Kubernetes admission webhook (Sigstore Policy Controller, Kyverno) enforces signature verification at deploy time; a compromised image pushed directly to the registry bypasses the check.
+Detect: Unsigned images can be deployed to production by bypassing the CI pipeline (e.g., via `kubectl set image`); there is no admission rejection event in the audit log.
+Fix: Deploy Sigstore Policy Controller or a Kyverno `ClusterPolicy` that verifies cosign signatures on all image pull events; block unsigned images at the admission webhook level, not just in CI.
+
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-security]] · [[cloud/kubernetes-operators]] · [[technical-qa/security-automation]] · [[technical-qa/infrastructure-testing]] · [[cs-fundamentals/security-fundamentals-se]]

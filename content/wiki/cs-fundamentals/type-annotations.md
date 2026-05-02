@@ -273,6 +273,28 @@ mypy $(git diff --name-only origin/main -- '*.py')
 
 ---
 
+## Common Failure Cases
+
+**mypy strict mode rejecting third-party libraries with no stubs**
+Why: `strict = true` enables `disallow_untyped_calls`, which fails when calling functions from libraries that ship no `.pyi` stubs or inline types.
+Detect: mypy emits `error: Call to untyped function "foo" in typed context` for a third-party import.
+Fix: add `ignore_missing_imports = true` globally, or add a per-module override (`[[tool.mypy.overrides]] module = ["third_party.*"] ignore_errors = true`) and install the relevant `types-*` stub package if one exists.
+
+**`TypeVar` used as a return type but inferred as `Any` by the checker**
+Why: if the `TypeVar` is not constrained by the function's input types, the checker cannot infer the concrete type and falls back to `Any`, defeating the purpose.
+Detect: `reveal_type(result)` shows `Any` when you expected a specific type; the checker emits no error on an obviously wrong assignment.
+Fix: ensure the `TypeVar` appears in at least one parameter type so the checker can bind it from the call site, or use a bounded `TypeVar` (`bound=BaseClass`).
+
+**`Protocol` satisfied at definition time but broken at runtime by a signature mismatch**
+Why: `Protocol` checking is structural and static; if the implementing class's method has a slightly different signature (extra required parameter, wrong return type), mypy catches it only if you have `--strict` and the implementing class is explicitly checked.
+Detect: `isinstance(obj, MyProtocol)` returns `True` (only checks method names, not signatures) but calling the method raises `TypeError` at runtime.
+Fix: use `mypy --strict` and annotate the implementing class explicitly with the protocol type in at least one call site so the checker validates the full signature.
+
+**`TypedDict` with `NotRequired` fields silently accepted when `Required` fields are missing**
+Why: if a `TypedDict` subclass omits `total=True` (the default) but mixes `Required` and `NotRequired` fields, older mypy versions or misconfigured projects may not enforce all required keys at construction sites.
+Detect: a dict literal missing a required key is passed without a type error; the omission only surfaces at runtime as a `KeyError`.
+Fix: run mypy with `--strict` and confirm the `TypedDict` uses `NotRequired` correctly; write a test that constructs the dict without the required field to confirm the checker rejects it.
+
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/data-validation]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/dependency-injection]] · [[python/ecosystem]]

@@ -231,6 +231,28 @@ spec:
 
 ---
 
+## Common Failure Cases
+
+**Green environment not receiving production-equivalent traffic during bake time**
+Why: Green is tested in isolation or with synthetic traffic; real user patterns (session cookies, large payloads, authenticated flows) only appear after the full cutover.
+Detect: Error rate spikes within the first 5 minutes after promotion that were absent during bake.
+Fix: Route a small slice of real traffic to green during bake using `previewService` weighted routing, or use canary instead of pure blue-green for stateful-heavy flows.
+
+**Active service selector not updating after Argo Rollouts promotion**
+Why: A misconfigured `activeService` name in the Rollout spec causes the active Service's selector to remain pointing at the old (blue) pods after promotion.
+Detect: `kubectl argo rollouts get rollout <name>` shows `Status: Healthy` but live traffic still returns old responses; check `kubectl get svc order-service-active -o yaml` and confirm pod selector hash.
+Fix: Verify the `activeService` and `previewService` fields in the Rollout spec exactly match the Service resource names; re-apply the corrected spec and re-promote.
+
+**Database schema incompatibility between blue and green versions**
+Why: Green deploys a schema migration (column rename, type change) that blue cannot tolerate; if rollback is triggered, blue writes corrupt data or crashes.
+Detect: Blue pods emit schema validation errors or ORM mapping failures immediately after rollback.
+Fix: Enforce expand-contract migrations: green must be backward-compatible with blue's schema for the entire bake window; only run destructive DDL after blue is fully terminated.
+
+**CodeDeploy deployment stuck waiting for ELB health checks on green**
+Why: The green task definition's health check path or port does not match the ALB target group configuration, causing targets to remain unhealthy indefinitely.
+Detect: CodeDeploy console shows deployment in `Created` state with `Waiting for ELB health check` beyond the expected timeout.
+Fix: Confirm the ALB target group health check path (`/health/live`) and port match the container's exposed port; verify the security group allows the ALB to reach the green tasks on that port.
+
 ## Connections
 
 [[cloud-hub]] · [[cloud/argo-rollouts]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/aws-ecs]] · [[cloud/github-actions]] · [[cloud/gitops-patterns]]

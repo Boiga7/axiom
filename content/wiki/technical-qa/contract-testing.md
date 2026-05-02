@@ -25,7 +25,7 @@ In microservice architectures, Service A (consumer) calls Service B (provider). 
 | Mocking the provider | Mocks can drift from reality; false confidence |
 | Contract testing | Provider validates it matches all consumers' expectations |
 
-Contract testing gives fast, reliable feedback that a provider hasn't broken its consumers — without running both services simultaneously.
+Contract testing gives fast, reliable feedback that a provider hasn't broken its consumers. Without running both services simultaneously.
 
 ---
 
@@ -253,6 +253,28 @@ Flexible matching makes contracts robust to data changes that don't affect struc
 | Best for | External APIs, public API clients | Internal microservices |
 
 ---
+
+## Common Failure Cases
+
+**Provider state endpoint is never called because the state string in the consumer test doesn't match the provider's registered handler**
+Why: the consumer writes `given("product 123 exists")` but the provider endpoint handles `"product with id 123 exists"` — a one-word difference causes Pact to skip the state setup silently.
+Detect: provider verification fails with a 404 or unexpected data; check the Pact logs for "No handler found for provider state" warnings.
+Fix: treat provider state strings as shared constants — define them in a shared module or document (e.g., a `pact-states.md`) that both teams reference, never just copy-paste.
+
+**Consumer test calls the real provider instead of the Pact mock server**
+Why: the Pact mock server starts on `localhost:1234` but the client under test is hardcoded to `https://api.example.com`; the consumer test passes because the real API is available in the test environment, and the `.pact` file is never written.
+Detect: delete the real API's test data and re-run — if the consumer test still passes, it's not using the mock server.
+Fix: make the provider URL configurable via an environment variable or constructor argument; in the test fixture, pass `http://localhost:{pact.port}` explicitly.
+
+**`can-i-deploy` blocks a deploy because an old consumer contract was published but that consumer is decommissioned**
+Why: PactFlow still holds the retired service's pact; `can-i-deploy` checks all consumers, including dead ones, so every provider deploy is blocked indefinitely.
+Detect: `can-i-deploy` reports a consumer that hasn't published a new pact in weeks and has no recent deployments in PactFlow.
+Fix: mark decommissioned consumers as inactive in PactFlow (`pact-broker delete-pacticipant`) or use environment-based `can-i-deploy` checks so retired services are excluded.
+
+**Pact matchers too flexible, allowing silent breaking changes to pass**
+Why: using `Like()` for every field means a provider can change a field's type (e.g., `price` from `float` to `string`) and verification still passes because `Like` only checks the type of the example value, not what the consumer actually does with the field.
+Detect: the provider changes `price` from `float` to a currency string; consumer tests still pass; production consumer throws a `TypeError` when it tries to multiply the price.
+Fix: use `decimal(9.99)` or `integer(42)` matchers instead of `like(value)` for fields where type matters to the consumer's logic, and add a consumer-side assertion on the actual value usage.
 
 ## Connections
 

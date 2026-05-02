@@ -10,7 +10,7 @@ tldr: The accumulated cost of shortcuts taken in test automation — and how to 
 
 # Automation Debt
 
-The accumulated cost of shortcuts taken in test automation — and how to pay it down.
+The accumulated cost of shortcuts taken in test automation, and how to pay it down.
 
 ---
 
@@ -212,6 +212,28 @@ def pytest_collection_modifyitems(items, config):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Quarantining flaky tests without scheduling a fix**
+Why: marking a test `@flaky` and excluding it from CI provides immediate relief but removes the signal; the underlying race condition or shared state remains and often worsens.
+Detect: the quarantine list grows sprint over sprint while no flaky tests are ever removed from it.
+Fix: assign every quarantined test a resolution ticket with a sprint target; if unfixed after two sprints, delete the test and file a story to rewrite it properly.
+
+**Debt inventory that counts files but not impact**
+Why: measuring duplicate selectors or test setup line counts tells you what's messy but not what's costing you — a single flaky test in the checkout flow hurts more than 40 duplicated selectors in low-traffic tests.
+Detect: the debt reduction roadmap targets the longest files or most duplicated selectors rather than the tests that most frequently block CI or generate false alerts.
+Fix: rank debt items by consequence (blocks CI, causes missed bugs, slows onboarding) not by code smell count.
+
+**Refactoring to Page Objects while the underlying tests still depend on execution order**
+Why: Page Objects solve the selector duplication problem but leave state leakage intact; tests that share a user or database row will still fail non-deterministically.
+Detect: E2E tests pass in isolation (`-k test_checkout`) but fail when the full suite runs in parallel.
+Fix: audit shared fixtures for mutable state before or alongside the PO extraction; each test must own its test data.
+
+**"Don't touch the tests" culture treated as acceptable**
+Why: if engineers fear changing tests, they stop writing new ones and start commenting out assertions when tests become inconvenient, quietly hollowing out coverage.
+Detect: test code has no PRs in the last 60 days despite active feature development, or assertions are commented out without an accompanying ticket.
+Fix: include test code in regular code reviews with the same quality bar as production code; make test maintainability an explicit team metric.
 
 ## Connections
 

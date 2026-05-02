@@ -128,7 +128,7 @@ response = await router.acompletion(
 
 ## Proxy Server (AI Gateway)
 
-Self-hosted OpenAI-compatible endpoint. Any client that speaks OpenAI works with it — including the official `openai` Python SDK, LangChain, LlamaIndex, Cursor, etc.
+Self-hosted OpenAI-compatible endpoint. Any client that speaks OpenAI works with it. Including the official `openai` Python SDK, LangChain, LlamaIndex, Cursor, etc.
 
 ### Running the proxy
 
@@ -209,7 +209,7 @@ general_settings:
 
 ## Environment Variables
 
-LiteLLM reads provider credentials from environment variables — no config needed for the SDK if vars are set:
+LiteLLM reads provider credentials from environment variables. No config needed for the SDK if vars are set:
 
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-..."
@@ -248,6 +248,33 @@ export GOOGLE_API_KEY="..."
 | Complexity | Low | Lowest | Low | High |
 
 ---
+
+## Common Failure Cases
+
+**Provider-specific parameter silently dropped when using LiteLLM SDK**  
+Why: LiteLLM maps to the OpenAI schema; parameters like `betas` (extended thinking), `cache_control`, or `system` with array format are stripped or ignored when the target provider uses a different schema.  
+Detect: the feature works when calling the provider directly but not through `litellm.completion()`; no error is raised, the parameter is silently ignored.  
+Fix: pass provider-specific kwargs via the `extra_body` parameter or call the provider SDK directly for features that have no OpenAI equivalent; check LiteLLM docs for the provider's supported params.
+
+**Router fallback fires but returns a response from the wrong model tier**  
+Why: when the primary model fails and the fallback is a cheaper/weaker model, the router succeeds from litellm's perspective but the response quality drops without the caller being notified.  
+Detect: responses degrade intermittently; `response.model` in the litellm response object shows the fallback model name, not the primary.  
+Fix: inspect `response.model` after every call when quality matters; set `allowed_fails` low and monitor `x-litellm-model-used` header on proxy responses; alert when fallback rate exceeds threshold.
+
+**Proxy master key leaks because it is the only access control**  
+Why: the LiteLLM proxy uses a single `master_key` for authentication; if it leaks, all providers and budget limits are bypassed.  
+Detect: unexpected spend on provider dashboards; no per-user audit trail in proxy logs.  
+Fix: create virtual keys per team or service via the proxy's `/key/generate` endpoint; set per-key spend limits; rotate the master key and treat it like a root credential.
+
+**Cost tracking shows $0 for Bedrock models**  
+Why: LiteLLM's cost database does not always include new Bedrock model variants; if the model string is unrecognised the cost is reported as zero rather than raising an error.  
+Detect: `response._hidden_params["response_cost"]` returns `0.0` for Bedrock calls even when tokens were consumed.  
+Fix: add a custom pricing entry for the model via `litellm.model_cost["bedrock/..."] = {...}`; or read token counts directly and calculate cost separately.
+
+**Async `acompletion` calls deadlock inside a sync FastAPI endpoint**  
+Why: calling `await litellm.acompletion()` inside a `def` (sync) route handler runs the coroutine on the wrong event loop, causing a deadlock or `RuntimeError: no running event loop`.  
+Detect: FastAPI route hangs indefinitely on the first LLM call; no timeout or error is raised.  
+Fix: use `async def` route handlers with `await litellm.acompletion()`; or use `litellm.completion()` (sync) inside sync routes.
 
 ## Connections
 

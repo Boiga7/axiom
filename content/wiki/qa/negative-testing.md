@@ -10,7 +10,7 @@ tldr: Testing what the system does when things go wrong — invalid inputs, fail
 
 # Negative Testing
 
-Testing what the system does when things go wrong — invalid inputs, failed dependencies, boundary violations.
+Testing what the system does when things go wrong. Invalid inputs, failed dependencies, boundary violations.
 
 ---
 
@@ -246,6 +246,28 @@ async def test_concurrent_stock_decrement_consistent(
 ```
 
 ---
+
+## Common Failure Cases
+
+**Only happy-path tests exist; negative inputs return 500 instead of 422**
+Why: developers validate inputs in the UI layer but not the API layer; sending `quantity: null` directly to the API bypasses client validation and hits an unhandled `None` dereference.
+Detect: `test_invalid_quantity_rejected` asserts `status_code == 422` but gets `500`.
+Fix: add Pydantic (or equivalent) schema validation at the API boundary so invalid inputs are rejected before reaching business logic; the parametrised negative test suite confirms each invalid variant.
+
+**Error responses leak internal implementation details**
+Why: uncaught ORM exceptions propagate to the default exception handler, which serialises the full traceback including table names and column types.
+Detect: `test_error_response_does_not_leak_stack_trace` finds `"psycopg2"` or `"sqlalchemy"` in the response body.
+Fix: add a top-level exception handler that catches all unhandled exceptions, logs the full traceback internally, and returns a generic `{"status": 500, "title": "Internal Server Error"}` with no stack trace.
+
+**Dependency failure tests use real endpoints — tests become integration tests**
+Why: `mock_payment_service` fixture is misconfigured or bypassed by a `respx.mock` scope error, causing the test to call the actual payments service.
+Detect: the timeout test passes inconsistently depending on whether the payment sandbox is up; it runs for 30s instead of the expected near-instant mock response.
+Fix: assert inside the test that `respx_mock.calls.call_count == 1` after the request; a zero count means the mock was not activated and the real service was called.
+
+**Concurrent negative tests produce flaky results under low parallelism**
+Why: `asyncio.gather` fires both requests but the database uses serialisable isolation without a proper unique constraint; one request may succeed twice if the constraint is missing.
+Detect: `test_concurrent_stock_decrement_consistent` occasionally returns `status_codes.count(201) == 2`.
+Fix: add a database-level unique constraint or advisory lock on the stock row; confirm the test reliably returns exactly one 201 and one 409 across 20 repeated runs.
 
 ## Connections
 

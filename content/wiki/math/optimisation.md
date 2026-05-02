@@ -113,7 +113,7 @@ from lion_pytorch import Lion
 optimizer = Lion(model.parameters(), lr=1e-4, weight_decay=0.01)
 ```
 
-Lion uses 50% less optimizer memory than Adam (only 1 moment vs 2). Google Brain (2023) paper showed Lion matches or exceeds AdamW on vision transformers. Less validated for LLM fine-tuning — use AdamW unless VRAM is the bottleneck.
+Lion uses 50% less optimizer memory than Adam (only 1 moment vs 2). Google Brain (2023) paper showed Lion matches or exceeds AdamW on vision transformers. Less validated for LLM fine-tuning. Use AdamW unless VRAM is the bottleneck.
 
 ---
 
@@ -158,7 +158,7 @@ scheduler = get_linear_schedule_with_warmup(
 
 ### Constant with Warmup
 
-No decay — useful when you're not sure when to stop and want to evaluate at any checkpoint:
+No decay. Useful when you're not sure when to stop and want to evaluate at any checkpoint:
 
 ```python
 from transformers import get_constant_schedule_with_warmup

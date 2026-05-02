@@ -12,7 +12,7 @@ tldr: Standard LLM benchmarks and what they actually measure — knowing which a
 
 > **TL;DR** Standard LLM benchmarks and what they actually measure — knowing which are saturated, contaminated, or misused prevents drawing wrong production decisions from benchmark scores.
 
-Standard benchmarks used to compare models. Knowing what each measures — and what it doesn't — prevents you from drawing wrong conclusions from benchmark scores.
+Standard benchmarks used to compare models. Knowing what each measures (and what it doesn't) prevents you from drawing wrong conclusions from benchmark scores.
 
 ---
 
@@ -146,6 +146,28 @@ See [[evals/methodology]] for the full golden set construction guide. Short vers
 - LMSYS Chatbot Arena has verbosity bias — longer responses get preferred regardless of accuracy
 - Minimum custom benchmark size: 50 examples to start; 200+ for statistical confidence
 - Never trust vendor-published benchmarks without third-party verification
+
+## Common Failure Cases
+
+**Citing HumanEval scores to justify a model choice for production coding tasks**  
+Why: HumanEval is saturated at 90%+ for frontier models; differences of 1-3 percentage points are not statistically meaningful, and the benchmark's synthetic docstring-to-function tasks do not reflect real engineering work.  
+Detect: two models show HumanEval scores of 92% and 90%; the 90% model actually outperforms on SWE-bench.  
+Fix: use SWE-bench Verified for coding evaluations; treat HumanEval as a sanity check for open-source models, not a differentiator for frontier models.
+
+**Comparing benchmark scores across different token budgets as if they are equivalent**  
+Why: a model running with extended thinking enabled will score significantly higher on GPQA than the same model without extended thinking; comparing the two numbers as "model A vs model B" is misleading.  
+Detect: a vendor announces "our model achieves X% on GPQA" without specifying whether extended thinking, chain-of-thought, or other compute-amplifying features were used.  
+Fix: always compare models at equivalent token budget and configuration; verify whether the reported benchmark used a standard evaluation protocol before drawing conclusions.
+
+**Building a production system on a custom benchmark with fewer than 50 examples**  
+Why: small test sets have high variance; a model that scores 80% on 25 examples could score anywhere from 60-95% on a different sample of the same population; the confidence interval is too wide to make decisions.  
+Detect: the benchmark result changes substantially when you add or remove 10 examples; standard error on the score is >5%.  
+Fix: minimum 200 examples for a benchmark used to make production deployment decisions; use Wilson confidence intervals to report uncertainty alongside the point estimate.
+
+**Trusting vendor-published benchmark numbers without checking evaluation methodology**  
+Why: labs have strong incentives to benchmark favorably; they may use prompt formats optimised for their model, include test examples in training data, or selectively report benchmarks where their model performs well.  
+Detect: the model's claimed score is significantly higher than any independent third-party evaluation; no public evaluation code or data is provided.  
+Fix: prefer benchmarks run by independent third parties (EleutherAI, HuggingFace Open LLM Leaderboard); run your own internal benchmark on a held-out set before deployment decisions.
 
 ## Connections
 

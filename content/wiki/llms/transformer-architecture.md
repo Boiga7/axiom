@@ -12,7 +12,7 @@ tldr: The transformer's core operations — scaled dot-product attention (O(n²)
 
 > **TL;DR** The transformer's core operations — scaled dot-product attention (O(n²)), KV cache, RoPE positional encoding, MoE routing, and Chinchilla scaling laws — and why each matters operationally.
 
-The dominant neural network architecture for language models since 2017. Understanding it makes you a better AI engineer — you'll know why prompt length matters, why certain tasks are hard, and what the practical limits are.
+The dominant neural network architecture for language models since 2017. Understanding it makes you a better AI engineer. You'll know why prompt length matters, why certain tasks are hard, and what the practical limits are.
 
 ---
 
@@ -70,7 +70,7 @@ In autoregressive generation (one token at a time), re-computing K and V for eve
 
 ## Positional Encodings
 
-Attention has no inherent notion of order — `[A, B, C]` and `[C, B, A]` look identical without positional information. Positional encodings inject order.
+Attention has no inherent notion of order. `[A, B, C]` and `[C, B, A]` look identical without positional information. Positional encodings inject order.
 
 | Method | How | Length limit | Used by |
 |---|---|---|---|
@@ -92,7 +92,7 @@ FFN(x) = max(0, xW₁ + b₁)W₂ + b₂   # ReLU
 FFN(x) = SwiGLU(xW₁) · (xW₃)W₂     # SwiGLU (modern)
 ```
 
-FFN width is typically 4x model dimension. It stores factual knowledge — this is where "The Eiffel Tower is in" → "Paris" happens. Attention handles routing; FFN handles lookup.
+FFN width is typically 4x model dimension. It stores factual knowledge. This is where "The Eiffel Tower is in" → "Paris" happens. Attention handles routing; FFN handles lookup.
 
 ---
 
@@ -144,6 +144,28 @@ None have displaced transformers for frontier models yet, but Mamba-based hybrid
 - Llama 3 8B: trained on 15T tokens — far above compute-optimal for better inference efficiency
 - Pre-LayerNorm: standard in modern models for training stability (vs original Post-LayerNorm)
 - FFN width: typically 4x model dimension; stores factual knowledge, not just routing
+
+## Common Failure Cases
+
+**KV cache memory exhaustion causes OOM errors at long context because allocation was not planned for**
+Why: KV cache grows linearly with sequence length and number of layers; at 32K context with a 70B model the KV cache alone can exceed 100 GB, surpassing the model weight footprint; systems that allocate GPU memory for weights but not KV cache will crash under load.
+Detect: GPU OOM errors occur not at model load time but when sequence length grows during inference; memory profiling shows KV cache as the dominant consumer.
+Fix: use paged attention (vLLM) to allocate KV cache in blocks; set `max_model_len` to match available KV cache budget rather than the model's architectural maximum; or use sliding-window attention if long-range retrieval is not required.
+
+**MoE routing collapse: all tokens route to the same 1-2 experts, degrading quality and wasting parameter capacity**
+Why: without load-balancing losses during training, the router can converge on sending nearly all tokens to the highest-capacity experts, making the model behave like a dense model with most parameters inactive.
+Detect: expert utilisation logs during inference show one or two experts at near-100% while others receive near-0%; output quality is below expectations for the model's total parameter count.
+Fix: this is a training-time issue; at inference you cannot fix it — evaluate the model's expert utilisation statistics before deployment; for your own training, add an auxiliary load-balancing loss term to the routing objective.
+
+**Attention scores saturate (all weight on one token) due to missing `√d_k` scaling in a custom implementation**
+Why: when re-implementing attention from scratch, omitting the `/ √d_k` denominator causes dot products to have variance proportional to `d_k`; at typical hidden dims (512-2048), softmax input values become very large, driving outputs toward one-hot distributions and gradient vanishing.
+Detect: attention weight distributions are near-one-hot even at early training steps; loss fails to decrease; attention entropy is near zero.
+Fix: ensure the scaling factor `1 / √d_k` is applied before softmax in every attention head; verify with a unit test that attention entropy is reasonable on random inputs.
+
+**Positional encoding length limit exceeded when inference context is longer than the training context, causing repetition or incoherence**
+Why: learned absolute positional encodings (used in GPT-2, BERT) have a fixed maximum sequence length equal to the training maximum; exceeding it means the model receives out-of-distribution position IDs and produces garbage; RoPE and ALiBi extrapolate but still degrade beyond roughly 2-4x their training length.
+Detect: output becomes repetitive, incoherent, or loops after the model's maximum trained sequence length; the degradation is sudden, not gradual.
+Fix: use a model with RoPE positional encoding and a large enough training context for your use case; if extrapolating beyond the training length, apply YaRN or rope_scaling to extend the effective range rather than using raw extrapolation.
 
 ## Connections
 

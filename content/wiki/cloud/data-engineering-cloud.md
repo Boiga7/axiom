@@ -230,5 +230,27 @@ def handler(event, context):
 
 ---
 
+## Common Failure Cases
+
+**Athena query scanning entire table due to missing partition filter**
+Why: A query omits the partition predicate (`WHERE year = ... AND month = ...`), causing Athena to scan every partition and incurring large data scan costs (billed at $5/TB).
+Detect: Athena query history shows `Data scanned` in the tens to hundreds of GB for queries that should only touch a single day's data; query takes minutes instead of seconds.
+Fix: Always include partition columns in WHERE clauses; use partition projection to prevent `MSCK REPAIR TABLE` and enforce partition discovery; set workgroup data scan limits to reject runaway queries above a threshold.
+
+**Glue job failing silently on schema evolution without alerting**
+Why: New fields added to source JSON are ignored by Spark if the schema is inferred once and cached in the Glue catalogue; deleted fields cause null columns silently rather than job failure.
+Detect: Curated Parquet files have all-null columns or missing columns compared to what the source data contains; downstream Athena queries return unexpected nulls.
+Fix: Enable Glue schema evolution options (`ALLOW_COLUMN_CHANGE`); run dbt schema tests after each Glue job run to catch unexpected nulls or type changes; alert on test failures before downstream consumers read the data.
+
+**dbt incremental model merging the wrong rows due to a missing unique key**
+Why: If the `unique_key` field is not truly unique in the source (e.g., duplicate event IDs from a replay), the incremental merge produces incorrect row counts or double-counts revenue.
+Detect: dbt tests show `unique` test failures on the model's key column after an incremental run; aggregate metrics diverge from the raw source count.
+Fix: Define the correct composite unique key (e.g., `order_id + event_type + event_date`) in the dbt model config; add a `not_null` + `unique` dbt test and run it on every CI merge.
+
+**S3 event-driven pipeline creating duplicate Glue job runs on large multi-part uploads**
+Why: S3 multipart uploads emit one `s3:ObjectCreated` event per part completion and one on final assembly; if the Lambda trigger is on `s3:ObjectCreated:*`, multiple Glue jobs start for the same file.
+Detect: Glue job run history shows multiple concurrent runs for the same `source_path`; the curated partition has duplicate rows or the job fails with `file already exists`.
+Fix: Trigger only on `s3:ObjectCreated:CompleteMultipartUpload` and `s3:ObjectCreated:Put` (not wildcard); add an idempotency check in the Lambda that records the S3 ETag in DynamoDB before starting the Glue job and skips if already processed.
+
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/serverless-patterns]] · [[cloud/aws-step-functions]] · [[cloud/cost-optimisation-cloud]] · [[llms/ae-hub]]

@@ -12,7 +12,7 @@ tldr: Opinionated decision tables for every major AI engineering choice — mode
 
 > **TL;DR** Opinionated decision tables for every major AI engineering choice — model (Sonnet 4.6 default), embedding (Cohere 65.2 MTEB), vector store (pgvector if on Postgres), agent framework (LangGraph for stateful Python), observability (Langfuse self-hosted), fine-tuning (Axolotl), and the prompting → RAG → fine-tune → agents escalation order.
 
-Which model, which approach, which architecture — for every major decision an AI engineer faces. The answers here are opinionated defaults. Adjust based on your constraints.
+Which model, which approach, which architecture, for every major decision an AI engineer faces. The answers here are opinionated defaults. Adjust based on your constraints.
 
 ---
 

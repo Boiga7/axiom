@@ -260,7 +260,7 @@ fly secrets set ANTHROPIC_API_KEY=sk-ant-...
 
 ### Modal (Serverless GPU)
 
-Best for: open model inference, fine-tuning jobs, batch processing — serverless with GPU.
+Best for: open model inference, fine-tuning jobs, batch processing. Serverless with GPU.
 
 ```python
 import modal
@@ -384,6 +384,33 @@ async def ready():
 - Fly.io `auto_stop_machines = "stop"` scales to zero; `min_machines_running = 0` for cost savings
 - Modal serverless GPU cost: ~$0.00164/s billed per request; cold start 2-5s
 - API keys go via platform secrets (fly secrets set, vercel env add), never in source code
+
+## Common Failure Cases
+
+**Docker image builds fine locally but fails in CI with `python: not found`**  
+Why: the Dockerfile uses `python` but the base image only has `python3`; macOS has a symlink, the container doesn't.  
+Detect: `docker build` fails in GitHub Actions with `executable file not found`; works on developer laptop.  
+Fix: use `python3` explicitly in CMD/ENTRYPOINT; or add `RUN ln -s /usr/bin/python3 /usr/bin/python` to the Dockerfile.
+
+**Fly.io machine doesn't scale to zero because a background connection is held open**  
+Why: `auto_stop_machines = "stop"` only works when the machine has no active connections; a Redis connection or database pool held open prevents scale-down.  
+Detect: Fly machines never show as stopped despite no traffic; monthly compute cost is higher than expected.  
+Fix: ensure connection pools have `max_idle_time` configured; close background connections when no requests are in-flight.
+
+**Modal cold start adds 5-15 seconds for first request after idle period**  
+Why: `container_idle_timeout=300` keeps the container warm for 5 minutes; after that, the next request waits for a cold start including model loading.  
+Detect: p99 latency has a bimodal distribution — fast (<1s) and slow (5-15s); the slow tail corresponds to cold starts.  
+Fix: increase `container_idle_timeout` for latency-sensitive workloads; or keep a warm instance with a periodic ping; or accept cold starts and set user expectations.
+
+**GitHub Actions deploys succeed but production still runs the old Docker image**  
+Why: the deployment step pushed a new image but the service was not restarted; or the image tag is `latest` and the platform cached the old image.  
+Detect: `docker inspect` on the running container shows the old image digest; the new code is not reflected in behavior.  
+Fix: use commit SHA tags (`ghcr.io/org/repo:${{ github.sha }}`) not `latest`; ensure the deploy step restarts the service after image push.
+
+**Secrets set in Fly.io are not reflected after `fly secrets set`**  
+Why: `fly secrets set` requires a machine restart to take effect; the current machines still have the old secret values.  
+Detect: log output shows the old API key being used despite `fly secrets set` reporting success.  
+Fix: run `fly machines restart` after setting secrets; or deploy a new version (`fly deploy`) which restarts machines automatically.
 
 ## Connections
 

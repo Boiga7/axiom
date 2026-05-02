@@ -10,7 +10,7 @@ tldr: "FinOps discipline for managing cloud spend. The goal is unit economics: c
 
 # Cloud Cost Optimisation
 
-FinOps discipline for managing cloud spend. The goal is unit economics: cost per transaction, cost per user, cost per model inference — not absolute spend.
+FinOps discipline for managing cloud spend. The goal is unit economics: cost per transaction, cost per user, cost per model inference. Not absolute spend.
 
 ---
 
@@ -190,6 +190,28 @@ aws cloudwatch put-metric-alarm \
 AWS Cost Explorer, Kubecost (for Kubernetes cost attribution), Infracost (Terraform cost estimation in PRs).
 
 ---
+
+## Common Failure Cases
+
+**Savings Plan commitment too large causes waste after a workload is decommissioned**
+Why: A 3-year Compute Savings Plan was purchased against a workload that was later retired; the commitment charge continues even though the covered compute no longer runs.
+Detect: Cost Explorer shows high Savings Plan coverage with low utilisation (coverage > 95% but utilisation < 60%); the Savings Plans console shows unused commitment dollars each month.
+Fix: Purchase Savings Plans in tranches (30-50% of baseline spend per purchase) rather than 100% up-front; review coverage quarterly using Cost Explorer's Savings Plans Utilization report and allow partial unused plans to age out before buying replacements.
+
+**Spot interruptions causing job re-runs that cost more than On-Demand would have**
+Why: A long batch job is interrupted at 80% completion with no checkpointing; the entire job re-runs from scratch, and the total Spot compute time exceeds what On-Demand would have cost.
+Detect: AWS Spot interruption notices in instance metadata appear frequently for the chosen instance type/AZ combination; CloudWatch shows repeated job start events without completion.
+Fix: Implement checkpointing (save progress to S3 every N minutes); use `capacityOptimized` allocation strategy and diversify across 3+ instance types and 3 AZs to reduce interruption frequency.
+
+**NAT Gateway data processing charges dominating the bill unexpectedly**
+Why: Application servers in private subnets pull large payloads from S3 or DynamoDB through the NAT Gateway, incurring $0.045/GB charges; S3 Gateway VPC Endpoints were never created.
+Detect: Cost Explorer shows NAT Gateway as a top-5 line item; the `BytesOutToDestination` metric on the NAT Gateway is consistently high.
+Fix: Create Gateway VPC Endpoints for S3 and DynamoDB and add them to private subnet route tables — this is free and eliminates the NAT Gateway data charge for those services.
+
+**EBS volumes orphaned after EC2 instance termination accumulate significant cost**
+Why: By default, EBS volumes attached to terminated EC2 instances are not deleted unless `DeleteOnTermination` was set to `true` at launch time; over months, dozens of unused 100GB+ volumes accumulate.
+Detect: Cost Explorer shows EBS as a top cost item while EC2 instance count is lower than expected; `aws ec2 describe-volumes --filters Name=status,Values=available` lists all unattached volumes.
+Fix: Set `DeleteOnTermination: true` on all root volumes in launch templates and Auto Scaling Groups; run a monthly audit with `aws ec2 describe-volumes` and delete unattached volumes after confirming they are orphaned.
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-ecs]] · [[cloud/cloud-monitoring]] · [[cloud/cloud-security]]

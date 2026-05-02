@@ -209,5 +209,32 @@ async def delete_product(
 
 ---
 
+## Common Failure Cases
+
+**Long-lived JWTs with no revocation mechanism**
+Why: access tokens set to expire in 24 hours or longer cannot be invalidated on logout, account compromise, or role change; the token remains valid until expiry regardless of server-side state.
+Detect: log out, then replay the token — if it still returns 200 the token cannot be revoked.
+Fix: use 15-minute access tokens with a refresh token rotation pattern, and maintain a Redis revocation list keyed by `jti` that is checked on every request.
+
+**Refresh token not rotated on use**
+Why: if an attacker steals a refresh token, they can obtain access tokens indefinitely; non-rotating refresh tokens never expire in practice.
+Detect: use the same refresh token twice; if the second request also succeeds, rotation is not implemented.
+Fix: invalidate the old refresh token and issue a new one on every `/auth/refresh` call; detect reuse of an invalidated token as a theft signal and revoke the entire session family.
+
+**OAuth state parameter omitted, enabling CSRF on the callback**
+Why: without a `state` parameter, an attacker can craft a callback URL with their own auth code and trick a victim's browser into binding the attacker's account.
+Detect: initiate an OAuth flow without a `state` parameter; if the callback succeeds without state validation, CSRF is possible.
+Fix: generate a cryptographically random `state` value, store it in the session before redirecting, and reject any callback where the returned `state` does not match.
+
+**API keys stored in plaintext in the database**
+Why: storing raw API key values means a database read gives an attacker all active keys; they cannot be selectively revoked or audited.
+Detect: query the `api_keys` table — if `hashed_key` is absent and `key` is the full raw value, keys are stored insecurely.
+Fix: store only a bcrypt or Argon2 hash plus the first 8 characters as a lookup prefix; show the full key to the user exactly once at creation time.
+
+**RBAC checked in business logic but not at the route level**
+Why: a role check inside a service method is invisible to the HTTP layer; a developer adds a new endpoint that calls the service without wiring up the `require_role` dependency, leaving it unprotected.
+Detect: automated security scan or manual route audit — list all endpoints and verify each has an auth dependency in the FastAPI router definition.
+Fix: enforce RBAC as a FastAPI `Depends` at the router or route decorator level, not inside the service, so it is impossible to add a route without specifying access control.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/security-fundamentals-se]] · [[cs-fundamentals/api-design]] · [[cloud/cloud-security]] · [[technical-qa/security-automation]] · [[qa/security-testing-qa]] · [[protocols/mcp]] · [[apis/anthropic-api]]

@@ -10,7 +10,7 @@ tldr: RLHF trains a reward model from human preferences then uses PPO to optimis
 
 # RLHF and DPO
 
-Two approaches to aligning a language model to human preferences after SFT (supervised fine-tuning). Both use preference data — pairs of responses where humans (or another model) judged one better than the other. They differ in how that preference signal is applied.
+Two approaches to aligning a language model to human preferences after SFT (supervised fine-tuning). Both use preference data. Pairs of responses where humans (or another model) judged one better than the other. They differ in how that preference signal is applied.
 
 ---
 
@@ -193,6 +193,28 @@ def create_preference_pair(prompt: str, response_a: str, response_b: str) -> dic
 - GRPO (DeepSeek, 2024) extends preference optimisation to reasoning via group-relative rewards
 - KTO and ORPO remove the need for paired data (KTO) or the reference model (ORPO) respectively
 - Preference data quality matters more than quantity — noisy labels hurt more than fewer clean ones
+
+## Common Failure Cases
+
+**PPO reward hacking — model learns to exploit reward model weaknesses rather than genuinely improving**  
+Why: the PPO policy optimises for the reward model's scores, not actual human preferences; if the reward model has blind spots (e.g., rewards verbosity, or penalises brevity), the policy exploits these rather than learning better behaviour.  
+Detect: reward model scores increase steadily but human preference ratings plateau or decline; the model starts producing unusually long or formulaic responses.  
+Fix: add a KL penalty (`kl_penalty="kl"`) and monitor the KL divergence from the SFT reference — cap it with `target_kl`; periodically sample responses and run human evaluation rather than relying solely on reward model scores.
+
+**DPO dataset chosen/rejected pairs are mislabelled, silently degrading the model**  
+Why: if labellers are inconsistent or the preference signal is ambiguous, a significant fraction of pairs will have the wrong label; DPO treats all pairs equally, so mislabelled pairs actively hurt the model.  
+Detect: DPO training loss decreases normally but human evaluation shows no improvement or slight degradation; auditing a random sample of 50 pairs reveals >10% mislabelling rate.  
+Fix: use inter-annotator agreement checks during labelling; filter pairs below a confidence threshold; use Constitutional AI self-critique to generate synthetic labels before using them as training signal.
+
+**Reference model not frozen during DPO, causing undefined training dynamics**  
+Why: `ref_model` in `DPOTrainer` must remain frozen (not updated); if gradients flow through the reference model due to a misconfigured `requires_grad`, the loss function breaks — the model is optimising a moving target.  
+Detect: DPO loss behaves erratically (spikes, then drops unexpectedly); training is much slower than expected (2× the expected memory usage for the model size).  
+Fix: confirm the reference model has `requires_grad_(False)` on all parameters; in TRL's `DPOTrainer`, the reference model is frozen by default — only override this intentionally.
+
+**GRPO group size G too small causes high variance in the advantage estimates**  
+Why: with G=2 or G=4, the mean and std of rewards within the group are unstable; the normalised advantage signal is noisy and the policy updates oscillate rather than converging.  
+Detect: GRPO training shows high variance in `reward/std` and `advantage/mean` metrics; loss fluctuates without a clear downward trend.  
+Fix: use G=8 as the minimum group size; increase to G=16 for high-variance reward functions; this comes at the cost of G× inference compute per training step.
 
 ## Connections
 

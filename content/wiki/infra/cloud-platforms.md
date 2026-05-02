@@ -35,7 +35,7 @@ The three major cloud providers each have a distinct AI stack. AWS dominates ent
 
 ### Bedrock — Claude on AWS
 
-Amazon Bedrock is the managed API gateway for frontier models including Claude, Llama, Mistral, and others. If your infrastructure is already AWS, Bedrock means no VPC egress to `api.anthropic.com` — model calls stay inside AWS.
+Amazon Bedrock is the managed API gateway for frontier models including Claude, Llama, Mistral, and others. If your infrastructure is already AWS, Bedrock means no VPC egress to `api.anthropic.com`. Model calls stay inside AWS.
 
 ```python
 import boto3
@@ -74,7 +74,7 @@ Use Bedrock when: enterprise compliance requires data to stay in AWS, you alread
 
 ### SageMaker — Training and Hosting Open Models
 
-SageMaker handles the full ML lifecycle — training, hosting, monitoring — for open-source models you bring yourself (Llama, Mistral, etc.).
+SageMaker handles the full ML lifecycle (training, hosting, monitoring) for open-source models you bring yourself (Llama, Mistral, etc.).
 
 ```python
 import sagemaker
@@ -140,7 +140,7 @@ def handler(event, context):
     }
 ```
 
-Lambda cold start adds 200–500ms latency for Python. For streaming responses, Lambda doesn't support SSE well — use API Gateway WebSocket or ECS instead.
+Lambda cold start adds 200–500ms latency for Python. For streaming responses, Lambda doesn't support SSE well. Use API Gateway WebSocket or ECS instead.
 
 ### IAM for AI Workloads
 
@@ -217,7 +217,7 @@ response = client.messages.create(
 
 ### Cloud Run — Serverless Containers for AI APIs
 
-Cloud Run is GCP's managed container runtime — deploy a Docker container, it scales to zero, handles traffic. Better than Lambda for AI workloads because it supports longer timeouts and streaming.
+Cloud Run is GCP's managed container runtime. Deploy a Docker container, it scales to zero, handles traffic. Better than Lambda for AI workloads because it supports longer timeouts and streaming.
 
 ```dockerfile
 FROM python:3.12-slim
@@ -283,9 +283,9 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-Note: Azure OpenAI uses **deployment names** not model names — you deploy a model, give it a name, and use that name in API calls.
+Note: Azure OpenAI uses **deployment names** not model names. You deploy a model, give it a name, and use that name in API calls.
 
-Claude is available via Azure Marketplace (not Azure OpenAI) — use the Anthropic SDK with an Azure-issued key.
+Claude is available via Azure Marketplace (not Azure OpenAI). Use the Anthropic SDK with an Azure-issued key.
 
 ### Azure ML — Training and MLOps
 
@@ -350,7 +350,7 @@ api_key = client.get_secret("anthropic-api-key").value
 
 ## Cost Comparison: Managed vs Self-Hosted
 
-For frontier models (Claude, GPT-4o) you can't self-host — you pay the API price regardless of which cloud you route through.
+For frontier models (Claude, GPT-4o) you can't self-host. You pay the API price regardless of which cloud you route through.
 
 For open models (Llama 3 8B, Mistral 7B):
 
@@ -375,6 +375,33 @@ Below ~10M tokens/month, managed inference APIs (Together AI, Fireworks, Groq) a
 - Azure OpenAI uses deployment names, not model names in API calls
 - Below ~10M tokens/month, managed inference APIs (Together AI, Fireworks, Groq) are cheaper than self-hosting
 - Store API keys in Secrets Manager (AWS), Secret Manager (GCP), or Key Vault (Azure), not env vars
+
+## Common Failure Cases
+
+**Lambda SSE streaming drops mid-response due to 29-second timeout**  
+Why: AWS API Gateway has a 29-second integration timeout; LLM responses for complex queries regularly exceed this.  
+Detect: streaming response cuts off at ~29 seconds; the client receives a partial response followed by a gateway timeout.  
+Fix: switch from Lambda to ECS or Fargate for streaming LLM endpoints; or use WebSocket + API Gateway WebSocket API.
+
+**Bedrock model access not enabled in the target region causes runtime failure**  
+Why: Claude models on Bedrock must be individually enabled per region in the AWS console; they're not on by default.  
+Detect: `botocore.exceptions.ClientError: Access denied to model` at runtime despite correct IAM permissions.  
+Fix: navigate to Bedrock → Model access in each required region and enable the models before deployment.
+
+**Cloud Run container fails health check and never receives traffic**  
+Why: the health check endpoint returns non-2xx during the LLM model warm-up period; Cloud Run marks the container unhealthy and stops routing to it.  
+Detect: Cloud Run logs show container restarting repeatedly; health check endpoint returns 503 during startup.  
+Fix: add a startup probe with a long `initialDelaySeconds`; return 200 from `/health` immediately even before the model is fully loaded, and use `/ready` for readiness.
+
+**Azure OpenAI deployment name vs model name confusion causes `DeploymentNotFound`**  
+Why: Azure OpenAI uses the deployment name (user-defined) not the model name in API calls; mixing them up returns a 404.  
+Detect: `openai.NotFoundError: The API deployment ... does not exist`.  
+Fix: verify deployment names in the Azure OpenAI Studio portal; model is `gpt-4o` from OpenAI but your deployment might be named `gpt-4o-prod` — use the deployment name.
+
+**Secrets stored in environment variables are exposed in crash dumps and logs**  
+Why: unhandled exceptions that print the full environment expose API keys stored as `ANTHROPIC_API_KEY=...` in the stack trace.  
+Detect: check your application logs for lines containing `API_KEY` or `SECRET`; rotate any keys found.  
+Fix: store secrets in Secrets Manager / Secret Manager / Key Vault; retrieve at runtime, never export to process environment for non-critical apps.
 
 ## Connections
 

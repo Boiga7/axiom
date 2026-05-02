@@ -1,4 +1,4 @@
-﻿---
+---
 type: experiment
 category: rag
 para: resource
@@ -72,7 +72,7 @@ print(f"Speed ratio: BGE-M3 is {bgem3_time/fe_time:.1f}x slower than fastembed")
 | BGE-M3 dense only | 0.74 | 0.91 | 0.78 |
 | BGE-M3 dense+sparse | 0.79 | 0.93 | 0.82 |
 
-BGE-M3's sparse retrieval mode (colbert-style) gives the most meaningful quality lift — worth the speed cost if retrieval quality is the bottleneck.
+BGE-M3's sparse retrieval mode (colbert-style) gives the most meaningful quality lift. Worth the speed cost if retrieval quality is the bottleneck.
 
 ## Connections
 - [[rag/embeddings]] — MTEB leaderboard and embedding model comparison

@@ -163,6 +163,28 @@ This prevents the bug class from recurring without the team noticing.
 
 ---
 
+## Common Failure Cases
+
+**Ice cream cone suite accumulated because E2E tests were the easiest to add**
+Why: early in a project, Playwright tests are written for every feature because they give visible proof of working software, while unit tests are treated as optional; by the time the problem is noticed the E2E suite takes 45 minutes.
+Detect: E2E test count exceeds unit test count, or the E2E suite runtime is more than 3x the unit + integration runtime combined.
+Fix: add an E2E-to-unit test ratio check to the CI pipeline; for each new E2E test merged without a corresponding unit test, flag it in the PR template and require justification.
+
+**Coverage target passed by testing trivial code while complex business logic has no tests**
+Why: `--cov-fail-under=80` is met because getters, properties, and simple utility functions are well-covered, but the order-processing or pricing logic that does the real work is at 20%.
+Detect: run `pytest --cov=src --cov-report=term-missing` and sort by coverage; modules with high cyclomatic complexity (use `radon cc src/`) but low coverage are the risk.
+Fix: supplement line coverage thresholds with a critical-module coverage requirement: identify the 5 highest-complexity modules and enforce 90%+ branch coverage on them specifically in CI.
+
+**Mutation testing reveals the test suite passes despite zero meaningful assertions**
+Why: tests call functions and check that no exception is raised but never assert the return value or state change, achieving line coverage without catching any real bugs.
+Detect: run `mutmut run` on a module and find that the mutation score is below 30% — most mutations survive because tests don't verify outputs.
+Fix: require assertion-per-test-case as a code review checklist item; use mutmut or cosmic-ray in CI for the most critical modules, failing the build if the mutation score drops below a threshold.
+
+**Staging environment diverges from production, making the integration test tier unreliable**
+Why: staging uses a different database version, a scaled-down Redis with different eviction policy, or a mocked third-party that doesn't match the real API's rate limits and response shapes.
+Detect: bugs are regularly found in production that cannot be reproduced in staging, and the root cause traces back to an environment difference.
+Fix: enforce environment parity via Infrastructure as Code (the same Terraform module parameterised for scale); run quarterly parity checks comparing all service versions and config values between staging and production.
+
 ## Connections
 
 - [[qa/test-case-design]] — techniques for deriving effective test cases

@@ -10,7 +10,7 @@ tldr: Operating QA at team and organisation scale — strategy, metrics, team bu
 
 # QA Leadership and Quality Strategy
 
-Operating QA at team and organisation scale — strategy, metrics, team building, and stakeholder communication.
+Operating QA at team and organisation scale. Strategy, metrics, team building, and stakeholder communication.
 
 ---
 

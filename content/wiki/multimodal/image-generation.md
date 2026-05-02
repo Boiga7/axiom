@@ -12,7 +12,7 @@ tldr: Flux.1 has displaced Stable Diffusion as the open-source default; DALL-E 3
 
 > **TL;DR** Flux.1 has displaced Stable Diffusion as the open-source default; DALL-E 3 leads on text-prompt adherence; all major image gen models are accessible via API with no local GPU needed.
 
-Text-to-image diffusion models are a separate model family from LLMs — they don't generate tokens, they denoise latent vectors. As of 2026, frontier image gen is accessible via API (no GPU required) or via Replicate/Fal.ai for managed open-source hosting.
+Text-to-image diffusion models are a separate model family from LLMs. They don't generate tokens, they denoise latent vectors. As of 2026, frontier image gen is accessible via API (no GPU required) or via Replicate/Fal.ai for managed open-source hosting.
 
 ---
 
@@ -60,7 +60,7 @@ with open("output.png", "wb") as f:
     f.write(image_bytes)
 ```
 
-DALL-E 3 internally rewrites prompts for better results. `revised_prompt` shows what it actually used — useful for debugging why the output differs from expectations.
+DALL-E 3 internally rewrites prompts for better results. `revised_prompt` shows what it actually used. Useful for debugging why the output differs from expectations.
 
 **Pricing (2026-05-01):** HD 1024×1024: $0.080 per image. Standard: $0.040.
 
@@ -68,7 +68,7 @@ DALL-E 3 internally rewrites prompts for better results. `revised_prompt` shows 
 
 ## Flux via Replicate
 
-Replicate hosts Flux.1 as a managed API — no GPU setup required:
+Replicate hosts Flux.1 as a managed API. No GPU setup required:
 
 ```python
 import replicate
@@ -178,7 +178,7 @@ DALL-E 3 is best for prompts with text that must be readable in the image (label
 
 ## Running Flux Locally
 
-For privacy or cost reasons — requires ~12GB VRAM (RTX 3080 or better):
+For privacy or cost reasons. Requires ~12GB VRAM (RTX 3080 or better):
 
 ```bash
 pip install diffusers transformers accelerate
@@ -220,6 +220,23 @@ image.save("output.png")
 - Midjourney v6: Discord-only interface, no API, highest aesthetic consistency for artistic styles
 - Ideogram 2: the best model for generating images with readable text embedded in them
 - Local Flux: needs ~12GB VRAM (fp16) or ~8GB with quantisation via `diffusers`
+
+## Common Failure Cases
+
+**DALL-E 3 `revised_prompt` shows the model silently modified the prompt to remove a key element, explaining why the output looks wrong**  
+Why: DALL-E 3 internally rewrites prompts to improve safety and coherence; if your prompt contains elements that trigger content policy checks, those elements are quietly removed from the revised prompt, producing an image that omits them entirely with no error.  
+Detect: the output image is missing a requested element; checking `response.data[0].revised_prompt` shows the missing element was stripped; the API returned 200 with no error.  
+Fix: log `revised_prompt` on every call; if the revised prompt is substantially different from the original, surface this to the user or retry with a differently-phrased prompt; avoid terms that commonly trigger policy rewrites.
+
+**Replicate Flux generation returns a stale cached URL that has expired, causing `httpx.get(image_url)` to return a 403**  
+Why: Replicate output URLs are signed and expire after a few minutes; if the pipeline stores the URL and downloads it later (or the download is delayed), the URL is no longer valid.  
+Detect: `httpx.get(image_url)` returns HTTP 403 or 410; the URL timestamp in the path shows it was generated more than a few minutes ago.  
+Fix: download the image immediately after generation completes and persist the bytes, not the URL; never cache Replicate or Fal.ai output URLs for more than a few minutes.
+
+**Local Flux pipeline runs out of VRAM mid-generation because `enable_model_cpu_offload()` was not called and the full model is loaded to GPU**  
+Why: `FluxPipeline.from_pretrained()` loads the full model to GPU by default; at bfloat16, Flux.1 [dev] requires ~24GB VRAM; without CPU offloading, the pipeline crashes with `CUDA out of memory` on cards with less than 24GB.  
+Detect: `torch.cuda.OutOfMemoryError` occurs during pipeline loading or on the first inference call; `nvidia-smi` shows GPU memory near capacity before the generation starts.  
+Fix: always call `pipe.enable_model_cpu_offload()` after loading the pipeline; this reduces peak VRAM to ~12GB by swapping model components between CPU and GPU as needed; for cards with <8GB, use Flux [schnell] with quantisation.
 
 ## Connections
 

@@ -17,7 +17,7 @@ Microsoft Azure. Third cloud globally but dominant in enterprise (Microsoft 365 
 ## Compute
 
 ### Azure Virtual Machines
-VMs. Size families: B-series (burstable, cheap), D-series (general), F-series (compute), E-series (memory), N-series (GPU — ND A100 for ML). Spot VMs (Spot) up to 90% cheaper, evicted with 30s notice.
+VMs. Size families: B-series (burstable, cheap), D-series (general), F-series (compute), E-series (memory), N-series (GPU, ND A100 for ML). Spot VMs (Spot) up to 90% cheaper, evicted with 30s notice.
 
 ### Azure App Service
 PaaS for web apps and APIs. No container management. Supports .NET, Java, Python, Node.js, PHP. Scale out via App Service Plan. Deployment slots for blue/green with traffic splitting.
@@ -114,7 +114,7 @@ Managed ML platform. Compute clusters for training, managed endpoints for infere
 ## Networking
 
 ### Azure Virtual Network (VNet)
-Regional network. Subnets within a VNet. VNet Peering for inter-VNet connectivity. Azure Firewall for egress control. Network Security Groups (NSGs) — stateful firewall at subnet/NIC level (same role as AWS Security Groups).
+Regional network. Subnets within a VNet. VNet Peering for inter-VNet connectivity. Azure Firewall for egress control. Network Security Groups (NSGs). Stateful firewall at subnet/NIC level (same role as AWS Security Groups).
 
 ### Application Gateway / Azure Front Door
 - **Application Gateway** — regional L7 LB with WAF.
@@ -128,12 +128,12 @@ Expose PaaS services (Storage, SQL, Cosmos) inside your VNet via private IP. Eli
 ## Security and Identity
 
 ### Entra ID (formerly Azure Active Directory)
-Microsoft's cloud identity platform. The de facto enterprise identity standard — most corporates already have it. Conditional Access for MFA enforcement. B2C variant for customer identity. SAML/OIDC federation.
+Microsoft's cloud identity platform. The de facto enterprise identity standard. Most corporates already have it. Conditional Access for MFA enforcement. B2C variant for customer identity. SAML/OIDC federation.
 
-Managed Identities (system-assigned or user-assigned) — replace service account credentials for Azure-to-Azure auth.
+Managed Identities (system-assigned or user-assigned). Replace service account credentials for Azure-to-Azure auth.
 
 ### Azure Key Vault
-Secrets, keys, certificates. HSM-backed key generation. Soft-delete and purge protection prevent accidental deletion. Reference Key Vault secrets directly in App Service/AKS via CSI driver — secret mounts, no code change required.
+Secrets, keys, certificates. HSM-backed key generation. Soft-delete and purge protection prevent accidental deletion. Reference Key Vault secrets directly in App Service/AKS via CSI driver. Secret mounts, no code change required.
 
 ```python
 from azure.identity import DefaultAzureCredential
@@ -190,6 +190,33 @@ az identity create --name my-identity --resource-group my-rg
 | NSG | Security Groups |
 
 ---
+
+## Common Failure Cases
+
+**Managed Identity not available at container startup**
+Why: The identity endpoint inside the container becomes reachable a few seconds after pod/container start, not instantly.
+Detect: `DefaultAzureCredential` raises `CredentialUnavailableError` during the first seconds of a pod lifecycle or after a node restart.
+Fix: Add retry logic with exponential backoff around the first credential acquisition, or set `AZURE_AUTHORITY_HOST` and use `ManagedIdentityCredential` directly with a retry policy.
+
+**AKS workload identity token not refreshed after expiry**
+Why: OIDC service account tokens have a bounded TTL; if the application caches the token long-term rather than re-requesting it from the projected volume, calls fail after expiry.
+Detect: Azure SDK calls return 401 errors roughly 24 hours after pod start without restart.
+Fix: Always acquire credentials via `DefaultAzureCredential()` per-request or use the Azure SDK's built-in token refresh; never cache the raw access token string.
+
+**Cosmos DB request units (RU/s) exceeded causing 429s**
+Why: Each Cosmos operation consumes RUs proportional to document size and index complexity; default provisioned throughput is often undersized for write spikes.
+Detect: HTTP 429 responses with the header `x-ms-retry-after-ms` from the Cosmos SDK; `TotalRequestUnits` metric in Azure Monitor spikes to provisioned limit.
+Fix: Enable autoscale RU/s, or switch to serverless mode for spiky workloads; reduce RU consumption by projecting only needed fields and limiting cross-partition queries.
+
+**Blob Storage SAS token leaks causing unauthorised access**
+Why: SAS tokens embedded in client-side code or logged in application traces grant full access until expiry.
+Detect: Azure Storage diagnostic logs showing access from unexpected IPs or outside business hours using the same SAS key.
+Fix: Generate SAS tokens server-side with short TTLs (minutes, not hours), use User Delegation SAS (backed by Entra ID), and rotate the storage account key if a token is compromised.
+
+**App Service deployment slot swap not warming up dependencies**
+Why: Slot swap completes before the new slot's app has established database connection pools or loaded in-memory caches, causing errors immediately after swap.
+Detect: Elevated error rates and high latency in the first 30-60 seconds after a slot swap.
+Fix: Use the `applicationInitialization` element in `web.config` or a startup probe endpoint that returns 200 only after warming up critical dependencies before the swap completes.
 
 ## Connections
 

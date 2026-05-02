@@ -10,7 +10,7 @@ tldr: "QA's role in application security: running automated security scans, coor
 
 # Security Testing (QA)
 
-QA's role in application security: running automated security scans, coordinating with pen testers, and integrating security checks into the test pipeline. Not a replacement for dedicated security engineering — but QA is often the team that operationalises security checks in CI.
+QA's role in application security: running automated security scans, coordinating with pen testers, and integrating security checks into the test pipeline. Not a replacement for dedicated security engineering, but QA is often the team that operationalises security checks in CI.
 
 ---
 
@@ -169,6 +169,33 @@ QA's role when an external pen test runs:
 5. Write regression tests for every confirmed vulnerability found
 
 ---
+
+## Common Failure Cases
+
+**ZAP DAST scan floods CI with false positives and gets ignored**
+Why: ZAP's default active scan generates hundreds of low-confidence alerts on first run, so the team sets `fail_action: warn` and stops reading the report.
+Detect: the ZAP artifact is uploaded but never opened, or the report contains 200+ alerts with no triage history.
+Fix: create a `.zap/rules.tsv` file to ignore known false positives, run ZAP in passive-only baseline mode first to establish a clean baseline, then enable active scan rules incrementally; set `fail_action: fail` for any alert severity above Medium.
+
+**SAST tool runs but its findings are never actioned**
+Why: Bandit or Semgrep is added to CI but results land in an artifact nobody reviews, and no threshold is set to fail the build.
+Detect: the SAST report artifact exists in CI but there are zero tickets linked to security findings over the past quarter.
+Fix: configure Bandit with `-ll` to surface only Medium+ severity findings, and fail CI (`--exit-zero` removed) when High findings are present; triage Medium findings in the sprint security review.
+
+**Access control test uses the wrong authentication fixture**
+Why: `customer_a_client` and `customer_b_client` fixtures share the same underlying test account due to a sequence collision or fixture scope mismatch, so the cross-customer access test never actually tests isolation.
+Detect: the test passes even when access control is intentionally removed from the endpoint under test.
+Fix: use `factory.Sequence` or UUID-based email generation to guarantee unique users per test, and add an assertion that the two clients return different user IDs from the `/me` endpoint.
+
+**Dependency scanner only runs on the application layer, not the Docker image**
+Why: `safety check` and `npm audit` scan declared dependencies but miss vulnerabilities in OS packages inside the base image.
+Detect: Trivy image scan against the published Docker image returns CVEs that the application-layer scan reported as clean.
+Fix: add `trivy image` scanning to the CI step that runs after `docker build`, and fail on CRITICAL severity; schedule a weekly scheduled workflow to scan existing images that haven't been rebuilt recently.
+
+**Pen test regression tests never added to the suite**
+Why: vulnerabilities confirmed during a pen test are fixed in code, but the corresponding automated regression test is not written, allowing the same class of issue to re-emerge in a future refactor.
+Detect: cross-reference the list of confirmed pen test findings against the test files — any finding without a test file covering the exact scenario is a gap.
+Fix: make writing a regression test for every confirmed pen test finding a mandatory step in the vulnerability remediation workflow, tracked in the same ticket as the fix.
 
 ## Connections
 [[qa-hub]] · [[qa/risk-based-testing]] · [[qa/qa-in-devops]] · [[technical-qa/security-automation]] · [[security/guardrails]] · [[cs-fundamentals/auth-patterns]]

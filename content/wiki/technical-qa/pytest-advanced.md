@@ -10,7 +10,7 @@ tldr: Beyond basic fixtures and assertions — plugins, custom hooks, fixture ar
 
 # Advanced pytest Patterns
 
-Beyond basic fixtures and assertions — plugins, custom hooks, fixture architecture, and test organisation at scale.
+Beyond basic fixtures and assertions. Plugins, custom hooks, fixture architecture, and test organisation at scale.
 
 ---
 
@@ -287,6 +287,33 @@ timeout = 30                  # global timeout, override per test
 ```
 
 ---
+
+## Common Failure Cases
+
+**Fixture teardown silently skipped after test exception**
+Why: if a fixture body raises before `yield`, pytest skips teardown for that fixture scope entirely.
+Detect: resources (DB connections, temp files) accumulate in CI and cause out-of-resource failures on later runs.
+Fix: wrap the fixture body in `try/finally` so teardown always executes regardless of setup errors.
+
+**Session-scoped fixture caches stale state across parametrized runs**
+Why: `scope="session"` creates the fixture once; if a test mutates shared state, subsequent tests see contaminated data.
+Detect: tests pass individually but fail when the full suite runs; order changes produced by `pytest-randomly` expose the bug.
+Fix: downscope to `"module"` or `"function"`, or use a savepoint/rollback pattern so mutations are never committed.
+
+**`pytest-asyncio` auto-mode skips async fixtures silently**
+Why: `asyncio_mode = "auto"` applies to test functions but not to fixtures in older versions; async fixtures without `@pytest.fixture` and explicit `asyncio_mode` are collected as sync and never awaited.
+Detect: async fixture always returns a coroutine object rather than the intended value; tests pass with wrong data.
+Fix: upgrade to `pytest-asyncio >= 0.23` and verify `asyncio_mode = "auto"` is set under `[tool.pytest.ini_options]` in `pyproject.toml`.
+
+**`--cov-fail-under` never triggers because coverage runs on the wrong source root**
+Why: `--cov=src` resolves relative to the directory pytest is invoked from; running pytest from a subdirectory or inside a Docker container shifts the root.
+Detect: coverage report shows 0% or omits expected modules even though tests pass.
+Fix: set `source = ["src"]` under `[tool.coverage.run]` as an absolute anchor and always invoke pytest from the project root.
+
+**Parametrized test IDs collide and produce duplicate node IDs**
+Why: auto-generated IDs use `repr()` of the parameter; two parameters with identical `repr` (e.g., two different objects that both print as `<object>`) produce the same ID, causing pytest to skip the duplicate.
+Detect: fewer test invocations than expected; `pytest --collect-only` shows fewer nodes than the parametrize list length.
+Fix: always supply explicit `pytest.param(..., id="...")` strings for complex parameter types.
 
 ## Connections
 

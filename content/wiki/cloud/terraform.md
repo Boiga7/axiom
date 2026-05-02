@@ -114,7 +114,7 @@ terraform import aws_s3_bucket.existing my-existing-bucket  # bring existing int
 
 ## Modules
 
-Reusable units of configuration. Treat modules like functions — single responsibility, well-defined interface.
+Reusable units of configuration. Treat modules like functions. Single responsibility, well-defined interface.
 
 ```
 modules/
@@ -147,7 +147,7 @@ module "database" {
 }
 ```
 
-Use **Terraform Registry** for community modules: `source = "terraform-aws-modules/vpc/aws"`. Pin versions with `version = "5.8.1"` — never use unversioned community modules in production.
+Use **Terraform Registry** for community modules: `source = "terraform-aws-modules/vpc/aws"`. Pin versions with `version = "5.8.1"`. Never use unversioned community modules in production.
 
 ---
 
@@ -241,7 +241,7 @@ jobs:
 
 ## OpenTofu
 
-Community fork of Terraform under MPL 2.0 (Terraform moved to BSL in 2023). Drop-in replacement — same HCL, same providers, same CLI. Choose OpenTofu for new projects if licence is a concern.
+Community fork of Terraform under MPL 2.0 (Terraform moved to BSL in 2023). Drop-in replacement. Same HCL, same providers, same CLI. Choose OpenTofu for new projects if licence is a concern.
 
 ```bash
 # Install
@@ -250,6 +250,28 @@ tofu init && tofu plan && tofu apply
 ```
 
 ---
+
+## Common Failure Cases
+
+**`terraform apply` succeeds but the state file is corrupted due to a concurrent apply**
+Why: two CI pipelines ran `terraform apply` simultaneously; the S3 backend was configured but the DynamoDB lock table was missing or misconfigured, so both writes raced and one partially overwrote the state.
+Detect: subsequent `terraform plan` outputs `Error: error reading state: ...` or shows resources as needing creation that already exist; the S3 state file size is suspiciously small.
+Fix: restore the state from S3 versioning (enable S3 versioning on the state bucket before anything else); add the missing DynamoDB lock table; never run concurrent applies without locking.
+
+**`terraform plan` shows a resource will be destroyed and recreated unexpectedly**
+Why: a resource property that forces replacement (e.g., `name`, `availability_zone`, `encrypted`) was changed in the module or provider update, and Terraform cannot update it in-place.
+Detect: `plan` output shows `-/+` beside the resource with `forces replacement` annotation; the change was unintentional or from a provider version bump.
+Fix: use `terraform state mv` to rename the resource if only the logical name changed; for provider-forced replacements, pin the provider version until the impact is assessed; use `lifecycle { prevent_destroy = true }` on critical stateful resources.
+
+**Sensitive variable leaks into the plan output or state file**
+Why: a `variable` of type `string` that holds a password or API key was not marked `sensitive = true`, so Terraform echoes it in the plan output and stores it in plaintext in the state file.
+Detect: `terraform plan` output or `terraform state show` displays literal secret values; CI logs contain the secret.
+Fix: mark all secret variables `sensitive = true`; use Vault or Secrets Manager data sources rather than variables for secrets; encrypt the state bucket with KMS and restrict state file access via IAM.
+
+**Module version bump destroys and recreates a managed resource due to provider changes**
+Why: a community module was updated (e.g., `terraform-aws-modules/vpc/aws` from 4.x to 5.x), and the new version renames or removes a resource logical name, causing Terraform to see it as a different resource.
+Detect: `terraform plan` after updating the `version` constraint shows a large number of resource deletions and recreations; the plan diff is dominated by the module's internal resources.
+Fix: read the module's upgrade guide before bumping the version; use `terraform state mv` to rename resources to the new module's internal paths; test module upgrades in a non-production workspace first.
 
 ## Connections
 

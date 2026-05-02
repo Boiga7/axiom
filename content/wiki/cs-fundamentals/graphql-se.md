@@ -282,5 +282,27 @@ schema = strawberry.Schema(
 
 ---
 
+## Common Failure Cases
+
+**N+1 query problem causing database overload**
+Why: resolving a list of N items triggers a separate DB query for each item's related field (e.g., each `Product` fetches its `Category` individually).
+Detect: `EXPLAIN ANALYZE` or query logs show hundreds of near-identical single-row queries per request; response latency scales linearly with list size.
+Fix: wrap every resolver that loads a related entity in a DataLoader so all keys in a request batch into one query.
+
+**Deeply nested query causes exponential database load**
+Why: GraphQL lets clients request arbitrarily nested data (e.g., users → orders → products → category → products → ...); a malicious or naive query can trigger exponential resolver calls.
+Detect: a single query brings down the DB; `EXPLAIN` shows query count or join depth explodes.
+Fix: add `QueryDepthLimiter` (max 6–10 levels) and a complexity budget; reject queries that exceed the threshold before any resolver runs.
+
+**Mutation returning stale data due to missing re-fetch**
+Why: a mutation updates a record and returns the pre-update object from the resolver; the client caches the stale response and displays wrong data.
+Detect: the UI shows the old value immediately after a successful mutation; a hard refresh shows the correct value.
+Fix: in the mutation resolver, re-fetch the record from the DB after the write and return the fresh version, not the input data.
+
+**Over-fetching via schema introspection in production**
+Why: introspection is enabled by default; attackers use it to enumerate every type, field, and resolver in the schema, enabling targeted injection or business logic attacks.
+Detect: access logs show `__schema` queries from unexpected clients.
+Fix: disable introspection in production (`schema = strawberry.Schema(..., introspection=False)`) and expose it only in staging/dev environments.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/grpc]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/microservices-patterns]] · [[technical-qa/graphql-testing]] · [[web-frameworks/fastapi]]

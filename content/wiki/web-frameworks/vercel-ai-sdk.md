@@ -12,7 +12,7 @@ tldr: Vercel AI SDK is the standard library for LLM-powered web apps — unified
 
 > **TL;DR** Vercel AI SDK is the standard library for LLM-powered web apps — unified provider interface (Anthropic, OpenAI, Google), streaming primitives (streamText, useChat), and automatic tool-call cycles without SSE boilerplate.
 
-The standard library for building LLM-powered web applications. Works with any provider (Anthropic, OpenAI, Google, Mistral) through a unified interface. The main value is streaming UX — responses appear token-by-token without you writing SSE infrastructure.
+The standard library for building LLM-powered web applications. Works with any provider (Anthropic, OpenAI, Google, Mistral) through a unified interface. The main value is streaming UX. Responses appear token-by-token without you writing SSE infrastructure.
 
 ---
 
@@ -187,7 +187,7 @@ const model = useCase === 'reasoning'
   : openai('gpt-4o')
 ```
 
-The `streamText` interface is identical regardless of provider — swap models without changing application code.
+The `streamText` interface is identical regardless of provider. Swap models without changing application code.
 
 ---
 
@@ -270,6 +270,28 @@ const modelWithReasoning = wrapLanguageModel({
 - `createDataStreamResponse` + `dataStream.writeData()` sends structured metadata alongside the token stream
 - `wrapLanguageModel` adds middleware (logging, caching, reasoning extraction) without changing route handlers
 - `APICallError.isInstance(error)` is the typed check for provider errors in catch blocks
+
+## Common Failure Cases
+
+**`useChat` messages show `undefined` for tool call results because the tool response is not returned to `toDataStreamResponse`**  
+Why: when a tool is defined in `streamText`, the tool's `execute` function must return a serialisable value; if it returns `undefined` or throws an unhandled error, the data stream protocol cannot include the tool result and `useChat` receives an incomplete message.  
+Detect: messages in the `useChat` state show the tool call but no tool result; the UI stops updating mid-stream; adding `console.log` in `execute` shows the function threw an error.  
+Fix: wrap `execute` in try/catch and return a structured error object on failure; never return `undefined` — return `{ error: "..." }` instead.
+
+**`generateObject` fails with `NoObjectGeneratedError` because the Zod schema is too complex for the model to satisfy**  
+Why: deeply nested Zod schemas with many optional fields and complex validation constraints require the model to produce very specific JSON; the model occasionally fails to satisfy all constraints in one generation, and without retries, `generateObject` throws.  
+Detect: `NoObjectGeneratedError` in production logs; the error is intermittent — most requests succeed but 1-5% fail on complex schemas.  
+Fix: set `mode: 'json'` on the model call if the provider supports JSON mode; simplify the schema by removing optional fields that are rarely needed; add retry logic with `maxRetries` on the `generateObject` call.
+
+**`maxSteps` exceeded because a tool always returns data that triggers another tool call**  
+Why: with `maxSteps: 5`, if each tool result causes the model to call another tool rather than generating a final text response, the cycle exhausts `maxSteps` and the generation ends without a complete response.  
+Detect: streaming ends abruptly after exactly `maxSteps` tool calls with no final assistant text; the model's reasoning shows it expected to make another tool call.  
+Fix: add a `finalize` tool that the model can call when it is ready to give the final answer; or instruct the model in the system prompt to provide a text summary after tool results rather than continuing to call tools.
+
+**`useChat` sends the full conversation history on every request, causing token costs to grow unboundedly in long conversations**  
+Why: `useChat` maintains the full `messages` array and sends all messages on every submit; a 50-turn conversation sends 50 messages worth of tokens on turn 51, causing costs and latency to grow linearly.  
+Detect: LLM API costs per session grow with session length; the `messages` array passed to `streamText` on the server grows without bound.  
+Fix: implement a message window on the server-side API route: `messages.slice(-20)` to keep only the last 20 messages; or add summarisation to compress older context.
 
 ## Connections
 

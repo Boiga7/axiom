@@ -96,7 +96,7 @@ HAVING COUNT(*) > 100;  -- only countries with more than 100 users
 6. ORDER BY
 7. LIMIT
 
-This explains why you can't use a SELECT alias in WHERE — WHERE runs before SELECT.
+This explains why you can't use a SELECT alias in WHERE, WHERE runs before SELECT.
 
 ---
 
@@ -325,6 +325,33 @@ for user in users:
 users = session.query(User).options(joinedload(User.orders)).all()
 # Now a single query fetches users + orders
 ```
+
+## Common Failure Cases
+
+**N+1 query pattern slows pages to a crawl under load**
+Why: accessing a relationship attribute inside a loop issues one SQL query per row rather than a single JOIN, causing hundreds of queries for a page that should use one.
+Detect: enable SQLAlchemy query logging or use `EXPLAIN` — a page load shows dozens of identical `SELECT` statements differing only in the ID parameter.
+Fix: use `joinedload()` or `selectinload()` in the initial query to eager-load the relationship in one round trip.
+
+**Missing index on a heavily filtered or joined column**
+Why: without an index, PostgreSQL performs a sequential table scan (O(n)) on every query; at millions of rows this dominates latency.
+Detect: `EXPLAIN ANALYZE` shows `Seq Scan` with high actual rows; query time degrades linearly as the table grows.
+Fix: add a `CREATE INDEX` on the column(s) used in `WHERE`, `JOIN ON`, and `ORDER BY`; for multi-column filters, match the column order to the query's selectivity pattern.
+
+**Transaction isolation level too loose for concurrent writes**
+Why: the default `READ COMMITTED` level allows non-repeatable reads; two concurrent transactions can both read the same inventory count as positive and both decrement past zero.
+Detect: negative balances or oversold inventory despite application-level checks; race conditions that only appear under concurrent load tests.
+Fix: use `SERIALIZABLE` isolation or explicit `SELECT ... FOR UPDATE` row-level locking for inventory, financial balances, or any check-then-act pattern.
+
+**Using `WHERE column = NULL` instead of `IS NULL`**
+Why: SQL `NULL` comparisons with `=` always return `NULL` (not `TRUE`), so the condition never matches any row.
+Detect: a query filtering for missing values returns zero rows even though the table has nulls in that column.
+Fix: always write `WHERE column IS NULL` or `WHERE column IS NOT NULL`.
+
+**Soft-delete filter omitted from a query, leaking deleted rows**
+Why: when rows are soft-deleted via `deleted_at IS NULL`, forgetting the filter in any query or ORM scope returns deleted data to the application.
+Detect: deleted records appear in API responses or counts; `SELECT COUNT(*) FROM table` is higher than the application's displayed total.
+Fix: use a default query scope (SQLAlchemy `@declared_attr` filter or Django model manager) that appends `WHERE deleted_at IS NULL` automatically.
 
 ## Connections
 

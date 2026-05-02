@@ -10,7 +10,7 @@ tldr: Library that spins up real Docker containers in tests — actual PostgreSQ
 
 # Testcontainers
 
-Library that spins up real Docker containers in tests — actual PostgreSQL, Redis, Kafka, etc. instead of mocks. Tests talk to real services; no fakes, no mocks, no in-memory substitutes.
+Library that spins up real Docker containers in tests. Actual PostgreSQL, Redis, Kafka, etc. instead of mocks. Tests talk to real services; no fakes, no mocks, no in-memory substitutes.
 
 ---
 
@@ -198,7 +198,7 @@ def wiremock():
 
 ## CI Performance
 
-Testcontainers pull images on first run — cache Docker images in CI:
+Testcontainers pull images on first run. Cache Docker images in CI:
 
 ```yaml
 # GitHub Actions — cache Docker images
@@ -211,6 +211,28 @@ Testcontainers pull images on first run — cache Docker images in CI:
 Use `scope="module"` or `scope="session"` for containers shared across tests in a class/session. Starting one Postgres per test function is slow; one per module is fast.
 
 ---
+
+## Common Failure Cases
+
+**Container pulls fail in CI because Docker Hub rate limits the runner**
+Why: GitHub Actions shared runners share a Docker Hub IP; anonymous pulls are rate-limited to 100 per 6 hours per IP, causing container startup to fail mid-pull.
+Detect: CI logs show `toomanyrequests: You have reached your pull rate limit` during test setup; tests fail before any test code runs.
+Fix: authenticate the runner with a Docker Hub account (`docker login` with a secret) or pre-cache images using `ScribeMD/docker-cache` action to avoid repeated pulls.
+
+**`scope="module"` container is reused across unrelated test files, leaking state**
+Why: when multiple test modules share a module-scoped container, each module gets its own container instance, but if fixtures are imported rather than defined locally, pytest may bind them to the wrong scope.
+Detect: unique-constraint failures or stale-data errors appear in the second test module that uses the container.
+Fix: always define container fixtures in the same `conftest.py` that owns the test files using them; verify scope with `pytest --setup-show`.
+
+**Port mapping returns `0` on first call before container is ready**
+Why: `get_exposed_port()` returns the mapped port as soon as Docker assigns it, but the service inside the container may not yet be listening; tests that connect immediately get a `Connection refused` error.
+Detect: tests fail intermittently with connection errors in the first few seconds of CI; retrying the test manually always passes.
+Fix: add an explicit readiness probe (HTTP check, TCP socket, or `wait_for_logs`) before yielding the container from the fixture.
+
+**Kafka container test consumes no messages due to offset positioning**
+Why: `auto_offset_reset="earliest"` only applies to new consumer groups; if the consumer group ID was used in a prior test run within the same session, the offset is already at the end and the consumer sees nothing.
+Detect: Kafka consumer test collects zero messages despite the producer successfully publishing; the assertion `len(messages) == 1` fails.
+Fix: use a unique consumer group ID per test (e.g., incorporate `uuid4()`) to guarantee the offset always starts at the beginning.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/database-testing]] · [[technical-qa/api-testing]] · [[technical-qa/wiremock]] · [[technical-qa/contract-testing]] · [[cloud/docker]]

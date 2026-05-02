@@ -54,7 +54,7 @@ ORDER BY embedding <=> '[0.1, 0.2, ...]'::vector
 LIMIT 5;
 ```
 
-Managed options: Supabase (pgvector built-in), Neon, AWS RDS. **Start here** if you already have Postgres — no new infrastructure needed.
+Managed options: Supabase (pgvector built-in), Neon, AWS RDS. **Start here** if you already have Postgres. No new infrastructure needed.
 
 **Limitations:** Not optimised for billion-vector scale; query latency increases significantly above ~10M vectors.
 
@@ -179,6 +179,33 @@ For most production RAG: Qdrant or Weaviate with their native hybrid search. The
 - Production RAG hybrid search: BM25 + dense in parallel, merged with reciprocal rank fusion (RRF)
 - Weaviate: built-in BM25 + dense hybrid without needing separate Elasticsearch layer
 - Pinecone serverless: no cluster management, pay-per-query; vendor lock-in risk
+
+## Common Failure Cases
+
+**pgvector query latency degrades above ~1M rows despite HNSW index**  
+Why: the HNSW index was built incrementally as rows were inserted; the graph structure fragments over many small inserts.  
+Detect: `EXPLAIN ANALYZE` shows HNSW scan time climbing; rebuilding the index from scratch on the same data is 5x faster.  
+Fix: drop the index, bulk-load all data, then `CREATE INDEX CONCURRENTLY` on the populated table with high `maintenance_work_mem`.
+
+**Cosine similarity returns wrong neighbours after embedding model change**  
+Why: new documents were embedded with a different model than the existing index; vectors from different models are not comparable.  
+Detect: similarity scores for known-similar pairs drop near zero; retrieval quality degrades without any code or data change.  
+Fix: re-embed the entire collection with the new model before deploying; never mix embeddings from different models in the same collection.
+
+**Chroma in-memory client loses all data on process restart**  
+Why: `chromadb.Client()` was used instead of `PersistentClient`; data exists only in RAM.  
+Detect: collection is empty after server restart; queries return no results on a collection that appeared populated.  
+Fix: use `chromadb.PersistentClient("./chroma_db")` in any environment where data must survive process restarts.
+
+**Qdrant filtered search is 10x slower than unfiltered**  
+Why: the payload field being filtered is not indexed; Qdrant rescores every matching payload point instead of using the HNSW graph.  
+Detect: filtered query latency is much higher than unfiltered for the same k; Qdrant logs show a full payload scan.  
+Fix: call `create_payload_index` on frequently filtered fields; Qdrant then uses a combined vector+payload index.
+
+**Pinecone upsert silently succeeds but queries return no results**  
+Why: vectors were upserted to the wrong namespace, or the index dimension doesn't match the embedding model used at query time.  
+Detect: upsert response shows success but `query` returns 0 matches; check namespace parameter and vector dimension in both calls.  
+Fix: always specify namespace explicitly; verify index dimension matches embedding model output dimension at creation time.
 
 ## Connections
 

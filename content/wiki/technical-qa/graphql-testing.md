@@ -269,5 +269,27 @@ async def test_order_status_subscription():
 
 ---
 
+## Common Failure Cases
+
+**MockedProvider variable mismatch causes silent no-op**
+Why: the mock `request.variables` object in `MockedProvider` is compared by deep equality; a single extra or missing field means no mock matches and the query hangs.
+Detect: the component renders indefinitely in loading state despite a mock being defined; `console.error` shows "no more mocked responses" in Apollo.
+Fix: log the actual variables reaching the mock in a `newData` function, then align the mock object field-for-field.
+
+**N+1 test passes because DataLoader batches were primed by a previous test**
+Why: the DataLoader cache from a session-scoped fixture is warm at test start, so the N+1 query count is artificially low.
+Detect: the N+1 test passes in isolation but fails after you add a `cache_clear()` call or reset the fixture scope to `function`.
+Fix: clear the DataLoader cache in the fixture teardown and run the N+1 assertion against a cold cache.
+
+**Schema diff tool misses breaking changes from field renames**
+Why: `graphql-inspector diff` flags field removals but not cases where a field is deprecated and a new one added with the same data — clients relying on the old name break silently.
+Detect: a client returns `undefined` for a field it previously used, but CI schema diff reported no breaking changes.
+Fix: add a consumer-driven contract test (using Pact or a schema snapshot) that explicitly verifies field names clients depend on.
+
+**Subscription test hangs when the second event never arrives**
+Why: `async for result in client.subscribe(...)` blocks indefinitely if the server only emits one event before the test assertion breaks.
+Detect: the test times out rather than failing with an assertion error.
+Fix: wrap the subscription loop in `asyncio.wait_for` with a reasonable timeout, and use `break` once the expected number of events have been collected.
+
 ## Connections
 [[tqa-hub]] · [[technical-qa/wiremock]] · [[technical-qa/testcontainers]] · [[technical-qa/playwright-advanced]] · [[cs-fundamentals/api-design]] · [[test-automation/testing-llm-apps]]

@@ -12,7 +12,7 @@ tldr: BM25+dense hybrid with RRF (k=60) is the production standard — BM25 catc
 
 > **TL;DR** BM25+dense hybrid with RRF (k=60) is the production standard — BM25 catches exact-match keywords dense misses; dense catches semantic matches BM25 misses; Qdrant and Weaviate have native hybrid support.
 
-Combining sparse (BM25) and dense (vector) retrieval. Neither alone is best — hybrid consistently outperforms either approach across benchmarks. The standard recipe: BM25 + dense embedding search, merged with Reciprocal Rank Fusion (RRF).
+Combining sparse (BM25) and dense (vector) retrieval. Neither alone is best. Hybrid consistently outperforms either approach across benchmarks. The standard recipe: BM25 + dense embedding search, merged with Reciprocal Rank Fusion (RRF).
 
 ---
 
@@ -207,7 +207,7 @@ def encode_splade(text: str) -> dict:
     return {"indices": indices, "values": values}
 ```
 
-SPLADE bridges the gap between BM25 and dense — it's a learned sparse model that generalises across synonyms.
+SPLADE bridges the gap between BM25 and dense. It's a learned sparse model that generalises across synonyms.
 
 ---
 
@@ -231,6 +231,33 @@ SPLADE bridges the gap between BM25 and dense — it's a learned sparse model th
 - SPLADE: learned sparse model that maps terms to synonyms; bridges BM25 and dense approaches
 - pgvector + rank_bm25: viable for teams already on PostgreSQL at small-medium scale
 - BM25 parameters k1 ∈ [1.2, 2.0], b=0.75 — defaults work; no tuning needed
+
+## Common Failure Cases
+
+**BM25 scores and cosine similarities on different scales cause naive weighted sum to favour one channel**  
+Why: BM25 returns scores in range 0-20+; cosine similarity is 0-1; a simple weighted sum is dominated by whichever has larger absolute values.  
+Detect: fusion results are nearly identical to the BM25-only or dense-only results; one channel is effectively ignored.  
+Fix: use RRF instead of weighted sum; RRF is rank-based and immune to scale differences.
+
+**SPLADE sparse vectors not generated for queries, only for documents**  
+Why: SPLADE requires encoding both query and document with the same model; using BM25 tokenisation for queries while SPLADE encodes documents creates a mismatch.  
+Detect: sparse scores are all zero for queries when you switch to SPLADE indexing.  
+Fix: encode queries with the SPLADE model too; don't mix SPLADE document vectors with BM25 query vectors.
+
+**Qdrant FusionQuery returns fewer results than expected**  
+Why: the Prefetch `limit` on each channel caps candidates before fusion; if both channels return few results, the fused list is thin.  
+Detect: `client.query_points(... limit=10)` returns 3 results despite thousands of documents in the collection.  
+Fix: increase Prefetch `limit` to 50-100 per channel before applying FusionQuery; the final `limit` trims to the desired count.
+
+**pgvector + Python BM25 hybrid doesn't scale past ~100K chunks**  
+Why: `BM25Okapi` from `rank_bm25` loads the full corpus into RAM and recomputes on every query; no indexing.  
+Detect: query latency grows linearly with corpus size; >500ms at 100K chunks.  
+Fix: use Elasticsearch or OpenSearch for BM25 at scale; both have ANN vector search and native hybrid support.
+
+**RRF k=60 flattens ranking when only 10-20 candidates are in each list**  
+Why: with a 10-item list, rank 1 scores `1/61` and rank 10 scores `1/70` — nearly identical; the fusion result is effectively random.  
+Detect: RRF output order doesn't match intuition for small result sets; top result switches randomly between runs.  
+Fix: use a smaller k (10-20) or use a cross-encoder reranker instead of RRF when candidate lists are small.
 
 ## Connections
 

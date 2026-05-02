@@ -10,7 +10,7 @@ tldr: A test that sometimes passes and sometimes fails on the same code is a fla
 
 # Flaky Test Management
 
-A test that sometimes passes and sometimes fails on the same code is a flaky test. Flaky tests erode trust in the test suite — engineers start re-running failures instead of investigating them.
+A test that sometimes passes and sometimes fails on the same code is a flaky test. Flaky tests erode trust in the test suite. Engineers start re-running failures instead of investigating them.
 
 ---
 
@@ -166,6 +166,28 @@ If a test stays flaky for 2 sprints: delete it, not quarantine it.
 ```
 
 ---
+
+## Common Failure Cases
+
+**Quarantine marker added but no owner assigned**
+Why: the test is skipped so CI is green, but no one is accountable for fixing it, and it sits quarantined indefinitely.
+Detect: quarantined tests older than one sprint with no linked issue or assignee in the skip reason string.
+Fix: enforce a policy that every `@pytest.mark.quarantine` must include an issue URL and owner in the `reason` field.
+
+**Retry masking a real regression**
+Why: `--reruns=3` hides a newly introduced bug because the test passes on the second attempt by coincidence (e.g., timing window is wide enough most of the time).
+Detect: a test that always requires retries after a specific commit was merged.
+Fix: treat a test that consistently needs retries after a code change as a failing test, not a flaky one — investigate the commit.
+
+**Time-sensitive assertion without frozen time**
+Why: `assert subscription.expires_at > datetime.now()` passes in the morning and fails at night when the test data was created hours earlier.
+Detect: tests that fail only in certain CI time slots or on specific weekdays.
+Fix: use `freezegun` or `jest.useFakeTimers()` to pin the clock for any assertion involving relative time.
+
+**Order-dependent setup left in a shared fixture**
+Why: a `session`-scoped fixture creates a resource that one test modifies permanently, so any test that runs after is working with corrupted state.
+Detect: a test that passes in isolation but fails when the full suite runs; `pytest --randomly-seed` surfaces different failures on different seeds.
+Fix: downscope the fixture to `function` or implement proper teardown that restores state.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[technical-qa/playwright-advanced]] · [[qa/test-reporting]] · [[qa/qa-in-devops]] · [[qa/regression-testing]]

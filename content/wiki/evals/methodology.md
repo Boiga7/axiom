@@ -1,4 +1,4 @@
-﻿---
+---
 type: concept
 category: evals
 tags: [evals, llm-as-judge, swe-bench, braintrust, inspect-ai, evaluation, benchmarks]
@@ -12,7 +12,7 @@ tldr: LLM evaluation methodology — only 52% of AI orgs have evals in place, ma
 
 > **TL;DR** LLM evaluation methodology — only 52% of AI orgs have evals in place, making this the most common gap; covers offline/online/agent/RAG eval types, framework selection, golden set construction, and CI integration.
 
-The discipline of systematically measuring model and system performance. Only 52% of organisations building AI products have evaluations in place — making this the single most common gap between teams shipping confidently and teams shipping on hope.
+The discipline of systematically measuring model and system performance. Only 52% of organisations building AI products have evaluations in place. Making this the single most common gap between teams shipping confidently and teams shipping on hope.
 
 > [Source: Perplexity research, 2026-04-29] [unverified]
 
@@ -27,7 +27,7 @@ Without evals you cannot:
 - Trust that your agent handles edge cases
 - Justify a production rollout to stakeholders
 
-The problem is not that people don't know evals matter — it's that building an eval suite feels slower than shipping. It isn't. Debugging production failures without evals takes 10x longer.
+The problem is not that people don't know evals matter. It's that building an eval suite feels slower than shipping. It isn't. Debugging production failures without evals takes 10x longer.
 
 ---
 
@@ -93,9 +93,9 @@ For a new project: start with promptfoo for prompt iteration, add Braintrust onc
 
 The gold standard for real-world coding ability. 2,294 real GitHub issues from 12 popular Python repos. The model must generate a patch that passes the repo's test suite.
 
-Why it matters: previous coding benchmarks (HumanEval, MBPP) are solved by memorisation. SWE-bench Verified requires actual program synthesis. Claude 3.7 Sonnet reached 70.3% — the current frontier.
+Why it matters: previous coding benchmarks (HumanEval, MBPP) are solved by memorisation. SWE-bench Verified requires actual program synthesis. Claude 3.7 Sonnet reached 70.3%. The current frontier.
 
-Use SWE-bench to compare models for coding tasks. Don't benchmark on HumanEval alone — it's saturated.
+Use SWE-bench to compare models for coding tasks. Don't benchmark on HumanEval alone. It's saturated.
 
 ### General Knowledge: MMLU
 
@@ -143,7 +143,7 @@ Run RAGAS on every chunking, embedding, or reranking change before deploying.
 
 ## Eval for Agents
 
-Agent evaluation is harder — the output is a trajectory (sequence of tool calls), not a single answer.
+Agent evaluation is harder. The output is a trajectory (sequence of tool calls), not a single answer.
 
 **Metrics:**
 - **Task completion rate** — did the agent accomplish the goal?
@@ -192,6 +192,33 @@ evalcheck wraps pytest with LLM-specific assertions and posts a comment to the P
 - inspect-ai: Anthropic's framework; best for safety and agent trajectory evals
 - RAGAS: four RAG metrics — faithfulness, answer relevancy, context precision, context recall
 - Agent eval metrics: task completion rate, step efficiency, tool accuracy, safety
+
+## Common Failure Cases
+
+**LLM judge scores correlate with length, not quality**  
+Why: the judge was not calibrated against humans; it rewards verbose answers because verbosity superficially looks thorough.  
+Detect: Spearman correlation between answer length and judge score > 0.5; human raters disagree with judge rankings for short-but-correct answers.  
+Fix: add rubric criteria that explicitly penalise padding; run inter-annotator agreement between judge and 3 humans on a calibration set.
+
+**Eval set contaminated by training data**  
+Why: golden set was assembled from the same source documents used to build the system prompt or fine-tune; the model effectively memorised these inputs.  
+Detect: eval scores are suspiciously high (>0.95) but production user satisfaction is much lower; performance drops on novel phrasing.  
+Fix: keep the eval set strictly held-out; prefer production log samples as eval inputs, not synthetic queries derived from training data.
+
+**CI eval blocks deploys on noise, not regressions**  
+Why: the regression threshold is too tight; natural LLM variance at temperature > 0 causes false failures on every other PR.  
+Detect: PRs fail evals when no prompt or code changed; re-running the same eval produces different pass/fail outcomes.  
+Fix: use temperature=0 for eval runs; set the regression threshold at 2–3x the observed variance on a fixed model.
+
+**Agent eval measures final answer only, misses tool misuse**  
+Why: the eval checks output correctness but ignores whether the agent called the right tools with correct arguments.  
+Detect: agent scores well on output quality but takes 3x more tool calls than necessary; intermediate step errors go undetected.  
+Fix: log and evaluate the full tool call trajectory; add step efficiency and tool accuracy as explicit eval metrics.
+
+**Golden set goes stale as the product evolves**  
+Why: expected outputs were written for an older product version; the model is now penalised for producing better-than-expected answers.  
+Detect: manual review of eval failures shows the model's answer is actually correct; human raters prefer the model output over the expected output.  
+Fix: version the golden set alongside the product; schedule a quarterly review; treat "model is right, expected is wrong" as a golden set bug.
 
 ## Connections
 

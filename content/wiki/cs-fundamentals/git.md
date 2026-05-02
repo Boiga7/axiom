@@ -104,7 +104,7 @@ D---E-------------F  main (F is the merge commit)
 
 ### Rebase
 
-Replays your branch's commits on top of another branch. Rewrites commit history — commits get new SHAs.
+Replays your branch's commits on top of another branch. Rewrites commit history. Commits get new SHAs.
 
 ```bash
 git switch feature/user-auth
@@ -312,6 +312,28 @@ git bisect good             # or: git bisect bad
 # Repeat until git identifies the culprit commit
 git bisect reset
 ```
+
+## Common Failure Cases
+
+**Force-pushing to a shared branch, overwriting teammates' commits**
+Why: `git push --force` on a branch others are working on rewrites the remote history; anyone who has already pulled will have diverged commits that are invisible to them.
+Detect: teammates report their branch is "behind" by a strange number of commits, or commits they authored no longer appear in `git log`.
+Fix: use `git push --force-with-lease` (fails if someone else has pushed since your last fetch) and never force-push to `main` or a branch with open PRs.
+
+**Rebasing a branch that has already been pushed and shared**
+Why: rebase rewrites commit SHAs; if others have based work on the old SHAs, their history diverges irrecoverably from yours.
+Detect: a teammate pulls your rebased branch and git reports "your branch has diverged" with hundreds of conflicting commits.
+Fix: only rebase local, un-pushed commits; once a branch is pushed and has active reviewers, use merge instead.
+
+**Secrets committed to history**
+Why: an API key or `.env` file gets staged and committed; even if removed in a subsequent commit, the secret is permanently in the history.
+Detect: `git log -S "sk-ant-"` or `trufflehog`/`gitleaks` scanning the repo finds the secret in a past commit.
+Fix: revoke the secret immediately; remove it from history with `git filter-repo --path .env --invert-paths` and force-push; add `.env` to `.gitignore` before the next commit.
+
+**`git add .` committing unintended files**
+Why: `git add .` stages everything in the working tree, including compiled artifacts, editor swap files, and local config that should never be tracked.
+Detect: `git diff --staged` reveals `.pyc` files, `node_modules/`, or `.env.local` in the staged set.
+Fix: always use `git add <specific-file>` or `git add -p`; maintain a comprehensive `.gitignore` that covers build outputs and editor files.
 
 ## Connections
 

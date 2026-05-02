@@ -195,6 +195,28 @@ dms.start_replication_task(
 
 ---
 
+## Common Failure Cases
+
+**DMS CDC lag growing instead of converging before cutover**
+Why: The source database is generating transactions faster than the DMS replication instance can apply them to the target, often because the replication instance class is undersized or the target has slow write throughput.
+Detect: `CDCLatencySource` and `CDCLatencyTarget` CloudWatch metrics grow monotonically rather than staying near zero; lag exceeds the cutover window.
+Fix: Scale up the replication instance class (use compute-optimised: `dms.c5.4xlarge`), reduce write amplification on the target (disable target indexes during full load, re-enable before CDC), and verify source IOPS are not bottlenecked.
+
+**Route 53 DNS cutover not propagating due to long TTL**
+Why: The DNS record TTL was not lowered to 60 seconds well before the cutover window; clients cache the old IP for hours after the DNS update.
+Detect: Some users still hit the old endpoint minutes or hours after the DNS change; `dig api.myapp.com` from different resolvers returns different IPs.
+Fix: Lower the TTL to 60 seconds at least 24 hours before the planned cutover, then change the record; raise the TTL back to normal after the migration is confirmed stable.
+
+**Landing zone SCPs blocking Wave 1 workloads from deploying**
+Why: SCPs applied during Wave 0 (region restrictions, tag enforcement, encryption requirements) conflict with legacy app behaviour that the team did not audit before starting Wave 1.
+Detect: CloudTrail shows `AccessDenied` events with `ExplicitDeny` from `organizations` principal; the deployment pipeline or app crashes immediately after rehost.
+Fix: Run a dry-run using IAM Access Analyzer and the SCP simulator against a sample of the Wave 1 app's required actions before migrating; create SCP exceptions for legacy apps in a transitional OU and tighten them after re-platforming.
+
+**Re-architect underestimated by 2-3x causing wave schedule collapse**
+Why: Monolith decomposition or microservices extraction surfaces hidden coupling, missing API contracts, and shared database dependencies that were not visible before work started.
+Detect: Re-architect items in a wave are consistently 2-3x over their time estimates; integration tests fail on shared-schema boundaries.
+Fix: Apply the strangler fig pattern — wrap the monolith with a thin proxy and migrate one domain at a time rather than a big-bang rewrite; budget explicitly for the dual-write period where both old and new paths are live.
+
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-networking-advanced]] · [[cloud/finops-cost-management]] · [[cloud/blue-green-deployment]] · [[cloud/platform-engineering]]

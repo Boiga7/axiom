@@ -48,7 +48,7 @@ Query → Embed → Vector similarity search in Redis
   hit: return cached response   miss: call LLM, embed, store
 ```
 
-Similarity threshold is the key tuning parameter — typically cosine similarity ≥ 0.93.
+Similarity threshold is the key tuning parameter, typically cosine similarity ≥ 0.93.
 
 ### Implementation
 
@@ -228,7 +228,7 @@ Typical hit rates:
 
 ## Prompt Caching (Anthropic-side)
 
-Distinct from semantic caching — this is handled automatically by the Anthropic API when you mark prefixes with `cache_control`. You don't need Redis for this.
+Distinct from semantic caching. This is handled automatically by the Anthropic API when you mark prefixes with `cache_control`. You don't need Redis for this.
 
 ```python
 response = client.messages.create(
@@ -329,6 +329,33 @@ langfuse.log_event("cache_hit" if hit else "cache_miss", {"similarity": similari
 - Minimum query volume for semantic caching to be worthwhile: ~1,000/day
 - Never cache: creative generation, real-time data, high-stakes decisions, streaming responses
 - Prompt caching (Anthropic-side) is distinct from Redis semantic caching — it happens inside the API
+
+## Common Failure Cases
+
+**Semantic cache returns wrong answer because similarity threshold is too low**  
+Why: cosine similarity ≥ 0.90 matches queries that are related but not equivalent; "What is the refund policy?" and "How do I request a refund?" retrieve the same cached answer even if they need different responses.  
+Detect: user-reported incorrect answers; cache hit rate seems high but satisfaction drops; compare cached answer to what a fresh call would return.  
+Fix: raise similarity threshold to 0.93-0.95; lower the threshold only for stable, definitional content where near-synonyms truly do need the same answer.
+
+**Redis scan_iter for cache lookup is O(N) and stalls under load**  
+Why: the naive implementation iterates all cache keys to find the nearest embedding; at 10,000+ entries this takes seconds.  
+Detect: cache lookup latency exceeds 500ms at moderate cache size; Redis CPU usage spikes on lookups.  
+Fix: implement RediSearch with HNSW vector indexing from day one; the migration cost is high if done reactively.
+
+**Prompt cache write tokens charged on every call due to short TTL**  
+Why: Anthropic's ephemeral cache TTL is 5 minutes; if requests come more than 5 minutes apart, the cache is recreated and charged 1.25x each time.  
+Detect: `cache_creation_input_tokens` is large on most calls; `cache_read_input_tokens` is rarely populated.  
+Fix: switch to `"persistent"` cache_control (1-hour TTL) for large static documents; use ephemeral only for dynamic context that changes frequently.
+
+**Cache entries from production bleed into staging after env variable misconfiguration**  
+Why: both environments point to the same Redis instance; staging queries return production-cached responses.  
+Detect: staging returns answers referencing production-specific data; cache keys have no environment prefix.  
+Fix: prefix all cache keys with the environment: `f"{ENV}:llm_cache:{hash}"`; use separate Redis instances for production and staging.
+
+**Stale cache serves outdated answers after knowledge base update**  
+Why: cache entries have a TTL of 1 hour but the underlying documents were updated; users receive the pre-update answer.  
+Detect: cache hit returns information that contradicts the current document; cache entries predate the last corpus update timestamp.  
+Fix: implement versioned cache keys tied to the corpus version; flush the relevant prefix on every corpus update.
 
 ## Connections
 

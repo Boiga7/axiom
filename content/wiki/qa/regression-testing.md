@@ -10,7 +10,7 @@ tldr: Verifying that previously working functionality hasn't been broken by new 
 
 # Regression Testing
 
-Verifying that previously working functionality hasn't been broken by new changes. The primary value of an automated test suite — it prevents known-good behaviour from silently degrading.
+Verifying that previously working functionality hasn't been broken by new changes. The primary value of an automated test suite. It prevents known-good behaviour from silently degrading.
 
 ---
 
@@ -28,7 +28,7 @@ The cost of a regression bug:
 
 ## Regression Test Selection
 
-You cannot re-run every test on every commit — it would take hours. Select intelligently.
+You cannot re-run every test on every commit. It would take hours. Select intelligently.
 
 **Risk-based selection:**
 - Always run: unit tests, fast integration tests, critical-path E2E
@@ -127,7 +127,7 @@ git bisect reset
 
 ## Visual Regression
 
-For UI changes — screenshots compared against baseline.
+For UI changes. Screenshots compared against baseline.
 
 ```typescript
 // Playwright visual regression
@@ -146,6 +146,28 @@ playwright test --update-snapshots
 ```
 
 ---
+
+## Common Failure Cases
+
+**Smoke suite grows beyond 2 minutes — developers stop waiting for it**
+Why: tests are added to the smoke suite without removing lower-value ones; after 18 months it runs in 8 minutes and developers merge without waiting for results.
+Detect: measure smoke suite wall-clock time in CI; anything over 2 minutes on a standard runner indicates the suite has drifted from its purpose.
+Fix: audit the smoke suite quarterly and move any test that is not testing a critical path (login, health, one core transaction) into the `core` or `full` tier; enforce the 2-minute budget as a CI step that fails if exceeded.
+
+**Regression test written after the fix — test always passes, never validates the fix**
+Why: the developer writes the regression test against the fixed code rather than writing it against the broken code first; the test passes immediately and was never in a failing state.
+Detect: the test cannot be made to fail by reverting the fix — meaning the test does not actually cover the fault condition.
+Fix: enforce the rule: write the regression test first, run it against the unfixed code, confirm it fails, then apply the fix; a test that never failed is not a regression test.
+
+**Visual regression baselines committed to git LFS with wrong branch pointer**
+Why: `playwright test --update-snapshots` is run on a feature branch and the snapshots are committed there; after merge the main branch baseline is now the post-feature-change state, and the previous visual state is lost.
+Detect: the `dashboard.png` snapshot in `main` reflects the new feature UI rather than the pre-feature baseline; reverting the feature would cause visual tests to fail on `main`.
+Fix: never run `--update-snapshots` on a feature branch for existing snapshots; run it on `main` only after the intentional UI change has been reviewed and approved; store a `SNAPSHOT_CHANGELOG.md` with the reason for each update.
+
+**`git bisect` not used — regression investigation takes hours instead of minutes**
+Why: the developer looks at the last 20 commits manually trying to find the regression, spending 2+ hours instead of letting bisect binary-search the commit history.
+Detect: a regression investigation takes more than 30 minutes on a codebase with a clean git history.
+Fix: as a first response to any regression, run `git bisect start`, mark the known good tag and bad commit, and run the failing test on each bisect step; bisect identifies the culprit commit in log2(n) steps.
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/qa-metrics]] · [[technical-qa/test-architecture]] · [[technical-qa/visual-testing]]

@@ -10,7 +10,7 @@ tldr: Automated comparison of UI screenshots against approved baselines to catch
 
 # Visual Testing
 
-Automated comparison of UI screenshots against approved baselines to catch unintended visual regressions. Complements functional tests — you can test that a button is clickable without testing that it looks correct.
+Automated comparison of UI screenshots against approved baselines to catch unintended visual regressions. Complements functional tests. You can test that a button is clickable without testing that it looks correct.
 
 ---
 
@@ -188,6 +188,28 @@ await expect(page).toHaveScreenshot('dashboard.png', {
 ```
 
 ---
+
+## Common Failure Cases
+
+**Baselines generated on macOS differ from CI Linux renders, causing permanent failures**
+Why: font rendering, anti-aliasing, and sub-pixel hinting differ between macOS and Linux; a baseline committed from a developer machine will always fail on a Linux CI runner even with `maxDiffPixelRatio: 0.02`.
+Detect: visual tests pass locally but always fail in CI with small pixel differences concentrated around text edges.
+Fix: generate and commit baselines only inside CI (run `--update-snapshots` in a dedicated CI job) and never commit locally-generated baselines; use Docker to ensure the local render environment matches CI.
+
+**CSS animations cause non-deterministic screenshots**
+Why: screenshots captured mid-animation differ from those captured at rest; even `animations: 'disabled'` in Playwright does not stop JavaScript-driven animations or third-party libraries that use `requestAnimationFrame` directly.
+Detect: intermittent pixel diffs always in the same region of the page (e.g., a loading spinner, a carousel); failures are not reproducible on re-run.
+Fix: add a `waitForLoadState('networkidle')` plus an explicit wait for animation-completion attributes (e.g., `page.wait_for_selector('[data-animation-done]')`), or use `page.evaluate("document.getAnimations().forEach(a => a.finish()")` to force all animations to completion.
+
+**`--update-snapshots` committed reflexively in CI, masking real regressions**
+Why: developers update snapshots to fix a failing build without reviewing the visual diff; a genuine regression (e.g., broken layout) is approved and the new broken state becomes the baseline.
+Detect: baseline images change in a PR but no corresponding UI change was made; the diff shows significant structural layout changes.
+Fix: enforce a policy where snapshot updates require a separate PR with mandatory design/QA review; never run `--update-snapshots` in the main CI gate.
+
+**Dynamic content not masked produces false-positive failures on every run**
+Why: timestamps, user avatars, session IDs, and ad slots change between runs; without masking, every screenshot differs from the baseline.
+Detect: visual tests fail on every PR regardless of code changes; the diff always shows the same dynamic region.
+Fix: identify all dynamic regions with `data-testid` attributes and add them to the `mask` array in `toHaveScreenshot`; verify the masked regions are covered by functional tests elsewhere.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/cypress]] · [[qa/cross-browser-testing]] · [[qa/regression-testing]] · [[qa/accessibility-testing]]

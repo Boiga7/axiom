@@ -10,7 +10,7 @@ tldr: Designing HTTP APIs that are intuitive, consistent, and maintainable. Good
 
 # API Design
 
-Designing HTTP APIs that are intuitive, consistent, and maintainable. Good API design is about the consumer's experience — the API is a product, not just an implementation detail.
+Designing HTTP APIs that are intuitive, consistent, and maintainable. Good API design is about the consumer's experience. The API is a product, not just an implementation detail.
 
 ---
 
@@ -94,6 +94,8 @@ Not:
   500 Internal Server Error — unexpected server error
   502 Bad Gateway       — upstream service failure
   503 Service Unavailable  — overloaded or maintenance
+
+> **→** [Request Flow Anatomy](/synthesis/request-flow-anatomy) — see how status codes map to failure points at each layer, from load balancer 502s to database-induced 503s.
 ```
 
 ---
@@ -228,6 +230,33 @@ Retry-After: 60   (when 429 is returned)
 ```
 
 ---
+
+## Common Failure Cases
+
+**Breaking change shipped without version bump**  
+Why: a field was renamed or a 200 response changed shape; existing consumers silently break.  
+Detect: consumer error rate spikes after a deploy; contract tests (if present) fail; check git diff for changed response shapes.  
+Fix: treat any field removal, rename, or type change as a breaking change; bump the API version and run both versions in parallel during the deprecation window.
+
+**404 vs 400 confusion causes client retry storms**  
+Why: client receives 404 for a malformed request (should be 400) and retries indefinitely thinking the resource will appear.  
+Detect: high rate of retries for a single endpoint; the 404s all carry the same malformed request shape.  
+Fix: return 400 with a descriptive `details` array for validation failures; 404 only when the resource legitimately does not exist.
+
+**Pagination cursor expires mid-iteration**  
+Why: cursor-based pagination encodes a timestamp or row offset that becomes invalid after a database vacuum or data mutation.  
+Detect: client reports missing or duplicate records mid-page; `nextCursor` decoding fails with a 400 or 404.  
+Fix: encode cursors as opaque base64 tokens; validate on decode and return a 422 with `CURSOR_EXPIRED` code when the cursor is stale.
+
+**Rate limit headers absent, client has no backoff signal**  
+Why: rate limiting was added at the infra layer (API Gateway) without forwarding `X-RateLimit-*` headers to the response.  
+Detect: clients receive 429 with no `Retry-After` header; they retry immediately, worsening the rate limit situation.  
+Fix: ensure the API Gateway propagates `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After` on every 429.
+
+**Nested resource URL depth causes routing conflicts**  
+Why: URLs deeper than 2 levels (`/a/:id/b/:id/c/:id`) have parameter name collisions and routing ambiguity across different frameworks.  
+Detect: requests to a deep route return the wrong resource; trace framework routing table for shadowed paths.  
+Fix: flatten the hierarchy; expose deep relationships via query params (`/items?orderId=456`) or a dedicated relationship endpoint.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/networking]] · [[technical-qa/api-testing]] · [[technical-qa/contract-testing]] · [[web-frameworks/fastapi]] · [[web-frameworks/django]]

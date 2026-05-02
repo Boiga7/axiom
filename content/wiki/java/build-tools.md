@@ -247,7 +247,7 @@ The `api` module generates Protobuf stubs; `web` and `batch` depend on it. This 
     key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
 ```
 
-Gradle also supports remote build caching — repeated CI builds share task output caches. Configure in `settings.gradle.kts`:
+Gradle also supports remote build caching. Repeated CI builds share task output caches. Configure in `settings.gradle.kts`:
 
 ```kotlin
 buildCache {
@@ -294,6 +294,28 @@ Native image limitation: reflection-heavy libraries (some LLM SDKs) need explici
 - Java 21 preview features: add `--enable-preview` to both compiler and test runner JVM args
 - GraalVM native: cold start drops from ~5s to <50ms; worth the complexity for Lambda/Cloud Run
 - Multi-module: keep Protobuf stubs in a shared `:api` module so both client and server compile against the same types
+
+## Common Failure Cases
+
+**Spring AI BOM and Spring Boot BOM define conflicting versions for a shared transitive dependency, causing `NoSuchMethodError` at runtime**  
+Why: `spring-ai-bom` pins specific versions of `jackson-databind`, `reactor-core`, and other libraries; if the Spring Boot BOM version is newer and resolves a higher version for the same artifact, Maven's nearest-definition rule picks one version — which may be incompatible with the other BOM's expectations.  
+Detect: the application starts but throws `NoSuchMethodError` or `ClassNotFoundException` on the first request involving AI components; `mvn dependency:tree` shows two different versions of the conflicting artifact.  
+Fix: import the Spring Boot BOM first in `dependencyManagement`, then Spring AI BOM so the AI BOM's pins take precedence; or explicitly lock the conflicting artifact to a version that satisfies both.
+
+**Gradle `--enable-preview` flag is added to `compilerArgs` but not to the Surefire/test runner JVM args, causing tests to fail with `UnsupportedClassVersionError`**  
+Why: Java preview features require `--enable-preview` at both compile time and runtime; if the test runner JVM does not have the flag, it refuses to load preview-enabled classes.  
+Detect: `mvn test` fails with `UnsupportedClassVersionError: Preview features are not enabled for ...`; the application JAR runs fine when launched with `--enable-preview` manually.  
+Fix: add `--enable-preview` to the Surefire plugin's `<argLine>` configuration and to Gradle's `tasks.withType<Test> { jvmArgs("--enable-preview") }`.
+
+**GraalVM native image build fails for LangChain4j because reflection metadata is missing for dynamically loaded model classes**  
+Why: native image does a static analysis that cannot see classes loaded via reflection at runtime; LangChain4j and the Anthropic SDK use reflection for JSON serialisation and model class instantiation, which native image removes unless explicit `reflect-config.json` hints are provided.  
+Detect: `native:compile` succeeds but the native binary crashes at runtime with `ClassNotFoundError` or `NullPointerException` in JSON deserialisation code paths.  
+Fix: run `mvn -Pagent spring-boot:run` to generate `reflect-config.json` via the GraalVM agent; commit the generated configs under `src/main/resources/META-INF/native-image/`; verify with a smoke test before deploying the native binary.
+
+**Gradle Kotlin DSL build file fails to resolve `implementation()` for a dependency that uses Groovy DSL string syntax**  
+Why: in Groovy DSL, `implementation 'group:artifact:version'` (space-separated, no parentheses) is valid; in Kotlin DSL, the equivalent requires `implementation("group:artifact:version")` with parentheses and quotes; mixing styles causes a compile error in the `.gradle.kts` file.  
+Detect: Gradle reports `Unresolved reference: implementation` or a type mismatch during build script compilation when copying dependency declarations from documentation that uses Groovy DSL.  
+Fix: always use quoted parenthetical syntax in `.gradle.kts`; use the IDE Kotlin DSL autocompletion (IntelliJ IDEA) to convert Groovy snippets; keep a reference `build.gradle.kts` with correct syntax to copy from.
 
 ## Connections
 

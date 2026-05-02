@@ -41,7 +41,7 @@ The model outputs "fromage". No fine-tuning required. This is **few-shot learnin
 
 ### 2. Scale Unlocks Capability
 
-GPT-3 demonstrated that capability is not just a function of architecture — it is a function of scale. Three settings tested:
+GPT-3 demonstrated that capability is not just a function of architecture. It is a function of scale. Three settings tested:
 
 | Setting | Description | Works well at |
 |---|---|---|
@@ -49,15 +49,15 @@ GPT-3 demonstrated that capability is not just a function of architecture — it
 | One-shot | One example | Medium+ models |
 | Few-shot | 10–100 examples | Consistently good at 175B |
 
-Smaller models (GPT-2, 1.3B) showed poor few-shot generalisation. Performance jumps non-linearly with scale — an early hint at emergent abilities.
+Smaller models (GPT-2, 1.3B) showed poor few-shot generalisation. Performance jumps non-linearly with scale. An early hint at emergent abilities.
 
 ### 3. 175B Parameters, 300B Training Tokens
 
-GPT-3 was trained on a mixture of Common Crawl (filtered), WebText2, Books1, Books2, and English Wikipedia. This showed that data quality matters as much as scale — filtered web data outperforms unfiltered.
+GPT-3 was trained on a mixture of Common Crawl (filtered), WebText2, Books1, Books2, and English Wikipedia. This showed that data quality matters as much as scale. Filtered web data outperforms unfiltered.
 
 ### 4. Decoder-Only Architecture
 
-GPT-3 is a pure decoder-only Transformer — causal attention masks prevent tokens attending to future positions. Every modern generative LLM (GPT-4, Claude, Llama, Mistral) uses this architecture.
+GPT-3 is a pure decoder-only Transformer. Causal attention masks prevent tokens attending to future positions. Every modern generative LLM (GPT-4, Claude, Llama, Mistral) uses this architecture.
 
 ---
 

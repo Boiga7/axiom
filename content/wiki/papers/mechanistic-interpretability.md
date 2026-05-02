@@ -35,9 +35,9 @@ The research programme of understanding what computations neural networks actual
 
 ### The Superposition Hypothesis
 
-Neurons in real networks are **polysemantic** — they activate for multiple unrelated concepts. This is not noise; it's a computational strategy.
+Neurons in real networks are **polysemantic**. They activate for multiple unrelated concepts. This is not noise; it's a computational strategy.
 
-Imagine representing 5 features in a 2D space. If features are sparse (most are zero in any given input), you can encode 5 features in 2 dimensions by placing them as nearly-orthogonal directions. Each neuron activates for multiple features, but rarely simultaneously — so interference is low.
+Imagine representing 5 features in a 2D space. If features are sparse (most are zero in any given input), you can encode 5 features in 2 dimensions by placing them as nearly-orthogonal directions. Each neuron activates for multiple features, but rarely simultaneously, so interference is low.
 
 ```
 Feature utilisation: if features are sparse with frequency p each
@@ -73,7 +73,7 @@ x̂ = decoder(h) = W_dec · h + b_dec         # reconstruct original activation
 Loss = ||x - x̂||² + λ||h||₁               # reconstruction + sparsity penalty
 ```
 
-The L1 penalty forces most feature activations to zero — recovering sparse, interpretable features from the superposed representation.
+The L1 penalty forces most feature activations to zero. Recovering sparse, interpretable features from the superposed representation.
 
 ### Results
 
@@ -96,7 +96,7 @@ Applied to a 1-layer transformer (MLP neuron activations):
 
 ### Safety-Relevant Findings
 
-Features for safety-relevant concepts were found and are causally active — not just correlated:
+Features for safety-relevant concepts were found and are causally active. Not just correlated:
 
 - Feature for "Assistant" token activates concepts related to helpfulness and subservience
 - Features activating on bioweapons-related requests cluster near dangerous-information features
@@ -116,7 +116,7 @@ This is the first interpretability work that directly touches production frontie
 | Model evaluation | Detecting dangerous capabilities or misaligned goals |
 | Mechanistic safety | Verifying alignment at the level of computations, not just behaviour |
 
-The long-term goal: verify that a model is safe by reading its "thoughts" — not just testing its outputs.
+The long-term goal: verify that a model is safe by reading its "thoughts". Not just testing its outputs.
 
 ---
 

@@ -237,5 +237,27 @@ async def provision_tenant_full(org_name: str, plan: str, admin_email: str) -> T
 
 ---
 
+## Common Failure Cases
+
+**Row-level security bypassed because `app.tenant_id` is not set on a connection from the pool**
+Why: a connection was reused from the pool after a previous request without re-executing `set_tenant()`, so the session-local setting carries over from the prior tenant.
+Detect: intermittent data leakage reports where one tenant sees rows belonging to another; `SELECT current_setting('app.tenant_id')` on a pooled connection returns a stale value.
+Fix: call `set_tenant()` at the start of every request inside the session context manager, not just on new connections; set `pool_pre_ping=True` in SQLAlchemy to discard stale connections.
+
+**Tenant provisioning partially succeeds and leaves orphaned resources**
+Why: `asyncio.gather` in `provision_tenant_full` has no rollback logic; if `provision_database` succeeds but `create_k8s_namespace` raises, the tenant is in the registry with a DB but no namespace.
+Detect: newly provisioned tenants report errors accessing the platform; checking the registry shows the tenant's `status` is not `active` but a DB exists.
+Fix: implement a saga with compensating transactions — on failure, delete the successfully created resources before raising; use an idempotent `status` field (`pending`, `active`, `failed`) so partial states can be retried.
+
+**ResourceQuota blocks legitimate workloads when a tenant exhausts their namespace quota**
+Why: a single noisy tenant runs a batch job that consumes all pods or CPU in the namespace, blocking other workloads including the operator that manages the tenant's infrastructure.
+Detect: `kubectl describe resourcequota -n tenant-<name>` shows the namespace at 100% of `pods` or `requests.cpu`; new pods are stuck `Pending`.
+Fix: separate workload quotas by priority class within the namespace, and set LimitRange defaults so containers that omit `resources` get sensible defaults rather than consuming unlimited quota.
+
+**Redis rate limit key persists across tenant ID reuse**
+Why: if a tenant account is deleted and the same `tenant_id` UUID is reused for a new tenant, the rate limit counters from the old tenant are still live in Redis under the same key, giving the new tenant a polluted starting count.
+Detect: a newly created tenant immediately hits rate limits on first use; checking Redis shows non-zero counter values for the new tenant's ID.
+Fix: never reuse tenant IDs; generate UUIDs v4 (essentially impossible to collide); also set Redis key TTLs to expire naturally within the rate limit window.
+
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/database-design]] · [[cloud/cost-optimisation-cloud]]

@@ -10,7 +10,7 @@ tldr: Architectural patterns for serverless compute — Lambda, Cloud Run, Azure
 
 # Serverless Patterns
 
-Architectural patterns for serverless compute — Lambda, Cloud Run, Azure Functions. Serverless shifts operations overhead to the cloud provider: no VM management, auto-scaling to zero, pay-per-invocation.
+Architectural patterns for serverless compute. Lambda, Cloud Run, Azure Functions. Serverless shifts operations overhead to the cloud provider: no VM management, auto-scaling to zero, pay-per-invocation.
 
 ---
 
@@ -217,6 +217,28 @@ gcloud run deploy myapp \
 ```
 
 ---
+
+## Common Failure Cases
+
+**Lambda cold start spikes cause API timeout errors under bursty traffic**
+Why: a sudden burst of concurrent requests forces Lambda to spin up many new execution environments simultaneously; each cold start takes 2–5 seconds for Python, causing the API Gateway's 29-second timeout to appear unreachable even though the function works fine in steady state.
+Detect: CloudWatch metrics show a spike in `InitDuration` correlating exactly with periods of high `ConcurrentExecutions`; error rate rises only at burst onset and recovers within minutes.
+Fix: configure provisioned concurrency scaled to your expected burst level; for AI inference Lambdas, pre-load the model outside the handler so the cold start cost is paid only once per container lifecycle.
+
+**SQS-triggered Lambda accumulates DLQ messages because retry logic is not idempotent**
+Why: a transient error causes Lambda to fail a batch, SQS retries all messages in the batch, and the non-idempotent handler processes some messages twice before failing on the duplicate, landing everything in the DLQ.
+Detect: DLQ depth grows steadily; DLQ messages have the same `MessageDeduplicationId` as messages already successfully processed elsewhere; downstream effects (charges, emails) appear duplicated.
+Fix: use Lambda Powertools idempotency decorator with a DynamoDB persistence store keyed on `messageId`; also set `FunctionResponseTypes: [ReportBatchItemFailures]` so only failed records are retried.
+
+**Event-driven saga leaves the system in an inconsistent state after a downstream Lambda fails**
+Why: there is no compensating event handler; if `ChargePayment` fails after `ReserveInventory` has already succeeded, inventory remains reserved with no corresponding order.
+Detect: inventory counts drift from expected values; orders in `pending` status with no payment event in the audit trail accumulate over time.
+Fix: publish a compensating event (`inventory.reservation.cancelled`) from the payment Lambda's error handler; implement a periodic reconciliation job that detects orphaned `pending` orders older than 5 minutes and triggers rollback.
+
+**Cloud Run container exits immediately after deploy with exit code 1**
+Why: the container's startup command fails because an environment variable or secret (`--set-secrets`) was not injected correctly — the secret version does not exist or the service account lacks Secret Manager accessor permission.
+Detect: Cloud Run console shows revision deployment failed with "Container failed to start"; Cloud Logging shows the startup error; `gcloud run services describe` shows no active revision.
+Fix: verify the secret version exists and is not destroyed; grant the Cloud Run service account the `roles/secretmanager.secretAccessor` IAM role on the specific secret; redeploy.
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-step-functions]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-api-gateway]] · [[cloud/cost-optimisation-cloud]] · [[llms/ae-hub]]

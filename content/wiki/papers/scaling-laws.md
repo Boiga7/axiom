@@ -29,7 +29,7 @@ L(D) ∝ D^(-0.095)    — loss as function of dataset tokens
 L(C) ∝ C^(-0.050)    — loss as function of compute (FLOPs)
 ```
 
-Loss decreases smoothly and predictably. No plateau — more compute always helps, though with diminishing returns.
+Loss decreases smoothly and predictably. No plateau. More compute always helps, though with diminishing returns.
 
 **Compute allocation (Kaplan's conclusion):**
 Given a fixed compute budget C, allocate most of it to model size. Kaplan found that the optimal token count grows much more slowly than model size:
@@ -39,7 +39,7 @@ N_optimal ∝ C^0.73   — scale parameters with compute
 D_optimal ∝ C^0.27   — token count grows much more slowly
 ```
 
-This led OpenAI to train GPT-3 on 300B tokens — far fewer than what would later be considered optimal.
+This led OpenAI to train GPT-3 on 300B tokens. Far fewer than what would later be considered optimal.
 
 ### Why Kaplan Was Wrong (Or Incomplete)
 
@@ -72,7 +72,7 @@ Both should scale equally. The practical implication:
 | Gopher | 280B | 5.6T | 300B (undertrained) |
 | Chinchilla | 70B | 1.4T | 1.4T (optimal) |
 
-Chinchilla (70B, 1.4T tokens) outperformed Gopher (280B, 300B tokens) — a 4× smaller model trained on more data beat the larger model.
+Chinchilla (70B, 1.4T tokens) outperformed Gopher (280B, 300B tokens). A 4× smaller model trained on more data beat the larger model.
 
 ### Practical Impact of the 20-Token Rule
 
@@ -89,11 +89,11 @@ Every post-2022 model applies Chinchilla scaling:
 
 ### Loss Predicts Downstream Performance
 
-Both papers show that cross-entropy loss on next-token prediction correlates with downstream task performance — validated the use of perplexity as a proxy metric during training.
+Both papers show that cross-entropy loss on next-token prediction correlates with downstream task performance. Validated the use of perplexity as a proxy metric during training.
 
 ### Emergent Capabilities Are Not Predicted by Scaling Laws
 
-Scaling laws predict smooth loss improvements. The emergence of capabilities (CoT reasoning, in-context learning) appears at discrete thresholds — this is not captured by the power law. The relationship between loss and capability is non-linear at specific scales.
+Scaling laws predict smooth loss improvements. The emergence of capabilities (CoT reasoning, in-context learning) appears at discrete thresholds. This is not captured by the power law. The relationship between loss and capability is non-linear at specific scales.
 
 ---
 

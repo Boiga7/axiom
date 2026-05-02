@@ -204,5 +204,27 @@ helm upgrade my-release my-chart -f values-prod.yaml --dry-run
 
 ---
 
+## Common Failure Cases
+
+**Hook job from a previous release blocks the next upgrade**
+Why: `helm.sh/hook-delete-policy` was not set (or set to `hook-succeeded` only), so a failed hook Job remains and the new upgrade cannot create a job with the same name.
+Detect: `helm upgrade` exits with `Error: rendered manifests contain a resource that already exists`; the old Job is visible in `kubectl get jobs`.
+Fix: manually delete the stale Job, then re-run the upgrade; add `before-hook-creation` to the hook's delete policy to prevent recurrence.
+
+**`helm dependency update` pulls a different sub-chart version than expected**
+Why: `Chart.yaml` uses a loose version range (e.g., `14.3.x`) and a new patch release broke a breaking change in the sub-chart API.
+Detect: `helm template` or `helm upgrade --dry-run` fails with an unexpected field error originating from the sub-chart.
+Fix: pin the dependency to the exact version in `Chart.yaml` and commit `Chart.lock` to source control so all environments use the identical chart.
+
+**OCI chart pull fails with "401 unauthorized" in CI**
+Why: the OCI registry authentication token was generated before the Helm client session started, or the credentials helper is not configured for the OCI URL prefix.
+Detect: `helm pull oci://...` returns `Error: unexpected status code 401`; the equivalent `docker pull` succeeds.
+Fix: run `helm registry login <registry>` explicitly before any OCI pull/push commands, using the same credential source as your Docker login.
+
+**`helm rollback` does not restore the application to a working state**
+Why: rollback restores the chart manifests to the previous revision but does not undo changes applied by hooks (e.g., a database migration run in `pre-upgrade` cannot be rolled back automatically).
+Detect: rollback completes without error but the application still errors because the schema no longer matches the old code version.
+Fix: write migrations to be backward-compatible (expand-contract pattern) so both old and new code can run against the same schema simultaneously.
+
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/argocd]] · [[cloud/github-actions]]

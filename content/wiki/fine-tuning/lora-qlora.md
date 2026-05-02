@@ -24,7 +24,7 @@ Every weight matrix W in a transformer can be approximated as:
 W_new = W_pretrained + ΔW
 ```
 
-During full fine-tuning, ΔW is the same shape as W — expensive for 7B+ parameter models.
+During full fine-tuning, ΔW is the same shape as W. Expensive for 7B+ parameter models.
 
 LoRA's key insight: **weight updates have low intrinsic rank.** ΔW can be approximated as:
 
@@ -110,7 +110,7 @@ The forward pass uses 4-bit weights; the backward pass dequantises to bf16 for g
 
 ### QLoRA vs LoRA Quality
 
-On most benchmarks: QLoRA is within 1–3% of LoRA in final quality. The quality gap is smaller for larger models — 70B QLoRA is near-indistinguishable from full LoRA on most tasks.
+On most benchmarks: QLoRA is within 1–3% of LoRA in final quality. The quality gap is smaller for larger models. 70B QLoRA is near-indistinguishable from full LoRA on most tasks.
 
 ---
 
@@ -164,6 +164,33 @@ model.print_trainable_parameters()
 - QLoRA quality penalty vs full LoRA: ~1-3% on most benchmarks; gap narrows at 70B
 - At inference: merge adapters (`merge_and_unload()`) for zero latency overhead
 - Trainable parameters in a typical 8B LoRA run: ~0.08% of total parameters
+
+## Common Failure Cases
+
+**Adapter outputs garbage after merging into base model**  
+Why: `merge_and_unload()` was called while the model was still in 4-bit mode; adapter weights were not dequantised before merging.  
+Detect: merged model produces repetitive or incoherent text on prompts that worked before merging; perplexity spikes post-merge.  
+Fix: load the base model in bf16 (not 4-bit) before calling `merge_and_unload`; dequantise adapters first if using bitsandbytes.
+
+**Eval loss diverges from train loss — overfitting on small dataset**  
+Why: dataset is too small (< 500 examples) for the chosen rank; the adapter memorises the training set.  
+Detect: training loss decreases smoothly but validation loss climbs after epoch 1–2.  
+Fix: reduce rank to 4 or 8; add `lora_dropout=0.1`; add more training examples or use data augmentation.
+
+**Style doesn't transfer because MLP layers are excluded**  
+Why: only attention projections are targeted; style and factual knowledge changes require MLP weight updates.  
+Detect: model format or structure improves but domain vocabulary and style remain unchanged after fine-tuning.  
+Fix: add MLP layers (`gate_proj`, `up_proj`, `down_proj`) to `target_modules`; re-run and compare validation loss.
+
+**Training loss spikes in early steps — alpha/rank ratio too large**  
+Why: `lora_alpha` is much larger than `r` (e.g., r=8, alpha=64); scaling factor `alpha/r = 8` amplifies early gradients and destabilises training.  
+Detect: loss spikes or diverges in the first 100 steps; gradient norm climbs far above baseline in training logs.  
+Fix: keep alpha = r or alpha = 2×r; reduce the learning rate; add `max_grad_norm=1.0` gradient clipping.
+
+**OOM during QLoRA backward pass despite fitting at inference**  
+Why: paged optimisers not enabled; gradient computation dequantises 4-bit weights to bf16 in-place, temporarily doubling VRAM usage.  
+Detect: OOM error fires during the backward pass, not the forward pass; VRAM spikes well above the inference baseline.  
+Fix: enable `bnb_4bit_use_double_quant=True`; use `paged_adamw_8bit` as the optimiser to offload optimiser states to CPU.
 
 ## Connections
 

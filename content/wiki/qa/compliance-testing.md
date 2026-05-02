@@ -10,7 +10,7 @@ tldr: Verifying software meets legal, regulatory, and standards requirements. Fa
 
 # Compliance Testing
 
-Verifying software meets legal, regulatory, and standards requirements. Failing compliance isn't just a bug — it's a regulatory risk. QA must understand which regulations apply and translate them into testable requirements.
+Verifying software meets legal, regulatory, and standards requirements. Failing compliance isn't just a bug. It's a regulatory risk. QA must understand which regulations apply and translate them into testable requirements.
 
 ---
 
@@ -205,6 +205,28 @@ jobs:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Testing the GDPR deletion endpoint but not cascading tables**
+Why: the primary user table is cleared, but references in orders, analytics events, session logs, or third-party forwarded data remain, leaving a GDPR violation that only surfaces during an audit.
+Detect: post-deletion database query against all tables containing a `user_id` column returns rows for the deleted user.
+Fix: maintain a schema registry of every table that stores PII; the deletion test must query all of them and assert zero rows after the deletion request.
+
+**PCI log-scrubbing tests that only check application logs**
+Why: card numbers can leak into infrastructure logs (load balancer access logs, cloud provider audit trails, APM traces) that the application layer never touches.
+Detect: PCI scan tool flags card-number patterns in CloudWatch or nginx access logs not covered by automated tests.
+Fix: extend log-scanning tests to cover all log destinations (application, infrastructure, APM, audit trail); run against a real transaction in a sandbox environment.
+
+**Compliance CI job runs on a schedule but not on every PR**
+Why: a weekly or monthly compliance scan means a new feature that breaks a GDPR or PCI requirement ships to production before the scan fires.
+Detect: compliance failures are discovered in scheduled runs after the offending code has been in production for days.
+Fix: run critical compliance tests (PCI log checks, GDPR deletion, auth audit logging) on every PR touching the relevant modules; use path filters to avoid unnecessary overhead.
+
+**Accessibility compliance treated as a one-time audit rather than continuous**
+Why: a WCAG audit passes at launch, but component library updates or new UI features introduce violations that accumulate until the next manual audit.
+Detect: automated axe scans in CI are not enabled, so violations are only caught by occasional manual reviews.
+Fix: integrate axe-core scans into the PR pipeline with a zero-new-Critical-violations policy so accessibility regression is caught at the same time as functional regression.
 
 ## Connections
 [[qa-hub]] · [[qa/security-testing-qa]] · [[qa/non-functional-testing]] · [[cs-fundamentals/security-fundamentals-se]] · [[cloud/cloud-security]] · [[qa/test-strategy]]

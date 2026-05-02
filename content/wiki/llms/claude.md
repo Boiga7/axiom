@@ -27,7 +27,7 @@ Anthropic's family of AI assistants. The current (April 2026) generation is Clau
 
 > [Source: Perplexity research / benchlm.ai, 2026-04-29]
 
-Opus 4.7 released April 16 2026. Sonnet 4.6 is the default recommendation for most production workloads — 1.2 percentage points behind Opus 4.6 on SWE-bench at 40% lower cost.
+Opus 4.7 released April 16 2026. Sonnet 4.6 is the default recommendation for most production workloads. 1.2 percentage points behind Opus 4.6 on SWE-bench at 40% lower cost.
 
 ### Which Model to Use
 
@@ -51,7 +51,7 @@ response = client.messages.create(
 # response.content includes a ThinkingBlock + TextBlock
 ```
 
-Available on Opus and Sonnet. Not available on Haiku. Do not combine with explicit chain-of-thought prompting — the internal reasoning replaces it.
+Available on Opus and Sonnet. Not available on Haiku. Do not combine with explicit chain-of-thought prompting. The internal reasoning replaces it.
 
 ---
 
@@ -76,7 +76,7 @@ Anthropic publishes explicit documentation of Claude's values and character. Key
 - Directness combined with openness to other views
 - Deep commitment to honesty and ethics
 
-These are explicitly trained via [[safety/constitutional-ai]] and reinforcement learning from human feedback. Claude is not simply following rules — it has internalised values.
+These are explicitly trained via [[safety/constitutional-ai]] and reinforcement learning from human feedback. Claude is not simply following rules. It has internalised values.
 
 ---
 
@@ -118,6 +118,28 @@ Claude's agentic coding tool. Uses Claude Sonnet 4.6 by default, switchable to O
 - 1M token context (Haiku: 200K); 1M tokens ≈ an entire large codebase
 - Prompt caching: 95% cost reduction for repeated 200K-token document queries (1-hour TTL)
 - "Lost in the middle" degradation: RAG over retrieved chunks outperforms raw long context injection
+
+## Common Failure Cases
+
+**Prompt caching miss because the cached prefix is not byte-identical across requests**
+Why: cache hits require that the content before the `cache_control` breakpoint is exactly the same on every call; any change in whitespace, dynamic timestamps, or user-ID injection into the system prompt invalidates the cache and charges full input cost.
+Detect: cache hit rate in the Anthropic API usage dashboard is near 0% despite an apparently stable system prompt; cost per call matches uncached pricing.
+Fix: move all dynamic content (user ID, session context, timestamps) after the last `cache_control` breakpoint, so the static prefix before it never changes.
+
+**Extended thinking enabled on Haiku, causing a 400 API error**
+Why: the `thinking` parameter is only valid for Opus and Sonnet models; passing `thinking={"type": "enabled", ...}` to a Haiku model ID returns an `invalid_request_error`.
+Detect: the API call raises a `BadRequestError` with a message about unsupported parameters; the model string in the request is `claude-haiku-*`.
+Fix: check the model string before enabling thinking; gate `thinking` on model family — only enable for `claude-opus-*` or `claude-sonnet-*`.
+
+**"Lost in the middle" degrades retrieval quality at 1M-token context, but the failure is silent**
+Why: when the key document or fact is placed in the middle of a 1M-token context, Claude's retrieval accuracy degrades significantly compared to placing it at the beginning or end; the model still produces a confident, fluent answer using peripheral context.
+Detect: accuracy drops in eval runs when the target document is placed at positions 30-70% through the context; the model gives plausible but wrong answers with no expressed uncertainty.
+Fix: place the most important context at the start or end of the prompt; use RAG to surface the top-k chunks and inject them near the beginning rather than injecting the full corpus.
+
+**Explicit chain-of-thought prompt combined with extended thinking produces lower-quality output than either alone**
+Why: the model's internal reasoning already performs chain-of-thought; adding an explicit "think step by step" instruction interferes with the extended thinking process and can cause the model to repeat reasoning redundantly or truncate the thinking block.
+Detect: response quality is lower than without CoT instructions; the thinking block is shorter than expected or the final answer contradicts the thinking.
+Fix: remove explicit CoT instructions (e.g., "think step by step", "reason through this") when extended thinking is enabled; let the thinking parameter handle reasoning internally.
 
 ## Connections
 

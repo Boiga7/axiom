@@ -12,7 +12,7 @@ tldr: Spring AI is the official Spring Boot LLM integration — auto-configured 
 
 > **TL;DR** Spring AI is the official Spring Boot LLM integration — auto-configured ChatClient, Advisors for RAG and memory, pgvector store, and function calling via Spring beans; the natural choice for teams already on Spring Boot.
 
-Spring Boot's official AI integration framework. If your team is already on Spring Boot, Spring AI is the natural choice — it follows Spring conventions (auto-configuration, dependency injection, application.properties) and integrates with the broader Spring ecosystem (Spring Data, Spring Security, Spring Web).
+Spring Boot's official AI integration framework. If your team is already on Spring Boot, Spring AI is the natural choice. It follows Spring conventions (auto-configuration, dependency injection, application.properties) and integrates with the broader Spring ecosystem (Spring Data, Spring Security, Spring Web).
 
 Spring AI vs LangChain4j: Spring AI is better for teams already on Spring Boot; LangChain4j is better for teams that want richer agent capabilities or a standalone library. See [[java/langchain4j]] for comparison.
 
@@ -327,6 +327,28 @@ String response = chatClient.prompt()
 - pgvector config: set `dimensions` to match your embedding model output (1536 for text-embedding-3-large)
 - Function calling: define as a Spring `@Bean`, enable by function name in `.functions("name")`
 - Spring AI streams via Reactor `Flux<String>` — integrates with Spring WebFlux naturally
+
+## Common Failure Cases
+
+**`ChatClient.Builder` is autowired but the bean is absent because the `spring-ai-anthropic-spring-boot-starter` is missing from the classpath**  
+Why: Spring AI auto-configuration only activates when the provider-specific starter is on the classpath; importing only `spring-ai-core` without a provider starter creates no `ChatModel` bean, causing `NoSuchBeanDefinitionException` for `ChatClient.Builder` at startup.  
+Detect: the application fails at startup with `No qualifying bean of type 'org.springframework.ai.chat.client.ChatClient$Builder' available`; `spring.ai.anthropic.api-key` is set correctly but ignored.  
+Fix: add `spring-ai-anthropic-spring-boot-starter` to dependencies (not just `spring-ai-core`); verify with `mvn dependency:tree` that the starter artifact is present.
+
+**`vectorStore.add(docs)` silently succeeds but no vectors are stored because the pgvector extension is not installed on the database**  
+Why: Spring AI's pgvector store auto-creates the `vector_store` table on startup but does not verify that the `vector` PostgreSQL extension is installed; if it is absent, `CREATE TABLE ... USING vector` fails silently in some configurations, or the table is created without the vector column.  
+Detect: `vectorStore.similaritySearch("query")` returns an empty list even after ingestion; inspecting the database shows the `vector_store` table exists but the `embedding` column is missing or has `text` type instead of `vector`.  
+Fix: run `CREATE EXTENSION IF NOT EXISTS vector;` on the database before starting the application; add this to your migration scripts or database setup documentation.
+
+**`QuestionAnswerAdvisor` injects retrieved context that exceeds the model's context window, causing a 400 error on long conversations**  
+Why: the advisor retrieves `topK` documents per request and prepends them to the system message; combined with `MessageChatMemoryAdvisor` maintaining a growing conversation history, the total tokens can exceed the model's input limit on longer sessions.  
+Detect: requests fail with a 400 response from the Anthropic API indicating `prompt is too long`; the failure starts appearing after several conversation turns; the same prompt works on a fresh conversation.  
+Fix: set a lower `topK` value (3 instead of 5); reduce `MessageWindowChatMemory.withMaxMessages()` to limit history size; or implement a summarisation step that compresses old history when the window fills.
+
+**Function calling fails with `IllegalArgumentException` because the `@Bean` name and the `.functions("name")` reference do not match**  
+Why: Spring AI registers function callbacks by the bean name; if the bean name is inferred from the method name (camelCase) but `.functions()` is called with a different string (e.g., `"get_current_weather"` vs `"getCurrentWeather"`), the function is not found and the model either ignores it or the SDK throws.  
+Detect: the model does not call the function even on prompts that clearly require it; enabling Spring AI debug logging shows the function is not registered under the expected name.  
+Fix: explicitly name the bean with `@Bean("getCurrentWeather")` and ensure the `.functions("getCurrentWeather")` call uses the exact same string; or use the `FunctionCallback.builder().name("exact-name")` to set the name explicitly.
 
 ## Connections
 

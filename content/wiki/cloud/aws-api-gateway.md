@@ -89,7 +89,7 @@ def handler(event, context):
 
 ## JWT Authoriser
 
-Validates JWT tokens from Cognito, Auth0, or any OIDC provider — without Lambda code.
+Validates JWT tokens from Cognito, Auth0, or any OIDC provider. Without Lambda code.
 
 ```bash
 aws apigatewayv2 create-authorizer \
@@ -174,6 +174,28 @@ def handler(event, context):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Lambda returns 502 Bad Gateway from API Gateway**
+Why: the Lambda function returned a response body that API Gateway cannot parse — typically a raw string instead of the expected `{"statusCode": ..., "body": ...}` format.
+Detect: CloudWatch Logs for the Lambda show a successful execution, but the caller receives `502` with `{"message": "Internal Server Error"}`.
+Fix: ensure the handler always returns a dict with `statusCode`, `headers`, and `body` (as a string); never return a bare Python object.
+
+**CORS preflight returns 403 even though CORS is configured**
+Why: CORS on HTTP API is set at the API level, but the Lambda returns its own `Access-Control-Allow-Origin` header, and the two conflict; or the `OPTIONS` route is not correctly handled.
+Detect: browser console shows `CORS error` on the preflight `OPTIONS` request; the `Access-Control-Allow-Origin` header is missing or duplicated in the response.
+Fix: either let API Gateway handle CORS entirely (remove headers from Lambda) or disable API Gateway CORS config and handle it fully inside the Lambda — never mix both.
+
+**JWT authoriser rejects valid tokens with 401**
+Why: the `Issuer` URL in the authoriser config doesn't exactly match the `iss` claim in the JWT (trailing slash, HTTP vs HTTPS, or wrong region in the Cognito URL).
+Detect: `401 Unauthorized` with `{"message": "Unauthorized"}` from API Gateway even though the token is freshly issued.
+Fix: compare the exact string of the `iss` claim from `jwt.io` against the `Issuer` value configured on the authoriser; they must match character-for-character.
+
+**Custom domain not resolving after API mapping**
+Why: the DNS CNAME record points to the wrong value, or the ACM certificate is in the wrong region (HTTP API custom domains require a regional ACM certificate in the same region as the API).
+Detect: `nslookup api.example.com` returns NXDOMAIN or points to a different endpoint than the `ApiGatewayDomainName` output.
+Fix: create the ACM certificate in the same region as the API, verify the certificate is `ISSUED`, and update the CNAME to the exact `ApiGatewayDomainName` value from the domain creation response.
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-lambda-patterns]] · [[cloud/secrets-management]] · [[cloud/cloud-monitoring]]

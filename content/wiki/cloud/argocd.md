@@ -63,7 +63,7 @@ spec:
       - CreateNamespace=true
 ```
 
-With `automated.selfHeal: true`, any `kubectl apply` or `kubectl delete` on a resource owned by this Application is reverted within ~3 minutes. This is intentional — manual changes in prod are anti-patterns.
+With `automated.selfHeal: true`, any `kubectl apply` or `kubectl delete` on a resource owned by this Application is reverted within ~3 minutes. This is intentional. Manual changes in prod are anti-patterns.
 
 ---
 
@@ -180,7 +180,7 @@ spec:
             size: 50Gi
 ```
 
-For secrets in Helm values: use ArgoCD Vault Plugin or External Secrets Operator — never commit plaintext secrets to Git.
+For secrets in Helm values: use ArgoCD Vault Plugin or External Secrets Operator. Never commit plaintext secrets to Git.
 
 ---
 
@@ -198,7 +198,7 @@ git revert <bad-commit>
 git push
 ```
 
-The Git revert approach is preferred — it creates an audit trail and keeps Git as the truth.
+The Git revert approach is preferred. It creates an audit trail and keeps Git as the truth.
 
 ---
 
@@ -264,6 +264,28 @@ ArgoCD CD:
 This cleanly separates CI (building artifacts) from CD (deploying to cluster). CI never needs cluster credentials.
 
 ---
+
+## Common Failure Cases
+
+**Application stuck in `OutOfSync` even after a successful sync**
+Why: a resource has a `last-applied-configuration` annotation that differs from what Argo generates (often due to Helm rendering differences or kubectl imperatives), causing Argo to always see drift.
+Detect: `argocd app diff my-api` shows non-empty output despite the sync appearing to complete cleanly.
+Fix: enable `RespectIgnoreDifferences` in the Application spec for the noisy field, or switch all resource management to Argo and stop mixing `kubectl apply`.
+
+**selfHeal loop: Argo keeps reverting changes needed for hotfix**
+Why: `selfHeal: true` is set and a temporary kubectl patch was applied directly to a resource owned by the Application.
+Detect: the resource reverts within ~3 minutes of each manual change and Argo logs show repeated sync events.
+Fix: either commit the change to Git (the correct path) or pause auto-sync for the Application (`argocd app set my-api --sync-policy none`) before applying the hotfix, then re-enable.
+
+**Image Updater commits a broken tag and deploys it automatically**
+Why: the update strategy (e.g., `latest` or `semver`) picked up a malformed or failing image tag and committed it to Git, triggering an automated sync.
+Detect: a bad image tag appears in the manifest repo commit history and the rollout health degrades immediately after.
+Fix: set `autoPromotionEnabled: false` in the Rollout or use `semver` with a constrained range rather than `latest`; always pair automated image updates with a pre-promotion analysis gate.
+
+**ArgoCD cannot access a private Git repo after repo credential rotation**
+Why: the SSH key or token stored in the ArgoCD `repo-creds` secret was rotated externally but not updated in Argo.
+Detect: the Application shows `ComparisonError: rpc error: code = Unknown desc = authentication required` in the UI.
+Fix: update the credential in `argocd repo add --upsert` or patch the `argocd-repo-creds` secret directly, then trigger a refresh.
 
 ## Connections
 

@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
 ## Tools
 
-Tools are the primary capability type — they perform actions and return results. FastMCP maps Python type hints to JSON Schema automatically.
+Tools are the primary capability type. They perform actions and return results. FastMCP maps Python type hints to JSON Schema automatically.
 
 ```python
 import httpx
@@ -101,7 +101,7 @@ FastMCP turns `fetch_url(url: str, timeout: int = 30)` into:
 
 ## Resources
 
-Resources expose readable data at URIs. Different from tools — resources are for reading, tools are for acting. Use URI templates for parameterised resources.
+Resources expose readable data at URIs. Different from tools. Resources are for reading, tools are for acting. Use URI templates for parameterised resources.
 
 ```python
 from pathlib import Path
@@ -245,7 +245,7 @@ Or globally in `~/.claude/settings.json` for all projects.
 
 ## Security — Tool Poisoning
 
-Tool descriptions and resource names are read by the LLM and can contain hidden instructions. A malicious MCP server can hijack model behavior through its tool schemas — this is the tool poisoning attack.
+Tool descriptions and resource names are read by the LLM and can contain hidden instructions. A malicious MCP server can hijack model behavior through its tool schemas. This is the tool poisoning attack.
 
 Example of a malicious tool description:
 ```python
@@ -335,6 +335,33 @@ if __name__ == "__main__":
 Clients and servers negotiate the highest mutually supported version at connection start.
 
 ---
+
+## Common Failure Cases
+
+**stdio server crashes silently because tool handler wrote to stdout**  
+Why: any `print()` call in a stdio server writes to stdout, which is the MCP protocol channel; the client receives corrupted JSON and drops the connection.  
+Detect: server disconnects immediately after calling a specific tool; MCP Inspector shows a parse error on tool result.  
+Fix: replace all `print()` calls with `import sys; print(..., file=sys.stderr)`; configure Python logging to use stderr only.
+
+**Tool schema validation fails because Pydantic model uses Optional fields without defaults**  
+Why: FastMCP generates JSON Schema from Pydantic models; `Optional[str]` without a default sets `required=True` in some schema versions, conflicting with the client's expectation.  
+Detect: MCP Inspector shows a schema validation error; calling the tool raises `InputValidationError` even with valid arguments.  
+Fix: provide explicit defaults for Optional fields (`Optional[str] = None`); test schemas with MCP Inspector before deploying.
+
+**Streamable-HTTP server works locally but is unreachable behind a reverse proxy**  
+Why: the proxy strips or modifies `Content-Type: text/event-stream` headers required for SSE; or the proxy buffers the response instead of streaming it.  
+Detect: SSE connections time out at the proxy; tools work with direct connection but fail through nginx/caddy.  
+Fix: add `proxy_buffering off; proxy_read_timeout 3600s;` in nginx; ensure `X-Accel-Buffering: no` header is set.
+
+**Resource handler returns binary data as a string, corrupting the result**  
+Why: reading a PDF or image file as text (`path.read_text()`) corrupts binary data; the client receives garbled content.  
+Detect: resource content is gibberish or raises decode errors on the client side.  
+Fix: return binary files as base64-encoded strings with the appropriate MIME type; use `path.read_bytes()` and `base64.b64encode(...).decode()`.
+
+**Tool descriptions are too long, consuming significant context budget**  
+Why: verbose docstrings intended for human developers are included verbatim in the tool schema; at 10 tools × 200-word descriptions, this consumes 2,000+ tokens per call.  
+Detect: prompt inspection shows tool schema consuming >10% of the context budget.  
+Fix: keep descriptions under 50 words; document implementation details in code comments, not docstrings.
 
 ## Connections
 

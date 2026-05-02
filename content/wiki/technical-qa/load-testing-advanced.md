@@ -273,5 +273,27 @@ jobs:
 
 ---
 
+## Common Failure Cases
+
+**Load test runs against production instead of staging**
+Why: `BASE_URL` defaults to the production URL when the environment variable is not set in CI, so real users are affected.
+Detect: production error rate spikes during the nightly CI run; the load test output shows the production hostname.
+Fix: make `BASE_URL` a required parameter with no default — k6 will exit with a script error if it is unset, forcing explicit configuration.
+
+**Virtual user count set too high for a single load generator**
+Why: running 500+ VUs from a single k6 process on a 2-core CI runner exhausts the generator's own CPU, making latency results meaningless (the tool, not the system, is the bottleneck).
+Detect: k6 reports `http_req_blocked` p99 > 100ms and iteration duration far higher than expected even at low concurrency.
+Fix: distribute load across multiple k6 instances using k6 cloud or a distributed runner setup, or reduce VUs to a level the generator can sustain.
+
+**Soak test catches no memory leak because test data is too small**
+Why: holding 50 VUs for 2 hours against a seeded database of 1,000 rows does not surface the memory leak that only appears with real production-scale data volumes.
+Detect: no memory growth observed during the soak test, but production shows gradual memory increase over days.
+Fix: seed the test environment with production-representative data volumes before running the soak test.
+
+**SLO thresholds based on average hide the long tail**
+Why: k6 threshold `http_req_duration: ['avg<500']` passes even when p99 is 5,000ms because a fast majority drags the average down.
+Detect: the threshold passes in CI but users report slow experiences; checking the raw results shows high p99.
+Fix: replace average-based thresholds with percentile thresholds: `['p(95)<500', 'p(99)<1000']`.
+
 ## Connections
 [[tqa-hub]] · [[technical-qa/chaos-engineering]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[cloud/observability-stack]] · [[llms/ae-hub]]

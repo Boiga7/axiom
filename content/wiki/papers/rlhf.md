@@ -39,7 +39,7 @@ Use Proximal Policy Optimisation to fine-tune the SFT model to maximise expected
 ```
 objective = E[RM(x, y)] - β · KL(π_RL || π_SFT)
 ```
-The KL penalty prevents the model from drifting too far from the SFT policy — stops reward hacking.
+The KL penalty prevents the model from drifting too far from the SFT policy. Stops reward hacking.
 
 ---
 

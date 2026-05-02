@@ -56,7 +56,7 @@ spec:
           memory: "512Mi"
 ```
 
-Always set `resources.requests` — the scheduler uses them for placement. Always set `limits` — without them, a single pod can starve all others on the node.
+Always set `resources.requests`. The scheduler uses them for placement. Always set `limits`. Without them, a single pod can starve all others on the node.
 
 ### Deployment
 Declarative rolling updates with rollback. Manages a ReplicaSet.
@@ -189,7 +189,7 @@ spec:
 ```
 
 ### Vertical Pod Autoscaler (VPA)
-Automatically adjusts CPU/memory requests. Usually run in "Off" mode (recommendations only) in production — live eviction during updates can disrupt traffic.
+Automatically adjusts CPU/memory requests. Usually run in "Off" mode (recommendations only) in production. Live eviction during updates can disrupt traffic.
 
 ### Cluster Autoscaler
 Adds/removes nodes based on pending pod pressure and node utilization. Configured at the node pool level in cloud-managed K8s. Set `--scale-down-utilization-threshold=0.5` to reclaim idle nodes.
@@ -364,6 +364,33 @@ kubectl port-forward svc/my-api-svc 8080:80
 - **Secrets**: never put raw values in YAML committed to git; use External Secrets Operator (pulls from Vault / Secrets Manager at runtime)
 
 ---
+
+## Common Failure Cases
+
+**Pods stuck in "Pending" indefinitely after deployment**
+Why: no node has enough allocatable CPU or memory to satisfy the pod's `resources.requests` — either the cluster has no remaining capacity or requests are set too high relative to node size.
+Detect: `kubectl describe pod <name>` shows `Insufficient cpu` or `Insufficient memory` in the Events section; `kubectl get nodes` shows nodes at capacity.
+Fix: scale the node group, right-size the pod requests to reflect actual consumption, or verify the Cluster Autoscaler is configured and has permission to add nodes.
+
+**Rolling update stalls with half old pods and half new pods**
+Why: the new pods fail their `readinessProbe` (app misconfiguration, missing secret, wrong image) so the deployment controller never proceeds past `maxUnavailable`.
+Detect: `kubectl rollout status deployment/<name>` hangs; `kubectl get pods` shows new pods in `Running` state but `0/1 READY`; `kubectl describe pod` shows probe failures.
+Fix: check logs on the new pod (`kubectl logs <new-pod>`), fix the underlying issue (missing env var, wrong image tag), then push a corrected deployment revision.
+
+**`kubectl drain` blocks node maintenance indefinitely**
+Why: a pod has no PodDisruptionBudget and is the only replica of a stateful workload, or a PDB has `minAvailable` equal to the current replica count, making any disruption impossible.
+Detect: `kubectl drain` outputs `Cannot evict pod as it would violate the pod's disruption budget`.
+Fix: temporarily scale the affected deployment to add a replica, then drain; or reduce `minAvailable` in the PDB, drain, then restore; never delete PDBs permanently on production workloads.
+
+**Ingress returns 502 for all requests despite pods being healthy**
+Why: the pod's `containerPort` or `targetPort` in the Service does not match the port the application actually listens on, so the Ingress Controller's backend health check fails.
+Detect: `kubectl describe ingress` shows healthy backend; `kubectl exec` into the pod and `curl localhost:<port>` returns connection refused on the configured port.
+Fix: align the Service `targetPort` with the actual listening port in the container; verify with `kubectl port-forward` before deploying changes.
+
+**NetworkPolicy blocks DNS and all pods lose external connectivity**
+Why: a default-deny egress policy was applied to a namespace without an explicit rule allowing UDP/TCP port 53 to `kube-dns` in `kube-system`.
+Detect: pods in the namespace fail name resolution (`nslookup kubernetes.default` times out); removing the NetworkPolicy restores connectivity.
+Fix: add an egress rule to the NetworkPolicy allowing port 53 to the `kube-system` namespace where `kube-dns` runs.
 
 ## Connections
 

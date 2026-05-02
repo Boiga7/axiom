@@ -79,7 +79,7 @@ user = client.chat.completions.create(
 
 ## Validation with Pydantic
 
-Pydantic validators run after extraction. If they fail, `instructor` retries the LLM call with the validation error as feedback — up to `max_retries` times.
+Pydantic validators run after extraction. If they fail, `instructor` retries the LLM call with the validation error as feedback. Up to `max_retries` times.
 
 ```python
 from pydantic import BaseModel, field_validator
@@ -104,7 +104,7 @@ class UserProfile(BaseModel):
         return v
 ```
 
-If the LLM returns `age: -5`, the validator raises, `instructor` sends the error back to the model: *"age must be positive — please fix"*, and retries. Default is 3 retries.
+If the LLM returns `age: -5`, the validator raises, `instructor` sends the error back to the model: *"age must be positive. Please fix"*, and retries. Default is 3 retries.
 
 ```python
 # Configure retries
@@ -236,6 +236,28 @@ result = client.messages.create(
 - **Guardrails AI** — broader output safety/validation framework; instructor focuses specifically on Pydantic schema enforcement. See [[security/guardrails]] for comparison.
 
 ---
+
+## Common Failure Cases
+
+**`instructor` exhausts `max_retries` and raises `InstructorRetryException` for a valid model response**  
+Why: the model returns a valid JSON object but includes it inside a markdown code fence (`\`\`\`json ... \`\`\``); instructor's default parser fails to extract the JSON, retries the call each time, and eventually exhausts retries.  
+Detect: `InstructorRetryException` raised even though the model's raw response contains correct JSON when inspected manually; the validation error message says "JSON parse error" or "Expecting value".  
+Fix: set `mode=instructor.Mode.MD_JSON` for models that reliably wrap JSON in markdown; or set `mode=instructor.Mode.JSON` to force JSON mode via the API when supported.
+
+**Nested Pydantic model fails to validate because a required field is missing from the model output**  
+Why: when the LLM generates a nested object, it may omit an inner required field, especially for deeply nested structures; instructor retries but the model continues to omit the same field, leading to `max_retries` exhaustion.  
+Detect: retry loop always fails on the same `Field required` validation error for a nested field; the model never includes the field despite the retry error message.  
+Fix: add a `description` to the missing field explaining what it represents and an example value; make the field `Optional` with a sensible default if it can genuinely be absent; simplify nested structures.
+
+**`Partial[Model]` streaming returns incomplete objects that are not caught before use**  
+Why: `create_partial()` yields partial model instances as tokens arrive; calling code that accesses attributes on partially-filled objects may encounter `None` where a required field is expected, causing `AttributeError` or `ValidationError`.  
+Detect: intermittent `AttributeError` when processing partial stream results; the final complete object is valid but intermediate partials have `None` for expected fields.  
+Fix: check for `None` on all accessed attributes when consuming partial results; or accumulate the stream and only process the final complete object if partial updates are not needed for the UX.
+
+**Using the sync `instructor.from_anthropic(anthropic.Anthropic())` client in an async function blocks the event loop**  
+Why: the sync Anthropic client blocks the thread while waiting for the API response; inside an async function, this blocks the entire asyncio event loop, preventing other coroutines from running.  
+Detect: other concurrent async tasks pause during the instructor call; overall throughput degrades significantly when multiple instructor calls run concurrently.  
+Fix: use `instructor.from_anthropic(AsyncAnthropic())` for the async client and `await client.messages.create(...)` in async functions.
 
 ## Connections
 

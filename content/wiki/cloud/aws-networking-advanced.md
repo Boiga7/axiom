@@ -251,5 +251,27 @@ Jumbo frames:
 
 ---
 
+## Common Failure Cases
+
+**Transit Gateway routing loop — VPCs can reach each other unintentionally**
+Why: when default route table association and propagation are both enabled, all attached VPCs can route to all others by default; this breaks environment isolation (prod can reach dev).
+Detect: a host in the dev VPC can ping or connect to the prod VPC's private IPs.
+Fix: disable `DefaultRouteTableAssociation` and `DefaultRouteTablePropagation` at Transit Gateway creation, then create explicit per-environment route tables with only the intended peering routes.
+
+**PrivateLink interface endpoint DNS not resolving inside VPC**
+Why: the VPC does not have DNS resolution or DNS hostnames enabled, so the private DNS name for the endpoint is not queryable within the VPC.
+Detect: `nslookup secretsmanager.eu-west-1.amazonaws.com` from an EC2 instance returns the public IP, not the endpoint's private IP.
+Fix: enable `enableDnsHostnames` and `enableDnsSupport` on the VPC; both must be `true` for private DNS override to work.
+
+**WAF blocking legitimate traffic — AWSManagedRulesCommonRuleSet false positive**
+Why: a managed rule (e.g., `SizeRestrictions_BODY` or `CrossSiteScripting_BODY`) is blocking requests with large payloads or special characters that your API legitimately handles.
+Detect: CloudWatch WAF metrics show `BlockedRequests` spiking; blocked request samples in the WAF console show the offending rule name and the legitimate request body.
+Fix: set the specific managed rule to `Count` mode (override action) rather than blocking, then add a custom rule that allows your known-good traffic pattern before applying the managed rule.
+
+**Route 53 failover not triggering — health check always healthy**
+Why: the health check is checking the ALB's `/` path which returns 200 even when the application is degraded, or the health check's IP range is blocked by a security group.
+Detect: the primary endpoint is serving errors but Route 53 continues routing traffic to it; the health check console shows `Healthy`.
+Fix: configure the health check to call a dedicated `/health/deep` endpoint that tests database connectivity; ensure the Route 53 health check IP ranges (published by AWS) are allowed in the security group.
+
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/cloud-security]] · [[cloud/aws-core]] · [[cloud/disaster-recovery]] · [[cloud/multi-tenancy]]

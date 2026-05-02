@@ -193,7 +193,7 @@ jmeter -n -t my-test-plan.jmx \
 | **Saturation point** | Know it before production finds it | VUs at which p99 exceeds SLA |
 | **CPU/memory at peak** | < 70% CPU, headroom for spikes | CloudWatch / Prometheus |
 
-Track p95 and p99, not just average. Averages hide the long tail — a p50 of 100ms with p99 of 5000ms means 1 in 100 requests is extremely slow.
+Track p95 and p99, not just average. Averages hide the long tail. A p50 of 100ms with p99 of 5000ms means 1 in 100 requests is extremely slow.
 
 ---
 
@@ -243,6 +243,28 @@ class BasicSimulation extends Simulation {
 ```
 
 ---
+
+## Common Failure Cases
+
+**Authentication tokens expire mid-test**
+Why: JWTs obtained in `setup()` have a short TTL; by the time a long soak test reaches hour 2, every request returns 401.
+Detect: error rate spikes suddenly mid-run at a predictable time interval matching the token TTL.
+Fix: implement token refresh logic in the VU lifecycle (e.g., k6 `setup` returns the refresh token and each VU re-authenticates when the access token is near expiry).
+
+**Think time omitted, making concurrency unrealistically high**
+Why: removing `sleep(1)` means 100 VUs each completing a request every 50ms generates 2,000 req/s — far beyond realistic user behaviour — producing a stress test when you intended a load test.
+Detect: throughput is 10-100x higher than production traffic patterns; results are not comparable to real-world behaviour.
+Fix: add think time (`sleep(1 + Math.random() * 2)`) to model realistic user pacing and match actual observed request rates.
+
+**Gatling simulation compiles but does not warm up the JVM before measurement starts**
+Why: the first few thousand requests in a Gatling simulation run on an unwarmed JVM, inflating p99 latency figures and making results unrepeatable.
+Detect: p99 latency is significantly higher in the first 60 seconds than in steady state; re-running the test shows different numbers.
+Fix: add a ramp-up warm-up phase (`rampUsers(10).during(30.seconds)`) before the measurement period begins, and exclude the warm-up phase data from SLO assertions.
+
+**Database connection pool exhausted silently**
+Why: as VU count climbs, connection pool wait time grows but the app returns 200 with degraded latency rather than an error, so the error rate threshold never fires.
+Detect: p99 latency climbs steadily while error rate stays near zero; `pg_stat_activity` shows many connections in `idle in transaction` state.
+Fix: add a custom metric tracking DB pool wait time and set a threshold on it (`pool_wait_time: ['p(95)<50']`), and monitor `pg_stat_activity` during the test.
 
 ## Connections
 

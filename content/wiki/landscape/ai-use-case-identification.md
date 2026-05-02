@@ -98,7 +98,7 @@ Common failure modes when scaling:
 3. **Integration** — AI output can't feed back into existing systems of record
 4. **Change management** — employees won't adopt the new workflow without investment in training and incentives
 
-Governance, security, and cost efficiency have become the decisive factors — not model capability. See [[landscape/enterprise-ai-adoption]] for the full governance picture.
+Governance, security, and cost efficiency have become the decisive factors. Not model capability. See [[landscape/enterprise-ai-adoption]] for the full governance picture.
 
 ## Running an AI Discovery Sprint
 
@@ -123,6 +123,23 @@ When advising a business on what to build, this framework makes you more credibl
 - Identifies governance requirements early, before they become blockers
 
 The skill set to run this: stakeholder interviews, use case pattern recognition, and the ability to estimate technical effort. This is as much a software engineering skill as an AI skill.
+
+## Common Failure Cases
+
+**Selecting an agentic execution use case as the first deployment, before any simpler primitives have been validated**
+Why: agentic execution has the highest governance requirements, the most failure modes, and the steepest integration complexity; teams attracted to the highest-value primitive underestimate the change management and trust-building required before an organisation will let an agent act autonomously.
+Detect: the pilot is late, over budget, or blocked on legal/IT approval; the team is building governance processes from scratch in parallel with the product; stakeholders are nervous about autonomous actions.
+Fix: use the 6-primitive ordering deliberately — pilot summarisation, classification, or extraction first; use the quick win to build organisational trust and the governance infrastructure that agentic execution will require.
+
+**Impact/Effort scores are set once and never reassessed, causing high-effort use cases to remain deprioritised after model improvements make them viable**
+Why: the framework depends on effort estimates that are a function of current technology; a use case rated high-effort in 2024 because of poor extraction accuracy may be low-effort in 2026 after model quality improvements, but the backlog is never revisited.
+Detect: the prioritisation matrix still shows use cases from 18+ months ago in the "high effort, reassess later" quadrant; the team has not updated effort scores since the initial assessment.
+Fix: schedule quarterly backlog reviews where effort scores are re-estimated; specifically re-evaluate any use case that was blocked on model capability, data quality, or integration complexity — all three evolve rapidly.
+
+**Discovery sprint interviews only the loudest internal advocates, missing the use cases with the highest actual volume**
+Why: interview-based discovery surfaces the use cases that motivated, articulate employees want to talk about; it systematically misses the high-volume repetitive tasks that workers have stopped noticing because they are so routine.
+Detect: the use cases identified are all creative or knowledge-intensive tasks; no high-frequency, low-complexity tasks appear in the backlog despite the organisation processing millions of routine transactions.
+Fix: supplement interviews with process mining — analyse system logs, ticket queues, and workflow data to find the highest-frequency human tasks; the best quick wins are often tasks that nobody thought to mention because they seem too simple.
 
 ## Connections
 - [[landscape/enterprise-ai-adoption]] — the broader adoption context and governance gap

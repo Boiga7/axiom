@@ -12,7 +12,7 @@ updated: 2026-05-01
 
 > **TL;DR** Benchmark p50/p95/p99 with 1000+ samples per scenario. Use py-spy for sampling profiling without code changes. Histograms over averages — averages hide the tail. Profile representative traffic at steady state.
 
-Directly relevant to mcpindex Weekend 2 — latency baselines for STDIO vs HTTP transport comparison.
+Directly relevant to mcpindex Weekend 2. Latency baselines for STDIO vs HTTP transport comparison.
 
 ## Key Facts
 - p50 = typical user experience; p95 = where slow users live; p99 = architectural bottlenecks and outliers
@@ -120,7 +120,7 @@ async def concurrent_benchmark(
 
 ### MCP Transport Comparison Pattern
 
-For mcpindex — comparing STDIO vs HTTP transport latency:
+For mcpindex. Comparing STDIO vs HTTP transport latency:
 
 ```python
 import asyncio
@@ -269,6 +269,28 @@ p99: 201.4 ms
 Record baselines at a fixed server version and commit to enable regression tracking across mcpindex releases.
 
 > [Source: py-spy documentation; Python performance optimization best practices, 2025]
+
+## Common Failure Cases
+
+**p99 estimates are unstable because fewer than 1000 samples were collected**  
+Why: p99 requires that 1% of samples (10 out of 1000) fall above the reported value; with only 100 samples, p99 is estimated from just one sample and varies wildly between runs — a single outlier can double the reported value.  
+Detect: re-running the benchmark with the same code shows p99 varying by 2-5x between runs; p50 and p95 are stable but p99 is not.  
+Fix: collect at minimum 1000 samples for p95, 5000 for p99 that you want to track as a regression metric over time.
+
+**Warm-up phase is too short, and connection setup latency contaminates the early measurements**  
+Why: the first HTTP request (or first few STDIO invocations) includes TCP handshake, TLS negotiation, and server-side warm-up; these are 5-10x slower than steady-state and inflate the low end of the distribution.  
+Detect: the first 10 measurements in the latencies list are significantly higher than the rest; removing them changes the p50 noticeably.  
+Fix: increase the warm-up phase to at least 10 requests (or more for connection-pooled services); for STDIO transport, warm-up should include at least one full JSON-RPC exchange.
+
+**Concurrency semaphore set to 1 during a concurrent benchmark, producing serial measurements**  
+Why: `asyncio.Semaphore(concurrency)` with `concurrency=1` allows only one request at a time; the benchmark appears to run concurrently but is actually serial, making the results identical to the sequential benchmark.  
+Detect: the concurrent benchmark (n=1000, concurrency=10) takes 10x longer than expected; throughput is the same as the serial baseline.  
+Fix: verify the semaphore limit matches the intended concurrency; print active concurrent tasks to confirm parallelism; use `asyncio.gather()` without a semaphore for a true fixed-concurrency burst test.
+
+**py-spy profile shows most time in `asyncio._run_once` suggesting I/O wait, but the actual bottleneck is synchronous code**  
+Why: `asyncio._run_once` being wide in the flame graph is normal — it means the event loop is waiting for I/O; but if your async function includes a synchronous CPU-bound operation, that operation blocks the event loop without appearing separately in the py-spy flame graph.  
+Detect: p99 latency is high but py-spy only shows `asyncio._run_once` as wide; adding `time.perf_counter()` breakpoints inside the async function reveals a specific code section is slow.  
+Fix: identify synchronous blocking operations (JSON parsing of large payloads, regex on large strings) and move them to a thread pool using `asyncio.to_thread()`.
 
 ## Connections
 - [[protocols/mcp-http-transport]] — the HTTP transport being benchmarked

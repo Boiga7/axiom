@@ -46,7 +46,7 @@ The fix is engineering, not bigger context windows:
 
 ## The Context Window as a Resource
 
-The context window is not infinite compute — it's a budget. Every token costs:
+The context window is not infinite compute. It's a budget. Every token costs:
 - **Money:** at $3/M (Sonnet 4.6), 100K tokens = $0.30 per call
 - **Latency:** time-to-first-token grows with context length
 - **Quality:** the "lost in the middle" problem — models retrieve information better from the start and end of context
@@ -266,7 +266,7 @@ Extended tasks spanning hours accumulate context until it becomes a liability. T
 
 Summarise message history when approaching context limits. Preserve critical decisions and unresolved issues; discard redundant tool outputs and completed steps.
 
-Lightweight compaction: once a tool result appears deep in history, the raw output is dispensable — summarise or drop it. Keep the conclusion, not the evidence.
+Lightweight compaction: once a tool result appears deep in history, the raw output is dispensable. Summarise or drop it. Keep the conclusion, not the evidence.
 
 Rule: maximise recall first (capture everything relevant), then improve precision (cut what's no longer load-bearing).
 
@@ -292,7 +292,7 @@ See [[agents/practical-agent-design]] for when to use sub-agents vs compaction.
 
 Rather than loading all relevant data upfront, agents maintain lightweight identifiers (file paths, URLs, stored queries) and retrieve information dynamically during execution.
 
-This mirrors how humans work: we use file hierarchies and naming conventions to retrieve on demand, not memorise entire repositories. Claude Code exemplifies this — it uses targeted queries and Bash commands to analyse large codebases without loading everything into context.
+This mirrors how humans work: we use file hierarchies and naming conventions to retrieve on demand, not memorise entire repositories. Claude Code exemplifies this. It uses targeted queries and Bash commands to analyse large codebases without loading everything into context.
 
 Trade-off: runtime exploration trades speed for intelligence. The agent needs proper tools, clear heuristics, and good naming conventions to navigate effectively. Hybrid approaches (some upfront, some JIT) often work best.
 

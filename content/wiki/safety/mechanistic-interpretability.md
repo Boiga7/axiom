@@ -18,7 +18,7 @@ Understanding what's actually happening inside neural networks at the circuit le
 
 ## The Core Challenge: Superposition
 
-Neural networks have more "concepts" (features) than neurons. A 4,096-dimensional model needs to represent millions of concepts. The model stores multiple features per neuron — they overlap in "superposition."
+Neural networks have more "concepts" (features) than neurons. A 4,096-dimensional model needs to represent millions of concepts. The model stores multiple features per neuron. They overlap in "superposition."
 
 This is why simple approaches (find the neuron for "cat") don't work. Neurons are polysemantic: they activate for multiple unrelated concepts. "Feature" and "neuron" are not synonymous.
 
@@ -127,6 +127,7 @@ Current status: interpretability can find features and circuits, but translating
 - [[safety/constitutional-ai]] — the alignment training that produces the circuits being studied
 - [[llms/transformer-architecture]] — the architectural substrate (residual stream, attention heads, FFN)
 - [[papers/key-papers]] — links to Towards Monosemanticity and Scaling Monosemanticity
+- [[papers/mechanistic-interpretability]] — four paper summaries: Zoom In (2020), Toy Models (2022), Towards Monosemanticity (2023), Scaling Monosemanticity (2024)
 
 ## Open Questions
 

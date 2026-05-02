@@ -10,7 +10,7 @@ tldr: The two workhorses of Python data processing for AI engineers. Polars is a
 
 # Polars + DuckDB
 
-The two workhorses of Python data processing for AI engineers. Polars is a DataFrame library (pandas replacement) built on Apache Arrow — lazy evaluation, parallel by default, no GIL. DuckDB is an in-process analytical SQL engine — run SQL directly on Parquet, CSV, JSON, or Polars DataFrames without a server.
+The two workhorses of Python data processing for AI engineers. Polars is a DataFrame library (pandas replacement) built on Apache Arrow. Lazy evaluation, parallel by default, no GIL. DuckDB is an in-process analytical SQL engine. Run SQL directly on Parquet, CSV, JSON, or Polars DataFrames without a server.
 
 Use Polars when you need Python-native DataFrame transformations. Use DuckDB when the query is naturally SQL or the data is too large to load at once.
 
@@ -273,6 +273,28 @@ df = (
 | Production pipeline with type safety | Polars (strict schema) |
 
 ---
+
+## Common Failure Cases
+
+**Polars `map_elements` is orders of magnitude slower than expected because it bypasses vectorised execution**  
+Why: `map_elements()` applies a Python function row-by-row, bypassing Polars' Rust-based vectorised engine; for operations on large DataFrames this can be slower than pandas.  
+Detect: a transformation using `map_elements()` is slower than the equivalent pandas operation; profiling shows most time in Python function calls rather than Polars native code.  
+Fix: replace `map_elements()` with native Polars expressions wherever possible (`.str.replace()`, `.cast()`, `.when().then().otherwise()`); reserve `map_elements()` only for truly custom logic that has no Polars equivalent.
+
+**`pl.scan_parquet()` lazy plan fails to push down filters, loading all data into memory**  
+Why: filter push-down only works when Polars can infer the filter at query plan time; using `map_elements()` or Python UDFs in the filter prevents push-down, so the full file is loaded before filtering.  
+Detect: memory usage spikes to the full file size before filtering despite using `scan_parquet()`; removing the `map_elements()` from the filter chain restores streaming behaviour.  
+Fix: use only native Polars expressions in `.filter()` calls on lazy frames; if a UDF is necessary, collect the filtered subset first using native expressions, then apply the UDF.
+
+**DuckDB `conn.execute()` result returns a pandas DataFrame when `.df()` is called, consuming unnecessary memory**  
+Why: `.df()` materialises the result as a pandas DataFrame; for large result sets this can exceed available memory; `.pl()` returns a Polars DataFrame with zero-copy Arrow transfer.  
+Detect: DuckDB queries on large result sets cause memory spikes; `type(result.df())` shows `pandas.core.frame.DataFrame`.  
+Fix: use `.pl()` instead of `.df()` for large result sets; use `.fetchmany(n)` for streaming access to large results without full materialisation.
+
+**Polars window function with `.over()` produces incorrect results when combined with `.filter()` before the window**  
+Why: applying `.filter()` before a `.over()` window function changes the partition contents; the window rank or mean is computed on the filtered subset, not the full group.  
+Detect: per-group rankings or means are wrong after filtering; removing the pre-filter and applying it afterwards produces different (correct) results.  
+Fix: apply filters after window functions, not before; if pre-filtering is required for performance, verify whether the window semantics are still correct on the filtered data.
 
 ## Connections
 

@@ -200,5 +200,27 @@ When to use:
 
 ---
 
+## Common Failure Cases
+
+**Happy path bias that persists even when explicitly trying bad paths**
+Why: testers know the system well enough to complete the happy path automatically; even a "bad path session" drifts toward familiar flows because the tester subconsciously knows what works.
+Detect: session notes show mostly valid inputs with minor variations; no tests of concurrent operations, interruptions, or dramatically out-of-range values.
+Fix: use the attack pattern list (long sequences, interruptions, permissions, concurrency, boundaries, recovery) as a literal checklist at session start; pick at least two attack patterns per session and execute them explicitly.
+
+**Confirmation bias unchecked in high-stakes pre-release sessions**
+Why: testers under release pressure subconsciously interpret ambiguous behaviour as acceptable rather than probing it, because finding a critical bug at release time is socially uncomfortable.
+Detect: pre-release exploratory sessions produce few or no bugs despite the feature being complex; bugs are found in production shortly after release.
+Fix: use adversarial pair exploration for pre-release sessions; the second person's explicit role is to challenge every "that looks fine" judgment and push to verify it against a specific expected behaviour.
+
+**Tunnel vision during bug investigation consuming the whole session**
+Why: a compelling bug draws complete focus; the tester spends 45 of 60 minutes fully characterising one issue and never tests the surrounding area where related bugs are likely.
+Detect: session notes show exhaustive detail on one bug and a single line of charter coverage.
+Fix: time-box bug investigation to 10-15 minutes during a session; log the reproduction steps and move on, then return for deeper investigation after the charter is complete.
+
+**Pair exploration where both explorers follow the same path**
+Why: two people exploring together default to one person driving while the other watches passively; this is pair testing in name only and adds no diversity of perspective.
+Detect: session notes from a pair session are identical to what a single tester would produce; the navigator's contributions are not visible in the record.
+Fix: assign the driver/navigator roles explicitly and enforce a swap every 20 minutes; the navigator must actively call out missed paths and challenge assumptions rather than watching the driver.
+
 ## Connections
 [[qa-hub]] · [[qa/exploratory-testing]] · [[qa/risk-based-testing]] · [[qa/usability-testing]] · [[qa/security-testing-qa]] · [[qa/test-strategy]]

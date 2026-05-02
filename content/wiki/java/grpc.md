@@ -12,7 +12,7 @@ tldr: gRPC with Protobuf is the standard for high-performance AI service communi
 
 > **TL;DR** gRPC with Protobuf is the standard for high-performance AI service communication — bidirectional streaming makes it the right choice for LLM output streaming between Java services.
 
-gRPC is the standard protocol for Java-to-Python AI service boundaries — Java orchestrator calling a Python inference service. Protobuf gives you typed contracts; gRPC streaming maps directly to LLM token-by-token output.
+gRPC is the standard protocol for Java-to-Python AI service boundaries. Java orchestrator calling a Python inference service. Protobuf gives you typed contracts; gRPC streaming maps directly to LLM token-by-token output.
 
 ---
 
@@ -308,6 +308,28 @@ import "grpc/health/v1/health.proto";
 - Spring Boot gRPC starter (`net.devh:grpc-*`) auto-configures channels from `application.yml`
 - `.proto` files define the API contract: version both services together or use backward-compatible field additions only
 
+## Common Failure Cases
+
+**gRPC call hangs indefinitely because no deadline is set and the Python inference server is overloaded**  
+Why: gRPC calls do not time out by default; if the Python server is slow to respond (model loading, high queue depth), the Java `StreamObserver.onNext` is never called and the calling thread waits forever, eventually exhausting the thread pool.  
+Detect: all threads are blocked on `grpc.io` internal park; the service stops responding to other requests; removing the gRPC call restores normal operation.  
+Fix: always attach a deadline before the stub call: `asyncStub.withDeadlineAfter(30, TimeUnit.SECONDS).generateStream(request, observer)`; handle `StatusRuntimeException` with status `DEADLINE_EXCEEDED` to implement retry or fallback logic.
+
+**Protobuf-generated stubs on the Java client and Python server are out of sync, causing silent field drops**  
+Why: if the Java module compiles its stubs from an older version of the `.proto` file than the Python server uses, new fields added in the server's proto are unknown to the Java client; proto3 silently ignores unknown fields on deserialization rather than raising an error.  
+Detect: the Java client receives responses where new fields (added to `GenerateChunk` in a recent proto change) are always zero/empty; enabling `UNKNOWN_FIELDS` logging on the channel reveals dropped bytes.  
+Fix: keep `.proto` files in a shared repository (`api/` module); both Java and Python services must rebuild stubs from the same version; use semantic versioning on the proto file and enforce it in CI.
+
+**`StreamObserver.onError` is called but the exception is swallowed because `handler.onError` only calls `printStackTrace`**  
+Why: `onError` in the default `TokenHandler` implementation just prints the stack trace and returns; the calling code assumes the stream completed successfully and proceeds to use a null or partial result.  
+Detect: the Java application produces empty or incomplete output after an inference error; the stack trace appears in logs but no error is propagated to the caller; the Python server logs show a `grpc.StatusCode.INTERNAL` error.  
+Fix: `onError` must signal failure to the caller — throw a runtime exception, complete a `CompletableFuture` exceptionally, or emit an error on a reactive `Sink`; never swallow gRPC stream errors silently.
+
+**Spring Boot gRPC starter fails to connect because the `address` in `application.yml` uses `static://` prefix but the host is behind a Kubernetes service that requires DNS-based resolution**  
+Why: `static://` configures a fixed list of addresses; in Kubernetes, the pod IP changes on restart; DNS-based load balancing requires the `dns:///service-name:50051` URI scheme, which uses the gRPC DNS resolver.  
+Detect: the Java service fails to connect after a pod restart of the Python inference service; the gRPC channel status shows `TRANSIENT_FAILURE`; `nslookup llm-service` resolves to the correct pod IP but the channel still uses the stale static address.  
+Fix: change the address to `dns:///llm-service:50051` and set `defaultLoadBalancingPolicy("round_robin")` on the channel; or use a service mesh (Istio, Linkerd) to handle transparent routing without SDK-level changes.
+
 ## Connections
 
 - [[java/spring-ai]] — Spring Boot LLM integration; gRPC is for Java↔Python service boundaries
@@ -315,3 +337,4 @@ import "grpc/health/v1/health.proto";
 - [[infra/inference-serving]] — vLLM and Triton both expose gRPC endpoints natively
 - [[protocols/mcp]] — MCP uses HTTP/stdio; gRPC is for direct service-to-service inference calls
 - [[web-frameworks/fastapi]] — FastAPI often serves the Python side; use gRPC when streaming performance matters
+- [[cs-fundamentals/grpc]] — language-agnostic reference: protocol comparison table, proto syntax, 4 streaming modes

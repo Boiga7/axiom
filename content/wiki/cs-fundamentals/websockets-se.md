@@ -10,7 +10,7 @@ tldr: Persistent bidirectional connections for real-time features — chat, live
 
 # WebSockets
 
-Persistent bidirectional connections for real-time features — chat, live feeds, collaborative editing.
+Persistent bidirectional connections for real-time features. Chat, live feeds, collaborative editing.
 
 ---
 
@@ -308,6 +308,28 @@ def test_chat_message_broadcast(client: TestClient) -> None:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Connection manager not removing dead sockets on broadcast, causing silent message loss**
+Why: when a client disconnects ungracefully (network drop, tab close), `websocket.send_json()` raises `RuntimeError`; without removing the dead socket, every subsequent broadcast attempt to it also raises and the message is lost for that client.
+Detect: broadcast errors appear in logs for connections that were never explicitly disconnected; the `_rooms` dict grows without bound over time.
+Fix: catch `RuntimeError` during broadcast, collect dead sockets, and discard them from the room set after iterating — as shown in the `ConnectionManager.broadcast` example above.
+
+**WebSocket connections lost on horizontal scaling without a pub/sub backing store**
+Why: each server process holds its own in-memory connection set; a message sent via server A is never delivered to users connected to server B.
+Detect: messages are delivered to only a subset of users in a room; the failure rate correlates with the number of server replicas.
+Fix: use a Redis pub/sub channel per room so every server instance publishes and subscribes, as shown in `PubSubConnectionManager`.
+
+**Nginx dropping WebSocket connections after the `proxy_read_timeout`**
+Why: Nginx's default `proxy_read_timeout` is 60 seconds; an idle WebSocket connection that has no data for 60 seconds is closed by the proxy, not the application.
+Detect: clients report intermittent disconnections approximately every 60 seconds; the heartbeat interval is longer than the proxy timeout.
+Fix: set `proxy_read_timeout 3600;` in the Nginx location block for the WebSocket path, and keep the heartbeat interval shorter than the proxy timeout.
+
+**Authentication token passed in the URL query string is logged by proxies**
+Why: WebSocket handshakes use a plain HTTP GET, so any token in the query string appears in access logs, CDN logs, and browser history in plaintext.
+Detect: the token value is visible in Nginx access logs or in the browser's developer tools network history.
+Fix: send the token as the first message after the connection is established (an "auth frame"), rather than in the URL; close with code 4001 if the auth frame is not received within a short deadline.
 
 ## Connections
 

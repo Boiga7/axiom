@@ -12,7 +12,7 @@ updated: 2026-05-01
 
 > **TL;DR** PyPI Trusted Publishers (OIDC) eliminates long-lived API tokens from CI — GitHub proves to PyPI it's running your workflow. Pytest plugins register via entry_points in pyproject.toml. No passwords stored, tokens expire automatically.
 
-Directly relevant to evalcheck — v0.2.0 shipped to PyPI 2026-04-29, and confident release management requires understanding this pipeline end to end.
+Directly relevant to evalcheck. V0.2.0 shipped to PyPI 2026-04-29, and confident release management requires understanding this pipeline end to end.
 
 ## Key Facts
 - Trusted Publishers (OIDC): GitHub Actions proves identity to PyPI without storing any secrets — tokens are short-lived and scoped
@@ -124,7 +124,7 @@ def eval_client():
     return EvalClient()
 ```
 
-Pytest discovers this automatically when the package is installed — no explicit `conftest.py` needed.
+Pytest discovers this automatically when the package is installed. No explicit `conftest.py` needed.
 
 ## pyproject.toml Structure
 
@@ -233,6 +233,28 @@ pytest --co -q 2>&1 | grep evalcheck
 
 > [Source: PyPI Docs — Trusted Publishers, 2025]
 > [Source: Python Packaging Authority — GitHub Actions CI/CD guide]
+
+## Common Failure Cases
+
+**PyPI Trusted Publisher upload fails with `403 Forbidden` because the workflow filename does not match**  
+Why: the Trusted Publisher configuration on PyPI requires an exact match on the workflow filename (e.g., `release.yml`); if the workflow is renamed or the case differs, the OIDC token is rejected.  
+Detect: the GitHub Actions workflow succeeds up to the `pypa/pypi-publish` step, then fails with `HTTPError: 403 Client Error: Forbidden`; no API token issue is involved.  
+Fix: verify the workflow filename in PyPI's Trusted Publisher settings matches the `.github/workflows/` filename exactly; update the PyPI configuration if the workflow was renamed.
+
+**pytest plugin not discovered because `entry_points.pytest11` key is missing from the built distribution**  
+Why: if `hatchling` or the build backend does not correctly bundle `pyproject.toml` entry points, the installed package has no `pytest11` entry point and pytest silently ignores it.  
+Detect: `pytest --co -q 2>&1 | grep evalcheck` shows no output after installing the package; running `python -c "import importlib.metadata; print(importlib.metadata.entry_points(group='pytest11'))"` shows no evalcheck entry.  
+Fix: verify the built wheel contains the entry point by running `unzip -p dist/evalcheck-*.whl METADATA | grep pytest11`; if missing, check that `[project.entry-points.pytest11]` is in `pyproject.toml` and rebuild.
+
+**Version bump forgotten before tagging, causing the tag and PyPI version to go out of sync**  
+Why: pushing `v0.3.0` tag triggers the release workflow, but if `pyproject.toml` still says `version = "0.2.0"`, the package is uploaded to PyPI as 0.2.0 and overwriting or conflicting with the previous release.  
+Detect: the PyPI upload succeeds but the package version on PyPI does not match the git tag; `pip install evalcheck` installs an unexpected version.  
+Fix: always update `version` in `pyproject.toml` before creating the git tag; automate this with `uv version 0.3.0` or a release script that bumps the version, commits, and tags in sequence.
+
+**Package uploaded to TestPyPI but cannot be installed because test dependencies are not mirrored there**  
+Why: TestPyPI only mirrors packages explicitly published to it; if your package's dependencies (e.g., `httpx`) were never published to TestPyPI, `pip install --index-url https://test.pypi.org evalcheck` fails to resolve dependencies.  
+Detect: `pip install` from TestPyPI fails with `Could not find a version that satisfies the requirement httpx`; the package exists on TestPyPI but dependencies do not.  
+Fix: use `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ evalcheck` to fall back to PyPI for dependencies; or only test the upload step with TestPyPI, not the install step.
 
 ## Connections
 - [[para/projects]] — evalcheck v0.2.0 is the current release; this page governs release management

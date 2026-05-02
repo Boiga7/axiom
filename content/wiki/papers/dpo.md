@@ -65,7 +65,7 @@ The loss increases the likelihood of preferred responses and decreases the likel
 3. Compute the DPO loss with the SFT model as the reference
 4. Optimise with Adam — standard supervised training
 
-No reward model. No PPO. No KL penalty as a separate term — it's implicit in the loss.
+No reward model. No PPO. No KL penalty as a separate term. It's implicit in the loss.
 
 ---
 

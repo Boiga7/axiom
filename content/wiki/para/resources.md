@@ -11,7 +11,7 @@ updated: 2026-05-01
 
 > **TL;DR** The 23-category AI engineering reference library — consulted on demand, no action required.
 
-Resources are reference knowledge. They don't require action — they're consulted when needed.
+Resources are reference knowledge. They don't require action. They're consulted when needed.
 ~95% of Nexus pages are resources.
 
 ## Layer 1 — Core AI Knowledge

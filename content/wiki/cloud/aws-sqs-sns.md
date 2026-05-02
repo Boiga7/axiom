@@ -122,7 +122,7 @@ SNS: order-events
     └──► SQS: audit-queue        ──► Audit Lambda
 ```
 
-All four consumers process every order event independently. Adding a new consumer is a new SQS subscription — no change to the Order Service.
+All four consumers process every order event independently. Adding a new consumer is a new SQS subscription. No change to the Order Service.
 
 ---
 
@@ -138,7 +138,7 @@ aws lambda create-event-source-mapping \
   --function-response-types ReportBatchItemFailures
 ```
 
-At scale, Lambda scales horizontally — one Lambda invocation per SQS batch, up to 60 concurrent invocations per FIFO queue (unlimited for Standard).
+At scale, Lambda scales horizontally. One Lambda invocation per SQS batch, up to 60 concurrent invocations per FIFO queue (unlimited for Standard).
 
 ---
 
@@ -155,6 +155,28 @@ At scale, Lambda scales horizontally — one Lambda invocation per SQS batch, up
 EventBridge is the modern choice when you need routing based on event content or AWS service events.
 
 ---
+
+## Common Failure Cases
+
+**Messages landing in DLQ immediately — maxReceiveCount too low**
+Why: a transient processing error (e.g., DB timeout) on a message increments its receive count, and if `maxReceiveCount` is set to 1 or 2, it hits the DLQ before any meaningful retry.
+Detect: DLQ depth grows rapidly immediately after messages are sent; the original queue depth stays low.
+Fix: set `maxReceiveCount` to at least 5 to allow for transient failures, and pair it with an appropriate `VisibilityTimeout` so retries have time to succeed.
+
+**FIFO queue throughput bottleneck — all messages use the same MessageGroupId**
+Why: FIFO queues process one message at a time per `MessageGroupId`; using a single group ID effectively serialises all processing to a single consumer.
+Detect: queue depth grows despite Lambda concurrency being available; CloudWatch `NumberOfMessagesSent` > `NumberOfMessagesDeleted` consistently.
+Fix: partition messages into multiple `MessageGroupId` values (e.g., by customer ID, order shard) to allow parallel processing across groups.
+
+**SNS delivery to SQS silently drops messages — missing access policy**
+Why: when SNS tries to deliver to an SQS queue, the queue's access policy must explicitly allow `sns:SendMessage` from the SNS topic ARN; without it, SNS delivery fails silently.
+Detect: SNS `NumberOfNotificationsDelivered` is zero for the SQS subscription; no errors are visible because SNS delivery failures are not automatically alarmed.
+Fix: add an SQS access policy statement allowing `sqs:SendMessage` with `ArnEquals: {"aws:SourceArn": "<topic-arn>"}` as the condition; alarm on `SNSNumberOfNotificationsFailed`.
+
+**Message processing causes infinite retry loop — poison pill message**
+Why: a structurally invalid message (malformed JSON, unexpected schema) always fails processing, consumes a visibility timeout slot each time, and repeatedly re-enters the queue up to `maxReceiveCount`.
+Detect: the DLQ consistently receives the same message IDs; the original queue's `ApproximateNumberOfMessagesNotVisible` is elevated.
+Fix: wrap the message parser in a try/except that catches schema errors and explicitly deletes the message (or routes to DLQ immediately) rather than letting it time out and re-enter.
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-lambda-patterns]] · [[cloud/cloud-monitoring]]

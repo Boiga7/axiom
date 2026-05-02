@@ -54,7 +54,7 @@ Review unused permissions with IAM Access Analyzer
 
 ## Service Control Policies (SCPs)
 
-SCPs are guardrails on AWS Organizations — they restrict what member accounts can do even if their IAM policies allow it. They do not grant permissions.
+SCPs are guardrails on AWS Organizations. They restrict what member accounts can do even if their IAM policies allow it. They do not grant permissions.
 
 ```json
 // Deny leaving the organisation
@@ -221,6 +221,28 @@ aws cloudtrail create-trail \
 ```
 
 ---
+
+## Common Failure Cases
+
+**IAM role with wildcards granting unintended S3 write access to production buckets**
+Why: A developer role created with `s3:*` on `arn:aws:s3:::*` to unblock a task is never tightened; it remains in place and is later assumed by CI/CD, granting write access to every bucket in the account including production.
+Detect: IAM Access Analyzer generates a finding for the role; CloudTrail shows the role performing `s3:DeleteObject` or `s3:PutObject` on buckets outside its intended scope.
+Fix: Replace wildcards with resource-scoped actions (`s3:GetObject` on `arn:aws:s3:::my-bucket/*`); set a permission boundary on developer roles to cap the maximum effective permissions.
+
+**SCP deny blocks break break-glass emergency access**
+Why: A region-restriction or service-restriction SCP applies to all principals including the emergency IAM role; during an incident, the SRE cannot access the affected resources.
+Detect: Emergency role assumptions fail with `ExplicitDeny` from `organizations` in CloudTrail; the SCP blocks the exact actions needed during incident response.
+Fix: Use SCP condition keys (`aws:PrincipalTag/BreakGlass: true`) to exempt the emergency role from restrictive SCPs; test the emergency access path in a non-production account quarterly.
+
+**GuardDuty enabled but findings never actioned because no alert routing is configured**
+Why: GuardDuty generates findings but they remain in the console unread; no EventBridge rule routes HIGH/CRITICAL findings to SNS or a ticketing system.
+Detect: GuardDuty console shows dozens of findings days old with no acknowledgement; no GuardDuty-related SNS topics or EventBridge rules exist.
+Fix: Create an EventBridge rule matching `{"source": ["aws.guardduty"], "detail.severity": [{"numeric": [">=", 7]}]}` and route to an SNS topic that pages on-call; triage findings within 24 hours of creation.
+
+**Secrets Manager secret rotated but application still caches the old value**
+Why: The application reads the secret at startup and caches it in memory; after rotation the cached value is stale and DB connections fail.
+Detect: Rotation succeeds in Secrets Manager but the application begins returning 500s immediately after the rotation window; CloudWatch logs show authentication failures against the database.
+Fix: Use the Secrets Manager SDK's built-in cache client (AWS Secrets Manager Caching Library) which handles rotation automatically, or implement a fallback that re-fetches on auth failure before raising an exception.
 
 ## Connections
 [[cloud-hub]] · [[cloud/secrets-management]] · [[cloud/cloud-networking]] · [[cloud/aws-cdk]] · [[security/guardrails]] · [[cs-fundamentals/auth-patterns]]

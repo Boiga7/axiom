@@ -10,7 +10,7 @@ tldr: Runtime enforcement of LLM output contracts — ensuring models return val
 
 # Guardrails and Output Validation
 
-Runtime enforcement of LLM output contracts — ensuring models return valid structure, safe content, and correct format before that output reaches your users or downstream systems.
+Runtime enforcement of LLM output contracts. Ensuring models return valid structure, safe content, and correct format before that output reaches your users or downstream systems.
 
 Distinct from [[security/prompt-injection]] (blocking bad inputs) and [[security/owasp-llm-top10]] (the threat taxonomy). This page is about validating and constraining what comes *out*.
 
@@ -18,7 +18,7 @@ Distinct from [[security/prompt-injection]] (blocking bad inputs) and [[security
 
 ## The Problem
 
-LLMs are probabilistic — even with clear instructions they can:
+LLMs are probabilistic. Even with clear instructions they can:
 - Return malformed JSON
 - Include off-topic or harmful content
 - Hallucinate fields or values
@@ -66,7 +66,7 @@ decision = client.messages.create(
 
 ## Pattern 2: Guardrails AI
 
-A framework for building "guardrails" — named validators that can run before (input) and after (output) every LLM call. Validators are composable and reusable.
+A framework for building "guardrails". Named validators that can run before (input) and after (output) every LLM call. Validators are composable and reusable.
 
 ```bash
 pip install guardrails-ai
@@ -213,6 +213,28 @@ This page focuses on output validation. Input validation (blocking malicious pro
 A production system needs both: validate inputs before the LLM sees them, validate outputs before your application uses them.
 
 ---
+
+## Common Failure Cases
+
+**`instructor` max_retries exceeded because the model's explanation wraps the JSON in markdown fences**  
+Why: some models return JSON inside a `\`\`\`json ... \`\`\`` code block by default; `instructor`'s parser tries to parse the full response text as JSON, fails, and retries; after `max_retries` attempts the error propagates.  
+Detect: `InstructorRetryException` on every call for a specific model; the raw response content shows valid JSON wrapped in markdown.  
+Fix: set `mode=instructor.Mode.JSON` or `mode=instructor.Mode.MD_JSON` to match the model's output style; or add a pre-parse step to strip code fences before passing to the Pydantic validator.
+
+**Guardrails AI `on_fail="reask"` loops indefinitely when the model cannot satisfy a validator**  
+Why: `reask` sends the failed output back to the model with the error message; if the validator is checking for something the model genuinely cannot produce (e.g., detecting PII in a response that must contain a name), the model fails every reask attempt.  
+Detect: API calls multiply by `max_retries`; the final response is still a validation failure; cost per request spikes.  
+Fix: use `on_fail="exception"` or `on_fail="filter"` for validators that the model structurally cannot satisfy; reserve `reask` only for format/schema validators where restatement actually helps.
+
+**NeMo Guardrails Colang flow silently drops user messages that don't match any defined pattern**  
+Why: NeMo routes user messages through defined conversational flows; if a user message matches no defined `user` pattern, NeMo returns an empty response or the default fallback without explanation.  
+Detect: users receive empty responses or generic fallbacks for valid queries that are slightly out-of-scope; Colang logs show "no matching flow" for those messages.  
+Fix: add a catch-all `define user ask anything` → `define flow default` pattern to handle unrecognised messages; or set `allow_unhandled_events: true` in the NeMo config to pass unmatched messages through to the underlying LLM.
+
+**Manual regex-based JSON extraction fails when the model returns multiple JSON objects in one response**  
+Why: `re.search(r'\{.*\}', text, re.DOTALL)` matches from the first `{` to the last `}`; if the model includes both a scratchpad JSON and the final JSON, the regex captures everything between them, producing invalid JSON.  
+Detect: `json.JSONDecodeError` on responses where the model was verbose; the extracted string contains two separate JSON objects concatenated.  
+Fix: use `re.findall(r'\{[^{}]*\}', text)` to find all top-level objects and select the last one; or instruct the model to return JSON in a specific XML tag: `<result>{...}</result>` and parse between the tags.
 
 ## Connections
 

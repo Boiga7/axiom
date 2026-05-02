@@ -10,7 +10,7 @@ tldr: Decoupling deployment from release — ship code dark, control visibility 
 
 # Feature Flags
 
-Decoupling deployment from release — ship code dark, control visibility independently.
+Decoupling deployment from release. Ship code dark, control visibility independently.
 
 ---
 
@@ -229,6 +229,28 @@ Anti-patterns:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Zombie flags accumulating as tech debt**
+Why: release flags are created with no deletion plan; after a feature ships at 100%, the conditional code and both branches remain in production indefinitely.
+Detect: flags created more than 4 weeks ago that have been at 100% for more than 2 weeks with no open cleanup ticket.
+Fix: track flag creation date and owner; add an automated lint step that fails the build if a release flag's age exceeds the agreed threshold.
+
+**`lru_cache` holding stale flag values in long-running processes**
+Why: `get_flags()` cached on first call never re-reads the environment, so a change to an env var has no effect until the process restarts.
+Detect: changing `FLAG_X=true` in the environment has no effect; only a process restart picks it up.
+Fix: either clear the cache explicitly after changing env vars in tests, or use a flag client (Unleash/LaunchDarkly) that polls for changes rather than a process-lifetime cache.
+
+**Flag spaghetti: flags that depend on other flags**
+Why: team members combine `if flag_a and flag_b and not flag_c` inline, creating state space that is impossible to test exhaustively.
+Detect: a change to one flag breaks behaviour that seemed unrelated; reproducing a bug requires knowing the exact flag combination active at the time.
+Fix: flags should be independent; if a feature requires multiple flags, use a single enclosing flag and remove the inner ones.
+
+**Inconsistent bucket assignment in gradual rollout**
+Why: using a non-deterministic bucketing function (e.g., `random.random() < 0.1`) means the same user gets a different experience on each request.
+Detect: a user reports the UI "flickering" between old and new versions on page refresh.
+Fix: always derive the bucket from a stable hash of `flag_name + user_id` so assignment is sticky.
 
 ## Connections
 

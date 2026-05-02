@@ -269,6 +269,28 @@ my-project/
 
 ---
 
+## Common Failure Cases
+
+**Tag pushed but CI publishes the wrong version**
+Why: the git tag (e.g. `v1.2.3`) and `version` in `pyproject.toml` are maintained separately; they can drift when someone edits the file without tagging or vice versa.
+Detect: the published wheel on PyPI has a different version string than the GitHub release tag.
+Fix: add the version-mismatch check shown above (compare `uv version --short` against the stripped tag) as a mandatory CI step before the build runs.
+
+**`uv sync` installs a different dependency graph than `uv add` did**
+Why: if `uv.lock` is committed but a developer runs `uv add` without committing the updated lockfile, the next `uv sync` on CI restores the old locked versions.
+Detect: `uv lock --check` fails in CI; package versions differ between local env and CI.
+Fix: run `uv lock --check` in CI as a gate before any tests execute; commit `uv.lock` atomically with every `uv add` or `uv remove`.
+
+**`src/` layout causes `ModuleNotFoundError` in tests without installation**
+Why: with a `src/` layout, `pytest` run from the project root can't find the package because it isn't on `sys.path` unless installed (`uv sync` or `pip install -e .`).
+Detect: `ModuleNotFoundError: No module named 'myapp'` when running `pytest` directly.
+Fix: ensure `uv run pytest` is used (which runs inside the synced `.venv`) or add `pythonpath = ["src"]` to `[tool.pytest.ini_options]` in `pyproject.toml`.
+
+**Workspace sibling resolved from PyPI instead of local source**
+Why: if `[tool.uv.sources]` declaring `{ workspace = true }` is missing for a sibling package, `uv` resolves it from PyPI, pulling in a stale or non-existent published version.
+Detect: changes to a local workspace package are not reflected after `uv sync`; the installed version shows a PyPI-published version number.
+Fix: explicitly declare every workspace dependency in `[tool.uv.sources]` with `{ workspace = true }`; verify with `uv pip list` that the editable local path is shown.
+
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[python/pypi-distribution]] · [[cs-fundamentals/cli-tooling]] · [[cloud/github-actions]]

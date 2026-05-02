@@ -297,6 +297,28 @@ def test_export_fails_if_file_exists(tmp_path) -> None:
 
 ---
 
+## Common Failure Cases
+
+**Error output written to stdout instead of stderr**
+Why: `print(f"Error: {e}")` writes to stdout, which pollutes machine-readable output when the command is piped; downstream scripts parsing JSON or CSV output receive the error message as data.
+Detect: pipe the command to `jq` or `cut` and trigger an error; if the parser receives the error text, stdout is being used for errors.
+Fix: write all errors via `Console(stderr=True)` (Rich) or `click.echo(..., err=True)`; reserve stdout exclusively for the command's data output.
+
+**Non-zero exit code not set on failure**
+Why: a command catches an exception and prints an error message but returns exit code 0; scripts that check `$?` to detect failure see success and continue silently.
+Detect: run the command with invalid input, then `echo $?` — if it prints 0, the exit code is wrong.
+Fix: call `raise typer.Exit(code=1)` or `raise SystemExit(1)` in every error path; use `typer.Exit(code=0)` only on genuine success.
+
+**Config precedence not honoured (env var silently overridden by file)**
+Why: the config loading order is implemented incorrectly — file values override env vars, so `MYAPP_API_KEY` in the environment has no effect when a config file exists.
+Detect: set an env var that conflicts with a config file value and check which takes effect.
+Fix: enforce the precedence chain explicitly: CLI args > env vars > config file > defaults; with `pydantic-settings`, env vars override file values by default.
+
+**Shell completion broken because entry point is not configured**
+Why: `add_completion=True` is set in Typer but the package's `pyproject.toml` does not declare a `[project.scripts]` entry point; the `myapp --install-completion` command generates a script pointing at a non-existent command.
+Detect: install the package with `pip install -e .` and run `myapp --install-completion bash`; if it fails or completion does not trigger, the entry point is missing.
+Fix: add `[project.scripts] myapp = "myapp.cli:app"` to `pyproject.toml` and reinstall.
+
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[cs-fundamentals/linux-fundamentals]] · [[cs-fundamentals/performance-optimisation-se]]

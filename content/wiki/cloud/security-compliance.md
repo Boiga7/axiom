@@ -10,7 +10,7 @@ tldr: Security Hub, GuardDuty, Config, Inspector, and WAF — the AWS security c
 
 # AWS Security and Compliance
 
-Security Hub, GuardDuty, Config, Inspector, and WAF — the AWS security control plane.
+Security Hub, GuardDuty, Config, Inspector, and WAF. The AWS security control plane.
 
 ---
 
@@ -264,6 +264,28 @@ waf.CfnWebACLAssociation(self, "WAFAssociation",
 ```
 
 ---
+
+## Common Failure Cases
+
+**Security Hub aggregates thousands of findings but the team cannot triage them**
+Why: enabling all managed standards at once generates findings for every enabled control across every resource; without severity filtering or suppression rules the queue is overwhelmed from day one.
+Detect: Security Hub shows 5,000+ active findings on first enablement; the team stops looking at it after a week.
+Fix: start with only the AWS FSBP standard, suppress controls that are not applicable to your workload (e.g., controls for services you do not use), and configure EventBridge rules that page on-call only for `CRITICAL` severity findings.
+
+**GuardDuty generates false positives for legitimate automated tooling**
+Why: security scanners, penetration testing tools, or deployment pipelines make API calls that match GuardDuty threat signatures (e.g., recon patterns, unusual IAM enumeration).
+Detect: GuardDuty findings reference IP addresses or IAM ARNs that belong to your own tooling; the finding type is consistent across deployments rather than random.
+Fix: add trusted IP lists (`CreateThreatIntelSet` with `KNOWN_THREAT_LIST=false`) for scanner IPs, and suppress findings for known automation ARNs using EventBridge rule pattern matching before escalation.
+
+**Config rule evaluations fall behind and show stale compliance status**
+Why: AWS Config has a per-rule evaluation throttle; for accounts with thousands of resources, the evaluation queue backs up and compliance status can lag by hours.
+Detect: Config console shows evaluations with timestamps many hours old; newly created non-compliant resources do not appear as NON_COMPLIANT for a long time.
+Fix: reduce the scope of Config rules to specific resource types rather than `ALL_SUPPORTED_RESOURCES`; use AWS Config aggregator with a dedicated aggregator account to reduce per-account evaluation load.
+
+**WAF blocks legitimate traffic after enabling a managed rule group**
+Why: AWS managed rule groups like `AWSManagedRulesCommonRuleSet` occasionally block legitimate payloads (large JSON bodies, specific header patterns); the default mode is `Block`, not `Count`.
+Detect: a sudden increase in 403 responses from the WAF after enabling the rule group; WAF sampled requests show legitimate traffic being blocked by a specific rule ID.
+Fix: switch new rule groups to `Count` mode initially using `override_action: COUNT`; monitor sampled requests for 48 hours to identify false-positive rules; then exclude specific rules via `excluded_rules` before switching to `Block`.
 
 ## Connections
 

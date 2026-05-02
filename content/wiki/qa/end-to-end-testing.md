@@ -255,6 +255,28 @@ Quarantine process:
 
 ---
 
+## Common Failure Cases
+
+**Logging in via the UI in every E2E test**
+Why: authenticating through the full login UI in each test adds 5-10 seconds per test and introduces a flaky dependency on the login flow that is unrelated to the feature under test.
+Detect: test setup time is >10 seconds on average; login page is the most common source of E2E failures even in tests that test checkout or orders.
+Fix: obtain an auth token via API call in the fixture and inject it as a cookie or local storage value directly; reserve UI login tests for the authentication feature itself.
+
+**Tests that share a single test user across all test classes**
+Why: when tests run in parallel and multiple tests mutate the same user's state (cart, address, preferences), they corrupt each other's state unpredictably, producing flaky failures that only appear in parallel CI runs.
+Detect: tests pass when run sequentially (`pytest -n 0`) but fail non-deterministically with `-n 4` or higher.
+Fix: use the `fresh_user` pattern to provision a unique user per test class or test function; never share mutable state across parallel tests.
+
+**E2E suite covering unit-testable logic instead of integration seams**
+Why: tests that verify a single component's rendering or a single service's response belong at a lower level; running them as E2E tests wastes CI resources and slows the feedback loop without increasing confidence.
+Detect: the E2E suite includes tests for form validation feedback, sorting/filtering UI state, or API error messages that do not require a second service to be involved.
+Fix: apply the critical-path framework — include only journeys that require two or more integrated systems and would be invisible to unit or integration tests.
+
+**`sleep()` calls used instead of proper waiting primitives**
+Why: fixed sleep durations are either too short (test fails on slow CI) or too long (test suite balloons in duration); they mask the real condition being waited for.
+Detect: test files contain `time.sleep()` or `page.wait_for_timeout()` calls; tests pass locally but fail on CI due to infrastructure speed differences.
+Fix: replace all sleeps with `expect(locator).to_be_visible()` or `page.wait_for_url()` — Playwright's auto-wait retries for up to the configured timeout and stops as soon as the condition is met.
+
 ## Connections
 
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/test-automation-strategy]] · [[qa/continuous-testing]] · [[technical-qa/playwright-advanced]] · [[technical-qa/flaky-test-management]] · [[technical-qa/e2e-framework-design]]

@@ -200,5 +200,27 @@ test('homepage renders consistently', async ({ page, browserName }) => {
 
 ---
 
+## Common Failure Cases
+
+**Running cross-browser tests on every PR and slowing CI to a crawl**
+Why: full cross-browser matrix on every PR adds 20-40 minutes to feedback time, causing developers to ignore or override failures rather than fix them.
+Detect: PR pipeline duration is consistently above 20 minutes; developers comment "just merge, it's probably a browser flake."
+Fix: run Chromium only on PRs; run the full browser matrix only on merge to main and nightly; use path filters to trigger cross-browser for CSS and layout changes.
+
+**Testing only on the latest browser version and missing enterprise pinned versions**
+Why: enterprise users often run Chrome -2 or Safari -1; features using newer CSS or JavaScript APIs (optional chaining, `aspect-ratio`, `gap`) silently fail on older versions.
+Detect: production support tickets cite browser versions not covered by the test matrix, or the analytics dashboard shows a browser version with a significantly higher error rate.
+Fix: include at least one previous major version for Chrome and Safari in the test matrix; check production analytics to identify the oldest version with meaningful share.
+
+**Visual regression thresholds set to 0% difference**
+Why: anti-aliasing, font hinting, and sub-pixel rendering vary across browsers and operating systems, causing pixel-perfect comparisons to fail on every cross-browser run even when the UI is correct.
+Detect: visual regression tests fail on every webkit run with sub-1% pixel differences that are invisible to the human eye.
+Fix: set `maxDiffPixelRatio` to 0.02-0.03 (2-3%) per browser to account for rendering differences; reserve stricter thresholds for layout-critical components only.
+
+**Treating `fail-fast: false` in the CI matrix as optional**
+Why: without `fail-fast: false`, a failure in one browser cancels all other browser jobs, leaving the team without a complete cross-browser picture and blocking fixes that only affect one browser.
+Detect: CI matrix jobs are cancelled when one browser fails, leaving gaps in the failure report.
+Fix: always set `fail-fast: false` in cross-browser matrix strategies so all browsers run to completion and the full impact is visible in a single run.
+
 ## Connections
 [[qa-hub]] · [[qa/accessibility-testing]] · [[qa/regression-testing]] · [[technical-qa/playwright-advanced]] · [[technical-qa/visual-testing]] · [[technical-qa/cypress]]

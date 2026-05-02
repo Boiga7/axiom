@@ -12,7 +12,7 @@ tldr: VLM architecture (ViT encoder → projection → LLM), Claude's document-u
 
 > **TL;DR** VLM architecture (ViT encoder → projection → LLM), Claude's document-understanding strength, multimodal RAG with ColPali, and image generation model comparison.
 
-Models that process multiple modalities — text, images, audio, video — in a unified architecture. As of 2026, vision is default on all frontier models. "Multimodal" no longer means experimental.
+Models that process multiple modalities (text, images, audio, video) in a unified architecture. As of 2026, vision is default on all frontier models. "Multimodal" no longer means experimental.
 
 ---
 
@@ -30,7 +30,7 @@ Visual tokens in language model space
 Text output
 ```
 
-The vision encoder (typically a ViT — Vision Transformer) divides the image into patches (16×16 or 32×32 pixels), embeds each as a vector, and feeds these into the language model alongside text tokens. The LLM treats visual tokens like text tokens.
+The vision encoder (typically a ViT, Vision Transformer) divides the image into patches (16×16 or 32×32 pixels), embeds each as a vector, and feeds these into the language model alongside text tokens. The LLM treats visual tokens like text tokens.
 
 ---
 
@@ -153,7 +153,7 @@ Claude does not natively process audio input. For voice-to-Claude pipelines: Whi
 
 ## Image Generation
 
-Not Claude's domain — generation is a separate model family.
+Not Claude's domain. Generation is a separate model family.
 
 | Model | Strength | Notes |
 |---|---|---|
@@ -174,6 +174,23 @@ Not Claude's domain — generation is a separate model family.
 - True multimodal RAG (ColPali, 2024): embeds document images directly; better for chart/diagram-heavy docs
 - Claude does not natively process audio input — pipeline is Whisper→text→Claude→TTS
 - Flux.1 has largely replaced Stable Diffusion as the open-source image generation default
+
+## Common Failure Cases
+
+**Image sent as `"type": "url"` is not accessible by Claude because the URL requires authentication or is behind a VPN**  
+Why: Claude fetches URL-referenced images from its own servers; any URL that requires cookies, auth headers, or is not publicly reachable returns a 403 or 404 when Claude attempts to fetch it; the API returns a successful response but the model cannot see the image.  
+Detect: the model responds as if no image was provided ("I don't see any image in your message"); switching to base64 encoding of the same image resolves the issue.  
+Fix: use base64 encoding for any non-public image; reserve URL references for truly public, unauthenticated URLs (e.g., public S3 objects, CDN assets without signed URLs).
+
+**`base64.standard_b64encode(f.read()).decode("utf-8")` encodes a large image that exceeds Claude's per-image token limit, causing a 400 error**  
+Why: Claude converts images to patch embeddings; a very high-resolution image (e.g., a 6000×4000 photo) generates thousands of tokens; combined with the text prompt, this may exceed the model's input token limit.  
+Detect: the API returns `400 Request too large` or the token usage in the response shows unexpectedly high input token counts for a simple image query.  
+Fix: resize images before encoding — target 1024×1024 or smaller for most tasks; use `PIL.Image.thumbnail((1024, 1024))` to resize in-place without distortion; for document PDFs, use the document block type rather than sending each page as an image.
+
+**Counting objects in an image returns systematically wrong results because the image contains more than ~15-20 instances**  
+Why: Claude's spatial reasoning degrades for dense counting tasks; it reliably counts 5-10 items but undercounts or approximates when items exceed ~15-20, especially if they are small or overlapping.  
+Detect: asking "how many X are in this image?" returns an answer that differs from the ground truth by more than 10%; the error rate increases with the number of items.  
+Fix: for counting tasks, use a dedicated object detection model (YOLO, Detectron2) rather than a VLM; or ask Claude to count by segmenting the image into quadrants and summing the partial counts.
 
 ## Connections
 

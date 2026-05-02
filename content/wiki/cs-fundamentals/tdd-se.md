@@ -10,7 +10,7 @@ tldr: Write a failing test before writing code. The test defines the contract; t
 
 # Test-Driven Development
 
-Write a failing test before writing code. The test defines the contract; the implementation satisfies it. TDD is a design technique as much as a testing one — it forces you to think about the API before the implementation.
+Write a failing test before writing code. The test defines the contract; the implementation satisfies it. TDD is a design technique as much as a testing one. It forces you to think about the API before the implementation.
 
 ---
 

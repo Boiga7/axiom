@@ -10,7 +10,7 @@ tldr: Aligning software design with the business domain. DDD provides a vocabula
 
 # Domain-Driven Design
 
-Aligning software design with the business domain. DDD provides a vocabulary and set of patterns for modelling complex business domains — making the code reflect the real world rather than database tables.
+Aligning software design with the business domain. DDD provides a vocabulary and set of patterns for modelling complex business domains. Making the code reflect the real world rather than database tables.
 
 ---
 
@@ -238,6 +238,28 @@ Inventory BC:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Domain logic leaking into the repository**
+Why: a `save()` method that also validates business rules, sends events, or updates related aggregates mixes persistence concerns with domain logic; the repository becomes untestable in isolation.
+Detect: a repository method contains `if` branches that enforce domain invariants rather than simply persisting and loading the aggregate.
+Fix: keep repositories to a single responsibility — load and store aggregates; move all invariant checks and domain rule enforcement into the aggregate or a domain service.
+
+**Aggregate boundary too large, causing lock contention**
+Why: an `Order` aggregate that includes all line items, the customer, payment details, and shipping history must be loaded and saved atomically; concurrent writes from different parts of the UI fight over the same aggregate root.
+Detect: high update conflict rates in the `optimistic_lock_version` column, or slow aggregate saves under load.
+Fix: split the aggregate along natural consistency boundaries — `Order` (items, status), `Payment` (payment attempts, result), and `ShipmentTracking` are separate aggregates that communicate via domain events.
+
+**Ubiquitous language not reflected in the code**
+Why: developers use `record`, `entry`, and `data` as variable names while the domain experts say `order`, `booking`, and `reservation`; divergence makes conversations between developers and domain experts confusing.
+Detect: sit in a domain expert conversation and note every time you have to mentally translate between what they say and what the code is called.
+Fix: rename code identifiers to match the ubiquitous language immediately when a mismatch is found; this is not a cosmetic change — it is the primary benefit of DDD.
+
+**Value objects mutated by callers**
+Why: a `Money` object is passed to a function which modifies its `amount` attribute directly (possible if `frozen=False`); other holders of the same object see unexpected state changes.
+Detect: a unit test modifies an attribute on a value object and checks whether another reference sees the change.
+Fix: declare all value objects with `@dataclass(frozen=True)`; any "mutation" must produce a new instance via methods like `.add()` or `.multiply()`.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/database-design]]

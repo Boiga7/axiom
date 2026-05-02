@@ -28,7 +28,7 @@ The question every AI engineer gets asked. The answer: they solve different prob
 
 ### Frequently updating knowledge
 
-Company documentation, product catalogs, pricing, news, support tickets — anything that changes weekly or daily. Updating a RAG index takes minutes. Fine-tuning takes hours to days and requires redeployment.
+Company documentation, product catalogs, pricing, news, support tickets. Anything that changes weekly or daily. Updating a RAG index takes minutes. Fine-tuning takes hours to days and requires redeployment.
 
 ### Long-tail factual knowledge
 
@@ -36,7 +36,7 @@ Facts that appear rarely in training data but matter for accuracy. The model can
 
 ### Attribution and citation
 
-RAG can show exactly which document supported which claim. Fine-tuned knowledge has no provenance — the model produces outputs it "knows" without being able to cite where.
+RAG can show exactly which document supported which claim. Fine-tuned knowledge has no provenance. The model produces outputs it "knows" without being able to cite where.
 
 ### Large knowledge corpus
 

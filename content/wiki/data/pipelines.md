@@ -354,6 +354,28 @@ def validate_training_dataset(path: str) -> dict:
 - Label imbalance ratio > 10x requires upsampling the minority class
 - Inter-annotator agreement target: κ > 0.7 for preference pairs
 
+## Common Failure Cases
+
+**Airflow `xcom_push` stores a list of thousands of document IDs in the metadata database, causing the database to bloat and slow task scheduling**  
+Why: XCom is designed for small inter-task metadata, not large payloads; storing 10,000+ IDs as a serialised Python list writes megabytes to Airflow's metadata DB per DAG run, causing query slowdowns and eventually disk exhaustion.  
+Detect: Airflow web UI becomes sluggish; the `xcom` table in the metadata DB grows unboundedly; DAG scheduling latency increases over weeks.  
+Fix: write document IDs to a temporary file in S3/GCS and pass only the file path via XCom; or use Airflow's task result backend (S3 or GCS XCom backend) for large payloads.
+
+**dbt model silently passes `dbt test` on an empty table because `not_null` tests pass when there are zero rows**  
+Why: `dbt test` validates constraints on existing rows; if the upstream source is empty (a failed extraction, a first-run edge case), the downstream model is also empty and all column tests trivially pass with no rows to fail.  
+Detect: `dbt test` reports green on a model that has zero rows; adding a `relationships` test or a minimum row count test reveals the empty table.  
+Fix: add a `dbt_utils.at_least_one` test to critical models to assert the table is non-empty; add a row count validation step in the extract task that fails the DAG if the source returns zero rows.
+
+**Prefect task cache is never invalidated after an upstream data change because `task_input_hash` only hashes the Python argument, not the database content it points to**  
+Why: `cache_key_fn=task_input_hash` computes the cache key from the function's arguments; if the argument is a source name string like `"confluence"`, the key is always the same regardless of whether new documents exist in Confluence, so the cached result is returned indefinitely.  
+Detect: new documents added to the source never appear in the vector store; manual cache invalidation (`prefect task invalidate-cache`) triggers a run that finds new documents.  
+Fix: include a content fingerprint (row count, latest `updated_at` timestamp from the source) in the cache key; or set a short `cache_expiration` (e.g., `timedelta(hours=1)`) to force regular re-runs.
+
+**DVC pipeline stage runs on every `dvc repro` call because an output file is modified by a step that reads it, creating a circular dependency**  
+Why: if a pipeline step reads and writes the same file (e.g., appending to a JSONL that is both a dependency and an output), DVC detects the file as changed after every run and marks the stage as stale, forcing a re-run on every `dvc repro` invocation.  
+Detect: `dvc repro` never reports "Stage ... cached"; every run re-executes all stages even when no input has changed; inspecting the stage shows the same file in both `deps` and `outs`.  
+Fix: separate read and write files — use `data/raw/input.jsonl` as input and `data/processed/output.jsonl` as output; never have a stage both depend on and produce the same file path.
+
 ## Connections
 
 - [[data/synthetic-data]] — generating training data when real data is scarce

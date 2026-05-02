@@ -12,7 +12,7 @@ updated: 2026-05-01
 
 > **TL;DR** OAuth boundary testing verifies that scoped tokens can't exceed their declared scope, PKCE can't be downgraded, and tokens can't be replayed or audience-swapped. Test the negative cases, not just the happy path.
 
-Directly relevant to mcpindex Weekend 2 — auth boundary tests are the explicit target.
+Directly relevant to mcpindex Weekend 2. Auth boundary tests are the explicit target.
 
 ## Key Facts
 - PKCE downgrade attack: if a server supports but doesn't enforce PKCE, attackers bypass it — test that servers reject auth requests without a code_challenge
@@ -214,6 +214,28 @@ For mcpindex, test these boundaries against every server you scan:
 > [Source: RFC 9700 — Best Current Practice for OAuth 2.0 Security, 2025]
 > [Source: MCP Specification 2025-03-26 — Authorization]
 > [Source: Security Boulevard — 7 MCP Authentication Vulnerabilities, 2026]
+
+## Common Failure Cases
+
+**PKCE test passes because the server accepts the code without verifying the code_verifier**  
+Why: some implementations store the authorization code but skip the `code_verifier` check at the token endpoint — the authorization flow succeeds whether or not the correct verifier is presented.  
+Detect: `test_code_verifier_mismatch_rejected` passes with the wrong verifier; the token endpoint returns 200 for any value of `code_verifier`.  
+Fix: verify the token endpoint code specifically checks `hash(code_verifier) == code_challenge` before issuing the token; test with an intentionally wrong verifier to confirm rejection.
+
+**Scope enforcement test passes at the API level but the database query ignores the scope**  
+Why: the authorization middleware returns 403 for out-of-scope requests, but a direct database access layer (called from a background job or admin endpoint) bypasses the middleware and executes without scope validation.  
+Detect: the `/tools/execute` endpoint correctly returns 403 for read-scoped tokens, but a background job endpoint at `/internal/tasks` executes the same operation without auth; out-of-scope operations succeed via the undocumented endpoint.  
+Fix: enforce scope validation at the data layer, not just the HTTP middleware layer; audit all endpoints including internal ones against the scope enforcement tests.
+
+**Audience validation test passes in unit tests but fails in production because `aud` claim is not validated**  
+Why: the test uses mock tokens where the `aud` claim is pre-set; the real JWT validation code calls `jwt.decode()` without passing `audience=expected_audience`, so any JWT with the right signature is accepted regardless of audience.  
+Detect: `test_token_for_wrong_resource_rejected` passes in tests but cross-server token reuse works in production; adding `print(decoded["aud"])` shows it is the wrong server's URL.  
+Fix: always pass `audience=server_url` to the JWT decode call; test with real tokens issued by a test OAuth server rather than manually crafted mock tokens.
+
+**`test_unauth_request_rejected` marks admin endpoints as protected but they respond 404 without auth instead of 401**  
+Why: returning 404 for unauthenticated requests to admin endpoints is a security-through-obscurity pattern that passes the `response.status_code != 200` assertion but is not correct OAuth behaviour — it hides the existence of the endpoint rather than enforcing auth.  
+Detect: admin endpoints return 404 for unauthenticated requests but 200 for authenticated ones; the existence of the endpoint leaks via timing differences.  
+Fix: return 401 (with a `WWW-Authenticate` header) for unauthenticated requests to any real endpoint; update the test assertion to check specifically for 401, not just "not 200".
 
 ## Connections
 - [[protocols/mcp]] — the MCP spec that mandates PKCE and Resource Indicators

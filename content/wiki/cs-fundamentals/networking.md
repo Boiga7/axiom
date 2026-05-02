@@ -254,7 +254,7 @@ Anthropic API typical latency:
 
 ## CORS (Cross-Origin Resource Sharing)
 
-Browsers block JavaScript from making requests to a different domain than the page it's on — unless the server explicitly allows it via CORS headers.
+Browsers block JavaScript from making requests to a different domain than the page it's on, unless the server explicitly allows it via CORS headers.
 
 ```python
 # FastAPI CORS setup
@@ -269,6 +269,28 @@ app.add_middleware(
 ```
 
 **Only matters for browser-to-API calls.** Server-to-server calls (your backend calling Anthropic's API) are not subject to CORS.
+
+## Common Failure Cases
+
+**No retry with exponential backoff on 429 / 529 responses**
+Why: hitting an LLM provider's rate limit and immediately retrying hammers the same threshold, worsening the situation and burning through the retry budget instantly.
+Detect: logs show rapid-fire 429 responses with no delay between them; request queue backs up.
+Fix: implement exponential backoff with jitter (`delay = base * 2^attempt + random(0, 1)`) and respect the `Retry-After` header when present.
+
+**CORS wildcard (`*`) in production exposes the API to any origin**
+Why: `allow_origins=["*"]` disables the same-origin protection, allowing any website to make credentialed API calls on behalf of a logged-in user.
+Detect: a browser on an unrelated domain can successfully call your `/api/` endpoints with session cookies attached.
+Fix: set `allow_origins` to an explicit allowlist of your own domains; never use `"*"` when `allow_credentials=True`.
+
+**WebSocket connection not heartbeating, silently dropped by load balancer**
+Why: most load balancers and proxies close idle connections after 60–300 seconds; a WebSocket with no traffic is silently terminated, and the client only discovers this when it next tries to send.
+Detect: clients report disconnections after a fixed period of inactivity; server logs show no `close` frame, just a vanished connection.
+Fix: implement application-level ping/pong on a 30-second interval from either side; configure the load balancer's idle timeout to exceed the heartbeat interval.
+
+**HTTP connection pool not reused, new TLS handshake per request**
+Why: creating a new `httpx.Client()` or `requests.Session()` inside a function means each call pays for a fresh TCP + TLS handshake (~100–200ms), multiplying per-request latency.
+Detect: each outgoing HTTP call shows a consistent ~150ms overhead that disappears when requests are made in quick succession from the same process.
+Fix: instantiate the HTTP client once at module or application level and reuse it across calls; use `httpx.AsyncClient` as an `async with` context at the application lifespan level.
 
 ## Connections
 

@@ -12,7 +12,7 @@ tldr: NoSQL covers four distinct families (document, key-value, wide-column, gra
 
 > **TL;DR** NoSQL covers four distinct families (document, key-value, wide-column, graph) each with different consistency and query trade-offs. PostgreSQL + Redis is the most common 2026 production stack; NoSQL wins when data shape is variable, write throughput is extreme, or relationship traversal dominates.
 
-SQL vs NoSQL is not either/or — it is choosing the right tool. Most production systems use both. The vault covers relational databases in [[cs-fundamentals/sql]], [[cs-fundamentals/database-design]], and [[cs-fundamentals/database-transactions]]; this page covers the four NoSQL families.
+SQL vs NoSQL is not either/or. It is choosing the right tool. Most production systems use both. The vault covers relational databases in [[cs-fundamentals/sql]], [[cs-fundamentals/database-design]], and [[cs-fundamentals/database-transactions]]; this page covers the four NoSQL families.
 
 ---
 
@@ -29,7 +29,7 @@ SQL vs NoSQL is not either/or — it is choosing the right tool. Most production
 
 ## MongoDB
 
-Document database. Stores data as flexible BSON documents (binary JSON). No rigid schema — a `laptop` document can have 40 fields while a `t-shirt` in the same collection has 8.
+Document database. Stores data as flexible BSON documents (binary JSON). No rigid schema. A `laptop` document can have 40 fields while a `t-shirt` in the same collection has 8.
 
 ### When to Use
 
@@ -310,6 +310,28 @@ with driver.session() as session:
 - PostgreSQL + Redis is the most common production stack in 2026
 
 ---
+
+## Common Failure Cases
+
+**DynamoDB hot partition throttling everything**
+Why: when most requests target the same partition key value (e.g., `PK="ORDER"` for all orders), a single partition absorbs all traffic and is throttled at 3,000 RCUs/s, even if the table's total provisioned capacity is much higher.
+Detect: `ConsumedReadCapacityUnits` at the table level looks fine, but `ThrottledRequests` is non-zero; inspecting per-partition metrics shows one partition at 100% utilisation.
+Fix: redesign the key to distribute load — use `USER#<id>` as the partition key so reads spread across users, or add a random suffix and fan out reads.
+
+**MongoDB collection scan because an index is missing**
+Why: without an index on the queried field, MongoDB performs a full collection scan (`COLLSCAN`); at millions of documents, this causes seconds-long queries and high CPU.
+Detect: `explain("executionStats")` shows `stage: COLLSCAN` and `nDocsExamined >> nReturned`.
+Fix: create a compound index on the fields used in `find()` filter and sort; put equality conditions first, range conditions last in compound indexes.
+
+**Redis data lost on restart because persistence is off**
+Why: the default Redis configuration keeps all data in memory only; a restart or crash loses everything without RDB snapshots or AOF logging enabled.
+Detect: after a Redis restart, all cached data and sessions are gone; application errors spike as DB is cold.
+Fix: enable AOF persistence (`appendonly yes`) for durability or RDB snapshots for a recovery point; for sessions/caching, accept loss but ensure the application gracefully handles cache misses on cold start.
+
+**Cassandra query without partition key causes full cluster scan**
+Why: Cassandra cannot fulfill queries that don't include the partition key; it must scatter the query to every node, which is catastrophically slow and can destabilise the cluster.
+Detect: query latency is seconds instead of milliseconds; `nodetool tpstats` shows high pending reads on all nodes.
+Fix: deny any query to production that omits the partition key; use `ALLOW FILTERING` only in development and never in a hot path; redesign the table if the access pattern requires it.
 
 ## Connections
 

@@ -16,7 +16,7 @@ Systematic techniques for deriving test cases from requirements. The goal is max
 
 ## Equivalence Partitioning (EP)
 
-Divide inputs into groups (partitions) where all values in a group are expected to behave the same. Test one value per partition — if one fails, all will fail; if one passes, all will pass.
+Divide inputs into groups (partitions) where all values in a group are expected to behave the same. Test one value per partition, if one fails, all will fail; if one passes, all will pass.
 
 **Rule:** For each partition, test one valid and one invalid value.
 
@@ -30,7 +30,7 @@ Divide inputs into groups (partitions) where all values in a group are expected 
 | Non-numeric | letters, symbols | "abc", -1 | Reject |
 | Boundary (EP) | 18, 65 | 18, 65 | Accept |
 
-Test cases: `{15, 30, 70, "abc"}` — four tests cover four partitions. Without EP you might test 100 ages and miss the boundary.
+Test cases: `{15, 30, 70, "abc"}`. Four tests cover four partitions. Without EP you might test 100 ages and miss the boundary.
 
 ---
 
@@ -51,7 +51,7 @@ Errors cluster at boundaries. Test the boundary values and their immediate neigh
 | max | 20 chars | Accept |
 | max + 1 | 21 chars | Reject |
 
-BVA extends EP — instead of one test per partition, test the partition edges.
+BVA extends EP. Instead of one test per partition, test the partition edges.
 
 **Combined EP + BVA approach** (industry standard):
 - Identify partitions (EP)
@@ -174,6 +174,28 @@ For any input field, always test:
 - [ ] Future dates where past dates expected
 
 ---
+
+## Common Failure Cases
+
+**Equivalence partitions overlap because boundaries are not defined precisely**
+Why: a partition defined as "valid age: 18-65" and another as "above maximum: >= 65" includes 65 in both partitions, making the boundary test ambiguous and potentially testing the wrong behaviour.
+Detect: two test cases with values at the exact boundary produce contradictory expected results, or a partition table has a value that fits two partition definitions.
+Fix: define partitions as strictly non-overlapping ranges using exclusive upper bounds or explicit membership rules before writing any test cases.
+
+**BVA applied to non-continuous domains, producing meaningless boundary tests**
+Why: BVA is applied to categorical or enum fields (e.g., status: pending/active/closed) where "min-1" and "max+1" have no meaning, generating invalid test values that the system correctly rejects.
+Detect: the boundary test for a categorical field is testing an empty string or a non-existent enum value that is trivially rejected by input validation rather than business logic.
+Fix: apply BVA only to ordered ranges (numeric, date, string length); use equivalence partitioning and decision tables for categorical inputs.
+
+**Decision table has missing combinations because `n` conditions imply 2^n columns**
+Why: a decision table for 4 binary conditions requires 16 columns, but only 5 are written because the rest seem "obviously the same," leaving untested edge-case combinations.
+Detect: running pairwise analysis (PICT) against the incomplete table reveals pairs of conditions that are never combined in any test case.
+Fix: generate the full 2^n table first, then prune identical-action columns using a risk-based approach — only prune combinations where the action is identical AND the underlying code path is confirmed to be the same.
+
+**State transition test covers only valid transitions, missing the invalid ones**
+Why: testers write the happy-path transitions but skip testing invalid transitions (e.g., shipping a New order) because they seem obviously wrong.
+Detect: a code change accidentally removes a guard for an invalid transition, which ships undetected because no test exercised that path.
+Fix: for each state, write at least one test for every transition that should be rejected; assert both the error response and that the state did not change.
 
 ## Connections
 

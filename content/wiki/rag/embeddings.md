@@ -57,7 +57,7 @@ The performance gap between top managed and best open models is small (~1–2 MT
 
 **More dimensions = more expressiveness, more storage, slower search.**
 
-OpenAI's text-embedding-3 models support **Matryoshka representation learning** — you can truncate to fewer dimensions (e.g. 256 instead of 3,072) with graceful quality degradation. A 256-dim truncation costs 12x less storage and is 12x faster to search, with ~5% quality drop.
+OpenAI's text-embedding-3 models support **Matryoshka representation learning**. You can truncate to fewer dimensions (e.g. 256 instead of 3,072) with graceful quality degradation. A 256-dim truncation costs 12x less storage and is 12x faster to search, with ~5% quality drop.
 
 ```python
 from openai import OpenAI
@@ -137,6 +137,33 @@ async def embed_batch(texts: list[str], batch_size: int = 96) -> list[list[float
 - fastembed: ~62 MTEB, 384 dims, zero-cost local; for dev and CI
 - Gap between top managed and best open model: ~1-2 MTEB points
 - Cohere binary quantisation: 32x storage reduction, ~1-3% quality drop
+
+## Common Failure Cases
+
+**Embedding model switched mid-pipeline, cosine scores collapse**  
+Why: existing chunks were embedded with model A; new queries use model B with a different vector space.  
+Detect: retrieval suddenly returns near-random results; cosine scores cluster around 0.5 regardless of query.  
+Fix: re-embed all chunks whenever the embedding model changes; version your index alongside the model name.
+
+**Cohere input_type not set, retrieval quality lower than benchmarks suggest**  
+Why: using `search_document` type for both indexing and querying, or omitting `input_type` entirely, bypasses Cohere's asymmetric embedding training.  
+Detect: MTEB-expected retrieval quality doesn't match production; swap input types and compare RAGAS context precision.  
+Fix: always use `input_type="search_document"` for chunks being indexed and `input_type="search_query"` for user queries.
+
+**Binary quantisation reduces quality below tolerance**  
+Why: Cohere binary quantisation converts float32 to 0/1 per dimension; the ~1-3% average MTEB drop is larger on niche domain corpora.  
+Detect: run domain-specific retrieval eval before and after quantisation; if precision drops >5%, the corpus may not suit binary quantisation.  
+Fix: use scalar quantisation (int8) instead of binary; or keep full float32 vectors for high-value corpora.
+
+**Out-of-vocabulary terms retrieved poorly**  
+Why: dense embeddings generalise poorly to proprietary acronyms, product codes, and version strings not in the training distribution.  
+Detect: queries containing exact product names or codes return irrelevant results despite perfect BM25 hits.  
+Fix: add BM25 as the sparse channel in hybrid retrieval; BM25 handles exact-match keywords that embeddings miss.
+
+**Batch embedding hits rate limits mid-index**  
+Why: sending all chunks at once exceeds the provider's tokens-per-minute limit; the pipeline crashes partway through.  
+Detect: `RateLimitError` or HTTP 429 mid-ingestion; partial index with no indicator of which chunks were processed.  
+Fix: batch in groups of 96 with exponential backoff on 429; checkpoint progress to a file so re-runs resume rather than restart.
 
 ## Connections
 

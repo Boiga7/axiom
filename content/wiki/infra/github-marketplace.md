@@ -12,7 +12,7 @@ updated: 2026-05-01
 
 > **TL;DR** GitHub Marketplace supports free, flat-rate, and per-unit billing. Paid plans require 100+ App installations. You must handle purchase lifecycle webhooks. Verified Publisher status is separate from listing.
 
-Directly relevant to evalcheck — the next gate is a GitHub Marketplace listing.
+Directly relevant to evalcheck. The next gate is a GitHub Marketplace listing.
 
 ## Key Facts
 - Billing models: free, flat-rate (monthly/yearly), per-unit (per user, monthly/yearly)
@@ -29,7 +29,7 @@ Directly relevant to evalcheck — the next gate is a GitHub Marketplace listing
 
 No payment handling required. Any GitHub user can install. Good for: open-source tools, community versions of commercial tools.
 
-evalcheck's initial listing should be free — it lowers friction for adoption and builds toward the 100-installation threshold needed for paid plans.
+evalcheck's initial listing should be free. It lowers friction for adoption and builds toward the 100-installation threshold needed for paid plans.
 
 ### Flat Rate
 
@@ -91,7 +91,7 @@ Webhook payload structure:
 }
 ```
 
-Your app must store the subscription state and enforce plan limits based on this data. GitHub does not enforce access controls — you do.
+Your app must store the subscription state and enforce plan limits based on this data. GitHub does not enforce access controls. You do.
 
 ## Listing Requirements
 
@@ -137,7 +137,7 @@ Pricing page tips:
 
 ## Verified Publisher
 
-The Verified Publisher badge (blue checkmark) signals trust. Requirements [unverified — check current docs]:
+The Verified Publisher badge (blue checkmark) signals trust. Requirements [unverified. Check current docs]:
 - Publish at least one package to GitHub Packages (or similar GitHub ecosystem trust signal)
 - Have a verified domain associated with your GitHub organisation
 - Agree to the GitHub Marketplace Partner Agreement
@@ -171,6 +171,28 @@ def get_marketplace_plan(account_login: str, jwt_token: str) -> dict:
 ```
 
 > [Source: GitHub Docs — Selling Your App on GitHub Marketplace, 2025]
+
+## Common Failure Cases
+
+**`marketplace_purchase` webhook not received for cancelled subscription, leaving user on paid plan**  
+Why: if your webhook endpoint was down or returned a non-2xx response when GitHub delivered the `cancelled` event, GitHub may not retry indefinitely; the subscription state in your database never updates.  
+Detect: a user who cancelled still has paid-plan access; GitHub Marketplace dashboard shows "cancelled" but your app shows "active".  
+Fix: poll `GET /marketplace_listing/accounts/{account_login}` on app startup and periodically to reconcile local state with GitHub's billing truth; implement idempotent webhook handlers that accept replayed events.
+
+**Free trial ended but app still grants paid access because `on_free_trial` flag was not stored**  
+Why: `on_free_trial: true` arrives in the `purchased` event; if you only store the plan name and not the trial flag and expiry date, you cannot enforce downgrade when the trial ends.  
+Detect: users on a 14-day trial retain paid access indefinitely; no `changed` or `cancelled` event was processed at trial end.  
+Fix: store `on_free_trial`, `effective_date`, and the computed expiry; add a daily cron job that downgrades accounts whose trial has expired without a conversion event.
+
+**Listing rejected because webhook endpoint returns 200 for `marketplace_purchase` events before business logic runs**  
+Why: GitHub's reviewer manually tests purchase, upgrade, and cancel flows; if your app does not actually respond to plan changes (access not revoked on cancel, features not enabled on purchase), the listing review fails.  
+Detect: listing review feedback cites "application did not respond to purchase event"; reviewer's test account still has access after cancelling.  
+Fix: implement all five `marketplace_purchase` action handlers (purchased, pending_change, changed, pending_change_cancelled, cancelled) before submitting for review; test each with the GitHub Marketplace test webhook.
+
+**Per-unit billing miscounts users because `unit_count` is not updated on `changed` event**  
+Why: user count changes (org members added/removed) arrive as `marketplace_purchase.changed` events with a new `unit_count`; if only the `purchased` event updates the count, the stored count diverges from billing reality.  
+Detect: an org that grew from 5 to 20 users is still billed and limited to 5-user quota.  
+Fix: update `unit_count` in your database on every `changed` event; use `GET /marketplace_listing/accounts/{account_login}` to verify the current `unit_count` on each plan check.
 
 ## Connections
 - [[infra/github-apps]] — the App architecture that underlies the Marketplace listing

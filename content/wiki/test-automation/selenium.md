@@ -12,7 +12,7 @@ tldr: Selenium is the W3C WebDriver standard for browser automation — prefer P
 
 > **TL;DR** Selenium is the W3C WebDriver standard for browser automation — prefer Playwright for new projects; use Selenium when maintaining legacy suites or requiring IE/Safari; explicit waits are mandatory, implicit waits interact badly with them.
 
-The original browser automation framework. W3C WebDriver protocol, supports all major browsers, available in Python, Java, C#, JavaScript. Widely used in enterprise and legacy test suites. For new projects, prefer [[test-automation/playwright]] — it's faster, more reliable, and has better async support. Use Selenium when you're maintaining existing suites or need IE/Safari compatibility.
+The original browser automation framework. W3C WebDriver protocol, supports all major browsers, available in Python, Java, C#, JavaScript. Widely used in enterprise and legacy test suites. For new projects, prefer [[test-automation/playwright]]. It's faster, more reliable, and has better async support. Use Selenium when you're maintaining existing suites or need IE/Safari compatibility.
 
 ---
 
@@ -330,6 +330,28 @@ public class LoginTest {
 - Page Object pattern: encapsulates selectors so test logic is separate from DOM structure
 - Selenium Grid: parallel execution across browsers via Docker Hub images (selenium/hub, selenium/node-chrome)
 - Selenium 4 uses W3C WebDriver natively — drop DesiredCapabilities for Options in new code
+
+## Common Failure Cases
+
+**Both `implicitly_wait` and `WebDriverWait` are set, causing flaky timeouts that are longer than expected**  
+Why: Selenium's implicit wait applies globally to every `find_element` call; when an explicit wait polls the DOM and each poll also triggers the implicit wait, the effective timeout per poll cycle multiplies, making timeouts unpredictable and test runs slow.  
+Detect: tests take 2–3x longer than expected; a 10-second explicit wait actually waits up to 10s × implicit_wait seconds in the worst case; removing one wait strategy makes timing consistent.  
+Fix: pick one strategy and stick with it; use `WebDriverWait` + `expected_conditions` exclusively; set `driver.implicitly_wait(0)` explicitly to disable implicit waits.
+
+**`driver.find_element(By.XPATH, "//button[contains(text(), 'Submit')]")` breaks when the button text changes or is translated**  
+Why: XPath expressions that match on visible text are brittle; a copy change, whitespace difference, or i18n translation changes the string, silently breaking the selector without any code change.  
+Detect: the test fails only after a UI copy update or in a locale-specific test run; the XPath targets a string that no longer matches the rendered DOM.  
+Fix: locate by ID, `name` attribute, or a dedicated `data-testid`; reserve XPath for cases where no other locator is available, and prefer `@id` or `@data-testid` attributes over text content.
+
+**`driver.quit()` is not called in the teardown, leaving Chrome processes running in CI**  
+Why: if a test raises an unhandled exception before `driver.quit()` in a `finally` block, or the pytest `@pytest.fixture` teardown is omitted, the ChromeDriver process stays alive; on CI, accumulated zombie processes consume memory and eventually crash the runner.  
+Detect: CI memory usage grows across test runs; `ps aux | grep chrome` shows multiple zombie processes; the build eventually fails with OOM or too many open files.  
+Fix: always call `driver.quit()` after `yield` in the pytest fixture with a `try/finally` block; never rely on garbage collection to close the browser.
+
+**`WebDriverWait` with `EC.text_to_be_present_in_element` matches stale text that is replaced by a loading spinner**  
+Why: if the DOM temporarily contains the expected text during a loading transition before replacing it with a spinner, the wait condition returns immediately on the stale match; the subsequent assertion then fails because the spinner replaced the text.  
+Detect: the test passes for the wait step but fails on the next assertion; the failure is timing-dependent and reproduces more reliably on slower machines.  
+Fix: wait for a more specific condition — wait for the loading indicator to disappear first (`EC.invisibility_of_element_located`), then wait for the final text; or wait for a DOM attribute that only appears on the settled state.
 
 ## Connections
 

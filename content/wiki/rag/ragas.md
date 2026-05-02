@@ -10,7 +10,7 @@ tldr: Reference-free evaluation framework for RAG pipelines.
 
 # RAGAS — RAG Evaluation Framework
 
-Reference-free evaluation framework for RAG pipelines. Computes four metrics from (question, answer, retrieved_contexts) triplets using LLM-as-judge — no ground-truth answers required for most metrics.
+Reference-free evaluation framework for RAG pipelines. Computes four metrics from (question, answer, retrieved_contexts) triplets using LLM-as-judge. No ground-truth answers required for most metrics.
 
 **Install:** `pip install ragas`
 
@@ -20,7 +20,7 @@ Reference-free evaluation framework for RAG pipelines. Computes four metrics fro
 
 ### 1. Faithfulness
 
-Does the answer contain only claims that can be inferred from the retrieved contexts? Measures hallucination — is the model making things up or grounding its answer in the retrieved evidence?
+Does the answer contain only claims that can be inferred from the retrieved contexts? Measures hallucination. Is the model making things up or grounding its answer in the retrieved evidence?
 
 ```
 Faithfulness = (# claims in answer that are supported by context) / (# total claims in answer)
@@ -36,11 +36,11 @@ Is the answer relevant to the question? Generates N synthetic questions from the
 Answer Relevancy = mean cosine_similarity(synthesised_qᵢ, original_question)
 ```
 
-A non-committal answer ("The answer may vary") gets low relevancy — it doesn't actually address the question.
+A non-committal answer ("The answer may vary") gets low relevancy. It doesn't actually address the question.
 
 ### 3. Context Precision
 
-Are the retrieved contexts ranked correctly — with the most useful ones at the top?
+Are the retrieved contexts ranked correctly. With the most useful ones at the top?
 
 ```
 Context Precision = mean precision@k over retrieved items
@@ -103,7 +103,7 @@ print(results)
 
 ## Choosing a Judge LLM
 
-RAGAS uses an LLM to evaluate — the judge model matters.
+RAGAS uses an LLM to evaluate. The judge model matters.
 
 ```python
 from ragas import evaluate
@@ -120,7 +120,7 @@ results = evaluate(
 )
 ```
 
-Best judges: Claude Sonnet/Opus or GPT-4o. Avoid evaluating with the same model that generated the answers — self-evaluation is biased.
+Best judges: Claude Sonnet/Opus or GPT-4o. Avoid evaluating with the same model that generated the answers. Self-evaluation is biased.
 
 ---
 
@@ -137,7 +137,7 @@ Faithfulness < 0.80: fix by adding sources to the system prompt ("cite the provi
 
 Context Precision < 0.60: rerank retrieved chunks (Cohere Rerank / Jina Reranker) before passing to the LLM.
 
-Context Recall < 0.70: retrieval is missing relevant content — check chunk size, embedding model, and whether the query-document distribution is aligned.
+Context Recall < 0.70: retrieval is missing relevant content. Check chunk size, embedding model, and whether the query-document distribution is aligned.
 
 ---
 
@@ -186,6 +186,33 @@ Run in CI after any change to the retrieval pipeline, embedding model, prompt, o
 - Production targets: Faithfulness > 0.90, Answer Relevancy > 0.85, Context Precision > 0.75
 
 ---
+
+## Common Failure Cases
+
+**Faithfulness scores are artificially high when context is sparse**  
+Why: if retrieved context is short, the LLM-as-judge can trivially verify every claim as "supported" since the model hedges or makes only generic claims.  
+Detect: faithfulness is 0.95+ but answers are vague and non-committal ("it depends" type responses).  
+Fix: check answer relevancy alongside faithfulness; both high = good quality; faithfulness high + relevancy low = the system learned to dodge.
+
+**Evaluating with the same model that generated the answers**  
+Why: self-evaluation is biased; the same model tends to endorse its own outputs and miss its own errors.  
+Detect: scores are consistently 0.05-0.10 higher than human annotator scores on the same set.  
+Fix: always use a different model as the judge; if generation uses GPT-4o, evaluate with Claude Sonnet or vice versa.
+
+**Context Recall scores are misleading because ground truth is stale**  
+Why: ground-truth answers in the test set predate corpus updates; the correct answer changed but the golden set wasn't refreshed.  
+Detect: context recall drops suddenly after a corpus update even though retrieval quality appears stable.  
+Fix: version your golden test set alongside the corpus; add a `corpus_version` field and re-evaluate when the corpus changes significantly.
+
+**RAGAS evaluate() call times out or fails on large datasets**  
+Why: each row makes multiple LLM calls (4+ calls per sample for all four metrics); 1,000 samples = 4,000+ API calls.  
+Detect: `TimeoutError` or rate limit errors during `evaluate()`; the call hangs for >10 minutes.  
+Fix: batch evaluate in slices of 50-100 samples; use async evaluation (`evaluate_async`) when available; cache judge results.
+
+**Context Precision looks good but real retrieval quality is poor**  
+Why: if you always retrieve exactly the correct chunk (k=1), precision will be 1.0 by definition — this is too easy.  
+Detect: context precision is 1.0 with k=1 but drops to 0.4 with k=5, indicating only the top result is relevant.  
+Fix: evaluate at realistic k values (5-10); test with the k you'll use in production, not a reduced set that inflates scores.
 
 ## Connections
 

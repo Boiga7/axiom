@@ -22,10 +22,10 @@ updated: 2026-05-01
 ## The SE Skills That Transfer Directly
 
 ### API integration
-Every LLM interaction is an HTTP call. Rate limits, retries, exponential backoff, streaming with async generators — identical to any third-party API. The anthropic SDK and openai SDK are just HTTP wrappers with nice types. See [[apis/anthropic-api]].
+Every LLM interaction is an HTTP call. Rate limits, retries, exponential backoff, streaming with async generators. Identical to any third-party API. The anthropic SDK and openai SDK are just HTTP wrappers with nice types. See [[apis/anthropic-api]].
 
 ### Async programming
-Production AI apps are I/O-bound. `asyncio`, `httpx`, async generators for streaming — the same patterns you use for any network-heavy service. See [[python/ecosystem]].
+Production AI apps are I/O-bound. `asyncio`, `httpx`, async generators for streaming. The same patterns you use for any network-heavy service. See [[python/ecosystem]].
 
 ### Testing discipline
 The instinct to write tests before shipping carries over completely. The *form* changes: you write evals instead of unit tests, and the assertions are probabilistic ("faithfulness > 0.8") rather than boolean. But the discipline is identical. See [[evals/methodology]].
@@ -34,7 +34,7 @@ The instinct to write tests before shipping carries over completely. The *form* 
 Tracing a bad LLM output is exactly like tracing a bug through a distributed system: you add logging, isolate the failure step, reproduce it with a minimal case. The tools are different (Langfuse traces instead of stack traces) but the thinking is the same. See [[observability/tracing]].
 
 ### Data handling
-Chunking documents, normalising embeddings, deduplicating training sets, building preference pairs — all data engineering. Pandas/Polars/DuckDB skills apply directly. See [[data/pipelines]].
+Chunking documents, normalising embeddings, deduplicating training sets, building preference pairs. All data engineering. Pandas/Polars/DuckDB skills apply directly. See [[data/pipelines]].
 
 ### Git and reproducibility
 Experiment tracking in AI (DVC, logged hyperparameters) is just version control applied to data and model checkpoints. The instinct to commit small and often, to be able to reproduce any previous state, is if anything *more* critical in AI work.

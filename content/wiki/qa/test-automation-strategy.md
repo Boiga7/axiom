@@ -10,7 +10,7 @@ tldr: The plan for where, when, and what to automate — and what not to. Automa
 
 # Test Automation Strategy
 
-The plan for where, when, and what to automate — and what not to. Automation without strategy produces a flaky, expensive test suite that nobody trusts. Strategy without automation produces manual bottlenecks.
+The plan for where, when, and what to automate, and what not to. Automation without strategy produces a flaky, expensive test suite that nobody trusts. Strategy without automation produces manual bottlenecks.
 
 ---
 
@@ -137,6 +137,28 @@ Phase 4: Mature
 ```
 
 ---
+
+## Common Failure Cases
+
+**Inverted pyramid: E2E suite grows unchecked while unit test coverage is low**
+Why: QA engineers naturally write Playwright/Selenium tests because they're visible and easy to demo, while unit test responsibility falls through the gap between dev and QA ownership.
+Detect: E2E suite takes 30+ minutes, unit suite takes under 2 minutes — the ratio of E2E to unit tests exceeds 1:5.
+Fix: add unit test coverage as a PR merge requirement (`--cov-fail-under=80`); cap the E2E suite at smoke + critical journeys and reject new E2E tests that duplicate covered integration tests.
+
+**ROI calculation ignores maintenance cost, making automation look cheaper than it is**
+Why: the build-cost estimate accounts for initial automation time but not the ongoing cost of updating selectors, test data, and assertions as the application evolves.
+Detect: engineer hours spent fixing broken tests exceeds hours saved in a given sprint; the automation cost line in team velocity charts is rising.
+Fix: track "test maintenance hours per sprint" as a metric; if it exceeds 20% of QA capacity, the suite has automation debt and the roadmap should pause new automation until flakiness and maintenance costs are reduced.
+
+**Tool selected for features the team will never use, wrong language fit**
+Why: Cypress was chosen because it has a nice UI, but the team writes Python and the backend tests are all pytest; the context switch creates friction and the Cypress suite gets abandoned.
+Detect: the tool's test directory has not been committed to in 30+ days despite active feature development.
+Fix: apply the tool selection criteria before adoption — language fit is the most important criterion; a pytest + Playwright (Python) setup has lower adoption cost for a Python team than a JavaScript-only tool.
+
+**Automation roadmap phases skipped, jumping straight to Phase 3 optimisation**
+Why: teams add parallelisation and visual regression before establishing reliable baselines, so they're optimising an unreliable suite and can't tell if the optimisations help.
+Detect: the test suite is parallelised but the pass rate is below 90%, meaning flaky tests are masking real failures.
+Fix: enforce phase gates: the Phase 2 prerequisite is a sustained pass rate above 95% for two weeks; do not invest in parallelisation until the suite is stable.
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/qa-metrics]] · [[qa/regression-testing]] · [[technical-qa/flaky-test-management]]

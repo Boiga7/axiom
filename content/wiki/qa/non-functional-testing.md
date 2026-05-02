@@ -10,7 +10,7 @@ tldr: Testing how the system behaves under conditions, not just whether it does 
 
 # Non-Functional Testing
 
-Testing how the system behaves under conditions, not just whether it does the right thing. Non-functional requirements are often implicit — users expect fast, reliable, secure, usable software even when it's not in the ticket.
+Testing how the system behaves under conditions, not just whether it does the right thing. Non-functional requirements are often implicit. Users expect fast, reliable, secure, usable software even when it's not in the ticket.
 
 ---
 
@@ -153,6 +153,28 @@ ci:
 ```
 
 ---
+
+## Common Failure Cases
+
+**NFRs never written, so performance testing has no pass/fail criteria**
+Why: performance is treated as a concern only after a slow complaint arrives; no acceptance criteria exist against which a load test result can fail.
+Detect: the load test report shows p95 = 1.2s but there is no SLO to compare it to; the team cannot determine whether to block release.
+Fix: add performance acceptance criteria in the Given/When/Then format to every user-facing story before sprint start; the presence of a failing assertion makes the test a real gate.
+
+**Soak test skipped because load test passed — memory leak ships to production**
+Why: a 5-minute load test does not exercise the leak; only the 2-hour soak test would catch connection pool exhaustion or unbounded cache growth.
+Detect: application memory climbs monotonically in production Grafana charts and requires a restart every 48 hours.
+Fix: make the soak test mandatory (not optional) for any sprint that introduces a new background job, caching layer, or connection pool; schedule it as a nightly CI job rather than a pre-release manual step.
+
+**Chaos experiment run against production without a rollback plan**
+Why: FIS experiment template terminates 25% of ECS tasks but the auto-scaling policy has a misconfigured scale-out delay, leaving the cluster degraded for 12 minutes.
+Detect: synthetic monitor fires an alert within 2 minutes; no runbook exists to stop the experiment early.
+Fix: always define a `stopCondition` in the FIS template tied to an alarm (e.g., 5xx rate > 5%), and document the `aws fis stop-experiment` command in the runbook before executing any chaos experiment.
+
+**Lighthouse CI assertions never tighten — performance budget drifts upward**
+Why: the initial `maxNumericValue` thresholds are set generously and never revised; LCP creeps from 2.1s to 3.8s over six months without any CI failure.
+Detect: compare the current Lighthouse CI config thresholds against the actual p95 values from last month's runs; if the threshold is more than 30% above current actuals, the budget is not functioning as a gate.
+Fix: after each quarter, lower the `maxNumericValue` thresholds to 110% of the measured actuals, treating performance budgets as a ratchet that can only tighten.
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/accessibility-testing]] · [[qa/cross-browser-testing]] · [[technical-qa/performance-testing]] · [[cloud/cloud-monitoring]]

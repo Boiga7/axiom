@@ -18,7 +18,7 @@ Running LLMs in production. The key challenge: transformers are memory-bandwidth
 
 ## The Bottleneck: Memory, Not Compute
 
-At inference time (after training), the GPU is not compute-limited — it's memory-bandwidth-limited. Moving weights from HBM (GPU memory) to CUDA cores is the bottleneck. Making the GPU do more computation per memory fetch (batch processing) is the key to throughput.
+At inference time (after training), the GPU is not compute-limited. It's memory-bandwidth-limited. Moving weights from HBM (GPU memory) to CUDA cores is the bottleneck. Making the GPU do more computation per memory fetch (batch processing) is the key to throughput.
 
 **Single-request serving:** The GPU is ~10% utilised because it's waiting for memory fetches. Wasteful.
 **Batched serving:** Serving N requests simultaneously uses the same memory fetches to do N times the work. Batching is everything for throughput.
@@ -42,7 +42,7 @@ vLLM uses a paged virtual memory scheme (like OS virtual memory) for the KV cach
 Result: 2–4x higher throughput than naive serving, near-zero wasted memory.
 
 ### Continuous Batching
-Standard batching waits for a full batch before processing. Continuous batching processes requests as they arrive and retires them when done — new requests join the in-flight batch dynamically.
+Standard batching waits for a full batch before processing. Continuous batching processes requests as they arrive and retires them when done. New requests join the in-flight batch dynamically.
 
 Combined with paged attention: optimal GPU utilisation.
 
@@ -156,6 +156,33 @@ Technique to accelerate autoregressive generation without quality loss:
 - Speculative decoding: 2-3x throughput improvement; draft and target must share same tokeniser
 - TensorRT-LLM: 20-40% better throughput than vLLM; higher setup cost
 - Local inference recommendation: GGUF Q4_K_M for CPU; Q5_K_M or bf16 for consumer GPU
+
+## Common Failure Cases
+
+**vLLM OOMs at startup before serving any requests**  
+Why: `gpu_memory_utilization=0.90` (default) pre-allocates 90% of VRAM for the KV cache; if the model weights consume more than 10% of the remaining space, startup fails.  
+Detect: `CUDA out of memory` in vLLM startup logs before any requests are received.  
+Fix: lower `gpu_memory_utilization` to 0.80 or 0.75; check model size vs GPU VRAM; or use `tensor_parallel_size` to split across multiple GPUs.
+
+**llama.cpp Q4_K_M GGUF produces noticeably worse quality than BF16 on coding tasks**  
+Why: INT4 quantisation loses precision on attention heads; coding and instruction-following tasks are sensitive to this.  
+Detect: pass@1 accuracy on HumanEval drops >5% vs the BF16 model; output contains more hallucinated API calls.  
+Fix: use Q5_K_M or Q6_K for coding-focused deployments where quality matters; accept the 30% larger model size.
+
+**vLLM speculative decoding draft model produces high rejection rate, slowing throughput**  
+Why: if the draft and target models are too different in capability or the target temperature is high, the acceptance rate drops below 50%, making speculative decoding slower than without it.  
+Detect: tokens/second with speculative decoding enabled is lower than without; `acceptance_rate` metric in vLLM < 0.6.  
+Fix: use a draft model that is a smaller version of the same model family; disable speculative decoding for high-temperature creative generation.
+
+**Continuous batching stalls when one request has a very long output**  
+Why: vLLM's continuous batching waits for all active sequences before adding new ones if one sequence is generating thousands of tokens.  
+Detect: tail latency increases when one user is generating a very long response; other short requests are queued behind it.  
+Fix: set `max_model_len` to cap KV cache per sequence; use streaming and timeout long generations at the application layer.
+
+**TensorRT-LLM engine built for one GPU type fails on another**  
+Why: TRT engines are compiled for a specific GPU architecture; an engine compiled for A100 cannot run on H100 (different compute capability, different optimisations).  
+Detect: `RuntimeError: Engine was compiled for CUDA compute capability 8.0 but current device is 9.0`.  
+Fix: rebuild the engine for each GPU type; maintain separate engine binaries per GPU architecture in CI.
 
 ## Connections
 

@@ -12,7 +12,7 @@ tldr: Claude-specific XML structuring outperforms Markdown, 2-5 few-shot example
 
 > **TL;DR** Claude-specific XML structuring outperforms Markdown, 2-5 few-shot examples in example tags, CoT for reasoning tasks but not with Extended Thinking, and DSPy for automated optimisation at scale.
 
-The craft of eliciting the best output from a language model through input design. More accurately called **context engineering** now — the discipline covers what to put in the context window, not just how to phrase a question.
+The craft of eliciting the best output from a language model through input design. More accurately called **context engineering** now. The discipline covers what to put in the context window, not just how to phrase a question.
 
 > [Source: Perplexity research, 2026-04-29] [unverified]
 
@@ -20,7 +20,7 @@ The craft of eliciting the best output from a language model through input desig
 
 ## Why It's a Real Skill
 
-The gap between a naive prompt and a well-engineered one is routinely 20–40% on task performance. DSPy auto-optimisation can find better prompts than human-written ones 60–80% of the time — but it needs a human-defined evaluation metric to optimise against.
+The gap between a naive prompt and a well-engineered one is routinely 20–40% on task performance. DSPy auto-optimisation can find better prompts than human-written ones 60–80% of the time, but it needs a human-defined evaluation metric to optimise against.
 
 The key insight: LLMs are extremely sensitive to framing, ordering, and structural signals in their input. Understanding *why* a prompt works makes you better at designing new ones.
 
@@ -250,6 +250,33 @@ At scale, context engineering decisions affect cost as much as model selection. 
 - DSPy MIPROv2: 10-40% improvement over hand-written prompts; needs 50-100 labelled examples
 - Prompt caching: system prompts >1,024 tokens should use `cache_control`; saves 90% on repeated calls
 - Zero-shot → few-shot → DSPy → fine-tuning is the correct escalation order
+
+## Common Failure Cases
+
+**Chain-of-thought conflicts with Extended Thinking and degrades output**  
+Why: adding "think step by step" instructions to a prompt using Extended Thinking (`thinking: enabled`) introduces conflicting reasoning pathways; the model's internal reasoning and the explicit CoT prompt interfere.  
+Detect: output quality drops when Extended Thinking is enabled and CoT instructions are present; answers are shorter or less coherent than with thinking alone.  
+Fix: remove all explicit CoT prompting when Extended Thinking is enabled; let the model reason internally via `budget_tokens`.
+
+**Few-shot examples include the wrong output format, model drifts to match them**  
+Why: examples were copied from an older version of the task spec with a different output format; the model follows the examples rather than the `<output_format>` instruction.  
+Detect: output format matches examples, not the spec; switching to zero-shot produces the correct format.  
+Fix: always keep examples consistent with the current output format spec; when format changes, update all examples simultaneously.
+
+**XML tag names collide with user-supplied content**  
+Why: user message contains text that looks like XML tags matching your structural tags (e.g., a user writes `</task>`); this closes the structural tag prematurely.  
+Detect: Claude treats user-supplied content after the tag as a structural boundary; output is truncated or misformatted.  
+Fix: use unique, unlikely tag names (e.g., `<SYSTEM_TASK>` not `<task>`); or sanitise user content to escape `<` and `>` before injection.
+
+**DSPy optimisation overfits to the eval set**  
+Why: the eval set used during DSPy optimisation is the same set used to measure improvement; the optimiser finds prompts that score well on these specific examples.  
+Detect: DSPy-optimised prompt scores 30% better on the optimisation set but shows no improvement on a held-out test set.  
+Fix: split data into optimisation set and held-out test set before running DSPy; report improvement on the held-out set only.
+
+**Prompt compression removes critical context**  
+Why: LLMLingua or similar compression aggressively removes tokens; it removes a constraint or caveat that the full-length prompt contained.  
+Detect: compressed-prompt answers violate a constraint that the full prompt enforced; faithfulness drops after compression.  
+Fix: mark critical constraints as anchor tokens that the compressor must preserve; validate compressed prompt against a checklist of required instructions.
 
 ## Connections
 

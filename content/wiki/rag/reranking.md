@@ -18,14 +18,14 @@ A second-pass scoring step applied after initial retrieval. The retriever finds 
 
 ## Why Reranking Exists
 
-Vector search is approximate. Embedding models compress a chunk into 768 or 1536 numbers — semantic meaning survives, but fine-grained relevance detail doesn't. A bi-encoder embeds query and document independently, which is fast but lossy.
+Vector search is approximate. Embedding models compress a chunk into 768 or 1536 numbers. Semantic meaning survives, but fine-grained relevance detail doesn't. A bi-encoder embeds query and document independently, which is fast but lossy.
 
 A cross-encoder sees the query and document together, computing full attention across both. It can catch:
 - Exact keyword matches the embedding missed
 - Negations ("does NOT support X")
 - Query-specific relevance that looks irrelevant in isolation
 
-The cost: cross-encoders are ~100x slower than bi-encoders. So you never use them for first-pass retrieval over millions of chunks — only to rerank 20-100 candidates.
+The cost: cross-encoders are ~100x slower than bi-encoders. So you never use them for first-pass retrieval over millions of chunks. Only to rerank 20-100 candidates.
 
 ---
 
@@ -153,7 +153,7 @@ Source: BEIR benchmark; exact numbers vary by domain.
 - Corpus is small (<1,000 chunks) — the bi-encoder is accurate enough
 - Queries are keyword-heavy and exact-match retrieval works fine
 
-For everything else — especially financial docs, legal, medical, code search — add a reranker.
+For everything else (especially financial docs, legal, medical, code search) add a reranker.
 
 ---
 
@@ -172,6 +172,33 @@ A common alternative: just retrieve top 20 instead of top 5. This does not repli
 - NDCG@10 progression: BM25 ~0.45 → dense ~0.55 → dense+rerank ~0.65-0.70 → hybrid+rerank ~0.70-0.75
 - Latency: reranking adds 100-500ms; skip if latency budget is <200ms
 - More k ≠ reranking: top-20 bi-encoder results are not equivalent to top-5 after reranking 50 candidates
+
+## Common Failure Cases
+
+**Reranker adds 1-2 seconds of latency and breaks the SLA**  
+Why: a remote reranker (Cohere API) adds one full API round-trip; at 50 candidates this can be 500-1500ms.  
+Detect: trace p95 latency; if reranking span exceeds 500ms consistently, it's a bottleneck.  
+Fix: reduce first-pass k from 50 to 20; use a self-hosted Jina reranker for sub-100ms latency on short documents.
+
+**BGE reranker OOMs on long documents**  
+Why: `bge-reranker-v2-m3` (568M params) runs full cross-attention on `[query + doc]` pairs; 1K-token docs at batch size 16 exceed 24GB VRAM.  
+Detect: `CUDA out of memory` error in the reranker; happens when document chunks are longer than 512 tokens.  
+Fix: set `max_length=512` and truncate documents; or reduce the batch size; or switch to Jina (137M, lighter).
+
+**Cohere rerank-v3.5 returns lower scores than expected for technical content**  
+Why: the reranker's general training may not align well with very domain-specific terminology (proprietary product names, internal code names).  
+Detect: manual inspection shows clearly relevant documents scored <0.2 by the reranker.  
+Fix: use a self-hosted domain-fine-tuned cross-encoder; or supplement with keyword boosting for domain terms.
+
+**Reranking the wrong documents due to missing first-pass k tuning**  
+Why: first-pass retrieval returns only k=5; the reranker can only re-order those 5; if the relevant document is at rank 6, reranking can't help.  
+Detect: RAGAS context recall is low despite high context precision after reranking.  
+Fix: increase first-pass k to 20-50 before reranking; recall must be established in the first pass.
+
+**JSON/table documents not scored correctly by text-only rerankers**  
+Why: older rerankers serialise JSON to plain text, destroying structure signals; a Jina v1 model may score a table lower than a prose duplicate.  
+Detect: compare scores for identical content in JSON vs prose format; >20% difference indicates structure sensitivity.  
+Fix: use Cohere rerank-v3.5 which handles semi-structured data natively; or serialise structured content to a consistent readable format before reranking.
 
 ## Connections
 

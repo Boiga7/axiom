@@ -71,7 +71,7 @@ Average time a bug lives from report to closure.
 Defect Age = (Close date - Open date), averaged across bugs
 ```
 
-Long-lived bugs indicate prioritisation problems or blocked fixes. Age-by-severity is the meaningful breakdown — P1 bugs should close within hours, not days.
+Long-lived bugs indicate prioritisation problems or blocked fixes. Age-by-severity is the meaningful breakdown. P1 bugs should close within hours, not days.
 
 ---
 
@@ -207,6 +207,28 @@ Translate metrics into business language:
 | Automation coverage = 60% | "40% of our regression suite is still manual — risk of missed regressions at this pace" |
 
 ---
+
+## Common Failure Cases
+
+**Defect escape rate appears low because production bugs are not linked back to testing**
+Why: production incidents are tracked in a separate oncall system (PagerDuty, OpsGenie) and never filed as Jira bugs; the DER calculation uses Jira data only, so the numerator is systematically undercounted.
+Detect: compare the count of P1/P2 Jira bugs marked "found in production" against the count of P1/P2 PagerDuty incidents in the same period; a large gap means incidents are not being filed as bugs.
+Fix: establish a policy that every production incident that reveals a software defect results in a Jira bug before the incident is closed; link the bug to the incident ticket.
+
+**Flaky test rate metric not tracked — the number grows unnoticed**
+Why: flaky tests are re-run until they pass and then forgotten; no one aggregates the re-run count across the suite, so the metric is never surfaced in sprint reviews.
+Detect: query CI run history for jobs that were retried; the ratio of retried jobs to total jobs approximates the flaky rate if no deduplicated tracking exists.
+Fix: instrument the test runner to tag any test that passed after one or more retries as `flaky_pass`; aggregate in the QA dashboard and track the weekly trend alongside the pass rate.
+
+**Test coverage metric counts test execution, not risk coverage**
+Why: reporting "90% test coverage" means 90% of written test cases were executed, but if the test cases were written only for happy paths, coverage of edge cases and high-risk areas is 0%.
+Detect: cross-reference the test case list against the risk register; if no test cases map to the High/Critical risk areas, execution coverage is misleading.
+Fix: report two coverage dimensions: execution coverage (cases run / cases planned) and risk coverage (risk areas with at least one test / total risk areas from the risk register).
+
+**Automation ROI not calculated — automation investment cannot be justified or expanded**
+Why: the team builds automation without recording manual execution time or automation run time, making it impossible to show payback period or argue for more automation investment.
+Detect: ask the team to estimate how long the regression suite would take to run manually; if nobody knows, the baseline was never recorded.
+Fix: before automating a test set, record the manual execution time per test and the expected sprint run frequency; update the ROI calculation quarterly as actual automation run times are measured.
 
 ## Connections
 

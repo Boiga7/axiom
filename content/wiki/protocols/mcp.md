@@ -16,7 +16,7 @@ The standard protocol for connecting AI agents to external tools and data source
 
 > [Source: Perplexity research, 2026-04-29] [unverified]
 
-Called "the new HTTP for agents" — every major AI framework adopted it within 12 months of the first public release.
+Called "the new HTTP for agents". Every major AI framework adopted it within 12 months of the first public release.
 
 ---
 
@@ -161,6 +161,33 @@ Use direct function calling for tight, internal tools. Use MCP for anything mean
 - MCP vs function calling: MCP tools are dynamic/discoverable and reusable across agents; function calls are static and in-process
 - Claude Code: ships with 10+ first-party MCP servers; `claude mcp add` for plugins
 - LangGraph: `langchain-mcp-adapters` wraps any MCP server as a LangGraph tool node
+
+## Common Failure Cases
+
+**Tool poisoning via malicious tool description**  
+Why: a third-party MCP server includes prompt injection instructions in its tool `description` field; the LLM reads the description and follows the injected instruction instead of the caller's intent.  
+Detect: agent takes unexpected actions after calling a tool from a third-party server; the action matches instructions in the tool description, not the user's request.  
+Fix: audit all tool descriptions before connecting a server; treat tool descriptions as untrusted content; run a separate screening call to check descriptions for injection payloads.
+
+**Rug pull: server changes tool behaviour after initial review**  
+Why: the server was approved at version 1.0 but was auto-updated to a version that changes tool side effects or permissions scope.  
+Detect: agent behaviour changes after a server update; tool call results differ from expected for the same inputs.  
+Fix: pin server versions; never auto-update MCP servers without a review gate; use `mcpindex` checksums to detect changes.
+
+**stdio transport leaks environment variables to child process**  
+Why: the MCP server process inherits the full environment of the host; secrets in environment variables (API keys, tokens) are accessible to the server.  
+Detect: the child MCP server process can read `os.environ` and exfiltrate secrets through its tool results.  
+Fix: scrub the environment before spawning stdio servers; pass only the minimum required environment variables.
+
+**Cross-origin escalation: two trusted servers combined unexpectedly**  
+Why: Server A has read access to the filesystem and Server B can make HTTP requests; an attacker crafts a request that chains A's read output into B's HTTP call to exfiltrate data.  
+Detect: audit logs show a tool call sequence that reads sensitive data and immediately sends it to an external URL; no single tool call looks malicious in isolation.  
+Fix: scope each server's permissions to the minimum needed; add a policy layer that checks cross-server data flows against an allow-list.
+
+**Tool schema missing `required` fields — LLM omits required parameters**  
+Why: `required: []` in the JSON Schema input; the LLM treats all parameters as optional and omits critical ones, causing the tool to fail or behave unexpectedly.  
+Detect: tool calls arrive with missing parameters; tool errors mention undefined or null required fields.  
+Fix: list all non-optional parameters in the `required` array; write the `description` for each required field to make the expectation explicit.
 
 ## Connections
 

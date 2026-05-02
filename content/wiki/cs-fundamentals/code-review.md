@@ -201,5 +201,27 @@ jobs:
 
 ---
 
+## Common Failure Cases
+
+**Review bottleneck: PRs sit for 24+ hours waiting for a first response**
+Why: no explicit SLA exists, reviewers treat review as lower priority than their own work, and there is no automated reminder or escalation.
+Detect: measure the median time-to-first-review in GitHub Insights; if it exceeds 4 hours (same business day), the process is blocked.
+Fix: establish and publish a turnaround SLA (4 hours first response), add a Slack or GitHub Actions reminder after 4 hours with no review, and distribute load via CODEOWNERS rotation.
+
+**Rubber-stamp approvals on large PRs**
+Why: PRs over 800 lines are cognitively too large to review thoroughly; reviewers approve quickly to unblock the author rather than audit the diff.
+Detect: PRs with 800+ lines changed that receive approval within 10 minutes, or approval comments with no substantive feedback.
+Fix: enforce a PR size gate in CI (warn at 400 lines, block at 800), and require authors to split large changes into a stack of smaller PRs before requesting review.
+
+**Blocking comments block permanently without follow-through**
+Why: a reviewer marks a comment `[blocking]` but then approves on the next round without verifying the fix was actually made; the issue ships anyway.
+Detect: review the diff between request-changes and approval rounds — was the blocking issue addressed or just marked resolved by the author?
+Fix: on the second review pass, explicitly verify that each blocking comment was resolved correctly before approving; use GitHub's "re-request review" workflow to enforce another pass.
+
+**Linter and formatter issues debated in review instead of automated**
+Why: reviewers spend comment threads on style, indentation, and import ordering — issues a pre-commit hook or CI formatter check would catch automatically.
+Detect: review comments containing words like "formatting", "trailing space", "import order", or "snake_case".
+Fix: add `ruff`, `black`, and `isort` to a pre-commit hook and CI gate; agree to never leave style comments in review — if it passes the formatter, it is correct.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/tdd-se]] · [[qa/defect-prevention]] · [[qa/agile-qa]] · [[cs-fundamentals/design-patterns]]

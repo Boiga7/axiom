@@ -164,6 +164,33 @@ Flows are closer to LangGraph in their explicit pipeline definition. Use Flows w
 
 > [Source: LangGraph vs CrewAI comparison, DEV Community and DataCamp, 2025-2026]
 
+## Common Failure Cases
+
+**Sequential crew hangs indefinitely when one agent loops on tool errors**  
+Why: CrewAI's sequential process has no built-in timeout; if an agent retries a failing tool repeatedly, the crew never advances.  
+Detect: crew execution exceeds expected wall-clock time; the verbose log shows the same agent/tool pair repeating.  
+Fix: set `max_iter` on agents (default is 15 but may be too high); add error handling in tools to return structured failures instead of raising exceptions.
+
+**Shared crew memory pollutes context with irrelevant prior task output**  
+Why: `memory=True` stores all task outputs in a shared store; later agents pick up unrelated facts from earlier tasks.  
+Detect: a writer agent starts referencing data that was only in the researcher's task output and was not passed as explicit context.  
+Fix: set `memory=False` and use explicit `context=[task]` to control which outputs flow to which agents; shared memory is rarely needed for linear crews.
+
+**Hierarchical process manager agent picks the wrong worker repeatedly**  
+Why: the manager's role/goal description overlaps too closely with the workers'; the LLM cannot distinguish which specialist is appropriate.  
+Detect: in verbose mode, the manager routes the same task to the wrong agent multiple times before converging.  
+Fix: sharpen role and goal descriptions to be mutually exclusive; add explicit routing keywords ("billing questions only", "technical errors only").
+
+**Tool results not passed between agents in sequential process**  
+Why: tasks without `context=[prior_task]` do not automatically receive prior outputs; the next agent starts from scratch.  
+Detect: writer agent asks questions the researcher already answered; answers don't build on prior tasks.  
+Fix: always wire `context` explicitly on tasks that need prior results; never rely on implicit context passing.
+
+**CrewAI Flows fail silently when a decorated method raises an exception**  
+Why: unhandled exceptions in `@listen` methods may be swallowed depending on the version; the flow stops without an error message.  
+Detect: flow completes faster than expected with no final output; no exception in logs.  
+Fix: wrap all `@listen` method bodies in try/except; log and re-raise or return a sentinel error value.
+
 ## Connections
 - [[agents/langgraph]] — the production-grade alternative for complex workflows
 - [[agents/multi-agent-patterns]] — supervisor and handoff patterns that CrewAI implements at higher abstraction

@@ -258,6 +258,28 @@ In CI, fail the build on HIGH/CRITICAL CVEs before pushing to a registry.
 
 ---
 
+## Common Failure Cases
+
+**Build cache invalidated on every run because COPY . . precedes dependency installation**
+Why: Placing `COPY . .` before `RUN pip install` means any source code change invalidates the pip layer, forcing a full reinstall even when `requirements.txt` is unchanged.
+Detect: Build times are consistently 3-5 minutes even for trivial one-line code changes; Docker build output shows `COPY` as the first non-cached step.
+Fix: Copy only the dependency file first (`COPY requirements.txt .`), run the install, then `COPY . .` — the install layer is only invalidated when the lock file changes.
+
+**Container runs as root because no USER instruction was added**
+Why: Most base images default to root unless overridden; without a `USER` instruction the application process runs with UID 0 inside the container.
+Detect: `docker inspect <container> | grep '"User"'` returns empty or `"User": ""`; `docker exec <container> whoami` returns `root`.
+Fix: Add `RUN addgroup --system app && adduser --system --group app` and `USER app` before the `CMD` instruction; verify with `docker run --rm <image> whoami`.
+
+**`docker compose down` removes containers but leaves volumes, causing stale state between test runs**
+Why: `docker compose down` without `-v` preserves named volumes; a PostgreSQL volume from a previous test run still contains old schema or data when the next run starts.
+Detect: Integration tests pass in isolation but fail after a previous run; database shows tables or rows that the test setup did not create.
+Fix: Use `docker compose down -v` in CI teardown steps to remove volumes; alternatively use `tmpfs` mounts for test databases so data is never persisted to disk.
+
+**Multi-platform build fails because base image does not have an arm64 variant**
+Why: `docker buildx build --platform linux/amd64,linux/arm64` fails mid-build when a base image (e.g., an older CUDA image) does not provide an arm64 manifest.
+Detect: Build fails with `exec format error` or `no matching manifest for linux/arm64` in the build output.
+Fix: Check image availability with `docker buildx imagetools inspect <base-image>` before adding `--platform` flags; use QEMU-based emulation only as a last resort as it is significantly slower than native builds.
+
 ## Connections
 
 - [[cloud/kubernetes]] — Kubernetes runs containers; Docker builds the images

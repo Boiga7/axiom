@@ -20,7 +20,7 @@ The production-proven pattern for grounding LLMs in external knowledge without f
 
 ## Why RAG Beats Fine-Tuning for Most Use Cases
 
-Fine-tuning bakes knowledge into weights — expensive, slow to update, and opaque. RAG keeps knowledge in a retrievable store — cheap to update, inspectable, and citable. 57% of orgs that build AI systems don't fine-tune at all. RAG is the first thing to reach for when the problem is "the model doesn't know X."
+Fine-tuning bakes knowledge into weights. Expensive, slow to update, and opaque. RAG keeps knowledge in a retrievable store. Cheap to update, inspectable, and citable. 57% of orgs that build AI systems don't fine-tune at all. RAG is the first thing to reach for when the problem is "the model doesn't know X."
 
 RAG is the right choice when:
 - Knowledge changes frequently (product docs, code, pricing)
@@ -70,7 +70,9 @@ How you split documents determines retrieval quality more than the retrieval alg
 
 **512 tokens with 10–20% overlap** is the production default for most use cases. Smaller chunks (128–256) improve precision; larger chunks (1,024+) improve recall but add noise.
 
-Parent document retrieval — retrieve small chunks for precision, expand to parent chunk for context — is a common trick to get both.
+Parent document retrieval (retrieve small chunks for precision, expand to parent chunk for context) is a common trick to get both.
+
+> **→** [Data as a System](/synthesis/data-as-system) — the pipeline behind RAG: data freshness SLAs, lineage tracking, contracts between producer and retrieval layer, and what happens when embeddings go stale.
 
 ---
 
@@ -95,7 +97,7 @@ For most production systems: Cohere embed-v4 if you want managed, BGE-M3 if you 
 
 Hybrid is the production default. BM25 alone misses semantic variations; dense alone misses exact-match keywords. Hybrid outperforms either alone on most benchmarks.
 
-Vector store options: [[infra/vector-stores]] — pgvector (Postgres-native, easiest), Chroma (local dev), Qdrant (production self-hosted), Pinecone (fully managed).
+Vector store options: [[infra/vector-stores]]. Pgvector (Postgres-native, easiest), Chroma (local dev), Qdrant (production self-hosted), Pinecone (fully managed).
 
 ---
 
@@ -115,7 +117,7 @@ Reranking adds ~200ms latency for most workloads. Worth it unless latency is the
 
 ## GraphRAG
 
-For queries requiring multi-hop reasoning across entities and relationships — "how does X relate to Y?" — graph-based retrieval outperforms naive chunk retrieval.
+For queries requiring multi-hop reasoning across entities and relationships ("how does X relate to Y?") graph-based retrieval outperforms naive chunk retrieval.
 
 **Full GraphRAG (Microsoft):**
 1. LLM extracts entities and relationships from all documents → knowledge graph
@@ -182,6 +184,38 @@ See [[evals/methodology]] for how RAG evaluation fits into the broader eval stra
 - RAGAS targets before production: faithfulness >0.9, context precision >0.8
 - Agentic RAG: typically 2-4 retrieval iterations; LangGraph tool node or standalone tool
 - LazyGraphRAG: 0.1% of full GraphRAG cost; add it when multi-hop synthesis queries are failing
+
+## Common Failure Cases
+
+**Retrieval returns irrelevant chunks despite correct query**  
+Why: embedding model mismatch. Query and documents were embedded with different models or different normalisation.  
+Detect: RAGAS context precision drops below 0.6; manual inspection shows chunks semantically unrelated to query.  
+Fix: re-embed all documents with the same model used for queries; verify cosine similarity scores are in expected range.
+
+**LLM answer contradicts retrieved context**  
+Why: system prompt lacks an explicit grounding instruction, so the model blends parametric knowledge with retrieved text.  
+Detect: RAGAS faithfulness below 0.85; answers contain claims not present in any retrieved chunk.  
+Fix: add "Answer only from the provided context. If the context does not contain the answer, say so." to the system prompt.
+
+**Reranker makes results worse**  
+Why: reranker was trained on a domain different from your corpus, or top-20 candidates fed to it contain too much noise.  
+Detect: context precision drops after adding reranker; run RAGAS with and without reranking on the same query set.  
+Fix: evaluate domain-matched reranker (BGE Reranker for generic, Cohere for multilingual); widen initial retrieval to top-30 before reranking.
+
+**Embeddings go stale after knowledge base update**  
+Why: documents were re-chunked or metadata changed without re-embedding; stale vectors no longer map to current content.  
+Detect: retrieval returns chunks whose stored content doesn't match what's in the source document; freshness checks fail.  
+Fix: trigger a re-index pipeline on every document update; use content hash to detect changed documents.
+
+**Token budget exceeded assembling top-k chunks**  
+Why: chunk size × k exceeds context window; common when chunks are large (1,024+ tokens) and k=10.  
+Detect: 413 errors or silent truncation; generation quality drops because context is cut mid-sentence.  
+Fix: reduce chunk size or k; use a context assembly step that trims to fit the budget rather than hard-cutting.
+
+**Agentic RAG loops without converging**  
+Why: the agent re-queries on every turn because retrieval never fully satisfies the stopping condition.  
+Detect: trace shows >4 retrieval iterations on a single query; token cost spikes on that query class.  
+Fix: add an explicit "sufficient context" check node; cap iterations at 4 and fall back to "I don't have enough information."
 
 ## Connections
 

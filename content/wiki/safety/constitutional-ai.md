@@ -77,7 +77,7 @@ CAI doesn't replace RLHF for helpfulness. It augments it: human feedback for "is
 
 All Claude models are trained with CAI as a core component of the post-training pipeline. The result is that Claude refuses harmful requests not by pattern-matching a blocklist, but because it has internalised a set of values.
 
-CAI also contributes to the "Constitutional AI" name for Claude's character — the documented values that govern Claude's behaviour. See [[safety/alignment]] and Anthropic's model card for specifics.
+CAI also contributes to the "Constitutional AI" name for Claude's character. The documented values that govern Claude's behaviour. See [[safety/alignment]] and Anthropic's model card for specifics.
 
 ---
 
@@ -114,6 +114,7 @@ CAI can be combined with DPO: use the AI feedback mechanism to generate preferen
 - [[safety/mechanistic-interpretability]] — understanding what's actually learned from CAI training
 - [[fine-tuning/dpo-grpo]] — DPO as an alternative to PPO for preference learning from AI feedback
 - [[llms/claude]] — how CAI shapes Claude's character and behaviour
+- [[papers/constitutional-ai]] — Bai et al. 2022 paper summary: full citation, problem statement, key contributions
 
 ## Open Questions
 

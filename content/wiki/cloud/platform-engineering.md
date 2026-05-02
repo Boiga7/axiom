@@ -10,7 +10,7 @@ tldr: Building and operating an Internal Developer Platform (IDP) that enables p
 
 # Platform Engineering
 
-Building and operating an Internal Developer Platform (IDP) that enables product teams to self-serve infrastructure, deployments, and tooling — without needing deep ops expertise. Platform engineering treats developers as customers.
+Building and operating an Internal Developer Platform (IDP) that enables product teams to self-serve infrastructure, deployments, and tooling. Without needing deep ops expertise. Platform engineering treats developers as customers.
 
 ---
 
@@ -167,6 +167,28 @@ Platform-specific:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Backstage catalog goes stale and teams stop trusting it**
+Why: `catalog-info.yaml` files drift from the actual service state because teams create new repos without going through the golden path, and there is no automated enforcement to register catalog entries.
+Detect: team members report finding outdated ownership information; the number of catalog components has not grown in weeks despite new services being deployed.
+Fix: add a CI check that fails if a repo lacks a valid `catalog-info.yaml`; use Backstage's `catalog-import` GitHub Action to auto-register new repos on PR merge.
+
+**Software template (scaffolder) generates broken repos because the template is not tested**
+Why: the template references a variable or action that changed in the Backstage scaffolder plugin version without the template being updated; teams run it and get a repo in a broken state.
+Detect: scaffolder job shows green but the generated repo fails its initial CI run; error messages reference undefined template variables.
+Fix: version-lock scaffolder plugin updates; test all templates in a staging Backstage instance before promoting to production; add a post-create CI step that runs the generated repo's `npm install` and build.
+
+**Golden path adoption stalls because teams perceive it as slower than doing it manually**
+Why: the scaffolder pipeline is a bottleneck — Backstage calls GitHub, waits for repo creation, then waits for ArgoCD to detect the new app, producing multi-minute waits that feel worse than `git init` + copy-paste.
+Detect: platform support tickets contain "it was faster to do it without Backstage"; adoption percentage stalls below 50%.
+Fix: benchmark and optimise the critical path (typically ArgoCD ApplicationSet sync interval — reduce from 3m to 30s); show a live progress UI in the scaffolder step so teams see work happening rather than a spinner.
+
+**DORA metrics look good but developer experience is poor**
+Why: deployment frequency is high because automated rollbacks count as deployments, and lead time is measured from PR merge to deployment rather than from code-complete to customer; the metrics are gamed by the tooling.
+Detect: SPACE satisfaction scores are low despite strong DORA numbers; teams report rollbacks as a daily occurrence.
+Fix: separately track rollback frequency and change failure rate; set alerts when rollback rate exceeds 10%; treat rollback-inflated deployment frequency as a lagging signal, not a leading one.
 
 ## Connections
 [[cloud-hub]] · [[cloud/gitops-patterns]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[cloud/observability-stack]] · [[cloud/secrets-management]]

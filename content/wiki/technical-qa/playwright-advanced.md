@@ -183,7 +183,7 @@ npx playwright codegen --target python http://localhost:3000
 npx playwright codegen --output tests/recorded.spec.ts http://localhost:3000
 ```
 
-Codegen produces a starting point — always refactor to use data-testid locators and explicit waits.
+Codegen produces a starting point. Always refactor to use data-testid locators and explicit waits.
 
 ---
 
@@ -235,6 +235,28 @@ npx playwright merge-reports --reporter html ./all-blob-reports
 ```
 
 ---
+
+## Common Failure Cases
+
+**Custom fixture not composed from the extended `test` object**
+Why: a test file imports `test` from `@playwright/test` directly instead of from `./fixtures`, so the custom `authenticatedPage` and `apiContext` fixtures are not available and the test receives `undefined`.
+Detect: TypeScript compiler error "Property 'authenticatedPage' does not exist on type TestInfo" or a runtime `undefined` page reference.
+Fix: ensure every test file that needs custom fixtures imports `{ test, expect }` from the local `./fixtures` file, not from `@playwright/test`.
+
+**`page.route` intercept set up after navigation**
+Why: calling `page.route('/api/products', ...)` after `page.goto('/products')` means the route was not active when the initial requests fired, so the real endpoint was hit instead of the mock.
+Detect: the error state the test expects is never shown; the network tab in trace viewer shows the real API response.
+Fix: always call `page.route()` before `page.goto()` so the interceptor is registered before any requests are made.
+
+**Codegen-generated CSS locators break after a UI reskin**
+Why: codegen defaults to CSS selectors like `.checkout-button` which are coupled to class names; a Tailwind class purge or component rename invalidates them.
+Detect: `ElementHandle` or `Locator` errors pointing to CSS selectors; the element is visible in the browser but not found by the test.
+Fix: refactor codegen output to use role-based or `data-testid` locators immediately after recording, before committing.
+
+**Healer opens PRs for intentional selector changes, not broken ones**
+Why: when a developer deliberately renames a component and updates tests manually, Healer still detects the old selector as broken and opens a conflicting PR with the original name restored.
+Detect: a Healer PR attempts to revert a selector that was correctly updated in the same branch.
+Fix: disable Healer (`healer: 'off'`) in branches where deliberate selector changes are being made, or close Healer PRs after confirming the manual update is correct.
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/visual-testing]] · [[technical-qa/test-architecture]] · [[technical-qa/flaky-test-management]] · [[qa/cross-browser-testing]] · [[test-automation/playwright]] · [[llms/ae-hub]]

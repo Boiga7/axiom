@@ -251,6 +251,33 @@ subagent_input = {
 - LangGraph `thread_id` is the key that identifies a conversation for checkpointing
 - Procedural memory (tools, prompts) requires redeployment to change
 
+## Common Failure Cases
+
+**Memory leaks between users in multi-tenant deployments**  
+Why: semantic memory queries are not scoped by `user_id`; one user's stored facts appear in another user's context.  
+Detect: user B sees references to user A's project names or preferences in responses.  
+Fix: always pass `filter={"user_id": user_id}` in vector similarity searches; never query the full memory store without a user scope.
+
+**Thread ID collision causes wrong episodic history to load**  
+Why: `thread_id` values are predictable (sequential integers, session timestamps) and collide between users or environments.  
+Detect: agent appears to "remember" things the current user never said; prior conversation history is wrong.  
+Fix: use UUIDs for thread IDs (`uuid.uuid4()`); namespace by user: `f"{user_id}:{session_uuid}"`.
+
+**Unbounded conversation history causes context window overflow**  
+Why: episodic memory appended on every turn grows indefinitely; at 200 turns, the full history exceeds the context budget.  
+Detect: `ContextWindowExceededError` or token count warnings after extended sessions; cost per call increases steadily.  
+Fix: summarise histories exceeding 20 turns; compress to summary + last 10 messages using the pattern in this page.
+
+**Semantic memory stores contradictory facts, newest not winning**  
+Why: memory.remember() stores new values but old entries persist; the vector store returns both old and new facts for the same key.  
+Detect: agent gives conflicting answers about a stored preference when queried on successive turns.  
+Fix: implement an upsert pattern: check for existing entries with the same key before writing; delete or overwrite stale entries.
+
+**Procedural memory (tools/prompts) drifts from semantic memory context**  
+Why: the agent's available tools are defined at deployment time, but semantic memory references tools that no longer exist.  
+Detect: agent attempts to call a tool mentioned in memory that raises `ToolNotFoundError`.  
+Fix: audit stored procedural references when deploying new tool sets; add a startup check that validates tool names against the registry.
+
 ## Connections
 
 - [[agents/langgraph]] — LangGraph checkpointing is the primary episodic memory implementation

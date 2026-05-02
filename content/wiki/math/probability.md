@@ -160,7 +160,7 @@ def compute_perplexity(model, tokenizer, text: str) -> float:
 - Strong LLM on Wikipedia: ~5-15
 - GPT-4 on various tasks: ~10-25
 
-Perplexity is not directly comparable across tokenisers — a model with a larger vocabulary that splits words less will have lower perplexity by construction.
+Perplexity is not directly comparable across tokenisers. A model with a larger vocabulary that splits words less will have lower perplexity by construction.
 
 ---
 

@@ -134,6 +134,33 @@ Build guardrails incrementally: identify risks from real usage, add targeted gua
 
 > [Source: OpenAI Practical Guide to Building Agents, 2025] [unverified]
 
+## Common Failure Cases
+
+**Agent loop runs indefinitely when no termination condition is met**  
+Why: the agent's instructions describe the goal but not when to stop; the model continues calling tools looking for more evidence.  
+Detect: wall-clock time and token spend keep growing past the expected task duration; no `FINISH` or final answer.  
+Fix: add a `max_iterations` hard limit (10-15 for most tasks); define explicit termination conditions in the instructions.
+
+**Tool namespace collision causes wrong tool to be called**  
+Why: two tools with similar names ("search", "web_search") cause the model to pick the wrong one for the context.  
+Detect: enable tool call logging; count how often each tool is called vs how often it should be; unexpected high usage of one tool.  
+Fix: rename tools to be unambiguous; use verb+noun patterns (`search_knowledge_base` vs `search_web`) and differentiate descriptions.
+
+**Destructive action executes without user confirmation**  
+Why: irreversible tools (delete_record, send_email) are called directly without a confirmation guardrail.  
+Detect: review your tool list; any tool with `delete`, `send`, `update`, `post` in the name requires a confirmation gate.  
+Fix: add a `confirm_action` tool that requires explicit approval before destructive calls; treat confirmation as part of the guardrail stack.
+
+**Guardrail catches too aggressively, blocking legitimate requests**  
+Why: input filters trained on harmful content patterns trigger on technical jargon ("execute", "inject", "exploit" in a coding context).  
+Detect: legitimate user requests are blocked at a rate >1%; users report false positives.  
+Fix: tune guardrail thresholds with domain-specific examples; add an allow-list for context-specific terminology.
+
+**Single-agent context fills with irrelevant tool results, degrading later decisions**  
+Why: tool results are appended to the conversation; after 10+ tool calls, the context contains stale, contradictory, or irrelevant observations.  
+Detect: agent makes contradictory decisions mid-run; references tool results from 5+ steps ago when a fresher result exists.  
+Fix: summarise or prune old tool results; keep only the 3-5 most recent observations in active context.
+
 ## Connections
 - [[agents/langgraph]] — graph-based orchestration with checkpointing
 - [[agents/multi-agent-patterns]] — supervisor, swarm, and fan-out patterns in depth

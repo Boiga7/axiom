@@ -11,7 +11,7 @@ updated: 2026-05-01
 
 > **TL;DR** Completed projects and deprecated topics — searchable but de-prioritised.
 
-Archives are not deleted — they remain searchable. They are just de-prioritised during queries.
+Archives are not deleted. They remain searchable. They are just de-prioritised during queries.
 
 ## Completed Projects
 _None yet. Move projects here when their kill criterion is reached or goal is achieved._

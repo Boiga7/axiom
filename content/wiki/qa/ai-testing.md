@@ -10,7 +10,7 @@ tldr: "QA's role when the product includes LLM-powered features: chatbots, AI re
 
 # Testing AI/LLM Features
 
-QA's role when the product includes LLM-powered features: chatbots, AI recommendations, summarisation, classification. AI features don't behave like traditional software — output is probabilistic, not deterministic.
+QA's role when the product includes LLM-powered features: chatbots, AI recommendations, summarisation, classification. AI features don't behave like traditional software. Output is probabilistic, not deterministic.
 
 ---
 
@@ -225,6 +225,28 @@ def test_bot_refuses_harmful_requests(prompt):
 ```
 
 ---
+
+## Common Failure Cases
+
+**Using a deterministic assert on non-deterministic output**
+Why: `assert response == expected_string` will flake on every model update or temperature variation because LLM output is probabilistic by design.
+Detect: tests pass locally but fail intermittently in CI without any code change.
+Fix: replace equality assertions with rubric-based LLM-as-judge evaluation or schema validation rather than exact string comparison.
+
+**Judge model and application model sharing the same system prompt biases**
+Why: when the same model family judges its own output, it inherits the same blind spots and systematically rates its responses higher than a human would.
+Detect: judge pass rates are suspiciously high (>95%) and do not correlate with human evaluation scores.
+Fix: use a different model family as judge (e.g., judge with GPT-4 if app uses Claude), or use a calibrated human gold set to validate judge scores.
+
+**Safety tests relying solely on keyword matching**
+Why: harmful intent can be expressed without the exact keywords in the deny-list, so keyword checks produce false confidence while missing paraphrased attacks.
+Detect: red team prompts with synonym substitutions or role-play framing bypass the safety suite.
+Fix: use a safety classifier (e.g., Perspective API, Anthropic's classifier) or a dedicated judge prompt that evaluates intent rather than surface tokens.
+
+**Hallucination tests that only check for known product names**
+Why: the set of known entities changes over time, and hallucination can manifest as subtle fabrications (wrong version numbers, invented policies) not caught by name lists.
+Detect: bot mentions plausible-sounding but incorrect product details that fall outside the hard-coded deny list.
+Fix: ground hallucination checks against a live product database query rather than a static set, and add a judge step asking whether all claims are supported by context.
 
 ## Connections
 [[qa-hub]] · [[qa/non-functional-testing]] · [[qa/risk-based-testing]] · [[evals/methodology]] · [[evals/llm-as-judge]] · [[test-automation/testing-llm-apps]] · [[llms/ae-hub]]

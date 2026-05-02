@@ -230,5 +230,27 @@ Next.js Image component:
 
 ---
 
+## Common Failure Cases
+
+**Stale content served after a deployment due to missing cache invalidation**
+Why: Static assets cached at edge with long TTLs (days/years) continue to be served from PoPs even after a new deploy replaces the origin files.
+Detect: Users on first visit (cache miss) see new content; returning users or users at different PoPs see old content; compare `x-cache` header (HIT vs MISS) across requests.
+Fix: Use content-hash-based filenames (`app.abc123.js`) for immutable assets so URLs change on each deploy; for non-hashed URLs, trigger a CloudFront invalidation as part of the deploy pipeline.
+
+**Authorization header included in cache key causing private responses to leak across users**
+Why: The CloudFront cache policy includes the `Authorization` header in the cache key so per-user responses can be cached, but a misconfiguration omits it, causing user A's response to be served to user B.
+Detect: Users intermittently see data belonging to another user; check CloudFront access logs for the same `x-cache: Hit` response served to multiple distinct users.
+Fix: Set `Cache-Control: private, no-store` on any response that contains user-specific data; for user-specific cached responses, always include the `Authorization` (or a session-derived cache key) in the cache policy.
+
+**Lambda@Edge function cold starts adding hundreds of milliseconds to every cache miss**
+Why: Lambda@Edge functions in `origin-request` position run on a cold container when a PoP handles its first request after a period of inactivity, and cold start duration adds directly to TTFB.
+Detect: p99 TTFB spikes to 500-800ms sporadically at low-traffic PoPs while p50 is fine; CloudWatch Lambda@Edge metrics show `Init Duration` on those invocations.
+Fix: Use CloudFront Functions (sub-millisecond, no cold start) for header manipulation, redirects, and URL rewrites; reserve Lambda@Edge only for logic that genuinely requires its longer timeout or full runtime.
+
+**Cache hit rate stays below 30% on API responses despite CDN being configured**
+Why: Every request has a unique `Cache-Control: no-cache` header from the origin, or the cache key includes a query-string parameter that is unique per user (e.g., a timestamp or session token).
+Detect: CloudFront analytics show `CacheHitRate` near zero for the `/api/*` behaviour; inspect the `Vary` and `Cache-Control` response headers from the origin.
+Fix: Remove session-specific query parameters from CDN-facing requests (handle them in the app layer); set explicit `Cache-Control` headers with a TTL greater than zero for cacheable endpoints; normalise the cache key to exclude parameters irrelevant to the response.
+
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/aws-core]] · [[cloud/cost-optimisation-cloud]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/performance-optimisation-se]]

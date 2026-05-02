@@ -18,7 +18,7 @@ Human annotation is the bottleneck of alignment. Models trained with RLHF need p
 
 ## Cost Reality
 
-RLHF annotation costs **5-10x more per sample than compute**. 600 high-quality RLHF annotations can cost ~$60,000 — roughly 167x the compute expense for the same training run. [Source: taskmonk.ai, 2026] [unverified]
+RLHF annotation costs **5-10x more per sample than compute**. 600 high-quality RLHF annotations can cost ~$60,000. Roughly 167x the compute expense for the same training run. [Source: taskmonk.ai, 2026] [unverified]
 
 This is the primary reason synthetic data generation (see [[data/distilabel]], [[data/synthetic-data]]) is so attractive: it replaces expensive human annotation with model-generated preference pairs, at the cost of some alignment quality.
 
@@ -283,6 +283,23 @@ Annotation tooling is expensive. Consider [[data/synthetic-data]] and [[data/dis
 - Inter-annotator agreement (Cohen's kappa > 0.6) is minimum acceptable for training data quality
 
 ---
+
+## Common Failure Cases
+
+**Label Studio `PairwiseComparison` export produces ties where `selected` is neither "left" nor "right" because annotators skipped the question**  
+Why: annotators can submit a task without selecting a preference; the export JSON contains an empty `result` array for those annotations, which causes a `KeyError` or `IndexError` when the processing script accesses `t["annotations"][0]["result"][0]`.  
+Detect: the preference pair extraction script throws `IndexError: list index out of range` on some rows; the raw export shows tasks with `"annotations": [{"result": []}]`.  
+Fix: filter out tasks with empty results before processing: `if t["annotations"] and t["annotations"][0]["result"]`; add a `required=True` constraint in the Label Studio template to force annotators to select before submitting.
+
+**Argilla `FeedbackDataset.push_to_argilla()` fails silently after timeout, leaving a partially uploaded dataset**  
+Why: large datasets (10,000+ records) can hit Argilla's HTTP timeout during upload; the Python call returns without error if the timeout is caught internally, but the Argilla server only received a fraction of the records.  
+Detect: `rg.FeedbackDataset.from_argilla(name).records` returns fewer records than the uploaded list; checking the Argilla UI shows the dataset exists but with a lower row count.  
+Fix: upload in batches using `dataset.add_records(batch)` in chunks of 500–1000; add a post-upload assertion that `len(dataset.records) == len(source_records)`.
+
+**Inter-annotator agreement is measured only at the end of the project and reveals κ < 0.5, making the entire dataset unusable**  
+Why: agreement is computed retrospectively on completed annotations; if the annotation guidelines were ambiguous, all annotators may have interpreted the task differently from the start, producing inconsistent labels throughout the dataset.  
+Detect: Cohen's kappa across annotators is below 0.5 after all annotations are complete; reviewing disagreements shows systematic differences in how annotators interpret "helpfulness" rather than random noise.  
+Fix: run an inter-annotator agreement calibration round on 50–100 overlap tasks before the main annotation begins; review disagreements, update guidelines, and retrain annotators before starting the full project.
 
 ## Connections
 

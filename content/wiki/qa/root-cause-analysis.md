@@ -10,7 +10,7 @@ tldr: Finding why defects happen so they stop happening — not just fixing the 
 
 # Root Cause Analysis
 
-Finding why defects happen so they stop happening — not just fixing the symptom.
+Finding why defects happen so they stop happening. Not just fixing the symptom.
 
 ---
 
@@ -215,6 +215,28 @@ Root cause: "External dependency changed unexpectedly"
 ```
 
 ---
+
+## Common Failure Cases
+
+**5-Whys stops at the symptom, not the root cause**
+Why: teams stop asking "why" once they reach a cause that is easy to name (e.g., "developer oversight") rather than a systemic gap they can actually change.
+Detect: the resulting action item is "be more careful" or "remind the team" rather than a process, tooling, or monitoring change.
+Fix: keep asking until the answer is a missing automated check, alert, or process step — personal blame is never a root cause.
+
+**Post-mortem action items are assigned but never tracked**
+Why: items are written into a document and then never linked to a ticketing system or given a due date, so they age unnoticed.
+Detect: review post-mortems from three months ago and check whether action items were closed in the ticket backlog.
+Fix: every action item must have an owner, a due date, and a Jira/Linear ticket created before the post-mortem meeting ends; add a monthly audit to close or re-schedule overdue items.
+
+**Defect escape analysis uses incomplete data**
+Why: `DetectionStage.PRODUCTION` bugs are under-reported because support tickets are not linked back to engineering defects, making the escape rate look better than it is.
+Detect: compare the count of customer-reported issues in the support system against the count of production bugs in the bug tracker; a large discrepancy indicates under-linking.
+Fix: add a field to the support ticket template requiring a bug tracker ID before the ticket can be closed, and write a weekly report that flags support tickets with no linked defect.
+
+**Prevention loop skips verification of the fix**
+Why: a process change is agreed in the post-mortem but never verified — the new monitoring alert is configured but pointed at the wrong metric, or the new CI gate is added but set to `warn` instead of `fail`.
+Detect: the same class of defect recurs in a later sprint despite a post-mortem action claiming it was addressed.
+Fix: treat each prevention action as a task with a concrete acceptance criterion ("the alert fires within 5 minutes of a simulated failure") that is verified by someone other than the author before closure.
 
 ## Connections
 

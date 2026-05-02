@@ -162,5 +162,27 @@ Run `make manifests` to generate the ClusterRole from these markers.
 
 ---
 
+## Common Failure Cases
+
+**Reconciler enters an infinite loop updating the same resource**
+Why: the reconciler calls `r.Update(ctx, obj)` on the main object (not the status subresource), which triggers a new watch event, which triggers a reconcile, endlessly.
+Detect: the operator pod logs show hundreds of reconcile calls per second for the same resource name/namespace; CPU usage on the operator pod spikes.
+Fix: use `r.Status().Update(ctx, obj)` for status changes only; for spec updates, compare the desired vs actual state before calling Update and skip if they match.
+
+**CRD schema validation silently drops unknown fields**
+Why: the CRD `openAPIV3Schema` omits `x-kubernetes-preserve-unknown-fields: true` and the Kubernetes API server silently strips fields it does not recognise, causing the operator to act on incomplete spec data.
+Detect: `kubectl get myapp <name> -o json` shows the CR is missing fields that were present in the applied YAML; operator behaviour is incorrect.
+Fix: add `x-kubernetes-preserve-unknown-fields: true` at the appropriate schema level, or extend the CRD schema to explicitly include the missing fields and run `make manifests`.
+
+**Operator fails to reconcile after cluster upgrade changes a core API version**
+Why: the operator was built against `apps/v1beta1` or another deprecated API that was removed in the new Kubernetes version, causing the client to return 404 on resource kinds.
+Detect: operator logs show `no matches for kind "X" in version "Y"`; `kubectl api-resources` confirms the old version is absent.
+Fix: update the controller-runtime and client-go dependencies to a version that targets the current API, regenerate the CRD manifests, and rebuild the operator image.
+
+**Finalizer prevents CR deletion and the operator pod is down**
+Why: the CR has a finalizer registered by the operator, but the operator pod is not running (crash-loop, deleted), so the finalizer can never be removed and the namespace or CR is stuck terminating.
+Detect: `kubectl get myapp <name>` shows `Terminating` status and non-empty `finalizers` list for many minutes.
+Fix: patch the finalizer out manually: `kubectl patch myapp <name> -p '{"metadata":{"finalizers":[]}}' --type=merge`; then fix the operator crash before re-deploying.
+
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/argocd]] · [[cloud/helm-advanced]] · [[cloud/secrets-management]]

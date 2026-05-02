@@ -10,7 +10,7 @@ tldr: Defects are not randomly distributed — they cluster in a small number of
 
 # Defect Clustering and Hotspot Analysis
 
-Defects are not randomly distributed — they cluster in a small number of modules. Find the hotspots and focus testing there.
+Defects are not randomly distributed. They cluster in a small number of modules. Find the hotspots and focus testing there.
 
 ---
 
@@ -220,6 +220,28 @@ Stakeholder reporting:
 ```
 
 ---
+
+## Common Failure Cases
+
+**Using raw defect count instead of defect density to rank hotspots**
+Why: a large module with 500 lines of code and 10 bugs has a lower density than a small utility with 50 lines and 5 bugs; ranking by count directs testing effort to the large module, which may actually be proportionally cleaner.
+Detect: the hotspot list is dominated by the largest files in the codebase regardless of their relative change frequency.
+Fix: normalise defect counts by lines of code (defects per 1,000 LOC) and weight by change frequency before ranking; use the hotspot matrix combining both dimensions.
+
+**Hotspot analysis run once at the start of a quarter and never updated**
+Why: the codebase changes weekly — new modules are introduced, hotspots are refactored, and risk shifts; stale hotspot data directs testing effort at code that is no longer the highest risk.
+Detect: the hotspot list references modules that no longer exist or have been fully rewritten since the last analysis.
+Fix: automate the defect density and churn scripts to run weekly and feed results into the sprint planning ritual; update the test plan each sprint to reflect current hotspots.
+
+**Mapping defects to files instead of to logical components**
+Why: a single component can span multiple files (e.g., a payment flow split across `routes.py`, `services.py`, `models.py`); file-level analysis misses the component-level concentration.
+Detect: individual files in the hotspot list appear unrelated, but all belong to the same user-facing feature.
+Fix: tag defects with a component or domain label in addition to the file path; run density analysis at the component level for planning, file level for code review targeting.
+
+**Treating integration defects the same as validation defects in escape rate analysis**
+Why: validation bugs have a low escape rate because automated tests catch them; integration bugs have a high escape rate because they only appear when external systems interact at runtime; conflating them hides the real risk.
+Detect: escape rate analysis shows a flat distribution across defect categories without a spike on integration or concurrency bugs.
+Fix: segment escape rate by defect category (see pattern analysis code) and prioritise integration testing investment based on the high-escape categories, not total count.
 
 ## Connections
 

@@ -239,5 +239,27 @@ SNS+SQS:  Fan-out: SNS publishes → multiple SQS queues subscribe independently
 
 ---
 
+## Common Failure Cases
+
+**Message deleted before processing is complete (at-most-once loss)**
+Why: SQS's `delete_message` is called immediately on receipt, or RabbitMQ's `basic_ack` fires before the handler returns; a crash after deletion but before the work finishes loses the message permanently.
+Detect: job counts in the DB are lower than enqueue counts; the discrepancy grows over time.
+Fix: delete/ack only after the handler returns successfully; let the visibility timeout expire on failure so the message reappears for retry.
+
+**Visibility timeout shorter than processing time causes duplicate delivery**
+Why: SQS re-enqueues any message not deleted within its `VisibilityTimeout`; if processing takes longer than the timeout, the same message is received and processed by a second consumer concurrently.
+Detect: duplicate rows or double charges correlate with long-running jobs; both consumers log successful processing of the same `message_id`.
+Fix: set `VisibilityTimeout` to at least 6x the expected processing time; extend it programmatically (`change_message_visibility`) for jobs with unpredictable duration.
+
+**No DLQ configured — poison messages loop forever**
+Why: a malformed or permanently-failing message that cannot be processed keeps cycling back to the queue and consuming retries, blocking throughput for other messages.
+Detect: the same message ID appears in logs repeatedly for hours; consumer retry counter resets instead of giving up.
+Fix: configure a dead-letter queue with `maxReceiveCount=3` so persistently-failing messages are quarantined for investigation rather than retried indefinitely.
+
+**Kafka consumer offset committed during rebalance, skipping messages**
+Why: if an offset is committed for a partition that gets reassigned to another consumer during a rebalance, the new consumer starts after the committed offset, skipping any unprocessed messages.
+Detect: consumer lag drops to zero but some expected records are missing from the DB.
+Fix: commit offsets only after the handler returns; use the cooperative rebalance strategy so fewer partitions are revoked per rebalance cycle.
+
 ## Connections
 [[se-hub]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/distributed-systems]] · [[cloud/aws-sqs-sns]] · [[cs-fundamentals/microservices-patterns]] · [[llms/ae-hub]]

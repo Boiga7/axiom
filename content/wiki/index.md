@@ -5,7 +5,7 @@ updated: 2026-05-01
 
 # Nexus — Content Index
 
-306 pages across 27 categories. Updated 2026-05-02.
+312 pages across 27 categories. Updated 2026-05-02.
 
 ---
 
@@ -28,6 +28,8 @@ updated: 2026-05-01
 - [[cs-fundamentals/design-patterns]] — GoF patterns: Factory Method, Builder, Adapter, Decorator, Facade, Strategy, Observer, Command
 - [[cs-fundamentals/microservices-patterns]] — Saga, CQRS, Outbox, Anti-Corruption Layer, API Gateway, Sidecar — distributed service design
 - [[cs-fundamentals/distributed-systems]] — CAP theorem, consistency models, consensus (Raft), failure modes, idempotency, distributed tracing
+- [[cs-fundamentals/debugging-systems]] — Debugging as a first-class skill: correlation IDs, log reading, distributed tracing, reproducing production failures, incident workflow
+- [[cs-fundamentals/os-internals]] — Processes vs threads, virtual memory (heap/stack/page tables), OOM kills, CPU scheduling, file system inodes, file descriptor limits
 - [[cs-fundamentals/auth-patterns]] — OAuth 2.0, PKCE, JWT, OIDC, API keys, RBAC, service-to-service auth (OIDC/IRSA)
 - [[cs-fundamentals/database-design]] — Normalisation, UUIDs, indexes (B-tree/GIN/partial), query optimisation, partitioning, Alembic migrations
 - [[cs-fundamentals/concurrency]] — asyncio, semaphore, thread safety, race conditions, multiprocessing, Go goroutines
@@ -193,6 +195,7 @@ updated: 2026-05-01
 - [[infra/litellm]] — OpenAI-compatible interface to 100+ LLM providers; router with retry/fallback/load balancing; self-hosted AI gateway proxy
 
 ### `apis/` — LLM APIs
+- [[apis/what-is-an-api]] — Contract for two pieces of software to communicate; structured request/response without knowing internals
 - [[apis/anthropic-api]] — Messages API, prompt caching (5-min/1-hour), Batch API, streaming, tool use, extended thinking
 - [[apis/openai-api]] — Chat completions, function calling, structured output, o1/o3 reasoning models, embeddings, Whisper
 - [[apis/google-ai]] — Gemini 2.5 Pro/Flash, Google AI Studio vs Vertex AI, vision, function calling, thinking mode
@@ -228,9 +231,20 @@ updated: 2026-05-01
 - [[test-automation/pytest-patterns]] — Fixtures, parametrize, respx mocking, markers, conftest, coverage
 - [[test-automation/testing-llm-apps]] — Testing LLM pipelines with pytest: mocking Anthropic API (respx), RAG stage isolation, agent loop testing, streaming, structured output, Hypothesis
 
+### `javascript/` — JavaScript / TypeScript Ecosystem
+- [[javascript/javascript-hub]] — JS/TS Brain hub: async patterns, type system, Node.js runtime, npm/pnpm, AI SDK patterns
+- [[javascript/typescript-fundamentals]] — Type narrowing, interfaces, generics, utility types, satisfies operator, strict tsconfig
+- [[javascript/nodejs-async]] — Event loop, libuv, async/await vs Python asyncio, streams, Promise patterns
+- [[javascript/npm-pnpm-ecosystem]] — pnpm (3-5x faster via hard links), workspaces, lockfiles, semantic versioning, npm publishing
+- [[javascript/ai-sdk-patterns]] — @anthropic-ai/sdk streaming + tool use, Vercel AI SDK streamText/generateObject, type-safe LLM clients
+
 ### `java/` — JVM Ecosystem
+- [[java/what-is-java]] — Compiled, statically typed, JVM-based; write-once run-anywhere; dominates enterprise backends that AI teams integrate with
+- [[java/build-tools]] — Maven (safe default for enterprise) vs Gradle/Kotlin DSL (faster, expressive greenfield); dependency management for multi-module LLM projects
 - [[java/langchain4j]] — ChatLanguageModel, AI Services annotations, @Tool function calling, RAG pipeline, MCP SDK, virtual threads
 - [[java/spring-ai]] — Spring Boot auto-config, ChatClient, structured output, function calling beans, RAG advisors, pgvector
+- [[java/anthropic-java-sdk]] — Official Anthropic Java SDK; strongly-typed builders, sync/async clients, streaming, tool use without framework overhead
+- [[java/grpc]] — Protobuf + bidirectional streaming for high-performance AI service communication between Java services
 
 ---
 
@@ -425,6 +439,11 @@ updated: 2026-05-01
 - [[synthesis/learning-path]] — Staged curriculum for software engineers moving into AI engineering: foundations → building → production → advanced; project ladder
 - [[synthesis/software-engineer-to-ai-engineer]] — Which SE skills transfer directly to AI engineering, what needs re-mapping, and the fastest learning order for a working developer
 - [[synthesis/gap-report]] — Ranked knowledge gaps relative to active projects and the 0→SE→AE learning path — what to research next
+- [[synthesis/request-flow-anatomy]] — Full request chain User → CDN → API Gateway → Service → DB → Response: where latency accumulates, where failures happen, where retries apply
+- [[synthesis/engineering-tradeoffs]] — The decisions that define senior engineers: cache vs recompute, RAG vs fine-tuning, scale up vs out, consistency vs availability
+- [[synthesis/data-as-system]] — Data lineage, contracts, freshness SLAs, ownership, consistency across services, ETL pipeline failure modes
+- [[synthesis/technical-communication]] — ADRs, RFCs, postmortems, stakeholder translation, explaining tradeoffs — the communication layer that multiplies technical skill
+- [[cs-fundamentals/debugging-systems]] — Debugging as a first-class skill: correlation IDs, tracing across services, systematic elimination, reproducing production bugs
 
 ---
 

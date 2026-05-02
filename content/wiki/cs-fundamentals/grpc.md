@@ -270,5 +270,27 @@ grpcurl -plaintext -d '{"id": "abc123"}' localhost:50051 product.v1.ProductServi
 
 ---
 
+## Common Failure Cases
+
+**Missing timeout on client call causes cascading hang**
+Why: without a deadline, a slow or unresponsive server keeps the client's goroutine/thread blocked indefinitely; under load, connection pool exhaustion spreads to other callers.
+Detect: p99 latency climbs to the connection pool timeout (often 30–60s) rather than a service-level SLA; `grpc.StatusCode.DEADLINE_EXCEEDED` never appears in logs.
+Fix: always pass `timeout=` on every stub call; set a default at the channel level and tighten it per RPC where the SLA is tighter.
+
+**Proto field number reuse after deletion**
+Why: deleting a field and reusing its number in a new field causes clients and servers compiled at different proto versions to silently misinterpret the wire format.
+Detect: after a proto change, clients receive garbled or zero-valued fields that should have valid data.
+Fix: never reuse field numbers; mark deleted fields with `reserved` so the compiler rejects future reuse.
+
+**Unhandled `grpc.RpcError` propagating as a 500**
+Why: client code that calls `stub.GetProduct(...)` without catching `grpc.RpcError` lets gRPC transport errors surface as unhandled exceptions, losing the status code context.
+Detect: logs show `grpc.RpcError` tracebacks without status code or details; callers cannot distinguish NOT_FOUND from UNAVAILABLE.
+Fix: wrap every stub call in a `try/except grpc.RpcError` block and map gRPC status codes to application-level exceptions or HTTP status codes.
+
+**Insecure port (`add_insecure_port`) used in production**
+Why: the server example uses `add_insecure_port` for simplicity; if carried to production, all traffic between services is unencrypted and unauthenticated.
+Detect: `grpcurl -plaintext` connects without TLS; traffic is visible in a network capture.
+Fix: use `add_secure_port` with `ssl_channel_credentials()` on the server and `secure_channel` on the client; enforce mTLS in a service mesh for zero-trust networking.
+
 ## Connections
-[[se-hub]] · [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/api-design]] · [[cloud/service-mesh]]
+[[se-hub]] · [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/api-design]] · [[cloud/service-mesh]] · [[java/grpc]]

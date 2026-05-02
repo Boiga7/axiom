@@ -14,7 +14,7 @@ updated: 2026-05-01
 
 ## Why System Design Matters for AI Engineers
 
-Every ML system is a software system first. A model serving stack, an eval pipeline, a RAG API — all require the same scaling, caching, and consistency decisions as any backend. Understanding these principles lets you reason about where latency comes from, why costs scale, and what breaks under load.
+Every ML system is a software system first. A model serving stack, an eval pipeline, a RAG API. All require the same scaling, caching, and consistency decisions as any backend. Understanding these principles lets you reason about where latency comes from, why costs scale, and what breaks under load.
 
 ---
 
@@ -78,7 +78,7 @@ def get_user(user_id):
 - Session tokens
 - Expensive computation results (embeddings, similarity scores)
 
-For AI: Anthropic's prompt caching (5-min TTL, 90% cost reduction for repeated system prompts) is an application of this same principle at the API level — see [[apis/anthropic-api]].
+For AI: Anthropic's prompt caching (5-min TTL, 90% cost reduction for repeated system prompts) is an application of this same principle at the API level. See [[apis/anthropic-api]].
 
 ### Cache Invalidation
 

@@ -10,7 +10,7 @@ tldr: Planning and executing recovery from catastrophic failures — region outa
 
 # Disaster Recovery
 
-Planning and executing recovery from catastrophic failures — region outages, data corruption, ransomware, accidental mass deletion. DR is the gap between "we have backups" and "we can actually recover in time."
+Planning and executing recovery from catastrophic failures. Region outages, data corruption, ransomware, accidental mass deletion. DR is the gap between "we have backups" and "we can actually recover in time."
 
 ---
 
@@ -194,6 +194,28 @@ velero restore create --from-backup production-20260501-020000
 ```
 
 ---
+
+## Common Failure Cases
+
+**DR drill reveals RTO is 3x the documented target because the runbook is outdated**
+Why: The runbook references IAM roles, VPC IDs, or DNS hosted zone IDs that no longer exist; manual steps take far longer than estimated because the team has never executed them against real infrastructure.
+Detect: The actual time to complete the failover steps during a drill exceeds the RTO target; team members pause frequently to look up resource IDs that changed since the runbook was last updated.
+Fix: Automate failover steps as runbooks in AWS Systems Manager or scripts in a DR repo; run a full rehearsal quarterly and update the runbook with actual timings after each drill.
+
+**Aurora Global Database failover leaves application connecting to the old (now read-only) primary**
+Why: After `failover-global-cluster` promotes the DR cluster, the old primary becomes a secondary read replica; the application's DB connection string still points to the old primary endpoint and all writes are rejected.
+Detect: Application logs show `ERROR: cannot execute INSERT in a read-only transaction` after the failover; the old endpoint resolves but rejects writes.
+Fix: Use the Aurora Global Database cluster endpoint (not a region-specific cluster endpoint) in the application config, or implement a DNS alias (`db.prod.internal`) pointing at the active primary and update it as part of the failover runbook.
+
+**Velero restore missing PersistentVolumeClaims because the backup ran during a PVC resize**
+Why: Velero backs up Kubernetes object metadata plus volume snapshots; if a PVC resize was in-flight during the backup, the snapshot may be taken from the old volume before the resize completed.
+Detect: Restored pods fail with `volume is too small` or the restored PVC is smaller than expected; `velero restore describe` shows warnings on the PVC objects.
+Fix: Pause workloads before scheduled Velero backups (or use quiesced backups with `--ordered-resources`); always verify the restore by mounting the restored PVC and checking data integrity before declaring the backup valid.
+
+**Route 53 health check passes on a degraded backend because it only checks TCP connectivity**
+Why: The health check is configured as `TCP:443` rather than HTTP; the server accepts the TCP connection even when the application process is crashed or returning 500s, so Route 53 never triggers failover.
+Detect: Users report errors; Route 53 health check console shows green; the target ALB access logs show 5xx responses despite the health check passing.
+Fix: Configure the health check as `HTTPS` with a meaningful path (`/health/ready`) that returns 200 only when the application is fully operational; set failure threshold to 2 consecutive failures to trigger failover promptly.
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/aws-rds-aurora]] · [[cloud/cloud-security]] · [[cloud/cloud-networking]] · [[cloud/argocd]]

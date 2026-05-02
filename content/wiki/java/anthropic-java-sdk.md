@@ -12,7 +12,7 @@ tldr: The official Anthropic Java SDK wraps the Messages API with strongly-typed
 
 > **TL;DR** The official Anthropic Java SDK wraps the Messages API with strongly-typed builders, synchronous and async clients, streaming support, and tool use — idiomatic Java without an LLM framework overhead.
 
-The official Anthropic SDK for Java. Use this when you need direct API access without LangChain4j or Spring AI overhead — batch jobs, one-off CLI tools, or when you're integrating into a codebase that already has its own abstractions.
+The official Anthropic SDK for Java. Use this when you need direct API access without LangChain4j or Spring AI overhead. Batch jobs, one-off CLI tools, or when you're integrating into a codebase that already has its own abstractions.
 
 ---
 
@@ -255,7 +255,7 @@ try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
 }
 ```
 
-Three blocking SDK calls running in parallel on virtual threads — no CompletableFuture chaining, no async handlers, same performance.
+Three blocking SDK calls running in parallel on virtual threads. No CompletableFuture chaining, no async handlers, same performance.
 
 ---
 
@@ -293,6 +293,28 @@ Cache writes cost 25% extra; cache reads cost 10% of normal input token price. B
 - Tool use requires two round-trips: first call returns the tool call, second call sends the result
 - Prompt caching: add `CacheControlEphemeral` to any `TextBlockParam`; 5-minute TTL
 - `Model.CLAUDE_SONNET_4_6`, `Model.CLAUDE_HAIKU_4_5_20251001` — use enum constants, not raw strings
+
+## Common Failure Cases
+
+**`message.content().get(0).asText().text()` throws `ClassCastException` because the first content block is a tool-use block, not a text block**  
+Why: when the model decides to call a tool, the first content block has type `tool_use`, not `text`; calling `asText()` on a tool-use block throws at runtime without a useful error message.  
+Detect: the exception occurs only on prompts that trigger tool use; adding a `System.out.println(block.type())` before the cast reveals the actual block type.  
+Fix: iterate over `response.content()` and check `block.isToolUse()` / `block.isText()` before casting; never assume index 0 is a text block when tools are defined on the request.
+
+**`MessageStream` leaks a thread if `stream.getFinalMessage()` is called after `close()` because the stream was not consumed to completion**  
+Why: `MessageStream` implements `AutoCloseable`; if the `try-with-resources` block exits before all stream events are consumed (e.g., an exception breaks out of `stream.textStream().forEach()`), the underlying HTTP connection is not fully drained; on repeated calls this can exhaust the connection pool.  
+Detect: connection pool exhaustion under load; `netstat` shows persistent half-open connections to `api.anthropic.com`; the issue worsens with concurrent requests.  
+Fix: always consume the stream to completion inside the `try-with-resources` block; wrap the `forEach` in a try/catch so exceptions are handled without exiting the stream prematurely.
+
+**Prompt caching returns `cacheReadInputTokens = 0` on the second call because the cache TTL expired between requests**  
+Why: Anthropic's prompt cache has a 5-minute TTL; if the second request arrives more than 5 minutes after the first, the cache entry is evicted and the system prompt is re-tokenised at full cost.  
+Detect: `cached.usage().cacheReadInputTokens()` returns 0 on the second call even though the system prompt is identical; the `cacheCreationInputTokens` count is non-zero on both calls.  
+Fix: prompt caching is only useful for high-frequency requests with the same system prompt (chat UIs, batch processing); for low-frequency calls the cache rarely hits; add `cacheCreationInputTokens` monitoring to verify hit rates in production.
+
+**Virtual thread executor context is never closed, causing the thread pool to leak on repeated invocations**  
+Why: `Executors.newVirtualThreadPerTaskExecutor()` returns an `ExecutorService`; calling it without `try-with-resources` or explicit `shutdown()` leaves virtual threads pending GC indefinitely; in a long-running service each batch call leaks the executor.  
+Detect: heap memory grows proportionally to the number of parallel batch calls; `jstack` shows many virtual threads in parked state with no active work.  
+Fix: always use the executor inside a `try-with-resources` block (`try (var executor = ...)`), which calls `close()` (= `shutdown()` + `awaitTermination`) automatically when the block exits.
 
 ## Connections
 
