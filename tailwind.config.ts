@@ -17,7 +17,7 @@ const config: Config = {
         // Text
         primary: "#f0f4f8",
         secondary: "#94a3b8",
-        muted: "#4a5568",
+        muted: "#64748b",
         // Brain accent palette
         ae: "#22d3ee",      // AI Engineering — cyan
         se: "#a78bfa",      // Software Engineering — violet

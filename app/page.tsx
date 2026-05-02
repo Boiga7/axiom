@@ -80,20 +80,42 @@ export default function HomePage() {
             </h1>
 
             <p className="text-secondary text-lg leading-relaxed max-w-xl mx-auto mb-8">
-              A practitioner&apos;s reference for AI engineering. LLMs, agents, RAG, evals,
-              and infrastructure from first principles.
+              How AI systems work, fail, and scale. LLMs, agents, RAG, evals,
+              and the infrastructure that keeps them running.
             </p>
 
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center gap-3">
+              <Link
+                href="/learn/ai-engineer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all bg-ae/10 text-ae border border-ae/20 hover:bg-ae/20 hover:border-ae/40"
+              >
+                Start learning
+              </Link>
               <a
                 href="#browse"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-medium transition-all text-secondary border border-white/[0.08] hover:border-white/[0.16] hover:text-primary"
               >
-                Browse Topics
+                Browse topics
               </a>
             </div>
           </div>
         </section>
+
+        {/* ── Start Here strip ────────────────────────────────── */}
+        <div className="mb-10 rounded-lg border border-white/[0.05] bg-elevated px-5 py-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-ae/70 mb-1">New here?</p>
+            <p className="text-secondary text-sm">
+              Pick a path for your role below. Each one builds from fundamentals to production.
+            </p>
+          </div>
+          <Link
+            href="/synthesis/getting-started"
+            className="shrink-0 font-mono text-xs text-ae/70 hover:text-ae transition-colors whitespace-nowrap"
+          >
+            What is this? →
+          </Link>
+        </div>
 
         {/* ── Role-Based Learning Paths ───────────────────────── */}
         <section className="mb-16" id="learn-paths">
@@ -105,7 +127,7 @@ export default function HomePage() {
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
           <p className="text-secondary text-xs font-mono mb-6 ml-4">
-            Choose the path for your role
+            Structured routes from fundamentals to production — pick the one for your role
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -120,12 +142,12 @@ export default function HomePage() {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-1.5 h-5 rounded-full bg-white/20" />
             <h2 className="font-mono text-[11px] uppercase tracking-widest text-secondary">
-              Deep Dives
+              In Production
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
           <p className="text-secondary text-xs font-mono mb-6 ml-4">
-            Curated reading on specific AI engineering areas
+            How systems behave under real load — reach for these when something breaks or doesn&apos;t scale
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -137,6 +159,15 @@ export default function HomePage() {
 
         {/* ── Browse by topic ──────────────────────────────────── */}
         <div id="browse">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-1.5 h-5 rounded-full bg-white/10" />
+            <h2 className="font-mono text-[11px] uppercase tracking-widest text-muted">
+              Browse by domain
+            </h2>
+            <div className="flex-1 h-px bg-white/[0.04]" />
+            <span className="font-mono text-[11px] text-muted">{pageCount} pages</span>
+          </div>
+
           {brainOrder.map((brain) => {
             const cats = brainGroups[brain];
             if (!cats?.length) return null;
@@ -158,7 +189,7 @@ export default function HomePage() {
                   </h2>
                   <div className="flex-1 h-px bg-white/[0.04]" />
                   <span className="font-mono text-[11px] text-muted">
-                    {cats.reduce((s, c) => s + c.count, 0)} pages
+                    {cats.reduce((s, c) => s + c.count, 0)}
                   </span>
                 </div>
 
@@ -194,7 +225,7 @@ export default function HomePage() {
                               {previews.map((title) => (
                                 <li
                                   key={title}
-                                  className="font-mono text-[9px] text-muted truncate leading-relaxed"
+                                  className="font-mono text-[10px] text-muted truncate leading-relaxed"
                                 >
                                   {title}
                                 </li>
