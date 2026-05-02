@@ -38,8 +38,8 @@ export default function Nav({ searchIndex }: NavProps) {
         {/* Nav */}
         <nav className="flex items-center gap-0.5 shrink-0">
           {NAV.map(({ href, label, icon }) => {
-            const active =
-              href === "/" ? pathname === "/" : pathname.startsWith(href.startsWith("/learn") ? "/learn" : href);
+            const segment = href === "/" ? "/" : `/${href.split("/")[1]}`;
+            const active = segment === "/" ? pathname === "/" : pathname.startsWith(segment);
             return (
               <Link
                 key={href}

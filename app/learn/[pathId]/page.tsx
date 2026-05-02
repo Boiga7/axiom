@@ -23,7 +23,7 @@ export function generateMetadata({ params }: Props): Metadata {
 
 export default function LearnPathPage({ params }: Props) {
   const learningPath = LEARNING_PATHS.find((p) => p.id === params.pathId);
-  if (!learningPath) notFound();
+  if (!learningPath) return notFound();
 
   const searchIndex = getSearchIndex();
   const color = BRAIN_COLORS[learningPath.brain as keyof typeof BRAIN_COLORS] ?? "#94a3b8";
