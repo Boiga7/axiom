@@ -61,6 +61,7 @@ export const LEARNING_PATHS: LearningPath[] = [
       { category: "cs-fundamentals", slug: "distributed-systems", note: "Retries, idempotency, eventual consistency" },
       { category: "cs-fundamentals", slug: "error-handling-patterns", note: "Timeouts, retries, circuit breakers — real backend engineering" },
       { category: "cs-fundamentals", slug: "performance-optimisation-se", note: "CPU vs IO, memory leaks, slow queries — measure, do not guess" },
+      { category: "cs-fundamentals", slug: "debugging-systems", note: "Systematic debugging under pressure: correlation IDs, tracing across services, reproducing production bugs" },
     ],
   },
   {
@@ -213,6 +214,22 @@ export const TOPIC_BUNDLES: LearningPath[] = [
       { category: "evals", slug: "methodology", note: "Online vs offline evals, shadow testing, A/B model comparison" },
       { category: "data", slug: "pipelines", note: "Data freshness, versioning, duplicate handling — pipeline health directly drives output quality" },
       { category: "cs-fundamentals", slug: "error-handling-patterns", note: "Retry and fallback across service boundaries — how AI systems degrade gracefully" },
+    ],
+  },
+  {
+    id: "production-thinking",
+    title: "Production Thinking",
+    description:
+      "System-level reasoning across the full stack — request flow anatomy, debugging under pressure, failure engineering, and the tradeoff decisions that define senior engineers.",
+    brain: "engineering",
+    estimatedHours: 5,
+    steps: [
+      { category: "synthesis", slug: "request-flow-anatomy", note: "The full chain: where latency comes from, where failures hide, where retries apply" },
+      { category: "cs-fundamentals", slug: "debugging-systems", note: "Systematic elimination, correlation IDs, tracing requests across services under pressure" },
+      { category: "cs-fundamentals", slug: "observability-se", note: "Metrics, logs, traces — the instrumentation that makes debugging possible" },
+      { category: "cs-fundamentals", slug: "distributed-systems", note: "How failures propagate: partial outages, inconsistency, cascade failure" },
+      { category: "cs-fundamentals", slug: "error-handling-patterns", note: "Circuit breakers, retries with backoff, timeouts, graceful degradation" },
+      { category: "synthesis", slug: "engineering-tradeoffs", note: "Cache vs recompute, RAG vs fine-tuning, scale up vs out, consistency vs availability" },
     ],
   },
   {
