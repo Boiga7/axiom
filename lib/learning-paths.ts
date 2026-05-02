@@ -1,8 +1,11 @@
 // lib/learning-paths.ts
 // Client-safe — no fs/path imports.
 
+import type { Brain } from "./constants";
+import { BRAIN_MAP } from "./constants";
+
 export type LearningStep = {
-  category: string;
+  category: keyof typeof BRAIN_MAP;
   slug: string;
   note?: string; // context shown on the path detail page
 };
@@ -11,7 +14,7 @@ export type LearningPath = {
   id: string;
   title: string;
   description: string;
-  brain: string; // key in BRAIN_COLORS from constants.ts
+  brain: Brain;
   estimatedHours: number;
   steps: LearningStep[];
 };
