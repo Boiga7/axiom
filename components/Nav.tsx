@@ -11,7 +11,6 @@ type NavProps = {
 
 const NAV = [
   { href: "/", label: "Home", icon: "⊹" },
-  { href: "/learn/ai-engineer", label: "Learn", icon: "◈" },
   { href: "/graph", label: "Graph", icon: "◎" },
   { href: "/scan", label: "Scan", icon: "⟳" },
 ];
