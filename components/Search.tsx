@@ -46,6 +46,16 @@ export default function Search({ index }: Props) {
     search(query);
   }, [query, search]);
 
+  // Auto-populate from ?q= URL param (used by tag links)
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) {
+      setQuery(q);
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, []);
+
   // Global ⌘K / Ctrl+K shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

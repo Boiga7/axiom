@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { slugToLabel } from "@/lib/wiki";
+import { slugToLabel } from "@/lib/constants";
 
 type Step = {
   href: string;

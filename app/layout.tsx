@@ -28,6 +28,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://elliot-digital.co.uk"),
   title: {
     default: "The Axiom",
     template: "%s · The Axiom",

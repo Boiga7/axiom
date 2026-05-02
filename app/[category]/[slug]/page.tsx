@@ -30,9 +30,24 @@ export async function generateStaticParams() {
 export function generateMetadata({ params }: Props): Metadata {
   const page = getPage(params.category, params.slug);
   if (!page) return {};
+  const cats = getCategories();
+  const catMeta = cats.find((c) => c.slug === params.category);
+  const color = catMeta ? BRAIN_COLORS[catMeta.brain] : "#22d3ee";
+  const ogUrl = `/og?title=${encodeURIComponent(page.title)}&category=${encodeURIComponent(slugToLabel(params.category))}&color=${encodeURIComponent(color)}`;
   return {
     title: page.title,
     description: page.excerpt,
+    openGraph: {
+      title: page.title,
+      description: page.excerpt ?? undefined,
+      images: [{ url: ogUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.title,
+      description: page.excerpt ?? undefined,
+      images: [ogUrl],
+    },
   };
 }
 
@@ -62,6 +77,23 @@ export default function WikiPage({ params }: Props) {
     hrefMap[p.slug] = p.href;
     hrefMap[`${p.category}/${p.slug}`] = p.href;
   }
+
+  // Related pages — extract wikilinks from content, resolve to pages
+  const wikilinkTargets = Array.from(
+    page.content
+      .replace(/```[\s\S]*?```/g, "")
+      .matchAll(/\[\[([^\]|#]+?)(?:\|[^\]]*)?\]\]/g),
+    (m) => m[1].trim()
+  );
+  const related = wikilinkTargets
+    .map((link) => {
+      const bare = link.includes("/") ? link.split("/").pop()! : link;
+      const href = hrefMap[link] ?? hrefMap[bare];
+      return href ? allPages.find((p) => p.href === href) : undefined;
+    })
+    .filter((p): p is NonNullable<typeof p> => !!p && p.slug !== slug)
+    .filter((p, i, arr) => arr.findIndex((x) => x.slug === p.slug) === i)
+    .slice(0, 5);
 
   // Sibling pages for the sidebar
   const siblings = getPagesByCategory(category).filter(
@@ -122,16 +154,17 @@ export default function WikiPage({ params }: Props) {
                     <span className="text-white/20">·</span>
                     <div className="flex flex-wrap gap-1.5">
                       {page.frontmatter.tags.map((tag) => (
-                        <span
+                        <Link
                           key={tag}
-                          className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded"
+                          href={`/?q=${encodeURIComponent(tag)}`}
+                          className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded transition-opacity hover:opacity-100 opacity-80"
                           style={{
                             color: color + "cc",
                             background: color + "15",
                           }}
                         >
                           {tag}
-                        </span>
+                        </Link>
                       ))}
                     </div>
                   </>
@@ -140,6 +173,34 @@ export default function WikiPage({ params }: Props) {
             </header>
 
             <WikiContent content={page.content} allPageHrefs={hrefMap} />
+
+            {/* Related reading */}
+            {related.length > 0 && (
+              <div className="mt-14 pt-8 border-t border-white/[0.06]">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-4">
+                  Related reading
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {related.map((r) => (
+                    <Link
+                      key={r.slug}
+                      href={r.href}
+                      className="group flex items-baseline gap-3 py-1.5"
+                    >
+                      <span
+                        className="font-mono text-[9px] uppercase tracking-widest shrink-0 w-24 truncate"
+                        style={{ color: color + "70" }}
+                      >
+                        {slugToLabel(r.category)}
+                      </span>
+                      <span className="text-sm text-secondary group-hover:text-primary transition-colors">
+                        {r.title}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Mobile: sibling navigation — hidden on lg where sidebar handles it */}
             {siblings.length > 0 && (

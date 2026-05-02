@@ -1,4 +1,4 @@
-import { getAllPages, getSearchIndex, BRAIN_COLORS, BRAIN_MAP } from "@/lib/wiki";
+import { getAllPages, getSearchIndex, BRAIN_COLORS, BRAIN_LABELS, BRAIN_MAP } from "@/lib/wiki";
 import Nav from "@/components/Nav";
 import GraphView from "@/components/GraphView";
 import type { Metadata } from "next";
@@ -62,34 +62,39 @@ export default function GraphPage() {
       <Nav searchIndex={searchIndex} />
 
       <div className="fixed inset-0 top-14 bg-base">
-        {/* Legend — desktop: vertical list top-left; mobile: compact dots top-right */}
+        {/* Legend — desktop */}
         <div className="hidden sm:flex absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-4 py-3 flex-col gap-2">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Brain</p>
-          {Object.entries(BRAIN_COLORS).map(([brain, color]) => (
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Domain</p>
+          {(Object.entries(BRAIN_LABELS) as [keyof typeof BRAIN_COLORS, string][]).map(([brain, label]) => (
             <div key={brain} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: color }} />
-              <span className="font-mono text-[10px] text-secondary capitalize">
-                {brain.replace("-", " ")}
-              </span>
+              <div className="w-2 h-2 rounded-full" style={{ background: BRAIN_COLORS[brain] }} />
+              <span className="font-mono text-[10px] text-secondary">{label}</span>
             </div>
           ))}
         </div>
 
-        {/* Mobile legend — dots only, top-right corner */}
-        <div className="sm:hidden absolute top-4 right-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-3 py-2 flex flex-col gap-1.5">
-          {Object.entries(BRAIN_COLORS).map(([brain, color]) => (
+        {/* Stats — top right */}
+        <div className="absolute top-4 right-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-4 py-3">
+          <p className="font-mono text-[10px] text-muted">
+            <span className="text-secondary">{nodes.length}</span> pages &nbsp;·&nbsp; <span className="text-secondary">{links.length}</span> connections
+          </p>
+        </div>
+
+        {/* Mobile legend */}
+        <div className="sm:hidden absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-white/[0.08] rounded-lg px-3 py-2 flex flex-col gap-1.5">
+          {(Object.entries(BRAIN_LABELS) as [keyof typeof BRAIN_COLORS, string][]).map(([brain, label]) => (
             <div key={brain} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
-              <span className="font-mono text-[9px] text-muted capitalize">{brain.replace("-", " ")}</span>
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: BRAIN_COLORS[brain] }} />
+              <span className="font-mono text-[9px] text-muted">{label}</span>
             </div>
           ))}
         </div>
 
         {/* Instructions */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
-          <p className="font-mono text-[10px] text-muted text-center">
-            <span className="hidden sm:inline">Scroll to zoom · drag to rotate · click a node to open</span>
-            <span className="sm:hidden">Pinch to zoom · drag to rotate · tap a node to open</span>
+          <p className="font-mono text-[10px] text-muted/60 text-center">
+            <span className="hidden sm:inline">Scroll to zoom · drag · click node to open</span>
+            <span className="sm:hidden">Pinch to zoom · drag · tap to open</span>
           </p>
         </div>
 

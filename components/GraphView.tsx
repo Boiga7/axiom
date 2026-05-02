@@ -158,17 +158,6 @@ export default function GraphView({ nodes, links }: Props) {
         };
       });
 
-      // --- Atmospheric shell ---
-      const atmR = R * 1.08;
-      const atm = ctx.createRadialGradient(cx, cy, R * 0.88, cx, cy, atmR);
-      atm.addColorStop(0, "rgba(34,211,238,0.05)");
-      atm.addColorStop(0.5, "rgba(34,211,238,0.02)");
-      atm.addColorStop(1, "transparent");
-      ctx.beginPath();
-      ctx.arc(cx, cy, atmR, 0, Math.PI * 2);
-      ctx.fillStyle = atm;
-      ctx.fill();
-
       // --- Links (draw behind sphere centre for depth) ---
       const hov = s.hoverId;
       const hovAdj = hov ? adj.current.get(hov) : null;
@@ -205,11 +194,8 @@ export default function GraphView({ nodes, links }: Props) {
       for (const { px, py, z, node } of sorted) {
         const phase = node.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
         const freq = 0.7 + (phase % 11) * 0.12;
-        const pulse = 1 + Math.sin(t * freq * Math.PI * 2 + phase * 0.41) * 0.14;
-
-        // Rare "firing" spike
-        const fireRaw = Math.sin(t * (0.08 + (phase % 7) * 0.04) * Math.PI * 2 + phase * 1.9);
-        const fire = Math.pow(Math.max(0, fireRaw), 9);
+        const pulse = 1 + Math.sin(t * freq * Math.PI * 2 + phase * 0.41) * 0.04;
+        const fire = 0;
 
         // Depth: nodes at front are full brightness, nodes at back are dim
         const depthV = Math.max(0, z + 1) / 2; // 0 (back) → 1 (front)
@@ -238,14 +224,6 @@ export default function GraphView({ nodes, links }: Props) {
         const coreA = 0.35 + depthV * 0.65 + (isHovered ? 0.2 : 0);
         ctx.fillStyle = node.color + hex2(Math.min(1, coreA));
         ctx.fill();
-
-        // White-hot centre on fire
-        if (fire > 0.4) {
-          ctx.beginPath();
-          ctx.arc(px, py, r * 0.4, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255,255,255,${(fire * 0.85).toFixed(2)})`;
-          ctx.fill();
-        }
 
         // Label on hover
         if (isHovered && z > -0.15) {
