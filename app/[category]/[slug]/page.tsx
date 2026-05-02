@@ -35,6 +35,15 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default function WikiPage({ params }: Props) {
   const { category, slug } = params;
   const page = getPage(category, slug);
@@ -103,7 +112,7 @@ export default function WikiPage({ params }: Props) {
               <div className="flex flex-wrap items-center gap-3">
                 {page.frontmatter.updated && (
                   <span className="font-mono text-[11px] text-muted">
-                    Updated {page.frontmatter.updated}
+                    Updated {formatDate(page.frontmatter.updated)}
                   </span>
                 )}
                 {page.frontmatter.tags?.length ? (

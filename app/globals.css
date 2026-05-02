@@ -54,6 +54,12 @@ body {
   color: #f0f4f8;
 }
 
+/* Align highlight.js background with our dark theme */
+.hljs {
+  background: #0e1117 !important;
+  padding: 0 !important;
+}
+
 /* Wiki prose styles */
 .wiki-prose {
   color: #cbd5e1;

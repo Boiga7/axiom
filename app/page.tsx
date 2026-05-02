@@ -28,7 +28,6 @@ export default function HomePage() {
   }
 
   const pageCount = allPages.length;
-  const categoryCount = categories.length;
 
   // Group categories by brain
   const brainGroups = categories.reduce<Record<string, typeof categories>>(
@@ -69,7 +68,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full border border-ae/20 bg-ae/5">
               <div className="w-1.5 h-1.5 rounded-full bg-ae animate-pulse" />
               <span className="font-mono text-[10px] uppercase tracking-widest text-ae/80">
-                {pageCount} pages · {categoryCount} categories
+                AI Engineering Reference · {pageCount} pages
               </span>
             </div>
 
