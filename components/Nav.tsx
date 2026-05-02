@@ -11,6 +11,7 @@ type NavProps = {
 
 const NAV = [
   { href: "/", label: "Home", icon: "⊹" },
+  { href: "/learn/ai-engineering-fundamentals", label: "Learn", icon: "◈" },
   { href: "/graph", label: "Graph", icon: "◎" },
   { href: "/scan", label: "Scan", icon: "⟳" },
 ];
@@ -37,7 +38,8 @@ export default function Nav({ searchIndex }: NavProps) {
         {/* Nav */}
         <nav className="flex items-center gap-0.5 shrink-0">
           {NAV.map(({ href, label, icon }) => {
-            const active = pathname === href;
+            const active =
+              href === "/" ? pathname === "/" : pathname.startsWith(href.startsWith("/learn") ? "/learn" : href);
             return (
               <Link
                 key={href}
