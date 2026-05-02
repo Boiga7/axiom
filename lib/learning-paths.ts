@@ -1,13 +1,12 @@
 // lib/learning-paths.ts
 // Client-safe — no fs/path imports.
-
 import type { Brain } from "./constants";
 import { BRAIN_MAP } from "./constants";
 
 export type LearningStep = {
   category: keyof typeof BRAIN_MAP;
   slug: string;
-  note?: string; // context shown on the path detail page
+  note?: string;
 };
 
 export type LearningPath = {
@@ -19,12 +18,118 @@ export type LearningPath = {
   steps: LearningStep[];
 };
 
+// Role-based learning paths — what to study to build a career in each discipline
 export const LEARNING_PATHS: LearningPath[] = [
+  {
+    id: "ai-engineer",
+    title: "AI Engineer",
+    description:
+      "Prompt engineering, RAG, agentic systems, evals, and production security. The core curriculum for building AI products.",
+    brain: "ai-engineering",
+    estimatedHours: 6,
+    steps: [
+      { category: "llms", slug: "claude", note: "Start with the model you will use most" },
+      { category: "prompting", slug: "techniques" },
+      { category: "rag", slug: "pipeline", note: "Retrieval-augmented generation end-to-end" },
+      { category: "agents", slug: "langgraph", note: "Stateful agent loops" },
+      { category: "evals", slug: "methodology" },
+      { category: "security", slug: "owasp-llm-top10", note: "What goes wrong in production" },
+      { category: "agents", slug: "mcp-server-development", note: "Build tool integrations" },
+    ],
+  },
+  {
+    id: "software-engineer",
+    title: "Software Engineer",
+    description:
+      "Clean code, design patterns, system design, databases, and APIs. The bedrock every backend engineer needs.",
+    brain: "engineering",
+    estimatedHours: 5,
+    steps: [
+      { category: "cs-fundamentals", slug: "se-hub" },
+      { category: "cs-fundamentals", slug: "clean-code" },
+      { category: "cs-fundamentals", slug: "design-patterns" },
+      { category: "cs-fundamentals", slug: "system-design" },
+      { category: "cs-fundamentals", slug: "database-design" },
+      { category: "cs-fundamentals", slug: "api-design" },
+      { category: "cs-fundamentals", slug: "tdd-se", note: "Test-driven development in practice" },
+    ],
+  },
+  {
+    id: "cloud-engineer",
+    title: "Cloud Engineer",
+    description:
+      "AWS, containers, Kubernetes, infrastructure as code, and production security. Deploy and operate systems at scale.",
+    brain: "infrastructure",
+    estimatedHours: 5,
+    steps: [
+      { category: "cloud", slug: "cloud-hub" },
+      { category: "cloud", slug: "aws-core", note: "The essential AWS services" },
+      { category: "cloud", slug: "docker", note: "Containers first" },
+      { category: "cloud", slug: "kubernetes", note: "Orchestration at scale" },
+      { category: "cloud", slug: "terraform", note: "Infrastructure as code" },
+      { category: "cloud", slug: "cloud-security" },
+      { category: "cloud", slug: "github-actions", note: "CI/CD pipelines" },
+    ],
+  },
+  {
+    id: "qa-engineer",
+    title: "QA Engineer",
+    description:
+      "Test strategy, case design, exploratory testing, and quality in modern delivery pipelines.",
+    brain: "engineering",
+    estimatedHours: 4,
+    steps: [
+      { category: "qa", slug: "qa-hub" },
+      { category: "qa", slug: "test-strategy" },
+      { category: "qa", slug: "test-case-design" },
+      { category: "qa", slug: "exploratory-testing" },
+      { category: "qa", slug: "regression-testing" },
+      { category: "qa", slug: "bug-lifecycle" },
+      { category: "qa", slug: "qa-in-devops", note: "Quality in CI/CD pipelines" },
+    ],
+  },
+  {
+    id: "technical-qa-engineer",
+    title: "Technical QA Engineer",
+    description:
+      "API testing, performance, test architecture, Playwright, and flaky test management. QA at the code level.",
+    brain: "engineering",
+    estimatedHours: 5,
+    steps: [
+      { category: "technical-qa", slug: "tqa-hub" },
+      { category: "technical-qa", slug: "api-testing" },
+      { category: "technical-qa", slug: "playwright-advanced" },
+      { category: "technical-qa", slug: "performance-testing" },
+      { category: "technical-qa", slug: "test-architecture" },
+      { category: "technical-qa", slug: "ci-cd-quality-gates", note: "Block broken code automatically" },
+      { category: "technical-qa", slug: "flaky-test-management" },
+    ],
+  },
+  {
+    id: "sql-engineer",
+    title: "SQL Engineer",
+    description:
+      "SQL, schema design, transactions, NoSQL tradeoffs, and Python data tools. Data at every level of the stack.",
+    brain: "engineering",
+    estimatedHours: 4,
+    steps: [
+      { category: "cs-fundamentals", slug: "sql" },
+      { category: "cs-fundamentals", slug: "database-design" },
+      { category: "cs-fundamentals", slug: "database-transactions" },
+      { category: "cs-fundamentals", slug: "nosql-databases", note: "When SQL is the wrong tool" },
+      { category: "python", slug: "sqlalchemy", note: "SQL from Python" },
+      { category: "python", slug: "polars-duckdb", note: "Analytical workloads" },
+    ],
+  },
+];
+
+// Topic bundles — curated deep-dives into specific AI engineering areas
+export const TOPIC_BUNDLES: LearningPath[] = [
   {
     id: "ai-engineering-fundamentals",
     title: "AI Engineering Fundamentals",
     description:
-      "Transformer internals → prompt engineering → RAG → evals. The foundation every AI engineer needs before touching a framework.",
+      "Transformer internals, prompt engineering, RAG, and evals. The foundation every AI engineer needs before touching a framework.",
     brain: "ai-engineering",
     estimatedHours: 5,
     steps: [
@@ -34,14 +139,14 @@ export const LEARNING_PATHS: LearningPath[] = [
       { category: "rag", slug: "chunking" },
       { category: "rag", slug: "embeddings" },
       { category: "rag", slug: "pipeline", note: "Full RAG pipeline from retrieval to answer" },
-      { category: "evals", slug: "methodology", note: "How to know if it's actually working" },
+      { category: "evals", slug: "methodology", note: "How to know if it is actually working" },
     ],
   },
   {
     id: "build-agents",
     title: "Build Agents",
     description:
-      "Single-agent loops → multi-agent orchestration → tool protocols → what goes wrong and how to stop it.",
+      "Single-agent loops, multi-agent orchestration, tool protocols, and what goes wrong and how to stop it.",
     brain: "ai-engineering",
     estimatedHours: 4,
     steps: [
@@ -57,7 +162,7 @@ export const LEARNING_PATHS: LearningPath[] = [
     id: "production-infrastructure",
     title: "Production Infrastructure",
     description:
-      "APIs → observability → multi-provider routing → managed RAG → content safety. How to run AI systems reliably.",
+      "APIs, observability, multi-provider routing, managed RAG, and content safety. How to run AI systems reliably.",
     brain: "infrastructure",
     estimatedHours: 4,
     steps: [
