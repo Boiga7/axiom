@@ -23,7 +23,7 @@ export default function Nav({ searchIndex }: NavProps) {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0 group" aria-label="The Axiom">
-          <span className="text-ae font-mono text-sm opacity-60 group-hover:opacity-100 transition-opacity">⬡</span>
+          <span className="text-ae font-mono text-sm opacity-80 group-hover:opacity-100 transition-opacity">⬡</span>
         </Link>
 
         {/* Search */}

@@ -120,12 +120,12 @@ export default function HomePage() {
           <div className="flex items-center gap-3 mb-2">
             <div className="w-1.5 h-5 rounded-full bg-white/20" />
             <h2 className="font-mono text-[11px] uppercase tracking-widest text-secondary">
-              Topic Bundles
+              Deep Dives
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
           <p className="text-secondary text-xs font-mono mb-6 ml-4">
-            Deep dives into specific AI engineering areas
+            Curated reading on specific AI engineering areas
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -225,9 +225,14 @@ export default function HomePage() {
         </div>
 
         <div className="h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-8 mb-10" />
-        <footer className="text-center text-muted font-mono text-[11px] tracking-wider">
-          <span>The Axiom · </span>
-          <span className="text-ae/60">elliot-digital.co.uk</span>
+        <footer className="flex items-center justify-center gap-4 text-muted font-mono text-[11px] tracking-wider pb-2">
+          <Link href="/" className="hover:text-secondary transition-colors">Home</Link>
+          <span className="text-white/10">·</span>
+          <Link href="/graph" className="hover:text-secondary transition-colors">Graph</Link>
+          <span className="text-white/10">·</span>
+          <Link href="/scan" className="hover:text-secondary transition-colors">Scan</Link>
+          <span className="text-white/10">·</span>
+          <span className="text-ae/40">elliot-digital.co.uk</span>
         </footer>
       </main>
     </>

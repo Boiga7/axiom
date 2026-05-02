@@ -12,6 +12,7 @@ import {
 import Nav from "@/components/Nav";
 import WikiContent from "@/components/WikiContent";
 import TableOfContents from "@/components/TableOfContents";
+import ReadingProgress from "@/components/ReadingProgress";
 import type { Metadata } from "next";
 
 type Props = { params: { category: string; slug: string } };
@@ -69,6 +70,7 @@ export default function WikiPage({ params }: Props) {
 
   return (
     <>
+      <ReadingProgress />
       <Nav searchIndex={searchIndex} />
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
@@ -138,6 +140,26 @@ export default function WikiPage({ params }: Props) {
             </header>
 
             <WikiContent content={page.content} allPageHrefs={hrefMap} />
+
+            {/* Mobile: sibling navigation — hidden on lg where sidebar handles it */}
+            {siblings.length > 0 && (
+              <div className="lg:hidden mt-12 pt-8 border-t border-white/[0.06]">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">
+                  More in {slugToLabel(category)}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {siblings.slice(0, 8).map((s) => (
+                    <Link
+                      key={s.slug}
+                      href={s.href}
+                      className="text-xs text-secondary hover:text-primary px-3 py-2 rounded-md border border-white/[0.06] hover:border-white/[0.12] hover:bg-card transition-colors leading-snug truncate"
+                    >
+                      {s.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </article>
 
           {/* Sidebar — ToC + sibling pages */}
