@@ -32,8 +32,8 @@ Two stale index entries removed — pages were deleted during the audit but thei
 
 | Removed Entry | Reason |
 |---|---|
-| `[[cloud/cost-optimisation-cloud]]` | Page deleted — content merged into [[cloud/finops-cost-management]] |
-| `[[qa/exploratory-testing-advanced]]` | Page deleted — content merged into [[qa/exploratory-testing]] |
+| `cloud/cost-optimisation-cloud` | Page deleted — content merged into [[cloud/finops-cost-management]] |
+| `qa/exploratory-testing-advanced` | Page deleted — content merged into [[qa/exploratory-testing]] |
 
 Page count corrected: 314 → 312.
 

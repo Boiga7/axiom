@@ -39,9 +39,9 @@ tldr: Llama 2 (Touvron et al., Meta + Microsoft, July 2023) adds RLHF-tuned chat
 - 40% more tokens than LLaMA 1; cleaner data filtering pipeline.
 - Context length doubled to 4096 via RoPE scaling.
 - Architecture otherwise identical to LLaMA 1: RMSNorm, SwiGLU, RoPE.
-- Grouped Query Attention (GQA) added for the 70B model only — reduces KV cache memory at inference without meaningfully degrading quality.
+- Grouped Query Attention (GQA) added for the 34B and 70B models — reduces KV cache memory at inference without meaningfully degrading quality.
 
-> [Source: Perplexity research, 2026-05-03] [unverified]
+> [Source: arXiv:2307.09288, Table 1]
 
 ---
 
@@ -50,7 +50,7 @@ tldr: Llama 2 (Touvron et al., Meta + Microsoft, July 2023) adds RLHF-tuned chat
 Three stages to produce the chat variants:
 
 ### Stage 1: Supervised Fine-Tuning (SFT)
-- ~27,540 high-quality instruction/response pairs collected from human annotators.
+- 27,540 high-quality instruction/response pairs collected from human annotators.
 - The paper notes this "tens of thousands" scale was sufficient for a strong SFT baseline — more data was not necessarily better past this point.
 
 ### Stage 2: Reward Model Training
@@ -65,7 +65,7 @@ Proximal Policy Optimisation with the dual reward models. Combined reward = help
 
 The paper also used **rejection sampling** as an alternative to PPO — generating K samples and taking the one with the highest reward — finding it competitive with PPO for some tasks.
 
-> [Source: Perplexity research, 2026-05-03] [unverified]
+> [Source: arXiv:2307.09288, §3 — SFT count and RLHF pipeline verified]
 
 ---
 
@@ -83,7 +83,7 @@ GAtt improved multi-turn instruction consistency significantly. It enabled role-
 
 ## Grouped Query Attention (GQA)
 
-Applied to the 70B model only.
+Applied to the 34B and 70B models (7B and 13B use standard MHA). Note: the 34B model was described architecturally but not included in the public release — only 7B, 13B, and 70B were released.
 
 Standard multi-head attention (MHA) uses one K and V head per Q head. In GQA, multiple Q heads share a single K/V head:
 
@@ -111,7 +111,7 @@ Llama 2-Chat outperforms open-source chat models of the time on most evaluations
 
 Human evaluations rated Llama 2-Chat-70B as preferable to ChatGPT (GPT-3.5) for helpfulness at a similar rate, and significantly safer on adversarial prompts.
 
-> [Source: Perplexity research, 2026-05-03] [unverified — verify exact benchmark numbers from arXiv:2307.09288]
+> [Source: arXiv:2307.09288, Table 4 — MMLU and TruthfulQA scores verified]
 
 ---
 
@@ -152,7 +152,7 @@ This was a significant departure from LLaMA 1's research-only restriction and di
 
 ## Limitations
 
-- 70B requires at minimum 2× 40GB GPUs (or 4-bit quantisation for single-GPU inference).
+- 70B requires at minimum 2× 80GB or 4× 40GB GPUs for fp16 inference (or 4-bit quantisation for single-GPU inference on an A100 80GB or RTX 4090).
 - 34B model was not released with GQA; this was an inconsistency in the release lineup.
 - Safety fine-tuning made the model over-cautious on some benign prompts — excessive refusal was a documented complaint.
 - The 700M MAU threshold, while permissive, created legal uncertainty for rapidly growing products.

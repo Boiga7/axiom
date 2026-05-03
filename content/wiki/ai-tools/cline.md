@@ -14,7 +14,7 @@ tldr: Open-source autonomous AI coding agent running as a VS Code extension — 
 
 Apache 2.0. 61k+ GitHub stars, 5M+ installs. Originated as "Claude Dev" in 2024 and has since expanded significantly. As of 2026 it runs in VS Code, JetBrains, Cursor, Windsurf, Zed, Neovim, and a preview CLI.
 
-> [Source: Perplexity research, 2026-05-03] [unverified]
+> [Source: github.com/cline/cline, marketplace.visualstudio.com — stars and installs verified 2026-05-03]
 
 ---
 
@@ -105,7 +105,7 @@ No automatic summarisation; the truncation is explicit. For long-running tasks, 
 | Autonomy | Medium (approval gates) | High (executes autonomously) | Medium | Lower (proposes, user accepts) |
 | Model flexibility | 30+ providers | Claude only | Multiple | Any |
 | Config file | `.clinerules` | `CLAUDE.md` | `.cursorrules` | `~/.aider.conf.yml` |
-| MCP support | Native marketplace | Native (claude code plugins) | Supported | Limited [unverified] |
+| MCP support | Native marketplace | Native (claude code plugins) | Supported | Via community MCP server (not native) |
 | Browser control | Yes (Puppeteer) | No built-in | No | No |
 | Open-source | Yes (Apache 2.0) | No | No | Yes (Apache 2.0) |
 | Best for | VS Code users wanting model flexibility + browser automation | Autonomous multi-step terminal tasks | IDE-integrated AI pair programming | Terminal-native multi-provider experimentation |

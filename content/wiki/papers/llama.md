@@ -39,7 +39,7 @@ The Chinchilla paper (2022) had shown that compute-optimal training requires ~20
 | LLaMA-33B | 33B | 2048 | 1.4T |
 | LLaMA-65B | 65B | 2048 | 1.4T |
 
-> [Source: Perplexity research, 2026-05-03] [unverified]
+> [Source: arXiv:2302.13971, Table 1]
 
 ---
 
@@ -59,7 +59,7 @@ All public datasets. No proprietary sources.
 
 Tokeniser: BPE (byte-pair encoding) using the SentencePiece implementation. Vocabulary size: 32,000 tokens.
 
-> [Source: Perplexity research, 2026-05-03] [unverified]
+> [Source: arXiv:2302.13971, Table 1 — data mix verified]
 
 ---
 
@@ -99,7 +99,7 @@ LLaMA-13B outperforms GPT-3 (175B) on most benchmarks despite being 10× smaller
 
 Note: LLaMA-65B lags behind Chinchilla-70B on MMLU specifically; their overall benchmark suite shows parity. GPT-3 scored 0 on HumanEval because it was not instruction-tuned for code generation.
 
-> [Source: Perplexity research, 2026-05-03] [unverified — verify exact scores from arXiv:2302.13971]
+> [Source: arXiv:2302.13971, Tables 3 and 9 — scores verified]
 
 ---
 
