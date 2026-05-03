@@ -211,4 +211,129 @@ test.describe("Exercise page", () => {
     const response = await page.goto("/practice/ai-engineer/does-not-exist");
     expect(response?.status()).toBe(404);
   });
+
+  test("invalid role path returns 404", async ({ page }) => {
+    const response = await page.goto("/practice/does-not-exist/rag-pipeline");
+    expect(response?.status()).toBe(404);
+  });
+});
+
+// ── Software Engineer exercise page ──────────────────────────────────
+
+test.describe("Software Engineer exercise page — refactor-god-class", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/practice/software-engineer/refactor-god-class");
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("renders exercise title", async ({ page }) => {
+    await expect(page.getByRole("heading", { level: 1, name: /Refactor a God class using SOLID/i })).toBeVisible();
+  });
+
+  test("shows Beginner difficulty badge", async ({ page }) => {
+    await expect(page.getByText("Beginner").first()).toBeVisible();
+  });
+
+  test("shows Software Engineer in breadcrumb", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation");
+    await expect(breadcrumb.getByText("Software Engineer")).toBeVisible();
+  });
+
+  test("shows 5 steps", async ({ page }) => {
+    const steps = page.locator("ol li");
+    await expect(steps).toHaveCount(5);
+  });
+
+  test("links to SOLID axiom page", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /Software design principles/i })).toBeVisible();
+  });
+});
+
+// ── QA Engineer exercise page ─────────────────────────────────────────
+
+test.describe("QA Engineer exercise page — test-charters", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/practice/qa-engineer/test-charters");
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("renders exercise title", async ({ page }) => {
+    await expect(page.getByRole("heading", { level: 1, name: /Write and execute test charters/i })).toBeVisible();
+  });
+
+  test("shows Beginner difficulty badge", async ({ page }) => {
+    await expect(page.getByText("Beginner").first()).toBeVisible();
+  });
+
+  test("shows QA Engineer in breadcrumb", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation");
+    await expect(breadcrumb.getByText("QA Engineer")).toBeVisible();
+  });
+
+  test("shows 5 steps", async ({ page }) => {
+    const steps = page.locator("ol li");
+    await expect(steps).toHaveCount(5);
+  });
+
+  test("links to exploratory testing axiom page", async ({ page }) => {
+    await expect(page.getByRole("link", { name: "Exploratory testing" })).toBeVisible();
+  });
+});
+
+// ── SDET exercise page ────────────────────────────────────────────────
+
+test.describe("SDET exercise page — streaming-endpoint-test", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/practice/sdet/streaming-endpoint-test");
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("renders exercise title", async ({ page }) => {
+    await expect(page.getByRole("heading", { level: 1, name: /Test a streaming LLM endpoint with Playwright/i })).toBeVisible();
+  });
+
+  test("shows Intermediate difficulty badge", async ({ page }) => {
+    await expect(page.getByText("Intermediate").first()).toBeVisible();
+  });
+
+  test("shows SDET in breadcrumb", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation");
+    await expect(breadcrumb.getByText("SDET")).toBeVisible();
+  });
+
+  test("shows 5 steps", async ({ page }) => {
+    const steps = page.locator("ol li");
+    await expect(steps).toHaveCount(5);
+  });
+});
+
+// ── Analytics Engineer exercise page ─────────────────────────────────
+
+test.describe("Analytics Engineer exercise page — window-function-query", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/practice/analytics-engineer/window-function-query");
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("renders exercise title", async ({ page }) => {
+    await expect(page.getByRole("heading", { level: 1, name: /Write a window function ranking query/i })).toBeVisible();
+  });
+
+  test("shows Beginner difficulty badge", async ({ page }) => {
+    await expect(page.getByText("Beginner").first()).toBeVisible();
+  });
+
+  test("shows Analytics Engineer in breadcrumb", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation");
+    await expect(breadcrumb.getByText("Analytics Engineer")).toBeVisible();
+  });
+
+  test("shows 5 steps", async ({ page }) => {
+    const steps = page.locator("ol li");
+    await expect(steps).toHaveCount(5);
+  });
+
+  test("links to SQL fundamentals axiom page", async ({ page }) => {
+    await expect(page.getByRole("link", { name: "SQL fundamentals" })).toBeVisible();
+  });
 });
