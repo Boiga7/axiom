@@ -61,11 +61,14 @@ export default function GraphView({ nodes, links }: Props) {
     rotY: 0,
     rotX: -0.2,
     dragging: false,
+    didDrag: false,
     lastX: 0,
     lastY: 0,
     hoverId: null as string | null,
+    selectedId: null as string | null,
     touchStartX: 0,
     touchStartY: 0,
+    touchSelectedId: null as string | null,
     zoom: 1,
     lastPinchDist: 0,
   });
@@ -127,7 +130,7 @@ export default function GraphView({ nodes, links }: Props) {
 
       ctx.clearRect(0, 0, W, H);
 
-      if (!state.current.dragging) {
+      if (!state.current.dragging && !state.current.selectedId) {
         state.current.rotY += 0.0006;
       }
 
@@ -142,7 +145,6 @@ export default function GraphView({ nodes, links }: Props) {
       };
 
       // --- WIREFRAME ---
-      // Back hemisphere (very faint, gives globe depth without screensaver feel)
       ctx.lineWidth = 0.5;
       for (const line of WIREFRAME) {
         ctx.beginPath();
@@ -158,7 +160,6 @@ export default function GraphView({ nodes, links }: Props) {
         ctx.strokeStyle = "rgba(71, 85, 105, 0.18)";
         ctx.stroke();
       }
-      // Front hemisphere (slightly brighter)
       for (const line of WIREFRAME) {
         ctx.beginPath();
         let prevZ = -1;
@@ -182,8 +183,8 @@ export default function GraphView({ nodes, links }: Props) {
       });
 
       // --- EDGES ---
-      const hov = s.hoverId;
-      const hovAdj = hov ? adj.current.get(hov) : null;
+      const sel = s.selectedId;
+      const selAdj = sel ? adj.current.get(sel) : null;
 
       for (const l of links) {
         const ai = nodes.findIndex((n) => n.id === l.source);
@@ -193,9 +194,9 @@ export default function GraphView({ nodes, links }: Props) {
         const b = proj[bi];
         if (a.z < -0.55 && b.z < -0.55) continue;
 
-        const isHovEdge = hov && (a.node.id === hov || b.node.id === hov);
+        const isSelEdge = sel && (a.node.id === sel || b.node.id === sel);
 
-        if (isHovEdge) {
+        if (isSelEdge) {
           const depth = Math.max(0, (a.z + b.z) / 2 + 0.55) / 1.55;
           ctx.beginPath();
           ctx.moveTo(a.px, a.py);
@@ -221,15 +222,13 @@ export default function GraphView({ nodes, links }: Props) {
 
       for (const { px, py, z, node } of sorted) {
         const depthV = Math.max(0, z + 1) / 2;
-        const isHovered = hov === node.id;
-        const isAdj = hovAdj?.has(node.id);
+        const isSelected = sel === node.id;
+        const isAdj = selAdj?.has(node.id);
 
-        // Crisp dot — no pulse, no glow by default
         const r = (1.4 + Math.sqrt(node.val ?? 1) * 0.45) * (0.4 + depthV * 0.6) * dpr;
-        const alpha = Math.min(1, 0.3 + depthV * 0.7 + (isHovered ? 0.2 : isAdj ? 0.1 : 0));
+        const alpha = Math.min(1, 0.3 + depthV * 0.7 + (isSelected ? 0.2 : isAdj ? 0.1 : 0));
 
-        // Tight glow on hover only — subtle, not dramatic
-        if (isHovered) {
+        if (isSelected) {
           const grd = ctx.createRadialGradient(px, py, 0, px, py, r * 5);
           grd.addColorStop(0, node.color + "28");
           grd.addColorStop(1, "transparent");
@@ -239,35 +238,36 @@ export default function GraphView({ nodes, links }: Props) {
           ctx.fill();
         }
 
-        // The dot
         ctx.beginPath();
         ctx.arc(px, py, r, 0, Math.PI * 2);
         ctx.fillStyle = node.color + Math.round(alpha * 255).toString(16).padStart(2, "0");
         ctx.fill();
 
-        // Clean label on hover
-        if (isHovered && z > -0.1) {
-          const fontSize = 11 * dpr;
+        // Label only for selected node; pixel-snap for crisp rendering
+        if (isSelected && z > -0.1) {
+          const rpx = Math.round(px);
+          const rpy = Math.round(py);
+          const fontSize = Math.round(11 * dpr);
           ctx.font = `500 ${fontSize}px "JetBrains Mono", monospace`;
           ctx.textAlign = "center";
           const tw = ctx.measureText(node.label).width;
-          const pad = 5 * dpr;
-          const pillW = tw + pad * 2;
-          const pillH = fontSize + pad * 1.6;
-          const lx = px - pillW / 2;
-          const ly = py - r - pillH - 6 * dpr;
+          const pad = Math.round(5 * dpr);
+          const pillW = Math.round(tw + pad * 2);
+          const pillH = Math.round(fontSize + pad * 1.6);
+          const lx = Math.round(rpx - pillW / 2);
+          const ly = Math.round(rpy - r - pillH - 6 * dpr);
 
-          ctx.fillStyle = "rgba(7, 9, 13, 0.9)";
+          ctx.fillStyle = "rgba(7, 9, 13, 0.92)";
           ctx.beginPath();
           ctx.roundRect(lx, ly, pillW, pillH, 3 * dpr);
           ctx.fill();
 
-          ctx.strokeStyle = node.color + "45";
-          ctx.lineWidth = 0.75 * dpr;
+          ctx.strokeStyle = node.color + "55";
+          ctx.lineWidth = 1 * dpr;
           ctx.stroke();
 
-          ctx.fillStyle = "rgba(226, 232, 240, 0.92)";
-          ctx.fillText(node.label, px, ly + fontSize + pad * 0.55);
+          ctx.fillStyle = "rgba(226, 232, 240, 0.95)";
+          ctx.fillText(node.label, rpx, Math.round(ly + fontSize + pad * 0.55));
         }
       }
 
@@ -320,8 +320,11 @@ export default function GraphView({ nodes, links }: Props) {
       const { x, y } = getCanvasPos(e);
       const s = state.current;
       if (s.dragging) {
-        s.rotY += (x - s.lastX) * 0.006;
-        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + (y - s.lastY) * 0.006));
+        const dx = x - s.lastX;
+        const dy = y - s.lastY;
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) s.didDrag = true;
+        s.rotY += dx * 0.006;
+        s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + dy * 0.006));
         s.lastX = x; s.lastY = y;
         return;
       }
@@ -336,6 +339,7 @@ export default function GraphView({ nodes, links }: Props) {
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       const { x, y } = getCanvasPos(e);
       state.current.dragging = true;
+      state.current.didDrag = false;
       state.current.lastX = x; state.current.lastY = y;
       if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
     },
@@ -349,12 +353,24 @@ export default function GraphView({ nodes, links }: Props) {
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (state.current.dragging) return;
+      if (state.current.didDrag) {
+        state.current.didDrag = false;
+        return;
+      }
       const { x, y } = getCanvasPos(e);
       const hit = findHovered(x, y);
       if (hit) {
-        const node = nodes.find((n) => n.id === hit);
-        if (node) router.push(node.href);
+        if (state.current.selectedId === hit) {
+          // Second click on already-selected node → navigate
+          const node = nodes.find((n) => n.id === hit);
+          if (node) router.push(node.href);
+        } else {
+          // First click → select and show label
+          state.current.selectedId = hit;
+        }
+      } else {
+        // Click on empty space → deselect
+        state.current.selectedId = null;
       }
     },
     [getCanvasPos, findHovered, nodes, router]
@@ -400,9 +416,8 @@ export default function GraphView({ nodes, links }: Props) {
         s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + (y - s.lastY) * 0.006));
         s.lastX = x; s.lastY = y;
       }
-      state.current.hoverId = findHovered(x, y);
     },
-    [getCanvasTouchPos, findHovered]
+    [getCanvasTouchPos]
   );
 
   const handleTouchEnd = useCallback(
@@ -416,11 +431,18 @@ export default function GraphView({ nodes, links }: Props) {
       if (dx < 10 && dy < 10) {
         const hit = findHovered(x, y);
         if (hit) {
-          const node = nodes.find((n) => n.id === hit);
-          if (node) router.push(node.href);
+          if (s.selectedId === hit) {
+            // Second tap → navigate
+            const node = nodes.find((n) => n.id === hit);
+            if (node) router.push(node.href);
+          } else {
+            // First tap → select
+            s.selectedId = hit;
+          }
+        } else {
+          s.selectedId = null;
         }
       }
-      state.current.hoverId = null;
     },
     [getCanvasTouchPos, findHovered, nodes, router]
   );
