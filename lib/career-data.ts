@@ -53,6 +53,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'technical-qa', slug: 'performance-testing', label: 'Performance Testing' },
       { category: 'technical-qa', slug: 'load-testing-advanced', label: 'Load Testing Advanced' },
       { category: 'technical-qa', slug: 'api-performance-testing', label: 'API Performance Testing' },
+      { category: 'qa', slug: 'performance-testing-qa', label: 'Performance Testing QA' },
     ],
   },
   {
@@ -74,6 +75,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'technical-qa', slug: 'ci-cd-quality-gates', label: 'CI/CD Quality Gates' },
       { category: 'cloud', slug: 'github-actions', label: 'GitHub Actions' },
       { category: 'cs-fundamentals', slug: 'cicd-pipelines', label: 'CI/CD Pipelines' },
+      { category: 'qa', slug: 'continuous-testing', label: 'Continuous Testing' },
     ],
   },
   {
@@ -106,6 +108,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'security', slug: 'red-teaming', label: 'Red Teaming' },
       { category: 'security', slug: 'owasp-llm-top10', label: 'OWASP LLM Top 10' },
       { category: 'technical-qa', slug: 'security-automation', label: 'Security Automation' },
+      { category: 'security', slug: 'llm-red-teaming-tools', label: 'LLM Red Teaming Tools' },
     ],
   },
   {
@@ -116,6 +119,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'observability', slug: 'platforms', label: 'Observability Platforms' },
       { category: 'observability', slug: 'langfuse', label: 'Langfuse' },
       { category: 'cloud', slug: 'cloud-monitoring', label: 'Cloud Monitoring' },
+      { category: 'observability', slug: 'llmops', label: 'LLMOps' },
     ],
   },
   {
@@ -126,6 +130,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'qa', slug: 'ai-testing', label: 'AI Testing' },
       { category: 'ai-tools', slug: 'claude-code', label: 'Claude Code' },
       { category: 'ai-tools', slug: 'cursor-copilot', label: 'Cursor / Copilot' },
+      { category: 'ai-tools', slug: 'openai-codex', label: 'OpenAI Codex' },
     ],
   },
   {
@@ -136,6 +141,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
       { category: 'qa', slug: 'continuous-testing', label: 'Continuous Testing' },
       { category: 'qa', slug: 'test-automation-strategy', label: 'Test Automation Strategy' },
       { category: 'qa', slug: 'defect-prevention', label: 'Defect Prevention' },
+      { category: 'qa', slug: 'process-improvement-model', label: 'Process Improvement Model' },
     ],
   },
 ]
