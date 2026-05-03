@@ -679,3 +679,54 @@ Punch list:
 - Added: [[ai-tools/continue]] — open-source Apache 2.0 VS Code/JetBrains extension; model-agnostic via config.json; 10-provider context system (@codebase embeddings, @docs indexing, @diff, @web, @terminal); comparison matrix vs Cursor/Copilot/Claude Code/Aider
 - Updated index.md: page count 314 → 317
 - Updated synthesis/gap-report.md: all 5 identified gaps resolved; no remaining critical gaps
+
+## [2026-05-03] ingest | New pages: ai-tools/cline, papers/llama, papers/llama-2
+- [[ai-tools/cline]] — Cline: open-source autonomous VS Code agent
+- [[papers/llama]] — LLaMA (Touvron et al. 2023): open-weight foundation models
+- [[papers/llama-2]] — Llama 2 (Touvron et al. 2023): RLHF chat models with commercial licence
+
+## [2026-05-03] lint | Graph Health rebuild — 377 pages, score 100/100, 1 orphan (cline), 111 hubs
+
+## [2026-05-03] lint | Vault audit — 2 broken links, 0 semantic duplicates, 32 runbooks not indexed, 1 accuracy issue (llama-2 GPU claim)
+
+## [2026-05-03] lint | Gap Intelligence — 0 critical gaps, 3 concept gaps found
+
+## [2026-05-03] research | RFC 7591 Dynamic Client Registration — registration endpoint, MCP OAuth self-registration, security testing
+
+## [2026-05-03] research | OAuth Server Metadata (RFC 8414) — discovery endpoint, MCP OAuth integration, PKCE
+
+## [2026-05-03] research | Mistral 7B + Mixtral 8x7B papers -- SWA, GQA, sparse MoE architecture and benchmarks
+
+## [2026-05-03] research | DeepSeek R1/R2 — entity page written, GRPO training approach, benchmark performance vs o1
+
+## [2026-05-03] lint | Gap Intelligence -- 0 critical gaps, 2 concept gaps found (RFC 7591, MLA)
+
+## [2026-05-03] research | Multi-head Latent Attention (MLA) -- DeepSeek low-rank KV cache compression, V2/V3/R1 usage
+
+## [2026-05-03] ingest | 9 new pages -- computer-use, pydantic-ai, model-routing, reasoning-model-patterns, openai-codex, mastra, bfcl, structured-outputs, voice-agents
+
+## [2026-05-03] ingest | 14-page batch -- agent-memory-systems, llm-red-teaming-tools, small-language-models, inference-time-scaling, eu-ai-act, ai-gateway, mlops-pipelines, iso42001, inference-platforms, llmops, process-improvement-model (new); benchmarks, caching, experiment-tracking (updated)
+
+## [2026-05-03] research | AWS CLF-C02 + AIF-C01 study guides -- full exam-domain coverage for both AWS Foundation certs (Cloud Practitioner + AI Practitioner)
+
+## [2026-05-03] ingest | performance-test-reporting — new QA page covering run report structure, NFR pass/fail tables, p95/p99 framing by audience, trend analysis, interim/final report formats, go/no-go sign-off pack, defect reporting fields for performance cycles
+
+## [2026-05-03] ingest | threat-modelling — new security page covering STRIDE with concrete examples per category, DREAD scoring, PASTA methodology, workshop facilitation (who to invite, DFD creation, trust boundaries, walking the attack surface), STRIDE-to-OWASP mapping, threats-to-test-cases derivation, MITRE ATT&CK basics, API/microservice-specific threats, threat register format, tooling (Threat Dragon, MS TMT, IriusRisk)
+
+## [2026-05-03] ingest | owasp-wstg — new security page covering WSTG v4.2 methodology: 12 test categories (INFO through APIT), test ID scheme (WSTG-AUTHN-01 etc.), WSTG vs OWASP Top 10 distinction, grey-box scoping process, passive vs active testing, ZAP + Burp Suite integration, CVSS v3.1 scoring, finding documentation standard, and deliverable structure for a security test report
+
+## [2026-05-03] ingest | UAT Governance
+
+Created wiki/qa/uat-governance.md — governance layer for UAT: entry/exit criteria, kick-off and close-out briefings, scope dispute resolution, defect triage with business owners, severity classification, sign-off documentation, sign-off refusal handling, agile vs waterfall governance, managing business users who misunderstand UAT.
+Updated wiki/index.md.
+Mirrored to axiom/content/wiki/qa/uat-governance.md.
+
+## [2026-05-03] ingest | Self-Healing Test Frameworks
+
+Created wiki/technical-qa/self-healing-tests.md — full landscape for clients with legacy Selenium suites: Healenium (tree-edit-distance algorithm, SelfHealingDriver wrapper, Docker backend, healing reports, Java setup), Playwright Healer Agent v1.56 (GitHub PR auto-fix, 75% success rate, config), Mabl (cloud ML multi-signal healing, visual healing), testRigor (plain English authoring, no selectors), Applitools visual AI (Layout match level, Selenium SDK), decision framework (Playwright migration vs Healenium wrapper with migration cost estimates), when self-healing is not the answer (flake root cause taxonomy, prioritised remediation order), ROI calculation template, client presentation guide for 3000-test 40%-flaky suites, limitations summary, tool comparison matrix.
+Updated wiki/index.md.
+Mirrored to axiom/content/wiki/technical-qa/self-healing-tests.md.
+
+## [2026-05-03] ingest | test-estimation — new QA page covering three-point PERT with worked examples, T-shirt sizing, analogy-based estimation, UCP; activity breakdown (test writing/execution/retesting/regression/automation separately); estimation in agile (story points, velocity tracking); common biases and counters; context-switch tax for concurrent streams; capacity model (headcount × days × utilisation); new-client ramp-up model (40% week 1 → 100% week 4); tracking estimate vs actuals; presenting ranges to clients; scope creep playbook (Type 1/2/3); re-baselining process with worked delta calculation.
+Updated wiki/index.md.
+Mirrored to axiom/content/wiki/qa/test-estimation.md.

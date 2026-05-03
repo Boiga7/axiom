@@ -41,8 +41,15 @@ Central hub for all quality assurance knowledge. Every page in the QA brain conn
 ## Defect Prevention and Quality
 [[qa/defect-prevention]] · [[qa/ai-testing]] · [[qa/compliance-testing]] · [[qa/defect-clustering]]
 
+## Release Governance
+[[qa/release-sign-off]]
+
 ## Production Quality
 [[qa/production-monitoring-qa]]
 
 ## Extended Testing
 [[qa/usability-testing]] · [[qa/performance-testing-qa]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

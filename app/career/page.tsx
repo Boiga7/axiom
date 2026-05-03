@@ -145,11 +145,11 @@ export default function CareerPage() {
             {BOARD_CRITERIA.map((criterion, i) => (
               <div
                 key={criterion.id}
-                className="rounded-lg border border-white/[0.06] bg-card p-5 group hover:border-ae/20 transition-colors"
+                className="rounded-lg border border-ae/20 bg-card p-5 group hover:border-ae/40 transition-colors"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Slide {i + 1}</span>
-                  <span className="font-display text-2xl font-semibold text-ae/20 group-hover:text-ae/40 transition-colors select-none">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-ae/60">Slide {i + 1}</span>
+                  <span className="font-display text-2xl font-semibold select-none transition-colors text-ae/25 group-hover:text-ae/50">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                 </div>
@@ -167,8 +167,8 @@ export default function CareerPage() {
         {/* Prerequisites */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-1.5 h-5 rounded-full bg-white/10" />
-            <h2 className="font-mono text-[11px] uppercase tracking-widest text-muted">
+            <div className="w-1.5 h-5 rounded-full bg-emerald-500/60" />
+            <h2 className="font-mono text-[11px] uppercase tracking-widest text-emerald-400/80">
               Prerequisites — Grade 2
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
@@ -178,13 +178,13 @@ export default function CareerPage() {
             {PREREQUISITES.map((prereq, i) => (
               <div
                 key={prereq.id}
-                className="rounded-lg border border-white/[0.06] bg-card p-5 group hover:border-white/[0.12] transition-colors"
+                className="rounded-lg border border-emerald-500/20 bg-card p-5 group hover:border-emerald-500/40 transition-colors"
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-5 h-5 rounded border border-white/[0.10] flex items-center justify-center shrink-0">
-                    <span className="font-mono text-[8px] text-muted">{i + 1}</span>
+                  <div className="w-5 h-5 rounded border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <span className="font-mono text-[8px] text-emerald-400">{i + 1}</span>
                   </div>
-                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Required</span>
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-emerald-400/60">Required</span>
                 </div>
                 <p className="font-display text-sm font-semibold text-primary mb-1.5 leading-snug">
                   {prereq.label}
@@ -211,7 +211,7 @@ export default function CareerPage() {
             {CERTIFICATIONS.map((cert) => (
               <div
                 key={cert.id}
-                className="rounded-lg border border-amber-400/20 bg-card p-5 group hover:border-amber-400/35 transition-colors"
+                className="rounded-lg border border-amber-400/20 bg-card p-5 group hover:border-amber-400/35 transition-colors flex flex-col"
               >
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-mono text-[9px] uppercase tracking-widest text-muted">
@@ -224,22 +224,22 @@ export default function CareerPage() {
                 <p className="font-display text-sm font-semibold text-primary mb-2 leading-snug">
                   {cert.label}
                 </p>
-                <p className="font-mono text-[11px] text-secondary leading-relaxed mb-4">
+                <p className="font-mono text-[11px] text-secondary leading-relaxed mb-4 flex-1">
                   {cert.detail}
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 mt-auto pt-1">
                   {cert.studySlug ? (
                     <Link
                       href={`/landscape/${cert.studySlug}`}
-                      className="font-mono text-[9px] text-amber-400/60 hover:text-amber-400 uppercase tracking-widest transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-amber-400 hover:bg-amber-400/20 hover:border-amber-400/70 transition-colors"
                     >
-                      → Study Guide
+                      Open Study Guide →
                     </Link>
                   ) : (
-                    <span className="font-mono text-[9px] text-amber-400/50 uppercase tracking-widest">Pending</span>
+                    <span className="inline-flex items-center rounded border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-muted">
+                      Pending
+                    </span>
                   )}
-                  <div className="h-0.5 flex-1 rounded-full bg-white/[0.06]" />
-                  <span className="font-mono text-[9px] text-muted uppercase tracking-widest">In Progress</span>
                 </div>
               </div>
             ))}
