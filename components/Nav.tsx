@@ -38,6 +38,18 @@ export default function Nav({ searchIndex }: NavProps) {
           </span>
         </Link>
 
+        {/* Career link */}
+        <Link
+          href="/career"
+          className="hidden sm:flex items-center gap-1.5 shrink-0 group"
+          aria-label="Career"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-ae/70 group-hover:bg-ae transition-colors" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ae/60 group-hover:text-ae/90 transition-colors">
+            Career
+          </span>
+        </Link>
+
         {/* Search */}
         <div className="flex-1 min-w-0">
           <Search index={searchIndex} />
