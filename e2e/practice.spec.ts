@@ -32,16 +32,19 @@ test.describe("Practice page", () => {
   test("each section has 5 exercise cards", async ({ page }) => {
     for (const path of ROLE_PATHS) {
       const section = page.locator("section").filter({ has: page.getByRole("heading", { name: path }) });
-      const cards = section.locator(".rounded-lg.border");
+      const cards = section.locator("a.rounded-lg");
       await expect(cards).toHaveCount(5);
     }
   });
 
   test("exercise cards show difficulty badges", async ({ page }) => {
-    // At least one Beginner badge should be visible
     await expect(page.getByText("Beginner").first()).toBeVisible();
-    // At least one Intermediate badge should be visible
     await expect(page.getByText("Intermediate").first()).toBeVisible();
+  });
+
+  test("exercise cards show Start link", async ({ page }) => {
+    const startLinks = page.getByText("Start");
+    await expect(startLinks.first()).toBeVisible();
   });
 
   // ── Search filter ──────────────────────────────────────────────────
@@ -50,7 +53,6 @@ test.describe("Practice page", () => {
     const search = page.getByPlaceholder("Search exercises...");
     await search.fill("RAG");
     await expect(page.getByText(/\d+ exercise/)).toBeVisible();
-    // AI Engineer section with RAG exercise should be visible
     await expect(page.getByRole("heading", { name: "AI Engineer" })).toBeVisible();
   });
 
@@ -75,15 +77,12 @@ test.describe("Practice page", () => {
   test("Beginner pill filters to only Beginner cards", async ({ page }) => {
     await page.getByRole("button", { name: "Beginner" }).click();
 
-    // Check exercise card difficulty badges (text-[9px] spans inside cards)
-    // Filter pills are buttons so span-only locator targets only the badges
     const intermediateCardBadges = page.locator(".space-y-16 span").filter({ hasText: /^Intermediate$/ });
     const advancedCardBadges     = page.locator(".space-y-16 span").filter({ hasText: /^Advanced$/ });
 
     await expect(intermediateCardBadges).toHaveCount(0);
     await expect(advancedCardBadges).toHaveCount(0);
 
-    // Some Beginner badges should remain
     const beginnerCardBadges = page.locator(".space-y-16 span").filter({ hasText: /^Beginner$/ });
     await expect(beginnerCardBadges.first()).toBeVisible();
   });
@@ -99,37 +98,16 @@ test.describe("Practice page", () => {
     await search.fill("k6");
     await page.getByRole("button", { name: "Intermediate" }).click();
     await expect(page.getByText("1 exercise")).toBeVisible();
-    // The k6 load test (SDET, Intermediate)
     await expect(page.getByText("Write and run a k6 load test")).toBeVisible();
   });
 
-  // ── Copy prompt button ─────────────────────────────────────────────
+  // ── Card navigation ────────────────────────────────────────────────
 
-  test("copy prompt button shows 'Copied' on click and reverts", async ({ context, page }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-
-    // Button aria-label is "Copy exercise prompt"
-    const firstCopyButton = page.getByRole("button", { name: "Copy exercise prompt" }).first();
-    await expect(firstCopyButton).toBeVisible();
-
-    await firstCopyButton.click();
-
-    // Button should now show "Copied"
-    await expect(page.getByText("Copied").first()).toBeVisible();
-
-    // After 2 seconds it reverts to "Copy prompt" text
-    await expect(page.locator("button", { hasText: "Copy prompt" }).first()).toBeVisible({ timeout: 4000 });
-  });
-
-  test("copy prompt writes correct text to clipboard", async ({ context, page }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-
-    const firstCopyButton = page.getByRole("button", { name: "Copy exercise prompt" }).first();
-    await firstCopyButton.click();
-
-    const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipboardText).toMatch(/I'm working through this/);
-    expect(clipboardText).toMatch(/AI Engineer/);
+  test("clicking an exercise card navigates to its exercise page", async ({ page }) => {
+    const firstCard = page.locator("a.rounded-lg").first();
+    await firstCard.click();
+    await page.waitForURL(/\/practice\/.+\/.+/);
+    expect(page.url()).toMatch(/\/practice\/ai-engineer\/rag-pipeline/);
   });
 
   // ── Navigation ─────────────────────────────────────────────────────
@@ -141,7 +119,6 @@ test.describe("Practice page", () => {
   });
 
   test("nav Lab link is active on /practice", async ({ page }) => {
-    // The Lab link should be present
     await expect(page.getByRole("link", { name: "Practice Lab" })).toBeVisible();
   });
 
@@ -153,5 +130,76 @@ test.describe("Practice page", () => {
     await page.goto("/practice");
     await page.waitForLoadState("networkidle");
     expect(errors).toHaveLength(0);
+  });
+});
+
+// ── Exercise page ────────────────────────────────────────────────────
+
+test.describe("Exercise page", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/practice/ai-engineer/rag-pipeline");
+    await page.waitForLoadState("networkidle");
+  });
+
+  test("renders exercise title as h1", async ({ page }) => {
+    await expect(page.getByRole("heading", { level: 1, name: /Build a RAG pipeline from scratch/i })).toBeVisible();
+  });
+
+  test("shows difficulty badge", async ({ page }) => {
+    await expect(page.getByText("Beginner").first()).toBeVisible();
+  });
+
+  test("shows role path breadcrumb", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation");
+    await expect(breadcrumb.getByRole("link", { name: "Practice Lab" })).toBeVisible();
+    await expect(breadcrumb.getByText("AI Engineer")).toBeVisible();
+  });
+
+  test("shows Why this matters section", async ({ page }) => {
+    await expect(page.getByText("Why this matters")).toBeVisible();
+  });
+
+  test("shows Before you start section with prerequisites", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Before you start" })).toBeVisible();
+    // RAG exercise has 4 prereqs
+    const prereqs = page.locator("ul").filter({ has: page.getByText(/Python basics/) }).locator("li");
+    await expect(prereqs).toHaveCount(4);
+  });
+
+  test("shows step-by-step guide with numbered steps", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Step-by-step guide" })).toBeVisible();
+    // RAG exercise has 6 steps
+    const steps = page.locator("ol li");
+    await expect(steps).toHaveCount(6);
+  });
+
+  test("shows Relevant Axiom pages section", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Relevant Axiom pages" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "RAG pipeline overview" })).toBeVisible();
+  });
+
+  test("shows What to do next section", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "What to do next" })).toBeVisible();
+  });
+
+  test("Back to Practice Lab link navigates back", async ({ page }) => {
+    await page.locator("main").getByRole("link", { name: /Back to Practice Lab/i }).click();
+    await page.waitForURL("/practice");
+    expect(page.url()).toMatch(/\/practice$/);
+  });
+
+  test("no console errors on load", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error") errors.push(msg.text());
+    });
+    await page.goto("/practice/ai-engineer/rag-pipeline");
+    await page.waitForLoadState("networkidle");
+    expect(errors).toHaveLength(0);
+  });
+
+  test("invalid exercise path returns 404", async ({ page }) => {
+    const response = await page.goto("/practice/ai-engineer/does-not-exist");
+    expect(response?.status()).toBe(404);
   });
 });

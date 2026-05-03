@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
-
-type Difficulty = "Beginner" | "Intermediate" | "Advanced";
-
-type Exercise = {
-  title: string;
-  description: string;
-  difficulty: Difficulty;
-};
-
-type RolePath = {
-  id: string;
-  title: string;
-  description: string;
-  exercises: Exercise[];
-};
+import { useState } from "react";
+import Link from "next/link";
+import type { RolePath, Difficulty } from "@/lib/practice-data";
 
 const DIFFICULTY_STYLES: Record<Difficulty, string> = {
   Beginner: "text-emerald-400/80 border-emerald-400/20 bg-emerald-400/5",
@@ -24,49 +11,6 @@ const DIFFICULTY_STYLES: Record<Difficulty, string> = {
 };
 
 const FILTER_DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"] as const;
-
-function buildPrompt(ex: Exercise, pathTitle: string): string {
-  return `I'm working through this ${pathTitle} exercise:\n\n**${ex.title}**\n\n${ex.description}\n\nPlease help me work through this step by step, explaining the key concepts as we go.`;
-}
-
-function CopyPromptButton({ prompt }: { prompt: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(prompt).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [prompt]);
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="mt-3 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest transition-all"
-      style={{
-        color: copied ? "#22d3ee" : "rgba(148,163,184,0.5)",
-      }}
-      aria-label="Copy exercise prompt"
-      title="Copy a ready-made prompt for this exercise"
-    >
-      {copied ? (
-        <>
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-            <path d="M2 6l3 3 5-5" stroke="#22d3ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Copied
-        </>
-      ) : (
-        <>
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-            <rect x="4" y="1" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
-            <rect x="1" y="3" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" fill="#0d1117"/>
-          </svg>
-          Copy prompt
-        </>
-      )}
-    </button>
-  );
-}
 
 export default function PracticeClient({ paths }: { paths: RolePath[] }) {
   const [search, setSearch] = useState("");
@@ -82,7 +26,7 @@ export default function PracticeClient({ paths }: { paths: RolePath[] }) {
       const matchesSearch =
         q === "" ||
         ex.title.toLowerCase().includes(q) ||
-        ex.description.toLowerCase().includes(q) ||
+        ex.tagline.toLowerCase().includes(q) ||
         path.title.toLowerCase().includes(q);
       return matchesDifficulty && matchesSearch;
     }),
@@ -94,7 +38,6 @@ export default function PracticeClient({ paths }: { paths: RolePath[] }) {
     <>
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 mb-10">
-        {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
@@ -112,7 +55,6 @@ export default function PracticeClient({ paths }: { paths: RolePath[] }) {
           />
         </div>
 
-        {/* Difficulty pills */}
         <div className="flex items-center gap-1.5">
           {FILTER_DIFFICULTIES.map((d) => (
             <button
@@ -129,7 +71,6 @@ export default function PracticeClient({ paths }: { paths: RolePath[] }) {
           ))}
         </div>
 
-        {/* Match count */}
         {hasFilter && (
           <span className="self-center font-mono text-[11px] text-muted">
             {totalMatches} {totalMatches === 1 ? "exercise" : "exercises"}
@@ -158,37 +99,40 @@ export default function PracticeClient({ paths }: { paths: RolePath[] }) {
             <p className="text-secondary text-sm mb-6 ml-4">{path.description}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ml-4">
-              {path.exercises.map((ex, i) => {
-                const prompt = buildPrompt(ex, path.title);
-                return (
+              {path.exercises.map((ex, i) => (
+                <Link
+                  key={ex.slug}
+                  href={`/practice/${path.id}/${ex.slug}`}
+                  className="group relative rounded-lg border border-white/[0.06] bg-card p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-elevated flex flex-col"
+                >
                   <div
-                    key={i}
-                    className="group relative rounded-lg border border-white/[0.06] bg-card p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-elevated flex flex-col"
-                  >
-                    <div
-                      className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                      style={{ background: "radial-gradient(circle at 30% 30%, rgba(34,211,238,0.06) 0%, transparent 70%)" }}
-                    />
-                    <div className="relative flex flex-col flex-1">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-mono text-[9px] uppercase tracking-widest text-muted">
-                          Exercise {i + 1}
-                        </span>
-                        <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded border ${DIFFICULTY_STYLES[ex.difficulty]}`}>
-                          {ex.difficulty}
-                        </span>
-                      </div>
-                      <h3 className="font-display text-base font-semibold text-primary leading-snug mb-2 group-hover:text-white transition-colors">
-                        {ex.title}
-                      </h3>
-                      <p className="font-mono text-[11px] text-muted leading-relaxed flex-1">
-                        {ex.description}
-                      </p>
-                      <CopyPromptButton prompt={prompt} />
+                    className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    style={{ background: "radial-gradient(circle at 30% 30%, rgba(34,211,238,0.06) 0%, transparent 70%)" }}
+                  />
+                  <div className="relative flex flex-col flex-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-mono text-[9px] uppercase tracking-widest text-muted">
+                        Exercise {i + 1}
+                      </span>
+                      <span className={`font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded border ${DIFFICULTY_STYLES[ex.difficulty]}`}>
+                        {ex.difficulty}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-base font-semibold text-primary leading-snug mb-2 group-hover:text-white transition-colors">
+                      {ex.title}
+                    </h3>
+                    <p className="font-mono text-[11px] text-muted leading-relaxed flex-1">
+                      {ex.tagline}
+                    </p>
+                    <div className="mt-4 flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-ae/60 group-hover:text-ae transition-colors">
+                      Start
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                        <path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
                   </div>
-                );
-              })}
+                </Link>
+              ))}
             </div>
           </section>
         ))}
