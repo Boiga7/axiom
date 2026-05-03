@@ -29,11 +29,20 @@ test.describe("Practice page", () => {
     }
   });
 
-  test("each section has 5 exercise cards", async ({ page }) => {
+  const EXERCISE_COUNTS: Record<string, number> = {
+    "AI Engineer": 9,
+    "Software Engineer": 8,
+    "Cloud Engineer": 8,
+    "QA Engineer": 8,
+    "SDET": 8,
+    "Analytics Engineer": 8,
+  };
+
+  test("each section has the correct exercise card count", async ({ page }) => {
     for (const path of ROLE_PATHS) {
       const section = page.locator("section").filter({ has: page.getByRole("heading", { name: path }) });
       const cards = section.locator("a.rounded-lg");
-      await expect(cards).toHaveCount(5);
+      await expect(cards).toHaveCount(EXERCISE_COUNTS[path]);
     }
   });
 

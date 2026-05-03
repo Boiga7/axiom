@@ -278,6 +278,206 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Build a full RAG pipeline", href: "/practice/ai-engineer/rag-pipeline" },
         ],
       },
+      {
+        slug: "tool-use",
+        title: "Wire up Claude tool use with multiple tools",
+        difficulty: "Intermediate",
+        tagline: "Define 3 tools in JSON Schema, handle tool_use blocks, and chain a multi-step tool call sequence.",
+        description: "Build a Python script that gives Claude three tools (a calculator, a weather lookup stub, and a file reader), handles the tool_use / tool_result turn cycle correctly, and exercises a query that requires at least two tool calls in sequence before Claude can answer.",
+        whyItMatters: "Tool use is how LLMs act on the world. Most production agents are not using a framework — they are driving the tool loop directly via the API. Getting the turn cycle (user to assistant to tool_use to tool_result back to assistant) right is the single biggest source of bugs in new AI engineers' first agentic projects.",
+        prerequisites: [
+          "Python and the anthropic SDK installed (pip install anthropic)",
+          "Basic understanding of the Messages API — system, user, and assistant roles",
+          "Anthropic API key",
+          "Familiarity with Python dictionaries and JSON",
+        ],
+        steps: [
+          {
+            title: "Define three tools in JSON Schema",
+            body: "Write a Python list with three tool definitions: add_numbers (a, b: integers), get_weather (city: string), read_file (path: string). Each must have a name, description, and input_schema with type: object, properties, and required fields. The description is what Claude reads to decide when to call a tool — write it precisely.",
+          },
+          {
+            title: "Wire the first turn",
+            body: "Call messages.create with the three tools in the tools parameter. Print the stop_reason. For a query like 'What is 42 plus 58?', stop_reason should be tool_use, not end_turn. If it is end_turn, Claude answered without tools — your descriptions are too ambiguous.",
+          },
+          {
+            title: "Handle the tool_use block",
+            body: "Inspect response.content for blocks with type == 'tool_use'. Extract name and input. Implement the actual logic for each tool (add_numbers is real; get_weather and read_file can return stub data). Execute the right function and collect the result.",
+          },
+          {
+            title: "Send the tool_result turn",
+            body: "Append the assistant's response to messages, then append a new user message with type: 'tool_result', the tool_use_id from the block, and your result. Call messages.create again. Claude should now produce an end_turn response using the result.",
+          },
+          {
+            title: "Chain two tool calls in a loop",
+            body: "Write a query that requires two tools in sequence. Handle the loop: keep calling until stop_reason is end_turn. Print the full message history so you can see the complete turn sequence. This multi-step loop is the core pattern behind every production agent.",
+          },
+          {
+            title: "Add error handling for tool failures",
+            body: "For the file reader, pass a path that does not exist. Return is_error: true in the tool_result. Observe how Claude handles a failed tool gracefully versus silently. A tool that reports errors explicitly produces much better agent behaviour than one that returns empty results.",
+          },
+        ],
+        axiomPages: [
+          { title: "Anthropic API", href: "/apis/anthropic-api" },
+          { title: "Multi-agent systems", href: "/agents/multi-agent-systems" },
+          { title: "MCP protocol", href: "/protocols/mcp" },
+        ],
+        whatNext: [
+          { label: "Build a LangGraph agent that wraps these tools in a stateful loop", href: "/practice/ai-engineer/langgraph-agent" },
+          { label: "Formalise tool schemas with the MCP protocol", href: "/protocols/mcp" },
+          { label: "Add structured output validation to your tool results", href: "/practice/ai-engineer/structured-outputs" },
+        ],
+      },
+      {
+        slug: "structured-outputs",
+        title: "Extract structured data reliably with Pydantic and Claude",
+        difficulty: "Beginner",
+        tagline: "Define a Pydantic model, prompt Claude to return matching JSON, and validate 20 real-world inputs.",
+        description: "Write a data extraction pipeline that takes unstructured text (job postings, invoice snippets, or product descriptions) and returns validated Pydantic objects every time. You will define the schema, write a system prompt that enforces JSON output, and build a retry loop that re-prompts when validation fails.",
+        whyItMatters: "Unstructured-to-structured extraction is one of the highest-ROI use cases for LLMs in production. The failure mode is not Claude refusing — it is Claude returning almost-valid JSON that breaks your downstream system. Pydantic validation plus a retry loop is the pattern that makes this production-safe.",
+        prerequisites: [
+          "Python with anthropic and pydantic v2 installed",
+          "Basic Pydantic knowledge (defining a BaseModel with typed fields)",
+          "Anthropic API key",
+          "A set of 20 unstructured text samples — job postings or invoices from any public dataset",
+        ],
+        steps: [
+          {
+            title: "Define your Pydantic model",
+            body: "Choose a domain (job postings work well). Define a model with 5-8 fields including required strings, optional fields, and at least one list field. Run model.model_json_schema() and inspect the output — this is what you will paste into your system prompt to tell Claude exactly what shape to produce.",
+          },
+          {
+            title: "Write the extraction system prompt",
+            body: "Instruct Claude to return only valid JSON matching the schema. Paste the json_schema() output directly into the prompt. Add one rule: if a field is not present in the text, return null for optional fields and never hallucinate values.",
+          },
+          {
+            title: "Extract from the first 5 samples",
+            body: "Call Claude for each sample, parse the response text as JSON, and pass it to model.model_validate(). Print each validated object. Expect at least one Pydantic validation error on your first pass — that is normal and the point of the exercise.",
+          },
+          {
+            title: "Build a retry loop",
+            body: "Wrap the call in a loop: try to validate; if ValidationError, append the error message to the conversation as a user turn and ask Claude to fix it. Cap retries at 3. Track how many inputs needed a retry and how many failed permanently.",
+          },
+          {
+            title: "Measure and tune",
+            body: "Run against all 20 samples. Record: success rate on first attempt, success rate after retry, permanent failures. If the failure rate exceeds 10%, read the failed samples — the issue is almost always ambiguity in the schema description or missing null handling in the prompt.",
+          },
+          {
+            title: "Add assistant prefill",
+            body: "Update the API call to prefill the assistant turn with { to force JSON output. Compare first-attempt success rate before and after. Prefill eliminates most cases where Claude adds a preamble before the JSON and breaks json.loads().",
+          },
+        ],
+        axiomPages: [
+          { title: "Anthropic API", href: "/apis/anthropic-api" },
+          { title: "Pydantic v2", href: "/python/pydantic-v2" },
+          { title: "Prompt engineering", href: "/prompting/prompt-engineering" },
+        ],
+        whatNext: [
+          { label: "Write an eval that scores extraction accuracy against a golden set", href: "/practice/ai-engineer/llm-judge-eval" },
+          { label: "Add structured output to your RAG pipeline", href: "/practice/ai-engineer/rag-pipeline" },
+          { label: "Learn how DSPy auto-optimises prompts like the one you just hand-wrote", href: "/prompting/dspy" },
+        ],
+      },
+      {
+        slug: "vision-pipeline",
+        title: "Build a document understanding pipeline with Claude vision",
+        difficulty: "Intermediate",
+        tagline: "Send PDF pages as images to Claude, extract structured data, and benchmark accuracy against ground truth.",
+        description: "Build a pipeline that converts a PDF document to page images, sends each page to Claude as a base64-encoded image, extracts structured information using a Pydantic schema, and evaluates extraction accuracy against a hand-labelled ground truth set of 5-10 pages.",
+        whyItMatters: "Claude vision is best-in-class for document understanding — it outperforms dedicated OCR tools on complex layouts, handwriting, and tables. The pattern (PDF to images, images to Claude, output to schema) is reused across invoice processing, medical record extraction, and any workflow where data lives in scanned documents rather than databases.",
+        prerequisites: [
+          "Python with anthropic, pydantic, and pdf2image or pymupdf installed",
+          "Anthropic API key",
+          "A PDF document with extractable information — invoices, receipts, or a simple form work well",
+          "A ground truth: manually label 5-10 pages with the expected extracted values",
+        ],
+        steps: [
+          {
+            title: "Convert PDF pages to images",
+            body: "Use pdf2image.convert_from_path or PyMuPDF to render each PDF page as a PNG at 150-200 DPI. Save to a temporary directory. Print the pixel dimensions — Claude works best when images are between 100px and 8000px on the long edge.",
+          },
+          {
+            title: "Encode images as base64",
+            body: "Read each PNG, base64-encode it, and construct the image content block: {type: image, source: {type: base64, media_type: image/png, data: <encoded>}}. This is the exact shape the API expects. Verify the structure matches the Anthropic docs before making any API calls.",
+          },
+          {
+            title: "Send a single page and verify",
+            body: "Build a message with the image block followed by a text block asking what is on the page. Print the response. Verify Claude can read the document correctly before adding the schema. If the description is wrong, check image resolution and contrast.",
+          },
+          {
+            title: "Add schema extraction",
+            body: "Define a Pydantic model for the document type (for a receipt: vendor, date, line_items as a list, total, currency). Update the prompt to return JSON matching the schema. Validate the response. Iterate on the prompt until the first page extracts cleanly.",
+          },
+          {
+            title: "Process all pages and aggregate",
+            body: "Loop over all pages, extract, and collect results. For multi-page documents, decide: does each page stand alone, or do you need to merge page results into a single document-level object? Implement the merge if needed.",
+          },
+          {
+            title: "Evaluate accuracy against ground truth",
+            body: "For each labelled field in your ground truth, compare the extracted value to the expected value. Report per-field accuracy. Identify which fields Claude gets wrong most often — these are usually amounts with ambiguous formatting or fields where the document layout varies between pages.",
+          },
+        ],
+        axiomPages: [
+          { title: "Vision models", href: "/multimodal/vision-models" },
+          { title: "Anthropic API", href: "/apis/anthropic-api" },
+          { title: "RAG pipeline overview", href: "/rag/pipeline" },
+        ],
+        whatNext: [
+          { label: "Add the extracted structured data to a Chroma vector store", href: "/practice/ai-engineer/rag-pipeline" },
+          { label: "Write an LLM-as-judge eval that scores extraction quality", href: "/practice/ai-engineer/llm-judge-eval" },
+          { label: "Fine-tune a small model for your specific document type", href: "/practice/ai-engineer/fine-tune-lora" },
+        ],
+      },
+      {
+        slug: "fine-tune-lora",
+        title: "Fine-tune a small model with QLoRA",
+        difficulty: "Advanced",
+        tagline: "Prepare a dataset, run a QLoRA fine-tune on a 7B model, and measure task performance before and after.",
+        description: "Fine-tune a 7B instruction-tuned model (Llama 3.1 8B or Mistral 7B) for a specific task using QLoRA. You will format a training dataset in chat template format, run supervised fine-tuning with TRL's SFTTrainer, push the LoRA adapter to HuggingFace Hub, and benchmark the fine-tuned model against the base model on a 20-question eval set.",
+        whyItMatters: "Fine-tuning is how you move from a model that can do anything to a model that is reliably excellent at one thing. QLoRA makes this trainable on a single consumer GPU by quantising the base model to 4-bit and training only small adapter matrices. The workflow — dataset format, training loop, eval before and after — is the same whether you are tuning for tone, domain knowledge, or a strict output format.",
+        prerequisites: [
+          "Python with transformers, peft, trl, bitsandbytes, and datasets installed",
+          "A GPU with at least 10GB VRAM (RTX 3080/4070 or better), or a Colab A100 instance",
+          "HuggingFace account with a write-access token",
+          "A narrow task in mind: classification, extraction, or following a specific output format all work well",
+        ],
+        steps: [
+          {
+            title: "Pick a task and prepare your dataset",
+            body: "Choose a task with clear right/wrong answers — sentiment classification or entity extraction works well for a first fine-tune. Collect or generate 200-500 examples. Format each as a chat turn: system message defining the task, user message with the input, assistant message with the correct output. Save as a Hugging Face Dataset.",
+          },
+          {
+            title: "Load the base model in 4-bit",
+            body: "Use BitsAndBytesConfig with load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16, and bnb_4bit_quant_type='nf4'. Load the model with from_pretrained and the quantization config. Print the memory footprint before and after — you should see roughly a 4x reduction.",
+          },
+          {
+            title: "Configure LoRA with PEFT",
+            body: "Create a LoraConfig with r=16, lora_alpha=32, target_modules pointing to the query and value projection layers (q_proj, v_proj for Llama), lora_dropout=0.05, task_type=CAUSAL_LM. Apply with get_peft_model. Print trainable parameters — they should be under 1% of total parameters.",
+          },
+          {
+            title: "Run the fine-tune",
+            body: "Configure SFTTrainer with your dataset, model, tokenizer, and training args: 3 epochs, per_device_train_batch_size=4, gradient_accumulation_steps=4, learning_rate=2e-4, bf16=True. Run trainer.train(). Monitor loss — it should decrease over the first epoch. A flat or increasing loss usually means the data format is wrong.",
+          },
+          {
+            title: "Evaluate before and after",
+            body: "Before training, run your 20-question eval against the base model and record scores. After training, load the merged model (base + LoRA adapter) and run the same eval. Calculate the delta. A 20-40% improvement on a narrow task is typical. Under 10% usually means your dataset is too small or too noisy.",
+          },
+          {
+            title: "Push and document",
+            body: "Push the LoRA adapter to HuggingFace Hub with model.push_to_hub. Write a model card noting: base model, task, dataset size, training config, and eval score. The card is what future-you needs when you come back to this adapter in 3 months and cannot remember what it does.",
+          },
+        ],
+        axiomPages: [
+          { title: "LoRA and QLoRA", href: "/fine-tuning/lora-qlora" },
+          { title: "Fine-tuning overview", href: "/llms/fine-tuning-overview" },
+          { title: "DPO and preference tuning", href: "/fine-tuning/dpo" },
+        ],
+        whatNext: [
+          { label: "Improve alignment with DPO using preference data", href: "/fine-tuning/dpo" },
+          { label: "Write an eval to benchmark the fine-tuned model systematically", href: "/practice/ai-engineer/llm-judge-eval" },
+          { label: "Use the fine-tuned model as the backbone for a RAG pipeline", href: "/practice/ai-engineer/rag-pipeline" },
+        ],
+      },
     ],
   },
   {
@@ -516,6 +716,152 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Apply query analysis to a real slow query log", href: "/cs-fundamentals/database-transactions" },
         ],
       },
+      {
+        slug: "async-python-patterns",
+        title: "Build a concurrent API client with asyncio and httpx",
+        difficulty: "Intermediate",
+        tagline: "Fetch 50 URLs concurrently, cap with a semaphore, and measure the speedup vs sequential.",
+        description: "Write an async Python script that fetches data from 50 endpoints concurrently using httpx and asyncio, applies a semaphore to cap concurrency at 10, handles retries with exponential backoff for 429 and 5xx responses, and measures total elapsed time against a sequential baseline.",
+        whyItMatters: "Most I/O-bound Python code in production either blocks the event loop accidentally or spawns too many concurrent requests and gets rate-limited. Understanding asyncio — coroutines, tasks, semaphores, and gather — is what separates Python engineers who can actually use the async ecosystem from those who copy-paste it and wonder why it is slow.",
+        prerequisites: [
+          "Python 3.10+ with httpx installed (pip install httpx)",
+          "Basic Python (functions, loops, exception handling)",
+          "No prior async experience required — you will build from first principles",
+        ],
+        steps: [
+          {
+            title: "Write a synchronous baseline",
+            body: "Use httpx.Client (the sync version) to fetch each URL in a for loop. Wrap in time.perf_counter() calls. Record total elapsed time for 10 URLs. This is your benchmark to beat.",
+          },
+          {
+            title: "Write the first async version",
+            body: "Replace with httpx.AsyncClient and async for. Wrap in asyncio.run(). Measure again. You will likely see similar performance — sequential async is not faster, it just does not block the thread. Understanding this distinction is the point.",
+          },
+          {
+            title: "Use asyncio.gather for true concurrency",
+            body: "Wrap each fetch in an async task, collect them in a list, and pass the list to asyncio.gather(). Measure again. You should see near-linear speedup up to the limit of your network. Print per-URL elapsed time to verify they overlap.",
+          },
+          {
+            title: "Add a semaphore to cap concurrency",
+            body: "Create asyncio.Semaphore(10). Wrap each fetch in async with sem:. Without a semaphore, 50 concurrent requests can trigger rate limits or overwhelm slow servers. Measure throughput at sem=5, 10, 20, 50 and find the sweet spot.",
+          },
+          {
+            title: "Add retry with exponential backoff",
+            body: "Wrap the fetch in a loop: catch httpx.HTTPStatusError for 429 and 5xx, await asyncio.sleep(2 ** attempt + random.random()), and retry up to 3 times. Verify the retry fires by temporarily pointing at a URL that returns 500.",
+          },
+          {
+            title: "Compare all three versions",
+            body: "Print a summary table: sequential, sequential async, concurrent with semaphore. For 50 requests hitting a remote API, the concurrent version is typically 5-20x faster. Identify the bottleneck — it is almost always the semaphore size or server-side rate limits, not Python overhead.",
+          },
+        ],
+        axiomPages: [
+          { title: "Async Python", href: "/python/async-python" },
+          { title: "FastAPI", href: "/web-frameworks/fastapi" },
+        ],
+        whatNext: [
+          { label: "Apply this pattern to a FastAPI endpoint that fans out to multiple APIs", href: "/web-frameworks/fastapi" },
+          { label: "Add a circuit breaker to stop cascading failures from slow upstreams", href: "/practice/software-engineer/circuit-breaker" },
+          { label: "Use the concurrency pattern to parallelise LLM API calls", href: "/practice/ai-engineer/llm-judge-eval" },
+        ],
+      },
+      {
+        slug: "redis-caching",
+        title: "Implement cache-aside with Redis",
+        difficulty: "Beginner",
+        tagline: "Add a Redis cache to a slow function, measure hit rate and latency, and handle cache invalidation.",
+        description: "Add a cache-aside layer to an existing Python function that calls a slow external API or database. You will implement get-on-hit, fetch-and-store-on-miss, TTL-based expiry, and explicit invalidation, then measure cache hit rate and latency across 100 calls with realistic key distribution.",
+        whyItMatters: "Caching is the most impactful single optimisation for read-heavy systems. Cache-aside gives you full control: your application reads from the cache, fetches on miss, and invalidates when data changes. Getting the TTL wrong in either direction (too short, too long) is the most common caching bug in production — and you will reproduce both failure modes in this exercise.",
+        prerequisites: [
+          "Python with redis-py installed (pip install redis)",
+          "Redis running locally (docker run -d -p 6379:6379 redis:alpine is the fastest way)",
+          "A slow function to cache — a time.sleep(0.1) stub works fine, or use a real database query",
+        ],
+        steps: [
+          {
+            title: "Set up the Redis connection",
+            body: "Create a redis.Redis client pointing at localhost:6379. Run client.ping() — it should return True. Write a helper that serialises Python objects to JSON for storage and deserialises on read.",
+          },
+          {
+            title: "Implement cache-aside read",
+            body: "Write a get_cached(key, fetch_fn, ttl=60) function: try client.get(key); if a hit, deserialise and return; if a miss, call fetch_fn(), store the result with client.setex(key, ttl, serialised), and return the result. This is the complete cache-aside pattern in under 10 lines.",
+          },
+          {
+            title: "Wrap a slow function",
+            body: "Apply get_cached to a function that simulates a 100ms call. Call it 10 times with the same key. Measure total elapsed time — the first call should be slow, calls 2-10 should be near-instant. Print hit/miss per call.",
+          },
+          {
+            title: "Test TTL expiry",
+            body: "Set TTL to 2 seconds. Call the function, wait 3 seconds, call again. The second call should be a miss even though you just fetched. This is the most common caching surprise: stale data after TTL expiry. Document the invariant for your team.",
+          },
+          {
+            title: "Implement explicit invalidation",
+            body: "Write an invalidate(key) function that runs client.delete(key). Call it after a simulated write operation. Verify the next read is a miss. The cache and the database are inconsistent between writes and the next TTL expiry unless you invalidate explicitly.",
+          },
+          {
+            title: "Measure cache hit rate",
+            body: "Run 100 calls with a Zipf key distribution: a few keys very frequently, many keys rarely. Print hit rate, average latency per hit, average latency per miss, and overall p95 latency. A well-tuned cache should hit 80%+ on typical read workloads.",
+          },
+        ],
+        axiomPages: [
+          { title: "Design patterns", href: "/cs-fundamentals/design-patterns" },
+          { title: "System design", href: "/cs-fundamentals/system-design" },
+        ],
+        whatNext: [
+          { label: "Add a circuit breaker to protect against Redis downtime", href: "/practice/software-engineer/circuit-breaker" },
+          { label: "Apply cache-aside to a RAG pipeline to avoid re-embedding identical queries", href: "/practice/ai-engineer/rag-pipeline" },
+          { label: "Extend to a write-through cache for a database-backed API", href: "/cs-fundamentals/system-design" },
+        ],
+      },
+      {
+        slug: "event-sourcing",
+        title: "Build an append-only event store with projection and replay",
+        difficulty: "Advanced",
+        tagline: "Implement event sourcing for a bank account domain, replay history from scratch, and query point-in-time state.",
+        description: "Implement a minimal event sourcing system for a bank account domain: define domain events (AccountOpened, MoneyDeposited, MoneyWithdrawn), build an append-only event store backed by a PostgreSQL table, write a projection that replays events to derive current account state, and verify that replaying the full history produces identical results to the current state.",
+        whyItMatters: "Event sourcing makes auditing, debugging, and temporal queries trivial — because you never mutate state, you can reconstruct what any entity looked like at any point in time. Building it from scratch forces you to confront the real constraints: event ordering, schema versioning, and the projection performance trade-off that frameworks hide from you.",
+        prerequisites: [
+          "Python with sqlalchemy 2.0 and psycopg2 installed",
+          "A running PostgreSQL instance (Docker works: docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=test postgres)",
+          "Comfort with Python dataclasses or Pydantic models",
+          "Basic SQL (CREATE TABLE, INSERT, SELECT ORDER BY)",
+        ],
+        steps: [
+          {
+            title: "Define your domain events",
+            body: "Create a Python dataclass or Pydantic model for each event: AccountOpened(account_id, owner_name, timestamp), MoneyDeposited(account_id, amount, timestamp), MoneyWithdrawn(account_id, amount, timestamp). Each event is immutable — no methods, no mutation, just data.",
+          },
+          {
+            title: "Create the event store table",
+            body: "Write CREATE TABLE with: id SERIAL PRIMARY KEY, aggregate_id UUID, event_type VARCHAR, payload JSONB, sequence_number BIGINT, occurred_at TIMESTAMPTZ. The sequence_number is per-aggregate — it is what you use to detect concurrency conflicts. Run the migration.",
+          },
+          {
+            title: "Implement append",
+            body: "Write an append(event) function that serialises the event to JSON, increments the sequence number for the aggregate, and INSERTs a row. Raise a concurrency error if the expected sequence number does not match. Test it: open an account, deposit, withdraw, and verify 3 rows appear.",
+          },
+          {
+            title: "Implement replay",
+            body: "Write a replay(aggregate_id) function that SELECTs all events ORDER BY sequence_number and applies each to an initial state dict using a match/case or dispatch table. The final state is the account balance. Verify it matches what you expect from the 3 events you stored.",
+          },
+          {
+            title: "Build a snapshot for performance",
+            body: "For accounts with 1000+ events, replay is slow. Add a snapshot table that stores the projected state at a given sequence number. Update replay to: load the latest snapshot, then apply only events after that sequence number. Measure replay time before and after for 10,000 events.",
+          },
+          {
+            title: "Test temporal queries",
+            body: "Query events for a specific account up to a given timestamp. Replay up to that point. Verify you can reconstruct the account state at any point in its history. This is the feature that makes event sourcing worth the complexity — in a CRUD system, this would require a full audit log redesign.",
+          },
+        ],
+        axiomPages: [
+          { title: "Design patterns", href: "/cs-fundamentals/design-patterns" },
+          { title: "System design", href: "/cs-fundamentals/system-design" },
+          { title: "Database design", href: "/cs-fundamentals/database-design" },
+        ],
+        whatNext: [
+          { label: "Design the multi-tenant schema that would store events per tenant", href: "/practice/software-engineer/multi-tenant-schema" },
+          { label: "Profile the event store queries with the N+1 exercise techniques", href: "/practice/software-engineer/fix-n-plus-one" },
+          { label: "Explore how dbt snapshots apply the same pattern to analytics data", href: "/practice/analytics-engineer/scd-type2" },
+        ],
+      },
     ],
   },
   {
@@ -751,6 +1097,153 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Add cluster autoscaling so nodes scale too, not just pods", href: "/cloud/aws-eks" },
           { label: "Add VPA (Vertical Pod Autoscaler) alongside HPA", href: "/cloud/aws-eks" },
           { label: "Run the same load test from the SDET path", href: "/practice/sdet/k6-load-test" },
+        ],
+      },
+      {
+        slug: "iam-least-privilege",
+        title: "Write and test least-privilege IAM policies",
+        difficulty: "Intermediate",
+        tagline: "Scope an IAM role to exactly the permissions a Lambda needs, then verify deny rules with the IAM simulator.",
+        description: "Design an IAM policy for a Lambda function that reads from S3 and writes to DynamoDB. You will start with broad permissions, enumerate the exact API calls the function makes via CloudTrail, write a least-privilege policy with explicit denies, and verify the deny rules hold using the AWS IAM Policy Simulator.",
+        whyItMatters: "Overly broad IAM policies are the most common cloud security vulnerability in real AWS accounts — and the hardest to notice because everything still works. Writing a least-privilege policy from scratch teaches you the IAM policy language, the difference between identity-based and resource-based policies, and how to use the simulator to verify your reasoning before an incident does it for you.",
+        prerequisites: [
+          "AWS account with IAM and Lambda access",
+          "AWS CLI configured with admin credentials for the setup steps",
+          "A simple Lambda function that reads one S3 bucket and writes to one DynamoDB table",
+          "Basic understanding of what IAM roles and policies are conceptually",
+        ],
+        steps: [
+          {
+            title: "Enumerate actual API calls via CloudTrail",
+            body: "Temporarily attach AdministratorAccess to your Lambda role. Enable CloudTrail in the same region. Invoke the Lambda 5-10 times. Query CloudTrail for the IAM calls made by your function's role ARN. This gives you the ground truth: the exact API calls your function actually makes.",
+          },
+          {
+            title: "Write the minimal policy",
+            body: "Based on the CloudTrail output, write an IAM policy with only the specific actions (e.g., s3:GetObject, dynamodb:PutItem) on the specific resource ARNs. Add explicit Deny statements for destructive actions like s3:DeleteObject and dynamodb:DeleteTable.",
+          },
+          {
+            title: "Attach and test with the CLI",
+            body: "Swap AdministratorAccess for your custom policy. Invoke the Lambda and verify it still works. Then use aws iam simulate-principal-policy to test each action: your allows should show Match and your explicit denies should show ExplicitDeny.",
+          },
+          {
+            title: "Add a resource condition",
+            body: "Update the S3 policy to only allow access when the object key starts with a specific prefix using the s3:prefix condition key. Test that a request to a key outside the prefix is denied. Conditions are where IAM gets powerful — they scope by time, IP, tag, and dozens of other attributes.",
+          },
+          {
+            title: "Block privilege escalation",
+            body: "Add an explicit Deny for iam:AttachRolePolicy and iam:CreateUser to prevent the Lambda role from granting itself more permissions. This is the self-escalation prevention pattern — a compromised Lambda should not be able to create new IAM credentials.",
+          },
+          {
+            title: "Document each statement",
+            body: "Write a short comment above each statement in the policy JSON explaining what it does and why. Good IAM policies are self-documenting because permissions that look unnecessary get removed by the next engineer unless there is a comment explaining why they exist.",
+          },
+        ],
+        axiomPages: [
+          { title: "AWS core concepts", href: "/cloud/aws-core" },
+          { title: "System design", href: "/cs-fundamentals/system-design" },
+        ],
+        whatNext: [
+          { label: "Apply least-privilege IAM to the ECS task role from the containerise exercise", href: "/practice/cloud-engineer/containerise-fastapi" },
+          { label: "Add a CloudWatch alarm to alert when the Lambda role is used unexpectedly", href: "/practice/cloud-engineer/cloudwatch-dashboard" },
+          { label: "Deploy the Lambda itself with Terraform and minimal permissions", href: "/practice/cloud-engineer/lambda-serverless" },
+        ],
+      },
+      {
+        slug: "lambda-serverless",
+        title: "Deploy a serverless API with Lambda and API Gateway",
+        difficulty: "Beginner",
+        tagline: "Write a Lambda handler, expose it via API Gateway HTTP API, and deploy the whole stack with Terraform.",
+        description: "Write a Python Lambda function that accepts a JSON POST body, validates it, performs a computation or external API call, and returns a structured response. Expose the function via API Gateway HTTP API, deploy the full stack with Terraform, and verify end-to-end with a curl request.",
+        whyItMatters: "Serverless is the default architecture for low-to-medium traffic APIs in AWS. Lambda removes the operational burden of servers, scales to zero when idle, and costs nothing when unused. The Terraform-managed approach you build here is how production serverless stacks are managed — nothing clicked in the console, everything reproducible from code.",
+        prerequisites: [
+          "AWS account with Lambda and API Gateway permissions",
+          "Terraform installed and AWS CLI configured",
+          "Python 3.12 (the current Lambda runtime)",
+          "Basic curl or Postman knowledge for testing",
+        ],
+        steps: [
+          {
+            title: "Write the Lambda handler",
+            body: "Create handler.py with a lambda_handler(event, context) function. Parse event['body'] as JSON, validate the required fields, perform the logic, and return {statusCode: 200, body: json.dumps(result)}. Test locally by calling lambda_handler({body: '{...}'}, None) — if it works locally, it will work in Lambda.",
+          },
+          {
+            title: "Package the deployment zip",
+            body: "Create a deployment package: zip handler.zip handler.py. If you have dependencies, pip install them into a local directory and include that directory in the zip. The zip structure matters — the handler file must be at the root, not in a subdirectory.",
+          },
+          {
+            title: "Write the Terraform",
+            body: "Define aws_iam_role for the Lambda execution role with AWSLambdaBasicExecutionRole. Define aws_lambda_function pointing at your zip. Define aws_apigatewayv2_api (HTTP API), aws_apigatewayv2_integration, and aws_apigatewayv2_route. Output the API endpoint URL.",
+          },
+          {
+            title: "Deploy and test",
+            body: "Run terraform apply. Copy the output URL. Run curl -X POST with your JSON body. If you get a 502, check the Lambda CloudWatch logs — the most common cause is a JSON serialisation error in the response body. The response body must be a string, not a dict.",
+          },
+          {
+            title: "Add environment variables",
+            body: "Update the Terraform to pass environment variables to the Lambda. Read them in the handler with os.environ. Verify they are present at runtime. Never hardcode secrets in the zip — use environment variables referencing AWS Secrets Manager or Parameter Store.",
+          },
+          {
+            title: "Measure cold start",
+            body: "Invoke the Lambda immediately after deployment (cold start), then again within 60 seconds (warm start). Measure the difference. For Python 3.12 with no dependencies, a cold start should be under 300ms. Over 1 second usually means too many imports at the top of the handler file.",
+          },
+        ],
+        axiomPages: [
+          { title: "AWS core concepts", href: "/cloud/aws-core" },
+          { title: "CI/CD pipelines", href: "/cs-fundamentals/cicd-pipelines" },
+        ],
+        whatNext: [
+          { label: "Add a CI/CD pipeline that packages and deploys the Lambda on every push", href: "/practice/cloud-engineer/github-actions-cicd" },
+          { label: "Apply least-privilege IAM to the Lambda execution role", href: "/practice/cloud-engineer/iam-least-privilege" },
+          { label: "Add CloudWatch monitoring to the Lambda you just deployed", href: "/practice/cloud-engineer/cloudwatch-dashboard" },
+        ],
+      },
+      {
+        slug: "cloudwatch-dashboard",
+        title: "Build a production CloudWatch dashboard for a running service",
+        difficulty: "Intermediate",
+        tagline: "Emit custom metrics, set alarms with anomaly detection, and build a Terraform-managed dashboard.",
+        description: "Instrument a running Lambda or ECS service with custom CloudWatch metrics, define alarms for error rate and p99 latency, add anomaly detection to catch gradual degradation, and build a CloudWatch dashboard that shows the full service picture in one view — all managed in Terraform.",
+        whyItMatters: "CloudWatch is the monitoring system you already have in every AWS account. Most engineers only use the basic metrics emitted automatically. Building a custom dashboard forces you to decide what failure looks like before it happens — which is the core discipline of SRE applied to a single service. An alarm without a dashboard is a page with no context.",
+        prerequisites: [
+          "A running AWS Lambda or ECS service (the Lambda from the previous exercise works perfectly)",
+          "Terraform for infrastructure management",
+          "AWS CLI for manual testing",
+          "Basic understanding of what p50/p95/p99 latency means",
+        ],
+        steps: [
+          {
+            title: "Emit custom metrics from your service",
+            body: "In the Lambda handler, use boto3 to call put_metric_data with a custom namespace (e.g., MyApp/Lambda). Emit: request_count (Count), error_count (Count), response_time_ms (Milliseconds). Invoke the function 20 times with varied inputs. Verify the metrics appear in CloudWatch Metrics within 2 minutes.",
+          },
+          {
+            title: "Create CloudWatch alarms in Terraform",
+            body: "Write aws_cloudwatch_metric_alarm resources for: error rate above 5% (use a math expression: error_count / request_count), and p99 latency above 500ms. Set alarm_actions to an SNS topic. Test by triggering the alarm manually with aws cloudwatch set-alarm-state.",
+          },
+          {
+            title: "Add anomaly detection",
+            body: "For the latency alarm, change the comparison to use ANOMALY_DETECTION_BAND. CloudWatch will model the normal latency pattern and alert when it deviates significantly. This catches gradual performance degradation that a static threshold misses. The band becomes accurate after 24 hours of data.",
+          },
+          {
+            title: "Build the dashboard in Terraform",
+            body: "Write an aws_cloudwatch_dashboard resource with a JSON dashboard body. Add widgets: a number widget for current error rate, a line graph for p99 latency over 1 hour, a log insights widget showing the last 10 error log lines. Use Terraform's jsonencode() to avoid manual JSON escaping.",
+          },
+          {
+            title: "Add a composite alarm",
+            body: "Create an aws_cloudwatch_composite_alarm that fires when both the error rate alarm AND the latency alarm are in ALARM state simultaneously. This reduces alert fatigue: a single noisy metric is informational, but two correlated bad metrics means something is genuinely wrong.",
+          },
+          {
+            title: "Test the full alert path",
+            body: "Deliberately break the function (raise an exception for all requests). Verify: metrics spike, alarms transition to ALARM, SNS sends a notification, composite alarm fires. Fix the function and verify alarms recover. The test is complete when you can describe the full path from bad request to recovery.",
+          },
+        ],
+        axiomPages: [
+          { title: "AWS core concepts", href: "/cloud/aws-core" },
+          { title: "FinOps and cost management", href: "/cloud/finops-cost-management" },
+        ],
+        whatNext: [
+          { label: "Add cost anomaly detection alongside the performance alerts", href: "/practice/cloud-engineer/billing-alerts" },
+          { label: "Verify the Kubernetes HPA responds to the latency signal", href: "/practice/cloud-engineer/kubernetes-autoscaling" },
+          { label: "Explore Langfuse for equivalent observability on LLM calls", href: "/observability/langfuse" },
         ],
       },
     ],
@@ -992,6 +1485,154 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Propose a test strategy for the whole feature", href: "/qa/test-strategy" },
         ],
       },
+      {
+        slug: "accessibility-testing",
+        title: "Audit a web page for accessibility issues",
+        difficulty: "Beginner",
+        tagline: "Run a WCAG 2.1 audit using axe, keyboard nav, and a screen reader — then write remediation notes.",
+        description: "Conduct a structured accessibility audit of a publicly available web application. Using a combination of automated scanning (axe DevTools browser extension), keyboard navigation testing, and screen reader spot-checking, identify and classify all accessibility issues against WCAG 2.1 AA criteria, then write prioritised remediation notes for the development team.",
+        whyItMatters: "Accessibility failures are both a legal risk and a quality failure — a page that cannot be navigated by keyboard is broken for power users and assistive technology users alike. A QA engineer who can audit for accessibility and write actionable remediation notes is rare and genuinely high-value, because most accessibility issues are introduced by developers who have never run a screen reader through their own UI.",
+        prerequisites: [
+          "Chrome or Firefox with the axe DevTools extension installed (free tier is sufficient)",
+          "NVDA (Windows, free) or VoiceOver (Mac, built-in) for screen reader testing",
+          "Access to a publicly available web application with interactive elements (forms, navigation, modals)",
+          "Basic knowledge of WCAG 2.1 — understand the four principles: Perceivable, Operable, Understandable, Robust",
+        ],
+        steps: [
+          {
+            title: "Run the automated axe scan",
+            body: "Navigate to the target page, open axe DevTools, and run a full page scan. Export the results. Note: automated tools catch roughly 30-40% of accessibility issues. Every issue axe finds is real; the absence of findings does not mean accessible.",
+          },
+          {
+            title: "Test keyboard navigation",
+            body: "Close your mouse and navigate the entire page using only Tab, Shift+Tab, Enter, Escape, and arrow keys. Check: can you reach every interactive element? Is the focus indicator always visible? Does focus order match visual reading order? Does every modal trap focus correctly? Record every failure.",
+          },
+          {
+            title: "Check colour contrast",
+            body: "Use the axe colour contrast checker or the WebAIM Contrast Checker on 5 text/background combinations. WCAG AA requires 4.5:1 for normal text and 3:1 for large text. Record any failures with the exact hex colours and measured ratio.",
+          },
+          {
+            title: "Test with a screen reader",
+            body: "Enable NVDA or VoiceOver and navigate to the page. Listen: are images announced with useful alt text? Are form fields announced with their labels? Are error messages announced when they appear? Do buttons announce their purpose? Record anything that sounds confusing or empty.",
+          },
+          {
+            title: "Classify all findings",
+            body: "Group every finding into three categories: Critical (blocks task completion for an assistive technology user), Serious (causes significant difficulty), and Moderate (causes minor confusion). Apply WCAG criteria codes (e.g., 1.4.3 Contrast Minimum) to each finding.",
+          },
+          {
+            title: "Write remediation notes",
+            body: "For each critical and serious finding, write a one-paragraph remediation note: what the issue is, the affected element (CSS selector or XPath), the WCAG criterion, the specific fix required, and the expected outcome after the fix. Good remediation notes turn an audit report into developer action.",
+          },
+        ],
+        axiomPages: [
+          { title: "Test case design", href: "/qa/test-case-design" },
+          { title: "Exploratory testing", href: "/qa/exploratory-testing" },
+        ],
+        whatNext: [
+          { label: "Automate the axe scan as a Playwright test and add it to CI", href: "/practice/sdet/accessibility-audit" },
+          { label: "Incorporate accessibility risk into your test risk matrix", href: "/practice/qa-engineer/risk-matrix" },
+          { label: "Run a focused exploratory session on keyboard navigation only", href: "/practice/qa-engineer/test-charters" },
+        ],
+      },
+      {
+        slug: "api-exploratory-testing",
+        title: "Exploratory test a REST API with boundary thinking",
+        difficulty: "Intermediate",
+        tagline: "Map an API surface, write a session charter, and find at least 3 bugs using structured exploration.",
+        description: "Run a structured exploratory testing session against a real REST API (JSONPlaceholder, Reqres, or the GitHub API). You will map the API surface, write a session charter, explore boundary conditions and error handling with Postman or curl, and file at least three bug reports or observations with exact reproduction steps.",
+        whyItMatters: "Most API bugs are not found by the developer's happy path test suite. They live at the boundaries: what happens when you send 10,000 characters in a name field? What happens when you send an integer where a string is expected? An exploratory tester who can think like an adversary and document findings rigorously adds more coverage than ten automated scripts for the happy path.",
+        prerequisites: [
+          "Postman (free) or curl installed",
+          "Access to a REST API with documentation — JSONPlaceholder, Reqres.in, or the GitHub API all work",
+          "Basic understanding of HTTP methods (GET, POST, PUT, DELETE) and status codes",
+          "Familiarity with JSON",
+        ],
+        steps: [
+          {
+            title: "Map the API surface",
+            body: "Read the API documentation and list every endpoint, HTTP method, path parameter, query parameter, and request body field. Note which fields are required vs optional, and their documented types and constraints. This map is your testing surface — every item on it is a test vector.",
+          },
+          {
+            title: "Write a session charter",
+            body: "Use the format: 'Explore [endpoint group] with [Postman] to discover [error handling and boundary behaviour].' Time-box to 45 minutes. Identify 3 specific questions you want to answer by the end of the session.",
+          },
+          {
+            title: "Test the happy path first",
+            body: "Send valid requests to each endpoint and verify responses match documentation. Confirm status codes, response body shape, and header values. Any happy path failure is a critical bug — document it before exploring further.",
+          },
+          {
+            title: "Probe boundaries and error handling",
+            body: "Systematically explore: empty strings for required fields, null values, negative numbers, very long strings (10,000 characters), unexpected types (send an array where a string is expected), special characters (SQL injection patterns, Unicode, emoji). Record every request and the exact response.",
+          },
+          {
+            title: "Check error response consistency",
+            body: "Find 5 different ways to trigger a 4xx error. Compare the error response bodies — are they in the same format? Do they include error codes and human-readable messages? Inconsistent error responses are a usability bug and an integration risk for API consumers.",
+          },
+          {
+            title: "File your findings",
+            body: "Write at least 3 bug reports or observations from the session. Each should include: the exact HTTP request (method, URL, headers, body), the actual response, what you expected, why the actual response is a problem, and a severity classification.",
+          },
+        ],
+        axiomPages: [
+          { title: "Exploratory testing", href: "/qa/exploratory-testing" },
+          { title: "Test documentation", href: "/qa/test-documentation" },
+          { title: "Risk-based testing", href: "/qa/risk-based-testing" },
+        ],
+        whatNext: [
+          { label: "Add contract testing to prevent the API regressions you found", href: "/practice/sdet/contract-testing" },
+          { label: "Build a risk matrix for the API surface you mapped", href: "/practice/qa-engineer/risk-matrix" },
+          { label: "Automate a regression test for the highest-severity bug you found", href: "/practice/sdet/streaming-endpoint-test" },
+        ],
+      },
+      {
+        slug: "regression-strategy",
+        title: "Design a regression testing strategy for a feature",
+        difficulty: "Intermediate",
+        tagline: "Map user flows, prioritise by risk, define automation boundaries, and estimate CI cost.",
+        description: "Choose any feature in an application you can access. Map all its user flows, classify each by business risk and change frequency, define which flows belong in smoke, full regression, and exploratory testing, and specify exactly which tests should be automated, which manual, and how each layer fits into the CI/CD pipeline.",
+        whyItMatters: "Regression testing without a strategy becomes an ever-growing suite that slows CI and still misses important bugs. A regression strategy is the quality contract between QA and the team — it defines what gets tested before every release, what gets spot-checked, and what is intentionally left to exploratory sessions. Building one forces you to confront the real trade-off between confidence and speed.",
+        prerequisites: [
+          "Access to an application you can explore (any web app works)",
+          "Familiarity with basic test types: smoke, regression, exploratory",
+          "No tooling required — this is a design exercise",
+        ],
+        steps: [
+          {
+            title: "List all user flows for the feature",
+            body: "Write out every end-to-end user flow. A flow starts at an entry point and ends at a measurable outcome (data saved, payment processed, notification sent). Aim for 10-20 flows — if you have fewer, you are missing edge cases.",
+          },
+          {
+            title: "Score each flow by risk",
+            body: "For each flow, score two dimensions: business impact if it breaks (1-5) and change frequency (how often this code area is touched, 1-5). Multiply them for a risk score. Sort descending. The top 20% are your regression must-haves.",
+          },
+          {
+            title: "Define your three test layers",
+            body: "Layer 1 — Smoke suite: the 5-10 flows that must work for the app to be usable. Run on every commit. Layer 2 — Full regression: all flows above your risk threshold. Run before every release. Layer 3 — Exploratory: low-risk flows and unusual combinations. Run quarterly or after large refactors.",
+          },
+          {
+            title: "Assign each flow to a test type",
+            body: "For each flow in Layers 1 and 2, decide: automated end-to-end (Playwright), automated API test, manual scripted, or exploratory. Automate flows that are stable, high-risk, and deterministic. Keep manual flows that require visual judgement or have rapidly changing UI.",
+          },
+          {
+            title: "Estimate the suite cost",
+            body: "For your Layer 1 and 2 automation, estimate: number of tests, average test duration, total CI time. If Layer 2 takes more than 15 minutes, it will be skipped. Adjust by parallelising, reducing scope, or moving borderline tests to Layer 3.",
+          },
+          {
+            title: "Write the strategy document",
+            body: "Produce a one-page document: feature scope, risk scoring rationale, three layers with test counts and run frequency, automation boundary decisions, and known gaps intentionally left in Layer 3. This document is what the team refers to when someone asks why a bug was not caught in regression.",
+          },
+        ],
+        axiomPages: [
+          { title: "Test automation strategy", href: "/qa/test-automation-strategy" },
+          { title: "Risk-based testing", href: "/qa/risk-based-testing" },
+          { title: "Test case design", href: "/qa/test-case-design" },
+        ],
+        whatNext: [
+          { label: "Apply this strategy to the coverage audit exercise", href: "/practice/qa-engineer/coverage-audit" },
+          { label: "Automate the smoke suite with Playwright", href: "/test-automation/playwright" },
+          { label: "Add risk scoring to your test charter process", href: "/practice/qa-engineer/test-charters" },
+        ],
+      },
     ],
   },
   {
@@ -1230,6 +1871,152 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Write a load test to check the endpoint under stress", href: "/practice/sdet/k6-load-test" },
         ],
       },
+      {
+        slug: "visual-regression",
+        title: "Set up visual regression testing with Playwright screenshots",
+        difficulty: "Intermediate",
+        tagline: "Capture baseline screenshots, detect pixel diffs on UI changes, and wire the suite into CI.",
+        description: "Build a visual regression test suite using Playwright's built-in screenshot comparison. Capture baseline screenshots for a web application's key views, introduce a deliberate visual change, verify the test detects it, and configure the suite to run in CI with a tolerance threshold and a diff image artifact on failure.",
+        whyItMatters: "Functional tests verify that a button works; visual regression tests verify that it still looks right. CSS changes, dependency upgrades, and font loading issues cause visual regressions that no functional test catches. A screenshot-based regression suite is the closest thing to automated visual QA — it does not replace human review, but it catches the regressions nobody would notice until a user complained.",
+        prerequisites: [
+          "Node.js with @playwright/test installed",
+          "A web application to test — any locally runnable app works",
+          "Git, for committing baseline screenshots",
+          "Basic Playwright test writing experience",
+        ],
+        steps: [
+          {
+            title: "Write the first screenshot test",
+            body: "Use toHaveScreenshot() in a Playwright test. Run it once — Playwright creates the baseline PNG in __screenshots__. Commit it to the repository. Run again — the test should pass. This is the full flow: generate baseline, commit, assert on subsequent runs.",
+          },
+          {
+            title: "Capture baselines for 5 key views",
+            body: "Write screenshot tests for: homepage, a listing page, a detail page, a form in empty state, and a form showing a validation error. Run all 5 once to generate baselines. Name them clearly — the file name is what you read in the CI failure log.",
+          },
+          {
+            title: "Set a pixel diff threshold",
+            body: "Add { maxDiffPixels: 100 } to toHaveScreenshot() for views with dynamic content (timestamps, animated elements). For static views, use maxDiffPixelRatio: 0 to catch any change. Tight thresholds generate false positives; loose thresholds miss real regressions — calibrate per view.",
+          },
+          {
+            title: "Introduce a deliberate regression",
+            body: "Change a CSS value (background colour, font size, spacing) in the app. Run the screenshot tests. At least one should fail with a diff image. Open the diff image — the changed pixels are highlighted in red. Verify you can see the change clearly. Revert and verify all tests pass again.",
+          },
+          {
+            title: "Handle dynamic content",
+            body: "Some views contain content that changes on every load (timestamps, random data). Use page.evaluate to freeze time before screenshotting, or mask the dynamic region with toHaveScreenshot({ mask: [page.locator('.timestamp')] }). Run the test 3 times and verify it is stable.",
+          },
+          {
+            title: "Add to CI",
+            body: "Configure the Playwright test to run in GitHub Actions. Store the baseline screenshots in the repository. On failure, use the actions/upload-artifact step to capture diff images as build artifacts. The workflow is: PR opens, CI runs, screenshot fails, diff image is attached, reviewer decides if the change is intentional.",
+          },
+        ],
+        axiomPages: [
+          { title: "Playwright and test automation", href: "/test-automation/playwright" },
+        ],
+        whatNext: [
+          { label: "Add accessibility scanning to the same test run", href: "/practice/sdet/accessibility-audit" },
+          { label: "Debug a screenshot test that is flaky due to animation timing", href: "/practice/sdet/debug-flaky-test" },
+          { label: "Wire the suite into a full CI/CD pipeline", href: "/practice/cloud-engineer/github-actions-cicd" },
+        ],
+      },
+      {
+        slug: "accessibility-audit",
+        title: "Automate accessibility audits with axe-core and Playwright",
+        difficulty: "Beginner",
+        tagline: "Inject axe into running pages, assert zero critical violations, and add the check to your test suite.",
+        description: "Write Playwright tests that inject axe-core into each page, run a full accessibility analysis, assert there are no critical or serious violations, and output a readable violation report on failure. Integrate the check as a first-class test alongside your existing functional tests.",
+        whyItMatters: "Manual accessibility audits are slow and inconsistent. axe-core running in Playwright catches 30-40% of WCAG issues automatically, runs in milliseconds, and produces machine-readable results that can block a PR. Adding accessibility checks to CI is the single highest-leverage accessibility practice a team can adopt — it prevents new violations from merging from the day it is set up.",
+        prerequisites: [
+          "Node.js with @playwright/test and @axe-core/playwright installed",
+          "A web application to test",
+          "Basic Playwright test writing experience",
+        ],
+        steps: [
+          {
+            title: "Install and run a basic analysis",
+            body: "Run npm install @axe-core/playwright. Import AxeBuilder from @axe-core/playwright in your test file. Run const results = await new AxeBuilder({ page }).analyze(). Print results.violations.length. On a typical production site, expect 5-20 violations.",
+          },
+          {
+            title: "Write the assertion",
+            body: "Add expect(results.violations).toHaveLength(0). Run the test. It will probably fail — that is expected. The goal is to understand what you are asserting before deciding how to handle existing violations.",
+          },
+          {
+            title: "Read the violation output",
+            body: "For each violation, axe reports: id (the rule), impact (critical/serious/moderate/minor), help (plain-English description), and nodes (the failing elements). Print the violations array as JSON and read the first 3 carefully. Map each to a WCAG criterion.",
+          },
+          {
+            title: "Scope the assertion to critical and serious",
+            body: "Update the assertion to filter: const critical = results.violations.filter(v => v.impact === 'critical' || v.impact === 'serious'). Assert that critical has length 0. This is the pragmatic starting point — fix blocking issues first, track moderate issues separately.",
+          },
+          {
+            title: "Add a custom reporter",
+            body: "On test failure, format violations as a readable table: violation id, impact, affected element count, help URL. Write it to a file and attach it as a Playwright test attachment with testInfo.attach(). The readable report is what the developer gets when CI fails — make it actionable.",
+          },
+          {
+            title: "Run across all pages",
+            body: "Add the axe check to the beforeEach of your existing test suite, or write a dedicated accessibility spec that visits all key pages. Track the violation count per page over time. The goal is not zero violations on day one — the goal is no new violations per PR.",
+          },
+        ],
+        axiomPages: [
+          { title: "Playwright and test automation", href: "/test-automation/playwright" },
+          { title: "Test case design", href: "/qa/test-case-design" },
+        ],
+        whatNext: [
+          { label: "Combine accessibility and visual regression in a pre-release check", href: "/practice/sdet/visual-regression" },
+          { label: "Run a manual accessibility audit to complement the automated scan", href: "/practice/qa-engineer/accessibility-testing" },
+          { label: "Add the axe check to the CI pipeline", href: "/practice/cloud-engineer/github-actions-cicd" },
+        ],
+      },
+      {
+        slug: "api-mocking",
+        title: "Mock external APIs in tests with respx and Playwright route()",
+        difficulty: "Intermediate",
+        tagline: "Isolate Python tests with respx and browser tests with page.route() — cover error and timeout cases.",
+        description: "Build a test suite for a service that calls two external APIs. Using respx (for Python/httpx tests) and Playwright's page.route() (for browser tests), mock both APIs so tests run without network access, cover error and timeout scenarios impossible to trigger against real APIs, and measure the speed improvement.",
+        whyItMatters: "Tests that call real external APIs are slow, flaky, and coupled to rate limits you do not control. Mocking at the HTTP boundary — not at the function boundary — gives you isolation without losing realism: your code actually makes the HTTP call, the mock just intercepts it. This distinction matters because most real integration bugs are in the request construction or response parsing, not the business logic.",
+        prerequisites: [
+          "Python with httpx and respx installed (pip install httpx respx pytest)",
+          "Node.js with @playwright/test for the browser tests",
+          "A Python service or script that makes HTTP calls with httpx",
+          "Basic pytest experience",
+        ],
+        steps: [
+          {
+            title: "Write a test that calls a real API and measure it",
+            body: "Write a pytest test that calls a real external API. Record the time taken. Run it 10 times and note the variance. This is your baseline: slow, variable, and broken when the API is down.",
+          },
+          {
+            title: "Mock with respx",
+            body: "Use the @respx.mock decorator (or respx.mock context manager). Define the mock route: respx.get('https://api.example.com/endpoint').mock(return_value=httpx.Response(200, json={...})). Run the test — it should pass without any network call and complete in under 10ms.",
+          },
+          {
+            title: "Test error scenarios",
+            body: "Define mocks that return 429 (rate limit), 500 (server error), and a network timeout (side_effect=httpx.ConnectTimeout). Write tests that verify your code handles each gracefully. These scenarios are impossible to trigger reliably against a real API.",
+          },
+          {
+            title: "Mock in Playwright with page.route()",
+            body: "In a Playwright test, use await page.route('**/api/external/**', route => route.fulfill({ status: 200, body: JSON.stringify({...}) })). Load the page and verify the UI renders correctly. Then mock a 500 and verify the error state renders correctly.",
+          },
+          {
+            title: "Test the timeout state in the browser",
+            body: "Use route => route.fulfill({ delay: 5000, status: 200 }) to simulate a slow API. Verify the UI shows a loading state and eventually a timeout error. This test is only possible with network interception — you cannot reliably slow down a real API.",
+          },
+          {
+            title: "Compare test execution time",
+            body: "Run your full suite with real network calls enabled. Then run with mocking. For a suite of 20 tests hitting 2 external APIs, the difference is typically 30-120 seconds vs under 5 seconds. That is the CI cost of untested external dependencies.",
+          },
+        ],
+        axiomPages: [
+          { title: "pytest patterns", href: "/python/pytest-patterns" },
+          { title: "pytest deep dive", href: "/test-automation/pytest-deep-dive" },
+          { title: "Playwright and test automation", href: "/test-automation/playwright" },
+        ],
+        whatNext: [
+          { label: "Add contract testing to verify your mocks stay in sync with the real API", href: "/practice/sdet/contract-testing" },
+          { label: "Use the same mocking pattern to test streaming LLM endpoints", href: "/practice/sdet/streaming-endpoint-test" },
+          { label: "Add the mocked suite to a CI pipeline", href: "/practice/cloud-engineer/github-actions-cicd" },
+        ],
+      },
     ],
   },
   {
@@ -1465,6 +2252,152 @@ export const ROLE_PATHS: RolePath[] = [
           { label: "Build the star schema that feeds this dbt model", href: "/practice/analytics-engineer/star-schema" },
           { label: "Add window function complexity to the model", href: "/practice/analytics-engineer/window-function-query" },
           { label: "Run this model in a CI/CD pipeline with dbt Cloud or GitHub Actions", href: "/practice/cloud-engineer/github-actions-cicd" },
+        ],
+      },
+      {
+        slug: "data-quality-profiling",
+        title: "Profile a dataset for quality issues with DuckDB",
+        difficulty: "Beginner",
+        tagline: "Measure nulls, duplicates, outliers, and cardinality across a 50k-row CSV in under 50 lines of SQL.",
+        description: "Take a raw CSV dataset (at least 50,000 rows) and produce a complete data quality profile: null rates per column, duplicate row counts, outlier detection using IQR for numeric columns, cardinality for categorical columns, and a summary report that flags any column needing remediation.",
+        whyItMatters: "Data quality problems are silent — a model trained on 20% null values in a key feature produces subtly wrong results that do not show up as errors. Profiling a dataset before using it is the data engineering equivalent of reading the code before running it. The output is also a prerequisite for any SLA-based data contract: you cannot promise data is complete if you have never measured it.",
+        prerequisites: [
+          "Python with duckdb installed (pip install duckdb)",
+          "A CSV dataset with at least 50,000 rows and a mix of numeric and categorical columns (Kaggle Titanic or NYC Taxi datasets work well)",
+          "Basic SQL knowledge",
+        ],
+        steps: [
+          {
+            title: "Load and inspect with DuckDB",
+            body: "Use duckdb.sql(\"SELECT * FROM read_csv_auto('data.csv') LIMIT 5\").df() to preview. Run SELECT COUNT(*) to verify row count. Run DESCRIBE on the table to see inferred column types. A numeric column inferred as VARCHAR is a common sign of data quality issues.",
+          },
+          {
+            title: "Measure null rates",
+            body: "Write a DuckDB query that computes (COUNT(*) - COUNT(col)) / COUNT(*) for every column. Sort descending. Any column above 5% null is flagged — either the data is genuinely missing or the ETL process has a gap.",
+          },
+          {
+            title: "Find duplicate rows",
+            body: "Run SELECT COUNT(*) FROM (SELECT DISTINCT * FROM data) and compare to the total. Then identify the natural key (e.g., user_id + timestamp) and check for duplicates on that subset. Duplicate rows in event data are usually a pipeline bug, not noise.",
+          },
+          {
+            title: "Detect numeric outliers",
+            body: "For each numeric column, compute Q1, Q3, and IQR using PERCENTILE_CONT. Flag rows where value < Q1 - 1.5*IQR or value > Q3 + 1.5*IQR. Print the outlier count and percentage per column. Decide: are these data errors (negative age) or genuine extreme values (very large purchase)?",
+          },
+          {
+            title: "Profile categorical cardinality",
+            body: "For each categorical column, compute COUNT(DISTINCT value) and the top 10 most frequent values with frequencies. Low-cardinality columns (under 20 unique values) are good candidates for enums. High-cardinality columns where 95% of values appear only once are a sign of free-text fields being misused as structured data.",
+          },
+          {
+            title: "Write the quality report",
+            body: "Produce a data quality report: a table with column, type, null_rate, duplicate_flag, outlier_count, cardinality, and a summary section with overall data quality score. Save as CSV or markdown — this is what you attach to a pull request when the data lands in the warehouse.",
+          },
+        ],
+        axiomPages: [
+          { title: "DuckDB and Polars", href: "/python/polars-duckdb" },
+          { title: "Database design", href: "/cs-fundamentals/database-design" },
+        ],
+        whatNext: [
+          { label: "Build a dbt model that codifies these quality rules as schema tests", href: "/practice/analytics-engineer/dbt-testing" },
+          { label: "Design a star schema that handles the nulls you found correctly", href: "/practice/analytics-engineer/star-schema" },
+          { label: "Analyse a large CSV dataset with more complex DuckDB queries", href: "/practice/analytics-engineer/duckdb-analysis" },
+        ],
+      },
+      {
+        slug: "scd-type2",
+        title: "Implement Type 2 slowly changing dimensions in SQL",
+        difficulty: "Intermediate",
+        tagline: "Track customer attribute history with effective dates, expire old rows, and query point-in-time state.",
+        description: "Implement a Type 2 SCD for a customer dimension where email address and subscription plan change over time. You will write the initial load, the incremental merge that expires changed rows and inserts new ones, and the point-in-time query that returns what a customer's record looked like on any given historical date.",
+        whyItMatters: "Every analytics system eventually needs to answer 'what did the customer's plan look like when they made this purchase?' If you built a simple dimension with current values, that question is unanswerable for historical data. SCD Type 2 preserves history by versioning rows with effective dates rather than overwriting — and understanding it is the difference between a data model that supports historical analysis and one that only works for reports about today.",
+        prerequisites: [
+          "PostgreSQL or DuckDB running locally",
+          "Basic SQL (INSERT, UPDATE, SELECT with JOINs)",
+          "Understanding of what a dimension table is from the star schema exercise",
+        ],
+        steps: [
+          {
+            title: "Create the dimension table",
+            body: "Write CREATE TABLE dim_customer with: surrogate_key SERIAL, customer_id INT (natural key), email VARCHAR, subscription_plan VARCHAR, effective_from DATE, effective_to DATE (NULL for the current row), is_current BOOLEAN. The surrogate key plus effective dates is the SCD Type 2 pattern.",
+          },
+          {
+            title: "Load the initial data",
+            body: "INSERT 10 customer rows with effective_from = today and effective_to = NULL, is_current = TRUE. Write a query that returns only current rows (WHERE is_current = TRUE) — this is the view most reports will use.",
+          },
+          {
+            title: "Write the incremental merge",
+            body: "Write the SQL that handles a changed row: UPDATE the existing row to set effective_to = today minus 1 day, is_current = FALSE, then INSERT a new row for the same customer_id with the new attributes and effective_from = today. Wrap both in a transaction. Verify 2 rows per changed customer.",
+          },
+          {
+            title: "Handle new and unchanged customers",
+            body: "Extend the merge: for new customer_ids, INSERT with is_current = TRUE; for changed customers, expire and insert; for unchanged customers, do nothing. Write a staging query that classifies each incoming row as new, changed, or unchanged using a LEFT JOIN.",
+          },
+          {
+            title: "Query point-in-time state",
+            body: "Write a query with a date parameter that returns the dimension as it existed on that date: WHERE effective_from <= target_date AND (effective_to IS NULL OR effective_to > target_date). Test with 3 historical dates and verify the correct row is returned for customers who changed during those periods.",
+          },
+          {
+            title: "Join the SCD dimension to fact data",
+            body: "Create a fact_orders table with customer_id, order_date, amount. Join to dim_customer using the point-in-time pattern: match on customer_id where order_date falls within the effective window. Verify an order placed before a plan change shows the old plan, not the current one.",
+          },
+        ],
+        axiomPages: [
+          { title: "Database design", href: "/cs-fundamentals/database-design" },
+          { title: "SQL fundamentals", href: "/cs-fundamentals/sql" },
+        ],
+        whatNext: [
+          { label: "Automate the SCD Type 2 merge logic with a dbt snapshot", href: "/practice/analytics-engineer/dbt-testing" },
+          { label: "Design the full star schema this dimension fits into", href: "/practice/analytics-engineer/star-schema" },
+          { label: "Profile the dimension for data quality before running history queries", href: "/practice/analytics-engineer/data-quality-profiling" },
+        ],
+      },
+      {
+        slug: "dbt-testing",
+        title: "Write comprehensive dbt tests including custom macros",
+        difficulty: "Advanced",
+        tagline: "Cover your dbt models with singular tests, a custom generic macro, source freshness, and CI.",
+        description: "Take an existing dbt project and build a testing layer that goes beyond not_null and unique. You will write singular tests for complex business rules, create a custom generic test as a Jinja macro, add source freshness checks, and run the full test suite in a CI workflow.",
+        whyItMatters: "Most dbt projects have schema.yml tests that check not_null and unique, and nothing else. Those tests catch structural problems; they do not catch business rule violations. A customer cannot have negative lifetime value. Orders cannot complete before they are created. Revenue cannot go backwards. These rules live in your head until you write dbt tests for them.",
+        prerequisites: [
+          "dbt Core installed with a DuckDB or PostgreSQL adapter (pip install dbt-core dbt-duckdb)",
+          "A dbt project with at least 2 models (the revenue model from the previous exercise is perfect)",
+          "Basic dbt knowledge: you can run dbt run and dbt test",
+          "Basic Jinja templating knowledge (learnable during the exercise)",
+        ],
+        steps: [
+          {
+            title: "Audit your current tests",
+            body: "Run dbt test and note what passes. Then read every model and list 3-5 business rules that are not tested: 'revenue cannot be negative', 'order_count cannot be zero if revenue is non-zero', 'date must be in the past'. These are your test targets.",
+          },
+          {
+            title: "Write singular tests",
+            body: "Create tests/assert_revenue_is_positive.sql. Write a SELECT that returns rows violating the rule: SELECT * FROM {{ ref('daily_revenue') }} WHERE revenue < 0. If any rows are returned, dbt treats it as a test failure. Run dbt test --select assert_revenue_is_positive. Then insert a bad row manually and verify the test catches it.",
+          },
+          {
+            title: "Write a custom generic test macro",
+            body: "Create macros/test_not_negative.sql. Use the dbt macro pattern: {% macro test_not_negative(model, column_name) %} SELECT * FROM {{ model }} WHERE {{ column_name }} < 0 {% endmacro %}. Add it to schema.yml as a column test: - not_negative. This macro is now reusable across every model.",
+          },
+          {
+            title: "Add referential integrity tests",
+            body: "Write a singular test that checks every customer_id in your fact table exists in your dimension table. Referential integrity failures are the most common data warehouse quality issue — they mean your joins silently drop rows without any error.",
+          },
+          {
+            title: "Configure source freshness",
+            body: "In sources.yml, add loaded_at_field and freshness thresholds for each source table. Run dbt source freshness. Set warn_after to 24 hours and error_after to 48 hours. Source freshness runs independently of dbt test and should be scheduled separately.",
+          },
+          {
+            title: "Run the full suite in CI",
+            body: "Configure a GitHub Actions workflow that runs dbt build --target ci: compile, run models against a test schema, run all tests, produce JUnit XML as an artifact. A suite that passes locally but fails in CI means the CI environment is wrong — fix the environment, not the tests.",
+          },
+        ],
+        axiomPages: [
+          { title: "Database design", href: "/cs-fundamentals/database-design" },
+          { title: "SQL fundamentals", href: "/cs-fundamentals/sql" },
+          { title: "DuckDB and Polars", href: "/python/polars-duckdb" },
+        ],
+        whatNext: [
+          { label: "Profile the source data that feeds your dbt models", href: "/practice/analytics-engineer/data-quality-profiling" },
+          { label: "Apply CI/CD discipline to dbt with GitHub Actions", href: "/practice/cloud-engineer/github-actions-cicd" },
+          { label: "Implement SCD Type 2 history in a dbt snapshot", href: "/practice/analytics-engineer/scd-type2" },
         ],
       },
     ],
