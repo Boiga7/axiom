@@ -5,7 +5,7 @@ para: resource
 tags: [structured-outputs, pydantic, instructor, llm-patterns]
 sources: []
 updated: 2026-05-01
-tldr: `instructor` wraps the Anthropic and OpenAI clients to enforce Pydantic schema validation on every LLM response, with automatic retry on validation failure.
+tldr: "instructor wraps the Anthropic and OpenAI clients to enforce Pydantic schema validation on every LLM response, with automatic retry on validation failure."
 ---
 
 # instructor — Structured LLM Outputs

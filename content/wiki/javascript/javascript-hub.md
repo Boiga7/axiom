@@ -5,7 +5,7 @@ para: resource
 tags: [javascript, typescript, nodejs, npm, pnpm, ai-sdk, hub]
 sources: []
 updated: 2026-05-02
-tldr: JavaScript/TypeScript Brain hub — covers the full JS/TS ecosystem for AI engineers: Node.js async model, TypeScript type system, pnpm package management, and production AI SDK patterns.
+tldr: "JavaScript/TypeScript Brain hub — covers the full JS/TS ecosystem for AI engineers: Node.js async model, TypeScript type system, pnpm package management, and production AI SDK patterns."
 ---
 
 # JavaScript/TypeScript Brain
