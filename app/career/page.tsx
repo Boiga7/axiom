@@ -7,6 +7,7 @@ import {
   REQUIREMENT_AREAS,
   PREREQUISITES,
   BOARD_CRITERIA,
+  CERTIFICATIONS,
   getCoverageLevel,
   getDaysUntilBoard,
 } from '@/lib/career-data'
@@ -142,14 +143,6 @@ export default function CareerPage() {
                     ))}
                   </div>
 
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <div
-                        key={n}
-                        className={`h-1 flex-1 rounded-full ${n <= area.pages.length ? styles.bar : 'bg-white/[0.06]'}`}
-                      />
-                    ))}
-                  </div>
                 </div>
               )
             })}
@@ -158,31 +151,33 @@ export default function CareerPage() {
 
         {/* Board Checklist */}
         <section className="mb-16">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-6">
             <div className="w-1.5 h-5 rounded-full bg-ae/60" />
             <h2 className="font-mono text-[11px] uppercase tracking-widest text-ae/80">
               Presentation Brief
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
+            <span className="font-mono text-[11px] text-muted">10–15 min · panel of 3</span>
           </div>
-          <p className="font-mono text-[11px] text-muted mb-8 ml-4">
-            10–15 min to a panel of up to 3. Cover each of these with specific evidence.
-          </p>
 
-          <div className="flex flex-col divide-y divide-white/[0.04]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {BOARD_CRITERIA.map((criterion, i) => (
-              <div key={criterion.id} className="flex gap-6 py-6 group">
-                <span className="font-display text-4xl font-semibold text-ae/[0.12] group-hover:text-ae/25 transition-colors shrink-0 w-10 text-right leading-none select-none">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div className="pt-0.5">
-                  <p className="font-display text-base font-semibold text-primary mb-1.5">
-                    {criterion.label}
-                  </p>
-                  <p className="font-mono text-[11px] text-muted leading-relaxed">
-                    {criterion.detail}
-                  </p>
+              <div
+                key={criterion.id}
+                className="rounded-lg border border-white/[0.06] bg-card p-5 group hover:border-ae/20 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Slide {i + 1}</span>
+                  <span className="font-display text-2xl font-semibold text-ae/20 group-hover:text-ae/40 transition-colors select-none">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                 </div>
+                <p className="font-display text-sm font-semibold text-primary mb-2 leading-snug">
+                  {criterion.label}
+                </p>
+                <p className="font-mono text-[11px] text-muted leading-relaxed">
+                  {criterion.detail}
+                </p>
               </div>
             ))}
           </div>
@@ -198,20 +193,62 @@ export default function CareerPage() {
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
 
-          <div className="flex flex-col gap-px">
-            {PREREQUISITES.map((prereq) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {PREREQUISITES.map((prereq, i) => (
               <div
                 key={prereq.id}
-                className="flex items-start gap-4 px-4 py-4 rounded-lg hover:bg-white/[0.02] transition-colors group"
+                className="rounded-lg border border-white/[0.06] bg-card p-5 group hover:border-white/[0.12] transition-colors"
               >
-                <span className="font-mono text-ae/40 text-xs shrink-0 mt-0.5 group-hover:text-ae/70 transition-colors">◆</span>
-                <div>
-                  <p className="font-mono text-xs font-semibold text-primary/80 mb-0.5">
-                    {prereq.label}
-                  </p>
-                  <p className="font-mono text-[11px] text-muted leading-relaxed">
-                    {prereq.detail}
-                  </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-5 h-5 rounded border border-white/[0.10] flex items-center justify-center shrink-0">
+                    <span className="font-mono text-[8px] text-muted">{i + 1}</span>
+                  </div>
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Required</span>
+                </div>
+                <p className="font-display text-sm font-semibold text-primary mb-1.5 leading-snug">
+                  {prereq.label}
+                </p>
+                <p className="font-mono text-[11px] text-muted leading-relaxed">
+                  {prereq.detail}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Certifications */}
+        <section className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1.5 h-5 rounded-full bg-amber-400/40" />
+            <h2 className="font-mono text-[11px] uppercase tracking-widest text-amber-400/70">
+              Target Certifications
+            </h2>
+            <div className="flex-1 h-px bg-white/[0.04]" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {CERTIFICATIONS.map((cert) => (
+              <div
+                key={cert.id}
+                className="rounded-lg border border-amber-400/20 bg-card p-5 group hover:border-amber-400/35 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-muted">
+                    AWS · {cert.level}
+                  </span>
+                  <span className="font-mono text-[9px] text-amber-400/60 uppercase tracking-widest">
+                    {cert.code}
+                  </span>
+                </div>
+                <p className="font-display text-sm font-semibold text-primary mb-2 leading-snug">
+                  {cert.label}
+                </p>
+                <p className="font-mono text-[11px] text-muted leading-relaxed mb-4">
+                  {cert.detail}
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="h-0.5 flex-1 rounded-full bg-white/[0.06]" />
+                  <span className="font-mono text-[9px] text-amber-400/50 uppercase tracking-widest">Pending</span>
                 </div>
               </div>
             ))}

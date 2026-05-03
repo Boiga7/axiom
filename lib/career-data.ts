@@ -207,6 +207,31 @@ export const BOARD_CRITERIA: BoardCriterion[] = [
   },
 ]
 
+export type Certification = {
+  id: string
+  label: string
+  code: string
+  level: string
+  detail: string
+}
+
+export const CERTIFICATIONS: Certification[] = [
+  {
+    id: 'aws-cloud-practitioner',
+    label: 'AWS Certified Cloud Practitioner',
+    code: 'CLF-C02',
+    level: 'Foundation',
+    detail: 'Cloud concepts, core AWS services, security, pricing and billing. Entry point for the AWS certification path.',
+  },
+  {
+    id: 'aws-ai-practitioner',
+    label: 'AWS Certified AI Practitioner',
+    code: 'AIF-C01',
+    level: 'Foundation',
+    detail: 'AI/ML and generative AI concepts, AWS AI services, and responsible AI practices.',
+  },
+]
+
 export function getCoverageLevel(pageCount: number): CoverageLevel {
   if (pageCount >= 4) return 'high'
   if (pageCount >= 2) return 'medium'
