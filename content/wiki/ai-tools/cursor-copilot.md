@@ -160,6 +160,7 @@ Fix: when working with rapidly evolving frameworks, use Cursor or Claude Code wi
 
 - [[ai-tools/claude-code]] — Claude Code comparison; higher autonomy, shell execution, MCP ecosystem
 - [[protocols/mcp]] — MCP servers available to Cursor, Copilot, and Claude Code alike
+- [[ai-tools/aider]] — open-source CLI alternative; architect mode, repo map; lower autonomy than Claude Code but model-agnostic
 
 ## Open Questions
 

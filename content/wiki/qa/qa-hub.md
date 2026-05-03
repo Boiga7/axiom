@@ -18,7 +18,7 @@ Central hub for all quality assurance knowledge. Every page in the QA brain conn
 [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/qa-metrics]] · [[qa/non-functional-testing]] · [[qa/test-planning]] · [[qa/shift-left-testing]] · [[qa/qa-leadership]]
 
 ## Test Design
-[[qa/test-case-design]] · [[qa/bdd-gherkin]] · [[qa/exploratory-testing]] · [[qa/test-case-design]] · [[qa/test-documentation]]
+[[qa/test-case-design]] · [[qa/bdd-gherkin]] · [[qa/exploratory-testing]] · [[qa/test-documentation]]
 
 ## Defect Management
 [[qa/bug-lifecycle]] · [[qa/root-cause-analysis]] · [[qa/negative-testing]]
@@ -44,5 +44,5 @@ Central hub for all quality assurance knowledge. Every page in the QA brain conn
 ## Production Quality
 [[qa/production-monitoring-qa]]
 
-## Specialist Testing
-[[qa/usability-testing]] · [[qa/performance-testing-qa]] · [[qa/exploratory-testing-advanced]]
+## Extended Testing
+[[qa/usability-testing]] · [[qa/performance-testing-qa]]

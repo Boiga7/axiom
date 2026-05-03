@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -238,4 +238,4 @@ Detect: more than one service listed in the connection string for the same datab
 Fix: give each service its own schema or database; share data via events or API calls, not direct table access.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/ddd-se]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/clean-code]]
+[[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/ddd-se]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/clean-code]]

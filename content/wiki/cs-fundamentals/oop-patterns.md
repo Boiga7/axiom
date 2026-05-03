@@ -389,6 +389,164 @@ The application code uses `EvalResultRepository`. It never knows whether it's ta
 
 ---
 
+### Builder
+
+Constructs complex objects step-by-step via a fluent interface. Each call returns `self` (or a new copy), making the construction readable.
+
+```python
+from dataclasses import dataclass, field, replace
+
+@dataclass
+class QueryBuilder:
+    _table: str = ""
+    _conditions: list[str] = field(default_factory=list)
+    _limit: int | None = None
+    _order_by: str | None = None
+
+    def from_table(self, table: str) -> "QueryBuilder":
+        return replace(self, _table=table)
+
+    def where(self, condition: str) -> "QueryBuilder":
+        return replace(self, _conditions=[*self._conditions, condition])
+
+    def limit(self, n: int) -> "QueryBuilder":
+        return replace(self, _limit=n)
+
+    def order_by(self, column: str) -> "QueryBuilder":
+        return replace(self, _order_by=column)
+
+    def build(self) -> str:
+        sql = f"SELECT * FROM {self._table}"
+        if self._conditions:
+            sql += " WHERE " + " AND ".join(self._conditions)
+        if self._order_by:
+            sql += f" ORDER BY {self._order_by}"
+        if self._limit:
+            sql += f" LIMIT {self._limit}"
+        return sql
+
+query = (
+    QueryBuilder()
+    .from_table("orders")
+    .where("status = 'pending'")
+    .where("user_id = 42")
+    .order_by("created_at DESC")
+    .limit(10)
+    .build()
+)
+```
+
+### Singleton
+
+One instance per process. In Python, the module-level instance pattern is the idiomatic approach.
+
+```python
+# settings.py
+class Settings:
+    def __init__(self):
+        self.db_url = os.environ["DATABASE_URL"]
+        self.debug = os.environ.get("DEBUG", "false") == "true"
+
+settings = Settings()  # module-level — import this, not the class
+```
+
+Use sparingly. Singletons make testing harder. Prefer dependency injection.
+
+### Adapter
+
+Wraps an incompatible interface so it matches the one callers expect.
+
+```python
+class LegacyPaymentGateway:
+    def make_payment(self, card_number: str, expiry: str, cents: int) -> bool: ...
+
+class PaymentProvider(ABC):
+    @abstractmethod
+    def charge(self, amount_pence: int, card: Card) -> ChargeResult: ...
+
+class LegacyGatewayAdapter(PaymentProvider):
+    def __init__(self, gateway: LegacyPaymentGateway) -> None:
+        self._gateway = gateway
+
+    def charge(self, amount_pence: int, card: Card) -> ChargeResult:
+        success = self._gateway.make_payment(card.number, card.expiry, amount_pence)
+        return ChargeResult(success=success)
+```
+
+### Decorator (structural)
+
+Adds behaviour to objects at runtime without subclassing.
+
+```python
+from functools import wraps
+
+def retry(max_attempts: int = 3, delay: float = 1.0):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except (ConnectionError, TimeoutError):
+                    if attempt == max_attempts - 1:
+                        raise
+                    time.sleep(delay * (2 ** attempt))
+        return wrapper
+    return decorator
+
+@retry(max_attempts=3, delay=0.5)
+def fetch_user(user_id: str) -> User:
+    return http_client.get(f"/users/{user_id}")
+```
+
+### Facade
+
+Simplifies a complex subsystem behind a single clean interface.
+
+```python
+class OrderFacade:
+    def __init__(self, inventory: InventoryService, payment: PaymentService,
+                 shipping: ShippingService, email: EmailService):
+        self._inventory = inventory
+        self._payment = payment
+        self._shipping = shipping
+        self._email = email
+
+    def place_order(self, cart: Cart, payment_method: PaymentMethod) -> Order:
+        self._inventory.reserve(cart.items)
+        charge = self._payment.charge(cart.total, payment_method)
+        order = Order.create(cart, charge)
+        label = self._shipping.create_label(order)
+        self._email.send_confirmation(order, label)
+        return order
+```
+
+### Command
+
+Encapsulates a request as an object. Enables undo, queuing, and logging.
+
+```python
+class Command(Protocol):
+    def execute(self) -> None: ...
+    def undo(self) -> None: ...
+
+@dataclass
+class CreateProductCommand:
+    repo: ProductRepository
+    name: str
+    price: float
+    _created_id: str = field(default="", init=False)
+
+    def execute(self) -> None:
+        product = self.repo.create(name=self.name, price=self.price)
+        self._created_id = product.id
+
+    def undo(self) -> None:
+        self.repo.delete(self._created_id)
+```
+
+---
+
 ## Dataclasses and Pydantic (Modern Python)
 
 In Python, prefer `dataclasses` or `pydantic.BaseModel` over hand-rolled `__init__` for data-holding classes.

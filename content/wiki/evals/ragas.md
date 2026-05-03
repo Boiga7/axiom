@@ -1,6 +1,6 @@
 ---
 type: entity
-category: rag
+category: evals
 para: resource
 tags: [ragas, rag-evaluation, faithfulness, answer-relevancy, context-precision, evals]
 sources: []

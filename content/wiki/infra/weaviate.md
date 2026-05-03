@@ -1,4 +1,4 @@
----
+﻿---
 type: entity
 category: infra
 para: resource
@@ -236,4 +236,4 @@ Fix: expose both ports in docker-compose: `- "8080:8080"` and `- "50051:50051"`;
 
 ## Connections
 
-[[infra/vector-stores]] · [[rag/pipeline]] · [[rag/reranking]] · [[rag/ragas]] · [[observability/arize]]
+[[infra/vector-stores]] · [[rag/pipeline]] · [[rag/reranking]] · [[evals/ragas]] · [[observability/arize]]

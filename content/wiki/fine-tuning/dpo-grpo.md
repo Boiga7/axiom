@@ -14,6 +14,8 @@ tldr: DPO is now the standard preference optimisation method (no reward model ne
 
 The training objectives that align models to human preferences. RLHF (PPO) was the original; DPO is now the standard; GRPO (from DeepSeek) is the frontier method for reasoning.
 
+**Scope**: This page covers training objectives, TRL code patterns, and the decision framework for choosing between methods. For the conceptual RLHF pipeline, preference data generation, and PPO deep-dive, see [[fine-tuning/rlhf-dpo]].
+
 ---
 
 ## The Preference Learning Problem
@@ -202,6 +204,7 @@ Fix: always start ORPO from an SFT checkpoint (not a base model), even if the SF
 
 ## Connections
 
+- [[fine-tuning/rlhf-dpo]] — sibling page; full RLHF pipeline, PPO mechanics, preference data generation, and RLHF vs DPO comparison
 - [[fine-tuning/decision-framework]] — which objective to choose for a given alignment problem
 - [[fine-tuning/lora-qlora]] — how LoRA adapters are trained using DPO/GRPO objectives
 - [[fine-tuning/frameworks]] — TRL `DPOTrainer`, `GRPOTrainer`, `ORPOTrainer` implement all objectives

@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -18,7 +18,7 @@ Central hub for all software engineering knowledge. Every page in the SE brain c
 [[cs-fundamentals/python-basics]] · [[cs-fundamentals/data-structures]] · [[cs-fundamentals/algorithms]] · [[cs-fundamentals/system-design]] · [[cs-fundamentals/sql]] · [[cs-fundamentals/git]] · [[cs-fundamentals/networking]] · [[cs-fundamentals/oop-patterns]]
 
 ## Code Quality
-[[cs-fundamentals/clean-code]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/data-validation]] · [[cs-fundamentals/feature-flags]] · [[cs-fundamentals/dependency-injection]] · [[cs-fundamentals/error-handling-patterns]]
+[[cs-fundamentals/clean-code]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/data-validation]] · [[cs-fundamentals/feature-flags]] · [[cs-fundamentals/dependency-injection]] · [[cs-fundamentals/error-handling-patterns]]
 
 ## Architecture
 [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/ddd-se]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/cqrs-event-sourcing]]

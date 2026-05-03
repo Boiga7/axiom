@@ -1,4 +1,4 @@
----
+﻿---
 type: synthesis
 category: synthesis
 para: resource
@@ -52,7 +52,7 @@ tldr: Runbook for diagnosing agents that spin indefinitely, hit max iterations, 
 
 | Suspect | Go to |
 |---|---|
-| Tool returning unexpected results | [[agents/mcp-server-development]] |
+| Tool returning unexpected results | [[protocols/mcp-server-development]] |
 | Graph termination condition missing | [[agents/langgraph]] |
 | Multi-agent loop with no exit | [[agents/multi-agent-patterns]] |
 | Tracing agent steps | [[observability/tracing]] |
@@ -83,4 +83,4 @@ Pivot to [[agents/langgraph]] to add explicit state checkpoints that let the age
 
 ## Connections
 
-[[agents/langgraph]] · [[agents/mcp-server-development]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[security/owasp-llm-top10]]
+[[agents/langgraph]] · [[protocols/mcp-server-development]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[security/owasp-llm-top10]]

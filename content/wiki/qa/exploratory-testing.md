@@ -193,6 +193,73 @@ Exploratory testing is not a replacement for automated regression suites. It com
 
 ---
 
+## Cognitive Biases to Fight
+
+| Bias | Effect | Fix |
+|---|---|---|
+| Confirmation bias | You expect it to work so you don't look hard where it might not | Explicitly try to break it |
+| Availability bias | You test what's easy to test, not what's risky | Use a risk-based heuristic to pick areas |
+| Anchoring | You test the same path every session because that's how you started | Start sessions from a different entry point |
+| Tunnel vision | You chase one bug and forget surrounding areas | Time-box bug investigation to 10 min; log and move on |
+| Happy path bias | You follow the intended flow; real users do weird things | Explicitly plan "bad path" sessions |
+
+---
+
+## Pair Exploration
+
+Two explorers, one application — each brings a different perspective.
+
+**Driver/Navigator:** Driver controls the keyboard; navigator observes, asks questions, notices what driver misses. Swap every 20 minutes.
+
+**Adversarial pair:** Explorer A tests the feature; Explorer B reviews notes and actively challenges assumptions. Best for pre-release high-risk sessions.
+
+**Cross-functional pair:** Developer + QA. Developer knows the code paths; QA knows the heuristics. Developer can direct QA to risky implementation areas.
+
+---
+
+## Test Notes Template
+
+```markdown
+## Exploratory Testing Session
+
+**Charter:** Explore the password reset flow with focus on token expiry
+**Tester:** Lewis E.
+**Date:** 2026-05-01
+**Duration:** 60 minutes (9:00–10:00)
+
+### Test Notes (what I tried)
+- Clicked "Forgot password" → email in < 30s
+- Waited 65 minutes, tried link → error shown ✓
+- Tried same link twice → second attempt rejected ✓
+- Requested reset twice in 2 min — both links worked. Is first token invalidated? UNCLEAR.
+
+### Bugs Found
+**B001** [HIGH] Two reset tokens active simultaneously
+  Steps: Request reset → don't click → request again → both links work
+  Expected: first link invalidated on second request
+
+### Questions/Issues
+- Are reset tokens stored hashed or plaintext?
+
+### Coverage
+- Happy path: ✓  |  Expiry: ✓  |  Concurrent tokens: partial (bug found)
+```
+
+---
+
+## Attack Patterns (Where Bugs Hide)
+
+- **Long sequences** — do 50 operations in a row; state accumulates unexpectedly
+- **Interruptions** — click back mid-flow, lose connection mid-upload
+- **Permissions** — try as different roles; attempt privilege escalation
+- **Concurrency** — open in two tabs and submit simultaneously
+- **Boundaries** — first/last item, exactly at limit, just over limit
+- **Recovery** — force errors and see how the app recovers
+
+Use at least two attack patterns per session as a literal checklist alongside the charter.
+
+---
+
 ## Common Failure Cases
 
 **Exploring without a charter and calling it exploratory testing**

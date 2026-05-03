@@ -276,6 +276,46 @@ def emit_daily_costs() -> None:
 
 ---
 
+## S3 Cost Reduction
+
+```bash
+# Intelligent-Tiering: auto-moves objects based on access patterns
+aws s3api put-bucket-intelligent-tiering-configuration \
+  --bucket my-bucket --id AllObjects \
+  --intelligent-tiering-configuration '{
+    "Id": "AllObjects", "Status": "Enabled",
+    "Tierings": [
+      {"Days": 90, "AccessTier": "ARCHIVE_ACCESS"},
+      {"Days": 180, "AccessTier": "DEEP_ARCHIVE_ACCESS"}
+    ]
+  }'
+
+# Lifecycle rule — transition old objects to IA, expire old versions
+# lifecycle.json: {"Rules": [{"ID": "TransitionToIA", "Status": "Enabled",
+#   "Filter": {}, "Transitions": [{"Days": 30, "StorageClass": "STANDARD_IA"}],
+#   "NoncurrentVersionExpiration": {"NoncurrentDays": 30}}]}
+aws s3api put-bucket-lifecycle-configuration --bucket my-bucket \
+  --lifecycle-configuration file://lifecycle.json
+```
+
+---
+
+## Data Transfer Cost Reduction
+
+- **Egress to internet:** $0.09/GB — use CloudFront to cache and reduce origin calls
+- **Cross-AZ:** $0.01/GB each way — keep services in the same AZ where latency allows
+- **NAT Gateway:** $0.045/GB processed — route S3/DynamoDB through Gateway VPC Endpoints (free within VPC)
+
+```bash
+# Create S3 Gateway VPC endpoint (eliminates NAT Gateway charges for S3)
+aws ec2 create-vpc-endpoint \
+  --vpc-id vpc-xxxxxxxxx \
+  --service-name com.amazonaws.eu-west-1.s3 \
+  --route-table-ids rtb-xxxxxxxxx
+```
+
+---
+
 ## Common Failure Cases
 
 **Cost allocation broken because tagging SCP was added after resources were created**
@@ -300,4 +340,4 @@ Fix: Use CloudWatch `EstimatedCharges` metric (updated multiple times per day) f
 
 ## Connections
 
-[[cloud-hub]] · [[cloud/cost-optimisation-cloud]] · [[cloud/aws-core]] · [[cloud/infrastructure-monitoring]] · [[cloud/github-actions]]
+[[cloud-hub]] · [[cloud/aws-core]] · [[cloud/infrastructure-monitoring]] · [[cloud/github-actions]] · [[cloud/kubernetes]]

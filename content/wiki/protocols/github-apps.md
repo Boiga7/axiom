@@ -1,6 +1,6 @@
 ---
 type: concept
-category: infra
+category: protocols
 para: resource
 tags: [github, apps, webhooks, jwt, installation-tokens, oauth, ci-cd]
 tldr: GitHub Apps authenticate in two steps — JWT (10-min) to get an installation token (1-hour). Webhooks carry the installation ID. Apps are scoped to repositories; OAuth Apps are scoped to users. Prefer GitHub Apps for bots and automation.

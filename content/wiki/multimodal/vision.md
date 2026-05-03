@@ -8,7 +8,7 @@ para: resource
 tldr: VLM architecture (ViT encoder → projection → LLM), Claude's document-understanding strength, multimodal RAG with ColPali, and image generation model comparison.
 ---
 
-# Multimodal AI
+# Vision and Multimodal AI
 
 > **TL;DR** VLM architecture (ViT encoder → projection → LLM), Claude's document-understanding strength, multimodal RAG with ColPali, and image generation model comparison.
 

@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -339,5 +339,5 @@ Fix: always use `git add <specific-file>` or `git add -p`; maintain a comprehens
 
 - [[cs-fundamentals/networking]] — push/pull communicate over HTTPS or SSH
 - [[infra/deployment]] — GitHub Actions CI/CD is triggered by git events (push, PR)
-- [[infra/github-apps]] — GitHub Apps authenticate to the GitHub API to read/write git repositories
+- [[protocols/github-apps]] — GitHub Apps authenticate to the GitHub API to read/write git repositories
 - [[python/pypi-distribution]] — PyPI release workflow is triggered from git tags via GitHub Actions

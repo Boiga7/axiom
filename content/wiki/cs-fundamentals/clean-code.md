@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -205,4 +205,4 @@ Detect: a shared utility function with more than two boolean flags or mode param
 Fix: prefer duplication over the wrong abstraction; wait for three or more genuinely identical callsites before extracting, and only when the abstraction boundary is stable.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]
+[[se-hub]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]

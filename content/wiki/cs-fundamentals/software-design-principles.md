@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -214,4 +214,4 @@ class Barkable(Protocol):
 ---
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]
+[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]

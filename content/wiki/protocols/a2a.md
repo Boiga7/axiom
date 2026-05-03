@@ -152,6 +152,7 @@ Fix: handle all five task states in the calling agent's polling loop; implement 
 - [[protocols/mcp]] — tool connectivity (complementary to A2A)
 - [[agents/langgraph]] — multi-agent orchestration that can wrap A2A agents
 - [[agents/multi-agent-patterns]] — when and how to use agent-to-agent delegation
+- [[agents/google-adk]] — the reference Python SDK for building A2A-compatible agents
 
 ## Open Questions
 

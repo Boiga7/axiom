@@ -1,4 +1,4 @@
----
+﻿---
 type: synthesis
 category: synthesis
 para: resource
@@ -54,7 +54,7 @@ tldr: Runbook for diagnosing RAG accuracy drops caused by embedding model change
 |---|---|
 | Embedding model selection and versioning | [[rag/embeddings]] |
 | Index rebuild and chunking strategy | [[rag/chunking]] |
-| Evaluating retrieval quality | [[rag/ragas]] |
+| Evaluating retrieval quality | [[evals/ragas]] |
 | Reranking to recover precision | [[rag/pipeline]] |
 
 ---
@@ -82,4 +82,4 @@ Pivot to [[synthesis/debug-rag-wrong-context]] for a broader diagnostic of the f
 
 ## Connections
 
-[[rag/embeddings]] · [[rag/chunking]] · [[rag/pipeline]] · [[rag/ragas]] · [[synthesis/debug-rag-wrong-context]]
+[[rag/embeddings]] · [[rag/chunking]] · [[rag/pipeline]] · [[evals/ragas]] · [[synthesis/debug-rag-wrong-context]]

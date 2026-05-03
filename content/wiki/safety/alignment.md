@@ -132,6 +132,7 @@ The real tension is at the edge cases: requests with both legitimate and illegit
 - [[llms/claude]] — RSP levels for Claude models
 - [[security/owasp-llm-top10]] — external attack threat model (distinct from safety)
 - [[security/red-teaming]] — red-teaming methodology
+- [[safety/scalable-oversight]] — designing oversight that works even when AI exceeds human capability
 
 ## Open Questions
 

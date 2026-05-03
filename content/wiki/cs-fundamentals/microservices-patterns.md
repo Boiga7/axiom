@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -227,4 +227,4 @@ Detect: all services return 502/503 simultaneously; gateway instance health chec
 Fix: deploy the gateway in an HA configuration (2+ instances behind a load balancer); implement circuit breakers on the gateway for individual backend services.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/design-patterns]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]]
+[[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/oop-patterns]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]]

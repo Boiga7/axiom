@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cloud
 para: resource
@@ -27,7 +27,7 @@ Central hub for all cloud and platform engineering knowledge. Every page in the 
 [[cloud/docker]] · [[cloud/kubernetes]] · [[cloud/kubernetes-operators]] · [[cloud/helm-advanced]]
 
 ## CI/CD and GitOps
-[[cloud/github-actions]] · [[cloud/argocd]] · [[cloud/argo-rollouts]] · [[infra/deployment]] · [[infra/github-apps]] · [[infra/github-marketplace]]
+[[cloud/github-actions]] · [[cloud/argocd]] · [[cloud/argo-rollouts]] · [[infra/deployment]] · [[protocols/github-apps]] · [[infra/github-marketplace]]
 
 ## Networking and Security
 [[cloud/cloud-networking]] · [[cloud/secrets-management]] · [[cloud/cloud-security]] · [[cloud/service-mesh]] · [[cloud/security-compliance]] · [[cloud/load-balancing-advanced]] · [[cloud/vpc-design-patterns]]

@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -262,4 +262,4 @@ Detect: a unit test modifies an attribute on a value object and checks whether a
 Fix: declare all value objects with `@dataclass(frozen=True)`; any "mutation" must produce a new instance via methods like `.add()` or `.multiply()`.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/design-patterns]] · [[cs-fundamentals/database-design]]
+[[se-hub]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/database-design]]

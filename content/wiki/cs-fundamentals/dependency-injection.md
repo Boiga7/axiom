@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -265,4 +265,4 @@ Fix: split the class along responsibility boundaries so each resulting class nee
 
 ## Connections
 
-[[cs-fundamentals/se-hub]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/clean-code]] · [[web-frameworks/fastapi]] · [[cs-fundamentals/design-patterns]]
+[[cs-fundamentals/se-hub]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/clean-code]] · [[web-frameworks/fastapi]] · [[cs-fundamentals/oop-patterns]]

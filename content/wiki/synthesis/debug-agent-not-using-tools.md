@@ -1,4 +1,4 @@
----
+﻿---
 type: synthesis
 category: synthesis
 para: resource
@@ -53,7 +53,7 @@ tldr: Runbook for diagnosing LLM agents that ignore available tools and answer f
 | Suspect | Go to |
 |---|---|
 | Tool schema design and required fields | [[protocols/mcp]] |
-| Tool description best practices | [[agents/mcp-server-development]] |
+| Tool description best practices | [[protocols/mcp-server-development]] |
 | Tracing tool calls in production | [[observability/tracing]] |
 | Agent loop not acting on tool output | [[agents/langgraph]] |
 | Reducing tool count with routing | [[agents/multi-agent-patterns]] |
@@ -84,4 +84,4 @@ Pivot to [[llms/hallucination]] to diagnose whether the model is ignoring tool o
 
 ## Connections
 
-[[agents/langgraph]] · [[agents/mcp-server-development]] · [[protocols/mcp]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[llms/hallucination]]
+[[agents/langgraph]] · [[protocols/mcp-server-development]] · [[protocols/mcp]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[llms/hallucination]]

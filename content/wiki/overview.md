@@ -14,9 +14,9 @@ updated: 2026-05-02
 
 ## State of the Wiki
 
-**Pages:** 302
+**Pages:** 317
 **Categories:** 27 across 5 layers (added CS Fundamentals, Cloud Brain, QA Brain, Technical QA Brain)
-**Last ingest:** Sprint 2026-05-02 — added aws-bedrock (Converse API/Knowledge Bases/Guardrails), mcp-server-development (FastMCP/transports/security), nosql-databases, cicd-pipelines, annotation-tooling; indexed 5 previously unindexed pages (multimodal/document-processing, image-generation, video; safety/red-teaming-methodology; data/datasets)
+**Last ingest:** Sprint 2026-05-03 — added google-adk (Google's Python agent SDK, A2A-native), aider (CLI coding assistant with architect/editor mode), scalable-oversight (debate, amplification, recursive reward modeling), bedrock-agentcore (AWS serverless agent runtime, microVM isolation), django-drf (REST Framework patterns + AI endpoints); Axiom home page widened from max-w-5xl to max-w-7xl
 
 ---
 

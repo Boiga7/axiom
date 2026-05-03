@@ -1,11 +1,11 @@
----
+﻿---
 type: index
-updated: 2026-05-01
+updated: 2026-05-03
 ---
 
 # Nexus — Content Index
 
-312 pages across 27 categories. Updated 2026-05-02.
+318 pages across 27 categories. Updated 2026-05-03.
 
 ---
 
@@ -22,10 +22,9 @@ updated: 2026-05-01
 - [[cs-fundamentals/cicd-pipelines]] — Stage ordering (lint→build→test→scan→staging→prod), Jenkins Declarative Pipeline, Azure DevOps YAML, DORA metrics, trunk-based development
 - [[cs-fundamentals/git]] — Staging, committing, branching, merge vs rebase, interactive rebase, PR workflow, conventional commits, .gitignore
 - [[cs-fundamentals/networking]] — HTTP/HTTPS/TLS, DNS, TCP vs UDP, status codes, headers, REST, WebSockets, SSE (LLM streaming), CORS
-- [[cs-fundamentals/oop-patterns]] — Classes, inheritance, composition, SOLID, Factory/Observer/Strategy/Repository patterns
+- [[cs-fundamentals/oop-patterns]] — OOP fundamentals, SOLID, and GoF patterns: Factory/Builder/Singleton/Adapter/Decorator/Facade/Observer/Strategy/Command/Repository
 - [[cs-fundamentals/api-design]] — REST principles, URL design, HTTP methods, status codes, response format, versioning, OpenAPI 3.1
 - [[cs-fundamentals/clean-code]] — Naming, function design, SOLID principles, code smells, comments — writing code for the next engineer
-- [[cs-fundamentals/design-patterns]] — GoF patterns: Factory Method, Builder, Adapter, Decorator, Facade, Strategy, Observer, Command
 - [[cs-fundamentals/microservices-patterns]] — Saga, CQRS, Outbox, Anti-Corruption Layer, API Gateway, Sidecar — distributed service design
 - [[cs-fundamentals/distributed-systems]] — CAP theorem, consistency models, consensus (Raft), failure modes, idempotency, distributed tracing
 - [[cs-fundamentals/debugging-systems]] — Debugging as a first-class skill: correlation IDs, log reading, distributed tracing, reproducing production failures, incident workflow
@@ -89,6 +88,7 @@ updated: 2026-05-01
 - [[safety/constitutional-ai]] — CAI two-phase training (SL-CAF + RLAIF), constitution as principles, vs RLHF
 - [[safety/mechanistic-interpretability]] — Superposition, SAEs, circuits, Anthropic's Golden Gate Claude demo
 - [[safety/red-teaming-methodology]] — structured adversarial testing, failure mode discovery, automated red teaming in CI
+- [[safety/scalable-oversight]] — debate, amplification, recursive reward modeling, prover-verifier games; Anthropic's #2 research priority (2025)
 
 ### `agents/` — Agentic Systems
 - [[agents/langchain]] — LCEL pipe operator, document loaders, text splitters, prompt templates, RAG chains, conversation memory; relationship to LangGraph
@@ -102,8 +102,8 @@ updated: 2026-05-01
 - [[agents/multi-agent-patterns]] — Supervisor, Swarm/handoff, Parallel fan-out; context management, trust, debugging
 - [[agents/memory]] — In-context, episodic, semantic, procedural memory; LangGraph checkpointing; multi-tenant isolation
 - [[agents/openai-agents-sdk]] — OpenAI Agents SDK (March 2025): handoffs, guardrails, structured output, streaming; vs LangGraph
-- [[agents/mcp-server-development]] — FastMCP decorator API, tool/resource/prompt definitions, stdio vs streamable-HTTP transports, Claude Desktop/Code integration, tool poisoning defence
 - [[agents/strands-agents-sdk]] — AWS open-source Python SDK; @tool decorator, Bedrock Converse API, MCP-native, used by Amazon Q Developer; vs LangGraph
+- [[agents/google-adk]] — Google's open-source Python SDK; A2A-native, Vertex AI Agent Engine deployment, async interfaces; v1.18.0 (November 2025)
 
 ### `rag/` — Retrieval-Augmented Generation
 - [[rag/pipeline]] — Full RAG pipeline: chunking → embed → retrieve → rerank → generate; GraphRAG; RAGAS
@@ -113,7 +113,6 @@ updated: 2026-05-01
 - [[rag/hybrid-retrieval]] — BM25 + dense + RRF; Elasticsearch/Qdrant/pgvector implementations; SPLADE
 - [[rag/query-expansion]] — HyDE (hypothetical answer embedding); multi-query with RRF; step-back prompting; hybrid policy
 - [[rag/reranking]] — Cohere Rerank v3.5, Jina, BGE reranker; 10-25% NDCG gain; LangChain/LlamaIndex integration
-- [[rag/ragas]] — Reference-free RAG evaluation: Faithfulness, Answer Relevancy, Context Precision, Context Recall; LLM-as-judge; CI regression testing
 
 ### `prompting/` — Prompt Engineering
 - [[prompting/techniques]] — XML structuring for Claude, CoT, few-shot, zero-shot vs fine-tuning, context compression
@@ -122,6 +121,7 @@ updated: 2026-05-01
 
 ### `evals/` — Evaluation Methodology
 - [[evals/methodology]] — Eval types, LLM-as-judge, frameworks (inspect-ai/Braintrust/promptfoo), golden sets, eval in CI
+- [[evals/ragas]] — Reference-free RAG evaluation: Faithfulness, Answer Relevancy, Context Precision, Context Recall; LLM-as-judge; CI regression testing
 - [[evals/openai-evals]] — OpenAI's open-source eval framework + benchmark registry; works with any Chat Completions endpoint; Dashboard UI for hosted runs
 - [[evals/llm-as-judge]] — Rubric design, calibration, bias types, pairwise vs absolute, judge system prompt design
 - [[evals/benchmarks]] — SWE-bench Verified (Opus 4.6 80.8%), GPQA (91.3%), MMLU, Chatbot Arena, custom benchmarks
@@ -171,8 +171,10 @@ updated: 2026-05-01
 ### `protocols/` — Agent Communication
 - [[protocols/mcp]] — MCP spec, transports, tool schema, OAuth 2.0 auth, security surface, ecosystem
 - [[protocols/mcp-http-transport]] — Streamable HTTP deep dive; POST/GET/DELETE contract; SSE lifecycle; session management; multiplexing
+- [[protocols/mcp-server-development]] — FastMCP decorator API, tool/resource/prompt definitions, stdio vs streamable-HTTP transports, Claude Desktop/Code integration, tool poisoning defence
 - [[protocols/a2a]] — Agent Card manifest, Tasks state machine, Part types, A2A vs MCP, LangGraph adapter
 - [[protocols/tool-design]] — Tool naming, description writing, parameter design, return value design, testing schemas
+- [[protocols/github-apps]] — JWT + installation token auth flow; webhook processing; App vs OAuth App; permissions; secrets management
 
 ---
 
@@ -190,14 +192,14 @@ updated: 2026-05-01
 - [[infra/experiment-tracking]] — Weights & Biases and MLflow for logging training runs, comparing hyperparameter experiments, and tracking checkpoints during fine-tuning
 - [[infra/flash-attention]] — IO-aware exact attention; O(N) memory vs O(N²); 3-10× faster than standard attention; standard in all modern training stacks
 - [[infra/deepspeed-zero]] — Zero Redundancy Optimizer; 3 partitioning stages (optimizer states/gradients/params); enables 200B+ model training; vs PyTorch FSDP
-- [[infra/github-apps]] — JWT + installation token auth flow; webhook processing; App vs OAuth App; permissions; secrets management
-- [[infra/github-marketplace]] — Billing models (free/flat-rate/per-unit); purchase lifecycle webhooks; listing requirements; verified publisher
+- [[infra/github-marketplace]] — Billing models (free/flat-rate/per-unit); purchase lifecycle webhooks; listing requirements; verified publisher [archived — evalcheck project reference]
 - [[infra/litellm]] — OpenAI-compatible interface to 100+ LLM providers; router with retry/fallback/load balancing; self-hosted AI gateway proxy
 
 ### `apis/` — LLM APIs
 - [[apis/what-is-an-api]] — Contract for two pieces of software to communicate; structured request/response without knowing internals
 - [[apis/anthropic-api]] — Messages API, prompt caching (5-min/1-hour), Batch API, streaming, tool use, extended thinking
 - [[apis/openai-api]] — Chat completions, function calling, structured output, o1/o3 reasoning models, embeddings, Whisper
+- [[apis/openai-responses-api]] — Stateful successor to Chat Completions (March 2025); server-side state via previous_response_id; built-in web search/file search/code interpreter/MCP tools; Assistants API deprecated Aug 2025
 - [[apis/google-ai]] — Gemini 2.5 Pro/Flash, Google AI Studio vs Vertex AI, vision, function calling, thinking mode
 - [[apis/aws-bedrock]] — Converse API (model-agnostic boto3), Knowledge Bases (managed RAG), Guardrails (content safety), Bedrock Agents — AWS-native LLM platform
 
@@ -205,6 +207,8 @@ updated: 2026-05-01
 - [[ai-tools/claude-code]] — CLI capabilities, CLAUDE.md governance, hooks system, skills, settings.json, /ultrareview
 - [[ai-tools/cursor-copilot]] — Cursor Composer, .cursorrules, MCP; Copilot Chat/Edits; comparison matrix vs Claude Code/Aider
 - [[ai-tools/tavily]] — real-time web search API for LLM agents; Search/Extract/Map/Crawl APIs; LangChain/LangGraph native integration; acquired by Nebius 2026
+- [[ai-tools/aider]] — open-source CLI coding assistant; architect mode (2 models), repo map (tree-sitter), atomic commits; most comparable to Claude Code
+- [[ai-tools/continue]] — open-source VS Code/JetBrains extension; any model via config.json; context providers (@codebase, @docs, @diff, @web); tab autocomplete with dedicated small model
 
 ---
 
@@ -223,6 +227,7 @@ updated: 2026-05-01
 - [[web-frameworks/fastapi]] — LLM API pattern, SSE streaming, dependency injection, BackgroundTasks for Langfuse logging
 - [[web-frameworks/nextjs]] — App Router, Server Components, Vercel AI SDK useChat, streaming route handler, Server Actions
 - [[web-frameworks/django]] — ORM patterns, pgvector VectorField, DRF, Channels WebSocket streaming, management commands
+- [[web-frameworks/django-drf]] — DRF serialisers, ModelViewSet, DefaultRouter, permissions, JWT auth; custom @action for AI endpoints
 - [[web-frameworks/vercel-ai-sdk]] — streamText, generateObject, useChat, useCompletion, tool calling, multi-provider, middleware
 
 ### `test-automation/` — Testing
@@ -277,7 +282,6 @@ updated: 2026-05-01
 - [[cloud/secrets-management]] — AWS Secrets Manager (auto-rotation), HashiCorp Vault (KV v2, dynamic secrets, Vault Agent), GCP/Azure equivalents, External Secrets Operator
 - [[cloud/pulumi]] — Python/TypeScript stacks, pulumi stack commands, unit testing with Mocks, Pulumi vs Terraform
 - [[cloud/ansible]] — Playbooks, Jinja2 templates, inventory, roles, Ansible Vault, ad-hoc commands, CI integration
-- [[cloud/cost-optimisation-cloud]] — Rightsizing (Compute Optimizer), Spot instances, Savings Plans, S3 lifecycle, NAT Gateway alternatives, cost tagging
 - [[cloud/cloud-security]] — IAM least privilege, SCPs, GuardDuty, WAF, Security Hub, CloudTrail, secrets management, Falco
 - [[cloud/keda]] — Kubernetes Event-Driven Autoscaling: Kafka/SQS/Prometheus scalers, TriggerAuthentication (IRSA), ScaledJob for batch, scale-to-zero
 - [[cloud/disaster-recovery]] — RTO/RPO definitions, 4 DR strategies, Aurora Global failover, S3 cross-region replication, Velero, DR runbook
@@ -303,6 +307,7 @@ updated: 2026-05-01
 - [[cloud/cloud-migration]] — The 6 Rs (Retire/Retain/Rehost/Replatform/Repurchase/Re-architect), migration decision matrix, wave planning (Wave 0 foundation → Wave 3 revenue-critical), AWS Migration Hub CLI, DMS database migration (full-load + CDC + cutover), migration runbook template with rollback procedure
 - [[cloud/aws-sagemaker]] — SageMaker vs vLLM decision guide, HuggingFace model deploy to real-time endpoint, target tracking autoscaling (invocations/instance), batch transform (multi-record, async polling), model registry + A/B testing (weighted traffic split), when to use ECS/vLLM instead
 - [[cloud/vpc-design-patterns]] — 3-tier VPC CIDR allocation, CDK ProductionVPC (NAT per AZ, flow logs, isolated data subnets), security groups vs NACLs (stateful vs stateless), CDK ALB/app/RDS security group chain, VPC endpoints (S3 gateway free, Secrets Manager interface), Fargate private subnet endpoints, multi-account Transit Gateway routing table isolation, NAT Gateway cost optimisation
+- [[cloud/bedrock-agentcore]] — AWS serverless agent hosting; microVM session isolation; $0.0895/vCPU-hr; LangGraph/Strands/CrewAI support; GA October 2025
 
 ---
 
@@ -343,7 +348,6 @@ updated: 2026-05-01
 - [[qa/international-testing]] — i18n vs l10n, pseudo-localisation (char substitution + bracket wrapping), locale parametrize (en-GB/de-DE/ar-SA/ja-JP), RTL layout Playwright assertions, Unicode round-trip tests, locale test checklist
 - [[qa/usability-testing]] — Nielsen's 10 heuristics, moderated session protocol, Maze API integration, SUS questionnaire + scoring, A/B testing with feature flags
 - [[qa/performance-testing-qa]] — NFR acceptance criteria (GIVEN/WHEN/THEN), baseline measurement script, regression threshold (20%), performance test sign-off table, Lighthouse CI budget
-- [[qa/exploratory-testing-advanced]] — HICCUPPS/FCC CUTS VIDS heuristics, attack patterns, SBTM session format, cognitive biases, pair exploration formats, session notes template
 - [[qa/root-cause-analysis]] — 5-whys example (expired API key → no monitoring), fishbone diagram (Technology/Process/People), full post-mortem template (timeline/impact/root-cause/contributing/lessons), DefectEscape dataclass + escape rate calculation, prevention loop per RCA type
 - [[qa/test-documentation]] — Documentation that earns its existence vs waste, test case template (preconditions/steps/expected/actual), when to write formal cases vs use charters, requirements traceability matrix, test summary report template (executive summary/defect table/coverage/risk), exploratory test charter format
 - [[qa/automation-debt]] — Debt signals table (slow CI/flaky/coupled tests), debt inventory scripts (magic string finder/duplicate selectors/no-assertion tests), debt quadrant (impact × effort), Page Object extraction pattern, quarantine with --run-flaky flag, automation debt roadmap markdown template
@@ -417,6 +421,8 @@ updated: 2026-05-01
 - [[papers/dpo]] — Rafailov 2023: eliminates reward model + PPO; direct loss on preference pairs; replaced RLHF for open-source fine-tuning
 - [[papers/swe-bench]] — Jimenez 2024: 2,294 real GitHub issues as benchmark; Claude 3.7 Sonnet 62% on Verified; gold standard for coding agents
 - [[papers/mechanistic-interpretability]] — Circuits (2020) → Superposition (2022) → Monosemanticity (2023) → Scaling Monosemanticity (2024); SAEs on Claude 3 Sonnet
+- [[papers/toolformer]] — Schick 2023 (Meta, NeurIPS): self-supervised API call learning via perplexity-reduction filtering; proves tool use is learnable not just promptable
+- [[papers/gpt-4-technical-report]] — OpenAI 2023: bar exam ~90th percentile, RLHF improves behaviour not capability, system card format, architecture opacity as competitive norm
 
 ### `landscape/` — Competitive Intelligence
 - [[landscape/ai-labs]] — Anthropic ($350B/Google $40B), OpenAI (revenue miss), Google DeepMind, Meta FAIR, Mistral
@@ -430,6 +436,8 @@ updated: 2026-05-01
 
 ## Synthesis
 
+- [[synthesis/audit-report]] — First full vault audit (2026-05-02): 134 broken links, 167 frontmatter gaps, 3 confirmed complementary duplicate pairs
+- [[synthesis/debugging-runbooks]] — Index of 32 production debugging runbooks by failure domain: AI/LLM, agents, database, infra, network, security, APIs, observability, CI/CD
 - [[synthesis/rag-vs-finetuning]] — Core distinction, when each wins, cost comparison, the 57% number
 - [[synthesis/llm-decision-guide]] — Which model/embedding/vector store/agent framework/infra for every major decision
 - [[synthesis/architecture-patterns]] — The 7 blueprints covering 90% of AI apps: RAG chatbot, document processing, classification, agentic loop, multi-agent, eval pipeline, hybrid human-AI

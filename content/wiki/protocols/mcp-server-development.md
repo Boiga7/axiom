@@ -1,6 +1,6 @@
 ---
 type: concept
-category: agents
+category: protocols
 para: resource
 tags: [mcp, fastmcp, python-sdk, stdio, tools, resources, prompts, server-development, tool-poisoning]
 sources: [raw/inbox/mcp-server-development-websearch-2026-05-02.md]

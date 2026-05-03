@@ -1,4 +1,4 @@
-# Nexus — Activity Log
+﻿# Nexus — Activity Log
 
 Append-only. Newest at bottom. Format: `## [YYYY-MM-DD] <ingest|query|lint|research> | <title>`
 Greppable: `grep "^## \[" wiki/log.md | tail -10`
@@ -592,7 +592,7 @@ gap-report.md updated to v4. Both active projects (evalcheck, mcpindex) have ade
 gap-report.md updated to v5. Both active projects fully covered. 5 sprint gaps resolved: nosql-databases, cicd-pipelines, annotation-tooling, aws-bedrock, mcp-server-development. 7 index maintenance gaps remain (files exist, not indexed). 2 concept gaps: LiteLLM, Strands Agents SDK.
 
 ## [2026-05-02] research | Sprint — 5 pages added, 5 gaps resolved
-- Added: [[cs-fundamentals/nosql-databases]], [[cs-fundamentals/cicd-pipelines]], [[data/annotation-tooling]], [[apis/aws-bedrock]], [[agents/mcp-server-development]]
+- Added: [[cs-fundamentals/nosql-databases]], [[cs-fundamentals/cicd-pipelines]], [[data/annotation-tooling]], [[apis/aws-bedrock]], [[protocols/mcp-server-development]]
 - Indexed (previously unindexed): [[multimodal/document-processing]], [[multimodal/image-generation]], [[multimodal/video]], [[safety/red-teaming-methodology]], [[data/datasets]]
 - Resolved gaps: nosql-databases, cicd-pipelines, annotation-tooling, aws-bedrock, mcp-server-development
 - Remaining top gaps: LiteLLM (concept gap), Strands Agents SDK (concept gap), 2 index stubs (llms/ae-hub, fine-tuning/rlhf-dpo review)
@@ -617,3 +617,65 @@ Full vault audit run. Rule-based: 134 broken links (90% from 4 missing hub pages
 
 ## [2026-05-02] research | JavaScript/TypeScript section — 5 pages written covering async, types, npm, Node.js runtime, AI SDK patterns
 - Added: [[javascript/javascript-hub]], [[javascript/typescript-fundamentals]], [[javascript/nodejs-async]], [[javascript/npm-pnpm-ecosystem]], [[javascript/ai-sdk-patterns]]
+
+## [2026-05-03] research | Sprint — 5 pages added, 5 gaps resolved, Axiom layout widened
+
+- Added: [[agents/google-adk]], [[ai-tools/aider]], [[safety/scalable-oversight]], [[cloud/bedrock-agentcore]], [[web-frameworks/django-drf]]
+- Resolved gaps: google-adk, aider, scalable-oversight, bedrock-agentcore, django-drf (broken wikilink)
+- Cross-links added: protocols/a2a, strands-agents-sdk, alignment, cursor-copilot
+- Axiom: app/page.tsx max-w-5xl → max-w-7xl; [category]/page.tsx max-w-6xl → max-w-7xl
+- Deployment held — user to trigger manually
+- Sources: WebSearch (Perplexity unavailable)
+
+## [2026-05-03] research | Sprint — 5 pages added: google-adk, aider, scalable-oversight, bedrock-agentcore, django-drf
+
+- Added: [[agents/google-adk]], [[ai-tools/aider]], [[safety/scalable-oversight]], [[cloud/bedrock-agentcore]], [[web-frameworks/django-drf]]
+- Resolved gaps: google-adk (agents/ category), aider (ai-tools/ category), scalable-oversight (safety/ category), bedrock-agentcore (cloud/ category), django-drf (broken wikilink from debug-cors-error)
+- Cross-links added: protocols/a2a → google-adk; strands-agents-sdk → bedrock-agentcore; alignment → scalable-oversight; cursor-copilot → aider
+- Sources: WebSearch (Perplexity unavailable)
+
+## [2026-05-03] lint | Gap intelligence refresh — 2 critical gaps (django-drf, google-adk), 3 concept gaps (aider, scalable-oversight, bedrock-agentcore)
+
+## [2026-05-03] lint | Structural audit — 248 pages missing Open Questions, graph stale at 378 pages, 0 stale unverified claims
+
+Punch list:
+- **## Open Questions missing (248 pages)**: Entire cloud/, cs-fundamentals/, qa/, technical-qa/ categories added in mass expansion without this section. Most critical: cloud/terraform, cloud/kubernetes, cs-fundamentals/se-hub, qa/qa-hub.
+- **## Connections missing (6 hub pages)**: cloud-hub, se-hub, javascript-hub, ae-hub, qa-hub, tqa-hub — hub pages are navigation roots; Connections section would be redundant.
+- **Graph health STALE**: graph-health.md last audited 87 pages (2026-05-01, score 97/100). Vault now 378 pages. Full rebuild needed before score is valid again.
+- **Stale [unverified] claims (0)**: All 20 pages with [unverified] tags have updated dates ≥ 2026-04-29, within the 60-day window.
+- **Contradictions (0)**: rag/chunking.md and rag/pipeline.md consistent at 512-token default. No cross-page contradictions found in sampled content.
+- **Data gap (1)**: papers/swe-bench.md line 80 — "Claude 4 / Code agents 70%+" marked [unverified] (updated 2026-05-01); current Claude Opus 4.6 score is 80.8% on SWE-bench Verified — page needs update.
+
+## [2026-05-03] lint | Vault structural audit — 6 merges/moves, 6 deletions, practice page built
+
+- Merged: [[cs-fundamentals/design-patterns]] → [[cs-fundamentals/oop-patterns]] (now covers all GoF patterns)
+- Merged: [[cloud/cost-optimisation-cloud]] → [[cloud/finops-cost-management]] (S3, data transfer sections added)
+- Merged: [[qa/exploratory-testing-advanced]] → [[qa/exploratory-testing]] (cognitive biases, pair exploration, templates added)
+- Moved: [[agents/mcp-server-development]] → [[protocols/mcp-server-development]]
+- Moved: [[rag/ragas]] → [[evals/ragas]]
+- Moved: [[infra/github-apps]] → [[protocols/github-apps]]
+- Archived: [[infra/github-marketplace]] (evalcheck-specific, not general AI engineering reference)
+- Wikilinks updated across ~20 pages for all moves/merges
+- Page count: 317 → 314
+- Axiom: practice page (/practice) added with 30 exercises across 6 role paths; Nav Lab link added
+
+## [2026-05-03] lint | Gap Intelligence — pre-commit scan: 2 stale index entries fixed, 5 gaps ranked
+
+- Fixed stale index entries: [[cloud/cost-optimisation-cloud]] and [[qa/exploratory-testing-advanced]] (deleted pages still listed)
+- Page count corrected: 314 → 312
+- Top gaps: synthesis/debugging-runbooks hub (32 orphans), apis/openai-responses-api (not covered), papers/toolformer, papers/gpt-4-technical-report, ai-tools/continue
+
+## [2026-05-03] ingest | 2 pages added: debugging-runbooks hub + OpenAI Responses API
+
+- Added: [[synthesis/debugging-runbooks]] — hub page indexing all 32 orphan debug runbooks by failure domain; fixes 32 broken inbound links in one step
+- Added: [[apis/openai-responses-api]] — stateful successor to Chat Completions; previous_response_id, built-in tools (web_search/file_search/code_interpreter/MCP), Assistants API deprecated Aug 2025
+- Source: OpenAI developers.openai.com/blog/responses-api (WebSearch 2026-05-03)
+- Updated index.md: page count 312 → 314
+
+## [2026-05-03] ingest | 3 pages added: toolformer, gpt-4-technical-report, ai-tools/continue
+
+- Added: [[papers/toolformer]] — Schick et al. (Meta, NeurIPS 2023): self-supervised API call learning via perplexity-reduction filtering; proved tool use is learnable not just promptable; conceptual predecessor to function calling, MCP, ReAct
+- Added: [[papers/gpt-4-technical-report]] — OpenAI March 2023: bar exam ~90th percentile, MMLU 86.4%, HumanEval 67%; RLHF improves behaviour not capability; System Card format first major frontier lab structured risk assessment; architecture opacity as competitive norm
+- Added: [[ai-tools/continue]] — open-source Apache 2.0 VS Code/JetBrains extension; model-agnostic via config.json; 10-provider context system (@codebase embeddings, @docs indexing, @diff, @web, @terminal); comparison matrix vs Cursor/Copilot/Claude Code/Aider
+- Updated index.md: page count 314 → 317
+- Updated synthesis/gap-report.md: all 5 identified gaps resolved; no remaining critical gaps

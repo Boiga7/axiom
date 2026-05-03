@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -224,4 +224,4 @@ Detect: review comments containing words like "formatting", "trailing space", "i
 Fix: add `ruff`, `black`, and `isort` to a pre-commit hook and CI gate; agree to never leave style comments in review — if it passes the formatter, it is correct.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/tdd-se]] · [[qa/defect-prevention]] · [[qa/agile-qa]] · [[cs-fundamentals/design-patterns]]
+[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/tdd-se]] · [[qa/defect-prevention]] · [[qa/agile-qa]] · [[cs-fundamentals/oop-patterns]]

@@ -1,7 +1,7 @@
----
+﻿---
 type: concept
 category: infra
-para: resource
+para: archive
 tags: [github, marketplace, billing, listing, saas, monetisation, evalcheck]
 tldr: GitHub Marketplace supports free, flat-rate, and per-unit billing. Paid plans require 100+ App installations. You must handle purchase lifecycle webhooks. Verified Publisher status is separate from listing.
 sources: []
@@ -195,7 +195,7 @@ Detect: an org that grew from 5 to 20 users is still billed and limited to 5-use
 Fix: update `unit_count` in your database on every `changed` event; use `GET /marketplace_listing/accounts/{account_login}` to verify the current `unit_count` on each plan check.
 
 ## Connections
-- [[infra/github-apps]] — the App architecture that underlies the Marketplace listing
+- [[protocols/github-apps]] — the App architecture that underlies the Marketplace listing
 - [[para/projects]] — evalcheck's next gate is the Marketplace listing
 - [[python/pypi-distribution]] — parallel distribution channel (PyPI) for the pytest plugin component
 

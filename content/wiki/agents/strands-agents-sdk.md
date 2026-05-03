@@ -1,4 +1,4 @@
----
+﻿---
 type: entity
 category: agents
 para: resource
@@ -247,10 +247,11 @@ Fix: attach the AWS-managed `AmazonBedrockAgentCoreFullAccess` policy to the exe
 ## Connections
 
 - [[apis/aws-bedrock]] — Strands uses the Bedrock Converse API as its default model backend
-- [[agents/mcp-server-development]] — MCP servers are a first-class tool source in Strands
+- [[protocols/mcp-server-development]] — MCP servers are a first-class tool source in Strands
 - [[agents/langgraph]] — LangGraph is the alternative for fine-grained stateful agent graphs
 - [[agents/practical-agent-design]] — single-agent vs multi-agent design decisions apply here
 - [[infra/litellm]] — Strands uses LiteLLM for non-Bedrock model providers
+- [[cloud/bedrock-agentcore]] — the serverless runtime for deploying Strands agents at scale
 
 ## Open Questions
 

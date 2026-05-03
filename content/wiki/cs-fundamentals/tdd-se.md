@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: cs-fundamentals
 para: resource
@@ -209,4 +209,4 @@ Chicago school: no mocks, test state not interactions, use real collaborators.
 ---
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/design-patterns]] · [[qa/defect-prevention]] · [[technical-qa/mutation-testing]] · [[qa/bdd-gherkin]]
+[[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/oop-patterns]] · [[qa/defect-prevention]] · [[technical-qa/mutation-testing]] · [[qa/bdd-gherkin]]

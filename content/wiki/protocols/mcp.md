@@ -1,4 +1,4 @@
----
+﻿---
 type: entity
 category: protocols
 tags: [mcp, model-context-protocol, agents, tools, security]
@@ -197,7 +197,7 @@ Fix: list all non-optional parameters in the `required` array; write the `descri
 - [[protocols/a2a]] — Google's agent-to-agent protocol (complements MCP)
 - [[ai-tools/claude-code]] — primary host that popularised MCP; plugin system
 - [[protocols/tool-design]] — how to write safe, well-designed MCP tool schemas
-- [[agents/mcp-server-development]] — building MCP servers in Python with FastMCP
+- [[protocols/mcp-server-development]] — building MCP servers in Python with FastMCP
 
 ## Open Questions
 

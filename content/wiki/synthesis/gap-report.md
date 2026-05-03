@@ -3,64 +3,75 @@ type: synthesis
 category: synthesis
 para: resource
 tags: [gaps, intelligence]
-tldr: Ranked knowledge gaps relative to active projects. Top critical gap is JavaScript/TypeScript — entire section missing despite being the dominant AI engineering frontend/backend language alongside Python.
-updated: 2026-05-02
+tldr: All 5 gaps identified 2026-05-03 resolved. debugging-runbooks hub, openai-responses-api, toolformer, gpt-4-technical-report, continue all written. No remaining critical gaps.
+updated: 2026-05-03
 ---
 
-# Knowledge Gap Report — 2026-05-02
+# Knowledge Gap Report — 2026-05-03
 
-> **TL;DR** Ranked knowledge gaps relative to active projects. Top critical gap is JavaScript/TypeScript — entire section missing despite being the dominant AI engineering frontend/backend language alongside Python.
+> **TL;DR** Post-audit scan. 2 stale index entries fixed. Remaining top gaps: debugging-runbooks hub page (32 orphans), OpenAI Responses API (not covered at all), Toolformer and GPT-4 Technical Report papers.
 
 ## Active Projects Detected
 
-- **evalcheck**: pytest plugin + GitHub App for eval regression comments. Phase: Distribution. Wiki coverage: comprehensive.
-- **mcpindex**: CLI + public scorecard directory for MCP server security scanning. Phase: Weekend 2. Wiki coverage: excellent.
+- **evalcheck**: pytest plugin + GitHub App for eval regression comments. Phase: Distribution (Show HN, cookbook PRs, marketplace listing). Wiki coverage: comprehensive — no blocking gaps.
+- **mcpindex**: CLI + public scorecard directory for MCP server security scanning. Phase: Weekend 2 (auth boundary tests, latency baselines, HTTP transport). Wiki coverage: strong — auth, HTTP transport, latency all covered.
 
-## Critical Gaps (blocks active project)
-
-### 1. JavaScript / TypeScript ecosystem
-The vault covers Python in depth but has zero dedicated coverage of JavaScript/TypeScript — the second most-used language in AI engineering (Node.js backends, Next.js frontends, TypeScript SDK clients, npm/pnpm tooling). The Vercel AI SDK, @anthropic-ai/sdk, and all Next.js AI patterns live in the JS/TS ecosystem. The axiom website itself is TypeScript. This is a structural gap.
-
-### 2. OpenAI Agents SDK
-Released early 2025, the OpenAI Agents SDK competes directly with LangGraph on production multi-agent workloads. The vault has strong LangGraph coverage but no standalone page for the OpenAI Agents SDK. Both evalcheck and mcpindex use agent patterns — a comparison page would directly serve active projects.
-
-## Concept Gaps (mentioned, no page)
-
-### 1. TypeScript type system deep dive
-Type narrowing, conditional types, mapped types, `satisfies` operator, `as const` patterns — the TypeScript-specific patterns that make AI SDK client code safe. Mentioned throughout web-frameworks/nextjs but no dedicated page.
-
-### 2. Node.js runtime and event loop
-Node.js event loop, libuv, async I/O model, streams — the runtime underpinning Next.js and all JS AI backends. Mentioned implicitly in web-frameworks pages but never explained.
-
-### 3. npm / pnpm package ecosystem
-Package management in the JS/TS world (pnpm workspaces, package.json scripts, lockfiles, semantic versioning, npm publishing). The Python equivalent (uv, pyproject.toml) is covered but the JS side is not.
-
-## Suggested Ingest Queue (ranked)
-
-1. JavaScript/TypeScript ecosystem hub (critical — structural gap)
-2. Node.js runtime and async patterns (critical — JS backend foundation)
-3. TypeScript type system (concept gap — AI SDK safety)
-4. OpenAI Agents SDK vs LangGraph comparison (critical — agent architecture)
-5. npm/pnpm ecosystem (concept gap — JS tooling)
-
-## Resolved Gaps (this sprint — 2026-05-02)
+## Resolved This Session (2026-05-03)
 
 | Gap | Page Written |
 |---|---|
-| LiteLLM | [[infra/litellm]] |
-| Strands Agents SDK | [[agents/strands-agents-sdk]] |
-| nosql-databases | [[cs-fundamentals/nosql-databases]] |
-| cicd-pipelines | [[cs-fundamentals/cicd-pipelines]] |
-| annotation-tooling | [[data/annotation-tooling]] |
-| aws-bedrock | [[apis/aws-bedrock]] |
-| mcp-server-development | [[agents/mcp-server-development]] |
+| synthesis/debugging-runbooks hub | [[synthesis/debugging-runbooks]] — 32 orphan runbooks now discoverable |
+| apis/openai-responses-api | [[apis/openai-responses-api]] — stateful API, built-in tools, migration guide |
+| papers/toolformer | [[papers/toolformer]] — Schick 2023 (Meta): self-supervised tool learning via perplexity reduction |
+| papers/gpt-4-technical-report | [[papers/gpt-4-technical-report]] — OpenAI 2023: capability evals, system card format, architecture opacity |
+| ai-tools/continue | [[ai-tools/continue]] — open-source IDE extension, model-agnostic, context providers, config.json |
+
+## Fixed This Scan (2026-05-03)
+
+Two stale index entries removed — pages were deleted during the audit but their index lines were missed:
+
+| Removed Entry | Reason |
+|---|---|
+| `[[cloud/cost-optimisation-cloud]]` | Page deleted — content merged into [[cloud/finops-cost-management]] |
+| `[[qa/exploratory-testing-advanced]]` | Page deleted — content merged into [[qa/exploratory-testing]] |
+
+Page count corrected: 314 → 312.
+
+## Resolved Previous Sprints
+
+| Gap | Page Written | Sprint |
+|---|---|---|
+| web-frameworks/django-drf | [[web-frameworks/django-drf]] | 2026-05-03 |
+| agents/google-adk | [[agents/google-adk]] | 2026-05-03 |
+| ai-tools/aider | [[ai-tools/aider]] | 2026-05-03 |
+| safety/scalable-oversight | [[safety/scalable-oversight]] | 2026-05-03 |
+| cloud/bedrock-agentcore | [[cloud/bedrock-agentcore]] | 2026-05-03 |
+| JavaScript/TypeScript ecosystem | [[javascript/javascript-hub]] + 4 pages | 2026-05-02 |
+| OpenAI Agents SDK | [[agents/openai-agents-sdk]] | 2026-05-02 |
+| Strands Agents SDK | [[agents/strands-agents-sdk]] | 2026-05-02 |
+
+## Remaining Gaps
+
+No critical or concept gaps identified at this time. All 5 gaps from the 2026-05-03 scan are resolved.
+
+## Structural Issues (not gaps — flagged for awareness)
+
+- **## Open Questions missing from ~248 pages**: cloud/, cs-fundamentals/, qa/, technical-qa/ categories lack this section. Content is complete; section is missing. Low priority.
+- **Graph health stale**: graph-health.md last audited at 87 pages (score 97/100). Vault is now 317 pages. Score is not valid until rebuilt.
+
+## Suggested Ingest Queue
+
+No urgent gaps. Next candidates when adding new pages:
+- `ai-tools/cline` — Cline and Windsurf remain absent from ai-tools/; covered in CLAUDE.md knowledge map
+- `papers/llama` and `papers/llama-2` — listed in CLAUDE.md must-reads, no dedicated pages yet
 
 ## Connections
 
 - [[para/projects]] — source of active project context
 - [[index]] — coverage map source
+- [[synthesis/graph-health]] — orphan and link-density analysis
 
 ## Open Questions
 
-- Should JavaScript/TypeScript get its own `javascript/` directory or live under `web-frameworks/`?
-- Is the OpenAI Agents SDK gap urgent enough to pause JavaScript research?
+- Should the debugging-runbooks hub live under `synthesis/` or be promoted to `cs-fundamentals/debugging-systems` as a subsection?
+- Is the OpenAI Responses API gap urgent enough to research before the next sprint, or does it wait until evalcheck or mcpindex specifically need it?
