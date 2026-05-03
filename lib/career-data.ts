@@ -1,5 +1,3 @@
-export type CoverageLevel = 'high' | 'medium' | 'low'
-
 export type WikiRef = {
   category: string
   slug: string
@@ -11,6 +9,7 @@ export type RequirementArea = {
   label: string
   description: string
   pages: WikiRef[]
+  accent: 'cyan' | 'violet' | 'rose' | 'amber' | 'emerald' | 'sky'
 }
 
 export type Prerequisite = {
@@ -23,6 +22,15 @@ export type BoardCriterion = {
   id: string
   label: string
   detail: string
+}
+
+export type Certification = {
+  id: string
+  label: string
+  code: string
+  level: string
+  detail: string
+  studySlug?: string
 }
 
 export const PROMOTION_TARGET = {
@@ -38,6 +46,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'test-strategy',
     label: 'Test Strategy & Planning',
     description: 'Create Test Strategies, Test Plans; review test scripts and requirements.',
+    accent: 'cyan',
     pages: [
       { category: 'qa', slug: 'test-strategy', label: 'Test Strategy' },
       { category: 'qa', slug: 'test-planning', label: 'Test Planning' },
@@ -49,6 +58,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'performance-testing',
     label: 'Performance & Load Testing',
     description: 'Manage progress reports for Performance Testing; assess client test capability.',
+    accent: 'violet',
     pages: [
       { category: 'technical-qa', slug: 'performance-testing', label: 'Performance Testing' },
       { category: 'technical-qa', slug: 'load-testing-advanced', label: 'Load Testing Advanced' },
@@ -60,6 +70,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'api-contract-testing',
     label: 'API & Contract Testing',
     description: 'Expert in multiple test tool types — API and contract testing.',
+    accent: 'violet',
     pages: [
       { category: 'technical-qa', slug: 'api-testing', label: 'API Testing' },
       { category: 'technical-qa', slug: 'contract-testing', label: 'Contract Testing' },
@@ -71,6 +82,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'cicd-quality-gates',
     label: 'CI/CD Quality Gates',
     description: 'Influence policy and strategy on client site; integrate quality into delivery pipelines.',
+    accent: 'emerald',
     pages: [
       { category: 'technical-qa', slug: 'ci-cd-quality-gates', label: 'CI/CD Quality Gates' },
       { category: 'cloud', slug: 'github-actions', label: 'GitHub Actions' },
@@ -82,6 +94,7 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'qa-leadership',
     label: 'QA Leadership & Metrics',
     description: 'Manage multiple test streams; manage risk; improve metrics; own Process Improvement Model.',
+    accent: 'cyan',
     pages: [
       { category: 'qa', slug: 'qa-leadership', label: 'QA Leadership' },
       { category: 'qa', slug: 'qa-metrics', label: 'QA Metrics' },
@@ -93,55 +106,60 @@ export const REQUIREMENT_AREAS: RequirementArea[] = [
     id: 'test-automation',
     label: 'Test Automation Tools',
     description: 'Expert in five or more technical test tools of different types.',
+    accent: 'violet',
     pages: [
-      { category: 'test-automation', slug: 'playwright', label: 'Playwright' },
-      { category: 'test-automation', slug: 'selenium', label: 'Selenium' },
-      { category: 'test-automation', slug: 'pytest-patterns', label: 'Pytest Patterns' },
-      { category: 'technical-qa', slug: 'playwright-advanced', label: 'Playwright Advanced' },
+      { category: 'test-automation', slug: 'playwright', label: 'Playwright (Web UI)' },
+      { category: 'test-automation', slug: 'selenium', label: 'Selenium (Web UI)' },
+      { category: 'test-automation', slug: 'pytest-patterns', label: 'Pytest (Framework)' },
+      { category: 'technical-qa', slug: 'postman-newman', label: 'Postman / Newman (API)' },
     ],
   },
   {
     id: 'security-testing',
     label: 'Security Testing',
     description: 'Broaden test capability scope; assess and identify security risks on client systems.',
+    accent: 'rose',
     pages: [
-      { category: 'security', slug: 'red-teaming', label: 'Red Teaming' },
-      { category: 'security', slug: 'owasp-llm-top10', label: 'OWASP LLM Top 10' },
+      { category: 'qa', slug: 'security-testing-qa', label: 'Security Testing QA' },
       { category: 'technical-qa', slug: 'security-automation', label: 'Security Automation' },
-      { category: 'security', slug: 'llm-red-teaming-tools', label: 'LLM Red Teaming Tools' },
+      { category: 'security', slug: 'red-teaming', label: 'Red Teaming' },
+      { category: 'security', slug: 'prompt-injection', label: 'Prompt Injection' },
     ],
   },
   {
     id: 'observability',
     label: 'Observability & Monitoring',
     description: 'Ensure effective quality assurance; monitor production quality and system health.',
+    accent: 'sky',
     pages: [
       { category: 'observability', slug: 'platforms', label: 'Observability Platforms' },
-      { category: 'observability', slug: 'langfuse', label: 'Langfuse' },
       { category: 'cloud', slug: 'cloud-monitoring', label: 'Cloud Monitoring' },
-      { category: 'observability', slug: 'llmops', label: 'LLMOps' },
+      { category: 'technical-qa', slug: 'test-observability', label: 'Test Observability' },
+      { category: 'qa', slug: 'production-monitoring-qa', label: 'Production Monitoring QA' },
     ],
   },
   {
     id: 'ai-tools',
     label: 'AI in Testing',
     description: 'Identify new tools; bring AI-assisted testing as a differentiator on client sites.',
+    accent: 'amber',
     pages: [
       { category: 'qa', slug: 'ai-testing', label: 'AI Testing' },
       { category: 'ai-tools', slug: 'claude-code', label: 'Claude Code' },
       { category: 'ai-tools', slug: 'cursor-copilot', label: 'Cursor / Copilot' },
-      { category: 'ai-tools', slug: 'openai-codex', label: 'OpenAI Codex' },
+      { category: 'test-automation', slug: 'playwright', label: 'Playwright Healer Agent' },
     ],
   },
   {
     id: 'process-improvement',
     label: 'Process Improvement (PIM)',
     description: 'Build measurable, benefits-driven improvements roadmaps utilising the Process Improvement Model.',
+    accent: 'emerald',
     pages: [
-      { category: 'qa', slug: 'continuous-testing', label: 'Continuous Testing' },
+      { category: 'qa', slug: 'process-improvement-model', label: 'Process Improvement Model' },
       { category: 'qa', slug: 'test-automation-strategy', label: 'Test Automation Strategy' },
       { category: 'qa', slug: 'defect-prevention', label: 'Defect Prevention' },
-      { category: 'qa', slug: 'process-improvement-model', label: 'Process Improvement Model' },
+      { category: 'qa', slug: 'qa-metrics', label: 'QA Metrics' },
     ],
   },
 ]
@@ -175,7 +193,7 @@ export const PREREQUISITES: Prerequisite[] = [
   {
     id: 'certification',
     label: 'Achieve certification in agreed test',
-    detail: 'ISTQB or equivalent — agree target with delivery manager.',
+    detail: 'AWS Cloud Practitioner + AWS AI Practitioner — agreed with delivery manager.',
   },
 ]
 
@@ -207,14 +225,6 @@ export const BOARD_CRITERIA: BoardCriterion[] = [
   },
 ]
 
-export type Certification = {
-  id: string
-  label: string
-  code: string
-  level: string
-  detail: string
-}
-
 export const CERTIFICATIONS: Certification[] = [
   {
     id: 'aws-cloud-practitioner',
@@ -222,6 +232,7 @@ export const CERTIFICATIONS: Certification[] = [
     code: 'CLF-C02',
     level: 'Foundation',
     detail: 'Cloud concepts, core AWS services, security, pricing and billing. Entry point for the AWS certification path.',
+    studySlug: 'aws-cloud-practitioner',
   },
   {
     id: 'aws-ai-practitioner',
@@ -229,14 +240,9 @@ export const CERTIFICATIONS: Certification[] = [
     code: 'AIF-C01',
     level: 'Foundation',
     detail: 'AI/ML and generative AI concepts, AWS AI services, and responsible AI practices.',
+    studySlug: 'aws-ai-practitioner',
   },
 ]
-
-export function getCoverageLevel(pageCount: number): CoverageLevel {
-  if (pageCount >= 4) return 'high'
-  if (pageCount >= 2) return 'medium'
-  return 'low'
-}
 
 export function getDaysUntilBoard(): number {
   const board = new Date('2027-01-15')
