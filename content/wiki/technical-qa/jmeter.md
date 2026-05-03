@@ -1,182 +1,301 @@
 ---
 type: entity
 category: technical-qa
-tags: [jmeter, performance-testing, load-testing, enterprise, java]
+tags: [jmeter, performance-testing, load-testing, java]
+sources: []
 updated: 2026-05-03
 para: resource
 ---
 
 # Apache JMeter
 
-The dominant open-source performance testing tool on enterprise client sites. Written in Java, runs everywhere a JVM runs, and has been the industry standard for load testing since the late 1990s. Its GUI is used for test design; production runs are headless on the command line. Almost every large-scale QA engagement will have JMeter in the toolchain.
+Apache JMeter is the dominant open-source performance testing tool in enterprise environments. Written in Java, it runs anywhere a JVM runs. It is protocol-agnostic: HTTP/HTTPS is the common case, but it also handles JDBC, JMS, LDAP, FTP, SMTP, and TCP out of the box. The GUI is for test design only; production load runs are headless on the CLI. Nearly every large-scale QA engagement has JMeter in the toolchain or as the incumbent that needs wrapping or replacing.
+
+JMeter sits in a different positioning bracket from [[k6]]: JMeter is the choice when a client already has `.jmx` files and infrastructure, or when non-HTTP protocol coverage is needed. k6 is the choice for greenfield, code-first, developer-led pipelines. See the comparison section for the full decision framework.
+
+See also: [[performance-testing]] for test type taxonomy and NFR acceptance criteria, [[load-testing-advanced]] for advanced load scenarios, [[api-performance-testing]] for API-specific latency and throughput patterns.
 
 ---
 
-## Architecture: The Test Plan Hierarchy
+## Test Plan Structure
 
-JMeter organises tests as a tree. Every node type serves a distinct purpose.
+JMeter organises tests as a tree. The nesting order is not arbitrary -- it defines both scope and execution order.
 
 ```
 Test Plan
   └── Thread Group
-        ├── Config Elements       (HTTP Request Defaults, CSV Data Set, HTTP Header Manager)
-        ├── Pre-Processors        (User Parameters, BeanShell/JSR223 Pre-Processor)
-        ├── Samplers              (HTTP Request, JDBC Request, JMS Publisher, TCP Sampler)
-        ├── Post-Processors       (Regex Extractor, JSON Extractor, CSS/JQuery Extractor)
-        ├── Assertions            (Response Code, Response Body, Duration, Size)
-        ├── Timers                (Constant Timer, Gaussian Random Timer, Throughput Shaping Timer)
-        └── Listeners             (View Results Tree, Summary Report, Backend Listener)
+        ├── Config Elements       (CSV Data Set, HTTP Request Defaults, Header Manager, Cookie Manager, Cache Manager)
+        ├── Pre-Processors        (JSR223 Pre-Processor, User Parameters, BeanShell Pre-Processor)
+        ├── Samplers              (HTTP Request, JDBC Request, WebSocket Sampler, TCP Sampler)
+        │     └── Logic Controllers (Loop, If, While, Transaction, Throughput, Random Order)
+        ├── Post-Processors       (JSON Extractor, Regex Extractor, CSS/JQuery Extractor, JSR223 Post-Processor)
+        ├── Assertions            (Response Assertion, Duration Assertion, Size Assertion, JSON Assertion)
+        ├── Timers                (Constant, Gaussian Random, Uniform Random, Constant Throughput)
+        └── Listeners             (View Results Tree, Aggregate Report, Summary Report, Backend Listener)
 ```
 
-**Test Plan** — root node. Sets global properties (user variables, classpath additions, whether to run thread groups serially).
+**Test Plan** -- root node. Sets global user-defined variables, classpath additions, whether thread groups run serially or in parallel, and the teardown thread group behaviour on shutdown.
 
-**Thread Group** — represents a population of virtual users. Controls concurrency (number of threads), ramp-up period, loop count or duration. One thread group per user journey type is the recommended pattern (e.g. separate groups for "browse", "checkout", "admin").
+**Thread Group** -- one population of virtual users. Each thread runs the sampler chain sequentially, in order. One thread group per user journey is the recommended pattern: separate groups for `browse`, `checkout`, `admin` to model realistic concurrency ratios.
 
-**Samplers** — the actual requests. HTTP Request sampler is the workhorse. Each sampler can be scoped under its thread group or a logic controller (If, While, Loop, Random Order, Throughput Controller).
+**Samplers** -- the actual requests sent to the system under test. The HTTP Request sampler covers the vast majority of web and API testing.
 
-**Config Elements** — applied before samplers in their scope. HTTP Request Defaults sets the host/port/protocol once so individual samplers only specify the path. CSV Data Set Config parameterises test data from a file. HTTP Header Manager injects headers (Authorization, Content-Type).
+**Config Elements** -- applied before samplers within their scope. Shared configuration (host, port, protocol) lives here rather than in every sampler individually.
 
-**Pre/Post-Processors** — run immediately before/after a sampler. JSR223 pre-processors (Groovy, fast) handle dynamic payload construction. Post-processors extract variables from responses for use in subsequent requests.
+**Pre/Post-Processors** -- run immediately before and after their parent sampler. Pre-processors handle dynamic payload construction; post-processors extract values from responses for use in later requests (correlation).
 
-**Assertions** — validate sampler output. Failures increment the error count but do not stop the thread by default. Attach assertions at the thread group level to apply them globally, or per-sampler for targeted checks.
+**Assertions** -- validate sampler output. Failures increment the error count but do not stop the thread by default. Failed assertions mark the sample red in listeners and contribute to the error rate in summary reports.
 
-**Listeners** — collect and visualise results. Never run listeners in CI — they consume memory and write to disk synchronously. Use only for local test debugging. In CI, write raw JTL output and process it separately.
+**Timers** -- pause execution after the sampler they are attached to (or all samplers in scope if placed at thread group level). They model user think time.
+
+**Listeners** -- collect, aggregate, and display results. They are memory-intensive. Never include listeners other than the Backend Listener in a production load run.
 
 ---
 
-## Creating a Basic HTTP Test Plan
+## Thread Groups
 
-Minimum viable JMeter test plan for a REST API:
+Thread Group configuration is where the load profile is defined.
+
+**Number of Threads (virtual users)** -- concurrent users. Each thread executes the sampler chain independently. Start at 1-5 to verify the script functions correctly before scaling.
+
+**Ramp-Up Period** -- seconds to reach the target thread count. JMeter adds `threads / ramp_time` threads per second. A zero-second ramp creates a thundering herd and does not reflect real traffic; always ramp. A 60-second ramp for 100 threads adds ~1.67 threads per second.
+
+**Loop Count / Scheduler** -- use the scheduler (duration-based) for load tests; loop count is only appropriate for functional smoke validation. Set duration to at least 5x the longest expected transaction time, minimum 15 minutes for steady-state measurement.
+
+**Stepping Thread Group (plugin)** -- from the JMeter Plugins Manager. Adds threads incrementally in steps rather than continuously, making staircase load profiles easy:
+
+```
+Start threads count:   0
+Initial delay:         30s
+Start N threads every: 30s
+Step threads count:    10
+Stop N threads every:  0s (disabled)
+Target thread count:   100
+```
+
+This adds 10 threads every 30 seconds until 100 VUs are running, holding each step for 30 seconds before the next. Ideal for capacity ramp tests where you want to identify the inflection point.
+
+**Scheduler example (XML):**
 
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<jmeterTestPlan version="1.2" properties="5.0">
-  <hashTree>
-    <TestPlan testname="API Load Test" enabled="true">
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="BASE_URL" elementType="Argument">
-            <stringProp name="Argument.name">BASE_URL</stringProp>
-            <stringProp name="Argument.value">api.example.com</stringProp>
-          </elementProp>
-        </collectionProp>
+<ThreadGroup testname="Checkout Flow" enabled="true">
+  <stringProp name="ThreadGroup.num_threads">50</stringProp>
+  <stringProp name="ThreadGroup.ramp_time">60</stringProp>
+  <boolProp name="ThreadGroup.scheduler">true</boolProp>
+  <stringProp name="ThreadGroup.duration">600</stringProp>
+  <stringProp name="ThreadGroup.delay">0</stringProp>
+  <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+</ThreadGroup>
+```
+
+---
+
+## Samplers
+
+### HTTP Request Sampler
+
+The workhorse. Covers all standard web and REST API testing.
+
+Key fields:
+- **Server Name or IP** -- can reference a variable (`${BASE_URL}`). Set this once in HTTP Request Defaults and leave it blank in individual samplers.
+- **HTTP Method** -- GET, POST, PUT, PATCH, DELETE, OPTIONS.
+- **Path** -- the URL path, e.g. `/api/v1/products/${product_id}`.
+- **Body Data / Parameters** -- switch to `Body Data` for JSON payloads; use `Parameters` for form-encoded data.
+- **Files Upload** -- for multipart form submissions.
+- **Advanced** -- connect timeout, response timeout, keep-alive, follow redirects.
+
+Minimal POST sampler:
+
+```xml
+<HTTPSamplerProxy testname="POST /orders">
+  <stringProp name="HTTPSampler.path">/api/v1/orders</stringProp>
+  <stringProp name="HTTPSampler.method">POST</stringProp>
+  <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+  <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+    <collectionProp name="Arguments.arguments">
+      <elementProp name="" elementType="HTTPArgument">
+        <stringProp name="Argument.value">{"product_id":"${PRODUCT_ID}","qty":1}</stringProp>
       </elementProp>
-      <hashTree>
+    </collectionProp>
+  </elementProp>
+</HTTPSamplerProxy>
+```
 
-        <!-- Thread Group: 50 users, 60s ramp, 10 min duration -->
-        <ThreadGroup testname="Browse Users" enabled="true">
-          <stringProp name="ThreadGroup.num_threads">50</stringProp>
-          <stringProp name="ThreadGroup.ramp_time">60</stringProp>
-          <boolProp name="ThreadGroup.scheduler">true</boolProp>
-          <stringProp name="ThreadGroup.duration">600</stringProp>
-          <hashTree>
+### JDBC Sampler
 
-            <!-- Config: shared host -->
-            <ConfigTestElement testname="HTTP Request Defaults">
-              <stringProp name="HTTPSampler.domain">${BASE_URL}</stringProp>
-              <stringProp name="HTTPSampler.protocol">https</stringProp>
-              <stringProp name="HTTPSampler.port">443</stringProp>
-            </ConfigTestElement>
-            <hashTree/>
+Tests database performance directly. Requires a JDBC Connection Configuration element in scope with the connection pool.
 
-            <!-- Sampler: GET /products -->
-            <HTTPSamplerProxy testname="GET /products">
-              <stringProp name="HTTPSampler.path">/api/v1/products</stringProp>
-              <stringProp name="HTTPSampler.method">GET</stringProp>
-              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-              <hashTree>
+```xml
+<JDBCSampler testname="SELECT Orders">
+  <stringProp name="dataSource">pg_pool</stringProp>
+  <stringProp name="queryType">Select Statement</stringProp>
+  <stringProp name="query">SELECT * FROM orders WHERE user_id = ${USER_ID} LIMIT 100</stringProp>
+  <stringProp name="variableNames">order_id,status,total</stringProp>
+</JDBCSampler>
+```
 
-                <!-- Assert 200 OK -->
-                <ResponseAssertion testname="Assert 200">
-                  <collectionProp name="Asserion.test_strings">
-                    <stringProp>200</stringProp>
-                  </collectionProp>
-                  <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-                  <intProp name="Assertion.test_type">8</intProp><!-- Contains -->
-                </ResponseAssertion>
-                <hashTree/>
+The `variableNames` field extracts first-row column values into JMeter variables for use in subsequent samplers.
 
-                <!-- Assert response time < 2000ms -->
-                <DurationAssertion testname="Assert Duration">
-                  <longProp name="DurationAssertion.duration">2000</longProp>
-                </DurationAssertion>
-                <hashTree/>
+### WebSocket Sampler
 
-              </hashTree>
-            </HTTPSamplerProxy>
+Requires the JMeter WebSocket Sampler plugin. Used for real-time feature testing (chat, notifications, live data feeds).
 
-          </hashTree>
-        </ThreadGroup>
+```xml
+<!-- Connect -->
+<WebSocketOpenConnection testname="WS Connect">
+  <stringProp name="server">ws.example.com</stringProp>
+  <stringProp name="port">443</stringProp>
+  <stringProp name="path">/ws/notifications</stringProp>
+</WebSocketOpenConnection>
 
-      </hashTree>
-    </TestPlan>
-  </hashTree>
-</jmeterTestPlan>
+<!-- Send message -->
+<WebSocketRequestResponseSampler testname="WS Subscribe">
+  <stringProp name="requestData">{"type":"subscribe","channel":"orders"}</stringProp>
+</WebSocketRequestResponseSampler>
 ```
 
 ---
 
-## Recording Tests with HTTP(S) Test Script Recorder
+## Config Elements
 
-JMeter's recorder proxies browser traffic and generates samplers automatically. Useful for complex multi-step flows where writing JMX by hand would be slow.
+Config elements apply to all samplers within their scope (thread group or logic controller).
 
-**Setup:**
+### HTTP Request Defaults
 
-1. Add `HTTP(S) Test Script Recorder` under the Test Plan.
-2. Set the proxy port (default 8888).
-3. Configure your browser to use `localhost:8888` as an HTTP/HTTPS proxy.
-4. For HTTPS: install JMeter's CA certificate (`ApacheJMeterTemporaryRootCA.crt`, generated in `bin/` on first recorder start) into the browser's trusted roots.
-5. Set a target controller (usually a Simple Controller or Recording Controller inside your thread group).
-6. Click Start, exercise the app in the browser, click Stop.
+Sets the base URL once. Individual samplers only specify the path. Changing the target environment requires changing one field.
 
-**Post-recording cleanup:**
+```xml
+<ConfigTestElement testname="HTTP Request Defaults">
+  <stringProp name="HTTPSampler.domain">${BASE_URL}</stringProp>
+  <stringProp name="HTTPSampler.protocol">https</stringProp>
+  <stringProp name="HTTPSampler.port">443</stringProp>
+  <stringProp name="HTTPSampler.connect_timeout">5000</stringProp>
+  <stringProp name="HTTPSampler.response_timeout">30000</stringProp>
+</ConfigTestElement>
+```
 
-- Delete static asset requests (`.js`, `.css`, `.png`, `.woff`) — they skew results and are usually served from CDN.
-- Replace hardcoded session tokens and CSRF values with variables from extractors.
-- Add `HTTP Header Manager` for `Accept`, `Content-Type`, `Authorization` where needed.
-- Collapse recorded samplers into a logical transaction controller flow.
+### HTTP Header Manager
+
+Injects headers into every sampler in scope. Use at thread group level for universal headers (Authorization, Accept, Content-Type) and at sampler level only for endpoint-specific overrides.
+
+```xml
+<HeaderManager testname="HTTP Header Manager">
+  <collectionProp name="HeaderManager.headers">
+    <elementProp name="" elementType="Header">
+      <stringProp name="Header.name">Authorization</stringProp>
+      <stringProp name="Header.value">Bearer ${AUTH_TOKEN}</stringProp>
+    </elementProp>
+    <elementProp name="" elementType="Header">
+      <stringProp name="Header.name">Content-Type</stringProp>
+      <stringProp name="Header.value">application/json</stringProp>
+    </elementProp>
+  </collectionProp>
+</HeaderManager>
+```
+
+### HTTP Cookie Manager
+
+Manages session cookies automatically. Add one per thread group for stateful user sessions. By default JMeter does not handle cookies unless this element is present.
+
+Set `Clear cookies each iteration?` to `true` for tests where each loop represents a fresh session; `false` for tests simulating a persistent user session.
+
+### HTTP Cache Manager
+
+Simulates browser caching behaviour. Respects `Cache-Control` and `ETag` response headers. Reduces load on the server for cacheable resources and makes the test more representative of real browser traffic. Add at thread group level.
+
+### CSV Data Set Config
+
+Parameterises test data from an external CSV file. Critical for authenticated flows where multiple threads must not share the same credentials.
+
+```xml
+<CSVDataSet testname="User Credentials">
+  <stringProp name="filename">${__P(data.dir,data)}/users.csv</stringProp>
+  <stringProp name="variableNames">USERNAME,PASSWORD,USER_ID</stringProp>
+  <stringProp name="delimiter">,</stringProp>
+  <boolProp name="quotedData">false</boolProp>
+  <boolProp name="recycle">false</boolProp>
+  <boolProp name="stopThread">true</boolProp>
+  <stringProp name="shareMode">shareMode.all</stringProp>
+</CSVDataSet>
+```
+
+`shareMode.all` -- all threads share one pointer into the CSV; each thread gets the next unused row.
+`shareMode.group` -- threads within the same thread group share a pointer.
+`shareMode.thread` -- each thread gets its own pointer, cycling independently.
+
+`recycle=false` + `stopThread=true` stops threads when the CSV is exhausted, preventing row reuse in auth-sensitive tests. Size the CSV to at least 2x the peak concurrent thread count.
+
+### User Defined Variables
+
+Global constants referenced anywhere in the test plan as `${VAR_NAME}`. Set environment-specific values here (base URL, timeouts, thresholds) and override them from the CLI with `-J` flags at runtime.
+
+```xml
+<elementProp name="BASE_URL" elementType="Argument">
+  <stringProp name="Argument.name">BASE_URL</stringProp>
+  <stringProp name="Argument.value">api.staging.example.com</stringProp>
+</elementProp>
+```
+
+Override at runtime: `jmeter -n -t test.jmx -JBASE_URL=api.prod.example.com`
 
 ---
 
-## Thread Group Configuration
+## Logic Controllers
 
-The three parameters that shape the load profile:
+Logic controllers modify the order or condition under which samplers execute.
 
-**Number of Threads** — concurrent virtual users. Each thread runs the sampler chain sequentially. Start with 10–20 to verify the script works, then scale to target.
+**Loop Controller** -- repeats its children N times (or indefinitely). Use inside a thread group to repeat a sub-flow independently of the thread group loop count.
 
-**Ramp-Up Period** — seconds to reach full concurrency. A 60-second ramp for 50 threads adds one thread every 1.2 seconds. Always ramp — a zero-second ramp creates a thundering herd that does not reflect real traffic patterns and can mask timing bugs.
-
-**Duration vs. Loop Count** — prefer duration-based tests (scheduler enabled). Loop count is useful only for functional smoke tests. For load tests, set duration to at least 5x the longest expected transaction time, with a minimum of 15 minutes for steady-state measurement.
-
-**Throughput Shaping Timer (plugin)** for target RPS:
+**If Controller** -- conditionally executes children based on a JavaScript condition or JMeter function. Use Groovy via JSR223 for performance; avoid JavaScript in hot paths.
 
 ```
-# Constant Throughput Timer — simplest approach
-Target throughput: 300 (requests per minute)
-Calculate based on: All active threads in current thread group
+${__groovy(vars.get("STATUS_CODE") == "200",)}
 ```
 
-For precise RPS control install the JMeter Plugins Manager and use the Throughput Shaping Timer, which accepts a schedule:
+**Transaction Controller** -- groups multiple samplers into a single reportable unit. The transaction's elapsed time covers all child samplers, giving a meaningful "end-to-end checkout time" metric rather than per-request metrics. Always wrap user journeys in transaction controllers for reporting.
 
+```xml
+<TransactionController testname="Complete Checkout">
+  <boolProp name="TransactionController.includeTimers">false</boolProp>
+  <boolProp name="TransactionController.parent">true</boolProp>
+</TransactionController>
 ```
-Start RPS  End RPS  Duration
-10         10       60s      # warm-up
-100        100      600s     # steady state
-200        200      120s     # stress spike
-```
+
+`parent=true` -- the transaction appears as a parent row in aggregate reports, with children collapsed. `parent=false` -- both the transaction and its children appear as rows.
+
+**Throughput Controller** -- restricts how often its children execute as a percentage of total executions or an absolute call count. Use to model a realistic endpoint distribution: 80% read, 15% write, 5% delete.
 
 ---
 
-## Correlation and Dynamic Data Extraction
+## Pre-Processors and Post-Processors
 
-Correlation is the process of extracting dynamic values from one response (session ID, CSRF token, auth token) and injecting them into subsequent requests. It is the most common cause of script failures at client sites when tests replay recorded traffic against a live server.
+### JSR223 Pre-Processor (Groovy)
 
-### Regex Extractor
+The fastest scripting option in JMeter. Groovy runs on the JVM with a compiled cache -- far faster than BeanShell for hot paths. Use for dynamic payload construction, timestamp generation, HMAC signing, or request mutation.
+
+```groovy
+// JSR223 Pre-Processor -- generate ISO timestamp and HMAC signature
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+import java.util.Base64
+
+def timestamp = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+vars.put("TIMESTAMP", timestamp)
+
+def secret = "my_shared_secret"
+def payload = "${vars.get('USER_ID')}:${timestamp}"
+def mac = Mac.getInstance("HmacSHA256")
+mac.init(new SecretKeySpec(secret.bytes, "HmacSHA256"))
+vars.put("SIGNATURE", Base64.encoder.encodeToString(mac.doFinal(payload.bytes)))
+```
+
+### Regex Extractor (Post-Processor)
+
+Extracts values from the response body, headers, or URL using a Java regular expression. The most widely used correlation tool for non-JSON responses and header extraction.
 
 ```xml
 <RegexExtractor testname="Extract Session ID">
-  <stringProp name="RegexExtractor.useHeaders">false</stringProp><!-- Body -->
+  <stringProp name="RegexExtractor.useHeaders">false</stringProp>
   <stringProp name="RegexExtractor.refname">SESSION_ID</stringProp>
   <stringProp name="RegexExtractor.regex">"sessionId"\s*:\s*"([^"]+)"</stringProp>
   <stringProp name="RegexExtractor.template">$1$</stringProp>
@@ -185,94 +304,62 @@ Correlation is the process of extracting dynamic values from one response (sessi
 </RegexExtractor>
 ```
 
-Always set the default to a sentinel like `SESSION_ID_NOT_FOUND`. If the variable resolves to the sentinel in later requests, the correlation failed — easier to diagnose than a 401 with no explanation.
+Always set the default to a sentinel value. If a subsequent request uses `SESSION_ID_NOT_FOUND` as a token, the failure is immediately visible in the View Results Tree rather than buried as a 401.
 
-### JSON Extractor
+### JSON Extractor (Post-Processor)
 
-Preferred for JSON APIs over regex. Uses JMESPath expressions:
+Preferred over Regex for JSON APIs. Uses JSONPath expressions.
 
 ```xml
 <JSONPostProcessor testname="Extract Auth Token">
   <stringProp name="JSONPostProcessor.referenceNames">AUTH_TOKEN</stringProp>
   <stringProp name="JSONPostProcessor.jsonPathExprs">$.data.token</stringProp>
   <stringProp name="JSONPostProcessor.defaultValues">TOKEN_NOT_FOUND</stringProp>
-  <stringProp name="JSONPostProcessor.match_no">0</stringProp><!-- 0 = random if multiple -->
+  <stringProp name="JSONPostProcessor.match_no">0</stringProp>
 </JSONPostProcessor>
 ```
 
-### CSS/JQuery Extractor
+`match_no=0` selects a random match when the path returns multiple values. `match_no=1` selects the first. Use `-1` to extract all matches into `VAR_1`, `VAR_2`, etc.
 
-Used for HTML responses — login pages, form submissions, CSRF tokens:
+### JSR223 Post-Processor (Groovy)
 
-```xml
-<HtmlExtractor testname="Extract CSRF Token">
-  <stringProp name="HtmlExtractor.refname">CSRF_TOKEN</stringProp>
-  <stringProp name="HtmlExtractor.expr">input[name="_csrf"]</stringProp>
-  <stringProp name="HtmlExtractor.attribute">value</stringProp>
-  <stringProp name="HtmlExtractor.default">CSRF_NOT_FOUND</stringProp>
-  <stringProp name="HtmlExtractor.match_no">1</stringProp>
-</HtmlExtractor>
+Use for complex extraction logic, conditional variable setting, or logging extracted values to a file for debugging.
+
+```groovy
+// Log extraction result -- remove before load test
+def token = vars.get("AUTH_TOKEN")
+if (token == "TOKEN_NOT_FOUND") {
+    log.error("Auth token extraction failed for user: " + vars.get("USERNAME"))
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage("Correlation failure: AUTH_TOKEN not extracted")
+}
 ```
-
----
-
-## Think Time and Pacing (Timers)
-
-Without timers, each virtual user hammers requests as fast as the server responds. Real users pause between clicks. Think time models this pause and prevents artificially high RPS per user.
-
-**Constant Timer** — fixed pause after each sampler in scope. Simple but not realistic.
-
-**Gaussian Random Timer** — pause drawn from a normal distribution. More realistic than constant.
-
-```xml
-<GaussianRandomTimer testname="Think Time">
-  <stringProp name="ConstantTimer.delay">1000</stringProp><!-- offset ms -->
-  <stringProp name="RandomTimer.range">2000.0</stringProp><!-- stdev ms -->
-</GaussianRandomTimer>
-```
-
-This produces pauses centred around 1000ms with ±2000ms variance. Mean pause ≈ 1000 + (2000 * 0.4) = 1800ms (Gaussian offset formula: offset + range * 0.4 at default σ).
-
-**Uniform Random Timer** — pause uniformly distributed between `[0, range] + constant`:
-
-```xml
-<UniformRandomTimer testname="Think Time">
-  <stringProp name="ConstantTimer.delay">500</stringProp>
-  <stringProp name="RandomTimer.range">1500</stringProp>
-</UniformRandomTimer>
-```
-
-Rule of thumb: attach timers at thread group level to apply globally; move to specific samplers only when a particular action warrants a different pacing.
 
 ---
 
 ## Assertions
 
-**Response Code Assertion** — checks HTTP status:
+Assertions validate sampler output. A failed assertion marks the sample as failed but does not stop the thread. Assertions contribute to the error rate in aggregate reports.
+
+### Response Assertion
+
+The general-purpose assertion. Can check response code, body, headers, URL, or the JMeter response message.
 
 ```xml
-<ResponseAssertion testname="Assert 200">
+<ResponseAssertion testname="Assert 200 OK">
   <collectionProp name="Asserion.test_strings">
     <stringProp>200</stringProp>
   </collectionProp>
   <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-  <intProp name="Assertion.test_type">8</intProp>
+  <intProp name="Assertion.test_type">8</intProp><!-- Contains -->
 </ResponseAssertion>
 ```
 
-**Response Body Assertion** — checks for expected content:
+Test type integers: `2` = Contains, `8` = Equals, `1` = Matches (regex), `16` = Not. Combine with bitwise OR: `18` = Not Contains.
 
-```xml
-<ResponseAssertion testname="Assert Body Contains product_id">
-  <collectionProp name="Asserion.test_strings">
-    <stringProp>product_id</stringProp>
-  </collectionProp>
-  <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-  <intProp name="Assertion.test_type">2</intProp><!-- Contains -->
-</ResponseAssertion>
-```
+### Duration Assertion
 
-**Duration Assertion** — marks a sample failed if it exceeds the threshold. Does not stop the test; it counts against the error rate:
+Marks a sample failed if elapsed time exceeds the threshold. Does not abort the request. Use as an SLO gate in load tests -- when p95 breaches the threshold, the error rate rises, and CI can fail on error rate.
 
 ```xml
 <DurationAssertion testname="Assert Under 2s">
@@ -280,359 +367,444 @@ Rule of thumb: attach timers at thread group level to apply globally; move to sp
 </DurationAssertion>
 ```
 
-**JSON Assertion** — validates JSON path exists and optionally matches a value:
+When to use: attach at the transaction controller level rather than individual samplers to assert the end-to-end user journey time.
+
+### Size Assertion
+
+Validates that the response body size is within expected bounds. Catches empty responses (0 bytes = server error that returned no body) and unexpectedly truncated payloads.
+
+```xml
+<SizeAssertion testname="Assert Non-Empty Response">
+  <stringProp name="Assertion.test_field">SizeAssertion.response_data</stringProp>
+  <intProp name="SizeAssertion.operator">5</intProp><!-- > -->
+  <longProp name="SizeAssertion.size">0</longProp>
+</SizeAssertion>
+```
+
+### JSON Assertion
+
+Validates that a JSONPath expression exists and optionally matches an expected value. Use to assert that mandatory fields are present in the response.
 
 ```xml
 <JSONPathAssertion testname="Assert Token Present">
   <stringProp name="JSON_PATH">$.data.token</stringProp>
-  <boolProp name="JSONVALIDATION">false</boolProp><!-- just check path exists -->
+  <boolProp name="JSONVALIDATION">false</boolProp><!-- path must exist only -->
   <boolProp name="EXPECT_NULL">false</boolProp>
+  <boolProp name="INVERT">false</boolProp>
 </JSONPathAssertion>
 ```
 
----
+Set `JSONVALIDATION=true` and add `<stringProp name="EXPECTED_VALUE">active</stringProp>` to assert an exact value match.
 
-## Distributed / Remote Testing
+**Assertion placement guidance:**
 
-A single JMeter process on a standard machine can generate roughly 300–500 RPS before the test generator itself becomes the bottleneck. For higher concurrency, use JMeter's controller/agent (called "slave" in older docs) model.
-
-**Architecture:**
-
-```
-Controller (your laptop or CI node)
-  ├── Agent 1 (cloud VM, e.g. 4-core 8GB)
-  ├── Agent 2
-  └── Agent 3
-```
-
-**Setup on each agent machine:**
-
-```bash
-# jmeter/bin/jmeter-server
-./jmeter-server -Djava.rmi.server.hostname=<AGENT_IP>
-```
-
-**Run from controller:**
-
-```bash
-jmeter -n -t test-plan.jmx \
-  -R agent1_ip,agent2_ip,agent3_ip \
-  -l results.jtl \
-  -e -o report/
-```
-
-The `-R` flag distributes the thread groups across all listed agents. Each agent runs the full thread group count — so 50 threads * 3 agents = 150 effective virtual users. Size your thread group for the per-agent share.
-
-**Network considerations:**
-
-- Agents need to reach the system under test, not the controller.
-- Open RMI port (1099 by default) between controller and agents.
-- Use a private subnet; avoid running agents in different geographic regions unless geo-distributed load is the test objective.
-- For large-scale cloud runs, prefer Taurus with BlazeMeter cloud execution or AWS/GCP spot instances bootstrapped with a startup script.
+| Assertion type | Attach at |
+|---|---|
+| Status code (200, 201) | Each sampler |
+| Response time SLO | Transaction controller |
+| Mandatory field presence | Each sampler (post-processor scope) |
+| Body content | Specific samplers only, not globally |
+| Size (non-empty) | Every sampler as a baseline |
 
 ---
 
-## Taurus: YAML Wrapper for JMeter
+## Timers
 
-Taurus (`bzt`) wraps JMeter (and k6, Gatling, Selenium) behind a code-first YAML interface. It handles JMeter installation, JVM flags, real-time reporting, and CI exit codes automatically.
+Timers pause execution after the sampler they are attached to. Placed at thread group level, they apply after every sampler. Placed under a specific sampler, they apply only after that sampler.
 
-**Install:**
+### Constant Timer
 
-```bash
-pip install bzt
+Fixed pause. Use only for scripted scenarios where exact timing is required (e.g., polling after a known async operation). Not realistic for load tests.
+
+```xml
+<ConstantTimer testname="Fixed 1s Pause">
+  <stringProp name="ConstantTimer.delay">1000</stringProp>
+</ConstantTimer>
 ```
 
-**Basic Taurus YAML (runs JMeter under the hood):**
+### Gaussian Random Timer
 
-```yaml
-execution:
-  - executor: jmeter
-    concurrency: 50
-    ramp-up: 60s
-    hold-for: 10m
-    throughput: 200  # target RPS
-    scenario: browse-products
+Pause drawn from a normal distribution. More representative of real user behaviour than a constant.
 
-scenarios:
-  browse-products:
-    default-address: https://api.example.com
-    requests:
-      - url: /api/v1/products
-        label: GET products
-        assert:
-          - contains:
-              - product_id
-          - not contains:
-              - error
-      - url: /api/v1/products/${product_id}
-        label: GET product detail
-        extract-jsonpath:
-          product_id: $.data[0].id
-
-reporting:
-  - module: final-stats
-    summary: true
-    percentiles: true
-  - module: junit-xml
-    filename: test-results/jmeter-results.xml
+```xml
+<GaussianRandomTimer testname="Think Time">
+  <stringProp name="ConstantTimer.delay">1000</stringProp><!-- offset ms -->
+  <stringProp name="RandomTimer.range">2000.0</stringProp><!-- range ms -->
+</GaussianRandomTimer>
 ```
 
-**Run:**
+Mean pause = `offset + (range * 0.4)` at the default standard deviation. The above produces a mean of ~1800ms.
 
-```bash
-bzt load-test.yml
+### Uniform Random Timer
+
+Pause uniformly distributed between `constant` and `constant + random_delay`. More predictable than Gaussian; easier to reason about minimum and maximum pauses.
+
+```xml
+<UniformRandomTimer testname="Think Time">
+  <stringProp name="ConstantTimer.delay">500</stringProp>
+  <stringProp name="RandomTimer.range">2000</stringProp>
+</UniformRandomTimer>
 ```
 
-Taurus prints a live summary table and exits non-zero if error rate or response time thresholds are breached. The `junit-xml` reporter produces output that CI systems (Jenkins, GitHub Actions) can parse as test results.
+This produces pauses between 500ms and 2500ms.
 
-**Wrapping an existing JMX file:**
+### Constant Throughput Timer
 
-```yaml
-execution:
-  - executor: jmeter
-    concurrency: 100
-    ramp-up: 2m
-    hold-for: 15m
-    scenario: existing-plan
+Controls requests per minute (not per second -- the unit is RPM) across all active threads. Use when the test objective is a target RPS rather than a target concurrency.
 
-scenarios:
-  existing-plan:
-    script: test-plans/checkout-flow.jmx
-    variables:
-      BASE_URL: https://staging.example.com
-      USERS_CSV: data/users.csv
+```xml
+<ConstantThroughputTimer testname="300 RPM Cap">
+  <intProp name="ConstantThroughputTimer.calcMode">2</intProp><!-- All active threads -->
+  <doubleProp name="throughput">300.0</doubleProp><!-- RPM -->
+</ConstantThroughputTimer>
 ```
+
+`calcMode=1` = this thread only, `calcMode=2` = all threads in thread group, `calcMode=4` = all threads in test plan.
+
+For the Throughput Shaping Timer (plugin), which accepts a rate schedule with ramp/hold/stress steps, install via the JMeter Plugins Manager (see Plugins section below).
 
 ---
 
-## Running JMeter in CI (Headless)
+## Listeners
 
-Never open the GUI in CI. The GUI is a test authoring tool — it loads all listeners into memory and renders them in real time, which inflates heap usage and produces unreliable results.
+Listeners collect and display results. They are the largest source of heap consumption in JMeter. The rule is simple: use listeners in the GUI during script development and debugging; remove or disable them for any actual load run.
 
-**Command-line syntax:**
+### View Results Tree
 
-```bash
-jmeter \
-  -n \                              # non-GUI mode
-  -t test-plans/checkout.jmx \     # test plan
-  -l results/results.jtl \         # raw output (CSV)
-  -e \                              # generate HTML report after test
-  -o results/html-report/ \        # HTML report output dir
-  -Jbase_url=https://staging.example.com \   # override JMeter property
-  -Jthreads=50 \
-  -Jrampup=60 \
-  -Jduration=600
-```
+Shows every request and response in detail. Essential for debugging correlation failures, assertion failures, and unexpected responses. Causes OOM errors with more than ~50 threads if left enabled. Always disable before running a load test.
 
-**GitHub Actions example:**
+**Correct use:** enable, run 1 thread, debug, disable.
 
-```yaml
-- name: Run JMeter load test
-  run: |
-    jmeter \
-      -n -t test-plans/api-load.jmx \
-      -l results/results.jtl \
-      -e -o results/html-report \
-      -Jbase_url=${{ vars.STAGING_URL }} \
-      -Jthreads=20 \
-      -Jrampup=30 \
-      -Jduration=300
-  env:
-    JVM_ARGS: "-Xms512m -Xmx2g"
+### Aggregate Report
 
-- name: Check error rate
-  run: |
-    python tools/check_jtl.py results/results.jtl --max-error-rate 0.01
+Shows per-sampler statistics: sample count, average, median, p90, p95, p99, min, max, error rate, throughput, received KB/s. The standard post-test report for client presentations. In non-GUI mode this data is generated by `jmeter -e -o report/`.
 
-- name: Upload HTML report
-  uses: actions/upload-artifact@v4
-  if: always()
-  with:
-    name: jmeter-report
-    path: results/html-report/
-```
+### Summary Report
 
-**Parsing JTL to enforce pass/fail:**
+Lightweight aggregate with fewer columns. Lower memory overhead than Aggregate Report. Acceptable for CI where you only need pass/fail decisions, not full percentile breakdowns.
 
-```python
-# tools/check_jtl.py
-import csv
-import sys
-import argparse
+### Backend Listener (InfluxDB -> Grafana)
 
-def check_jtl(path: str, max_error_rate: float, max_p95_ms: int = None):
-    rows = []
-    with open(path) as f:
-        reader = csv.DictReader(f)
-        rows = list(reader)
-
-    total = len(rows)
-    errors = sum(1 for r in rows if r.get("success", "true").lower() == "false")
-    error_rate = errors / total if total else 0
-
-    latencies = sorted(int(r["elapsed"]) for r in rows)
-    p95 = latencies[int(total * 0.95)] if total else 0
-
-    print(f"Total samples: {total}")
-    print(f"Error rate:    {error_rate:.2%}")
-    print(f"p95 latency:   {p95}ms")
-
-    failed = False
-    if error_rate > max_error_rate:
-        print(f"FAIL: error rate {error_rate:.2%} exceeds threshold {max_error_rate:.2%}")
-        failed = True
-    if max_p95_ms and p95 > max_p95_ms:
-        print(f"FAIL: p95 {p95}ms exceeds threshold {max_p95_ms}ms")
-        failed = True
-
-    sys.exit(1 if failed else 0)
-```
-
----
-
-## JMeter + Grafana / InfluxDB Real-Time Dashboard
-
-For long-running load tests (30+ minutes), real-time visibility beats post-hoc JTL analysis. The Backend Listener streams metrics to InfluxDB; Grafana visualises them live.
-
-**JMeter Backend Listener config:**
+The only listener suitable for production load runs. Streams metrics asynchronously to an external time-series database rather than accumulating them in memory.
 
 ```xml
 <BackendListener testname="InfluxDB Listener">
+  <stringProp name="classname">
+    org.apache.jmeter.visualizers.backend.influxdb.HttpMetricsSender
+  </stringProp>
   <elementProp name="arguments" elementType="Arguments">
     <collectionProp name="Arguments.arguments">
-      <elementProp name="influxdbMetricsSender" elementType="Argument">
-        <stringProp name="Argument.value">
-          org.apache.jmeter.visualizers.backend.influxdb.HttpMetricsSender
-        </stringProp>
-      </elementProp>
       <elementProp name="influxdbUrl" elementType="Argument">
-        <stringProp name="Argument.value">http://localhost:8086/write?db=jmeter</stringProp>
+        <stringProp name="Argument.value">http://influxdb:8086/write?db=jmeter</stringProp>
       </elementProp>
       <elementProp name="application" elementType="Argument">
         <stringProp name="Argument.value">checkout-load-test</stringProp>
       </elementProp>
-      <elementProp name="measurement" elementType="Argument">
-        <stringProp name="Argument.value">jmeter</stringProp>
-      </elementProp>
       <elementProp name="summaryOnly" elementType="Argument">
         <stringProp name="Argument.value">false</stringProp>
+      </elementProp>
+      <elementProp name="percentiles" elementType="Argument">
+        <stringProp name="Argument.value">90;95;99</stringProp>
       </elementProp>
     </collectionProp>
   </elementProp>
 </BackendListener>
 ```
 
-**Docker Compose for local InfluxDB + Grafana:**
+Import Grafana dashboard ID **5496** (JMeter Load Test Results) for an out-of-the-box view covering active threads, RPS, error rate, and response time percentiles by transaction.
+
+---
+
+## CLI Execution
+
+Never use the GUI for load tests. The canonical non-GUI command:
+
+```bash
+jmeter \
+  -n \                                          # non-GUI mode
+  -t test-plans/checkout.jmx \                 # test plan
+  -l results/results.jtl \                     # raw output (CSV format)
+  -e \                                          # generate HTML report after test
+  -o results/html-report/ \                    # HTML report output dir (must not exist)
+  -Jbase_url=https://staging.example.com \     # override User Defined Variable
+  -Jthreads=50 \
+  -Jrampup=60 \
+  -Jduration=600
+```
+
+**Key flags:**
+
+| Flag | Purpose |
+|---|---|
+| `-n` | Non-GUI (headless) mode |
+| `-t <file.jmx>` | Test plan file |
+| `-l <file.jtl>` | Results output file (CSV) |
+| `-e` | Generate HTML dashboard report |
+| `-o <dir>` | HTML report output directory (must not pre-exist) |
+| `-J<var>=<val>` | Override a JMeter property (accessible as `${__P(var,default)}`) |
+| `-G<var>=<val>` | Override a JMeter property globally across all threads |
+| `-R <ip,ip>` | Distribute test to remote injector nodes |
+| `-X` | Exit remote engines after the test |
+
+**JVM heap** -- set before running:
+
+```bash
+export JVM_ARGS="-Xms512m -Xmx4g -XX:MaxMetaspaceSize=256m"
+jmeter -n -t test.jmx -l results.jtl -e -o report/
+```
+
+The JTL file is a CSV with columns: `timeStamp`, `elapsed`, `label`, `responseCode`, `success`, `bytes`, `grpThreads`, `allThreads`, etc.
+
+---
+
+## CI Integration: GitHub Actions
 
 ```yaml
-services:
-  influxdb:
-    image: influxdb:1.8
-    ports: ["8086:8086"]
-    environment:
-      INFLUXDB_DB: jmeter
+name: Performance Gate
 
-  grafana:
-    image: grafana/grafana:latest
-    ports: ["3000:3000"]
-    volumes:
-      - grafana-data:/var/lib/grafana
-    depends_on: [influxdb]
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'   # nightly at 02:00 UTC
 
-volumes:
-  grafana-data:
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install JMeter
+        run: |
+          wget -q https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz
+          tar -xzf apache-jmeter-5.6.3.tgz
+          echo "${GITHUB_WORKSPACE}/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+
+      - name: Run load test
+        run: |
+          jmeter \
+            -n -t test-plans/api-load.jmx \
+            -l results/results.jtl \
+            -e -o results/html-report \
+            -Jbase_url=${{ vars.STAGING_URL }} \
+            -Jthreads=20 \
+            -Jrampup=30 \
+            -Jduration=300
+        env:
+          JVM_ARGS: "-Xms512m -Xmx2g"
+
+      - name: Enforce thresholds
+        run: python tools/check_jtl.py results/results.jtl --max-error-rate 0.01 --max-p95-ms 2000
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jmeter-report-${{ github.run_number }}
+          path: results/html-report/
 ```
 
-Import the **JMeter Dashboard** (Grafana dashboard ID 5496) for an out-of-the-box view covering active threads, RPS, error rate, response time percentiles.
+**Threshold enforcement script (`tools/check_jtl.py`):**
+
+```python
+import csv
+import sys
+import argparse
+
+
+def check_jtl(path: str, max_error_rate: float, max_p95_ms: int | None = None):
+    with open(path) as f:
+        rows = list(csv.DictReader(f))
+
+    total = len(rows)
+    if total == 0:
+        print("FAIL: JTL file is empty")
+        sys.exit(1)
+
+    errors = sum(1 for r in rows if r.get("success", "true").lower() == "false")
+    error_rate = errors / total
+
+    latencies = sorted(int(r["elapsed"]) for r in rows)
+    p95 = latencies[int(total * 0.95)]
+
+    print(f"Samples:    {total}")
+    print(f"Error rate: {error_rate:.2%}")
+    print(f"p95:        {p95}ms")
+
+    failed = False
+    if error_rate > max_error_rate:
+        print(f"FAIL: error rate {error_rate:.2%} > threshold {max_error_rate:.2%}")
+        failed = True
+    if max_p95_ms and p95 > max_p95_ms:
+        print(f"FAIL: p95 {p95}ms > threshold {max_p95_ms}ms")
+        failed = True
+
+    sys.exit(1 if failed else 0)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("jtl")
+    parser.add_argument("--max-error-rate", type=float, default=0.01)
+    parser.add_argument("--max-p95-ms", type=int, default=None)
+    args = parser.parse_args()
+    check_jtl(args.jtl, args.max_error_rate, args.max_p95_ms)
+```
 
 ---
 
-## Reading JMeter Summary Reports
+## Distributed Testing
 
-The aggregate report listener (or `jmeter -e` HTML output) provides these columns:
+A single JMeter process on a standard machine generates roughly 300-500 RPS before the load generator itself becomes the bottleneck. For higher concurrency (typically above 500 VUs or 500 RPS sustained), use JMeter's controller/injector model.
 
-| Column | Meaning |
-|---|---|
-| Label | Sampler name |
-| # Samples | Total requests sent |
-| Average | Mean response time (ms) — avoid using this as SLO metric |
-| Median | p50 latency |
-| 90% Line | p90 latency — standard SLO anchor |
-| 95% Line | p95 latency |
-| 99% Line | p99 latency — catches tail outliers |
-| Min / Max | Extremes — max often reveals timeout values |
-| Error % | Percentage of samples with failures |
-| Throughput | RPS sustained during the test window |
-| Received KB/sec | Server-side response bandwidth |
+**Architecture:**
 
-**Identifying bottlenecks:**
+```
+Controller (CI node or local machine)
+  ├── Injector 1 (cloud VM, e.g. 4-core / 8 GB)
+  ├── Injector 2
+  └── Injector 3
+```
 
-- **Rising p99 with stable p50** — a subset of requests hitting a slow path (DB lock contention, cold cache, GC pause). Not a capacity issue yet.
-- **p50 and p99 both rising together** — overall capacity ceiling being hit; scale horizontally or optimise the hot path.
-- **Error rate > 1% before target RPS** — the system is rejecting requests; check server-side logs for 5xx, connection pool exhaustion, or rate limiting.
-- **Throughput plateaus below target** — the server is saturated; adding more threads only increases error rate from this point.
-- **Max latency = exactly round number (e.g. 30000ms)** — requests are hitting a timeout, not completing. Find and fix the timeout configuration or the upstream call causing it.
+**Setup on each injector:**
 
----
-
-## Common Pitfalls
-
-**Running tests in GUI mode**
-GUI mode loads listeners into memory and renders every sample in real time. This consumes 3–5x more heap than headless and produces lower throughput from the load generator itself, making results unrepresentative. Use GUI only to build and debug scripts; always run actual load tests with `-n`.
-
-**Insufficient Java heap**
-Default JVM heap is 512MB. A 200-thread test with a View Results Tree listener open will OOM. Set via environment variable before starting JMeter:
 ```bash
-export JVM_ARGS="-Xms1g -Xmx4g"
+# On each injector node
+./jmeter-server -Djava.rmi.server.hostname=<INJECTOR_IP>
 ```
-For distributed agents, set this on each agent node in `jmeter-server.sh`.
 
-**No think time**
-A script with no timers and 50 threads sends requests as fast as responses arrive. At 100ms average response time, that's 50 * 10 = 500 RPS — far above any realistic user concurrency model. This makes the test a stress test by accident. Always model think time unless you explicitly want a stress/soak scenario.
+**Run from controller:**
 
-**Static assets not excluded from recording**
-A recorded script capturing JS/CSS/image requests inflates sample counts, creates misleading error rates when CDN assets are unavailable in staging, and pollutes the aggregate report with noise. Add a URL filter to the recorder or a Throughput Controller set to 0% for static extensions.
+```bash
+jmeter -n -t test-plan.jmx \
+  -R 10.0.0.1,10.0.0.2,10.0.0.3 \
+  -l results.jtl \
+  -e -o report/
+```
 
-**CSV Data Set Config exhaustion**
-When a CSV file has fewer rows than the number of concurrent threads * iterations, JMeter will recycle rows or error depending on the "Recycle on EOF?" setting. In authenticated flows, this means multiple threads sharing the same credential, causing 401s or session conflicts. Size your test data set to at least 2x the peak concurrent thread count.
+**Thread count semantics:** the `-R` flag distributes the test but does not divide thread counts. 50 threads * 3 injectors = 150 effective VUs. Size your thread group to the per-injector share.
 
-**Not verifying correlation before scaling**
-A script that works at 1 thread but fails at 50 almost always has a correlation issue — dynamic tokens extracted correctly in isolation but clashing when concurrent threads share state. Always run at 1 thread with "View Results Tree" open before scaling, verifying each extracted variable has a non-sentinel value.
+**Network requirements:**
+- RMI port 1099 must be open between controller and injectors.
+- Injectors need network access to the system under test, not to each other.
+- Use a private subnet. Geographic distribution is a deliberate choice, not a default.
+- Injectors need the same JMeter version and the same plugin set as the controller.
+
+**When to use distributed testing:**
+- Target VU count > 500.
+- Target RPS > 500 sustained (depends on response size and think time).
+- CPU on the single controller node exceeds 80% during the test ramp.
+- The test requires geographic distribution of load origins.
+
+For large cloud-scale runs, consider wrapping with Taurus (`bzt`) or using BlazeMeter cloud execution, which handles injector provisioning automatically.
 
 ---
 
-## JMeter vs k6: When Each Wins
+## JMeter vs k6
 
-| Dimension | JMeter | k6 |
+| Dimension | JMeter | [[k6]] |
 |---|---|---|
-| Test language | XML (JMX) + GUI | JavaScript (ES6) |
-| Learning curve | Higher (XML, GUI concepts) | Lower (code-first) |
-| Ecosystem maturity | 25+ years, vast plugin library | 8 years, growing fast |
-| Enterprise client fit | Near-universal — already installed | Increasing adoption |
-| Distributed testing | Built-in controller/agent | k6 Cloud or k6 operator for K8s |
-| Real-time dashboards | Backend Listener → InfluxDB/Grafana | Built-in k6 Cloud or Prometheus |
-| CI integration | Taurus or raw CLI | First-class (`k6 run`, exit codes) |
-| Protocol coverage | HTTP, JDBC, JMS, LDAP, FTP, SMTP | HTTP, WebSocket, gRPC (extensions) |
-| Resource usage | Higher (JVM per thread) | Lower (Go coroutines) |
-| Scripting complexity | GUI reduces complexity | Code-first scales better |
+| Test definition | XML (`.jmx`) + GUI | JavaScript / TypeScript |
+| Learning curve | Higher -- GUI concepts, XML structure | Lower -- code-first |
+| Ecosystem age | 25+ years, vast plugin library | ~8 years, fast growing |
+| Protocol coverage | HTTP, JDBC, JMS, LDAP, FTP, SMTP, TCP | HTTP, WebSocket, gRPC (via extensions) |
+| Distributed testing | Built-in controller/injector | k6 Cloud or k6 Operator (Kubernetes) |
+| Resource usage per VU | Higher (JVM thread per VU) | Lower (Go goroutine per VU) |
+| Real-time dashboards | Backend Listener to InfluxDB/Grafana | k6 Cloud or Prometheus remote write |
+| CI integration | Taurus or raw CLI with JTL parsing | First-class (`k6 run`, threshold exit codes) |
+| Code review of tests | Difficult -- XML diffs are noisy | Natural -- JavaScript PRs |
+| Script version control | Possible but painful | Clean |
 
 **Choose JMeter when:**
-- The client already has JMeter scripts and infrastructure.
-- You need non-HTTP protocol testing (JDBC, JMS, LDAP).
-- The team is not comfortable with JavaScript.
-- You need the broadest plugin ecosystem.
+- The client already has `.jmx` scripts and JMeter infrastructure.
+- Non-HTTP protocol testing is required (JDBC, JMS, LDAP, FTP, TCP).
+- The team is not comfortable with JavaScript or TypeScript.
+- You need the broadest plugin ecosystem for specialist scenarios.
+- Enterprise license compliance requirements favour open-source Apache projects.
 
-**Choose k6 when:**
+**Choose [[k6]] when:**
 - Greenfield project with developer-led performance testing.
-- Existing JavaScript/TypeScript skillset.
-- Kubernetes-native deployment (k6 operator).
-- You want TypeScript type safety in test scripts.
-- CI-first workflow where code review of test scripts matters.
+- Existing JavaScript/TypeScript skillset in the team.
+- Kubernetes-native deployment (k6 Operator).
+- CI-first workflow where test scripts are code-reviewed.
+- You want type safety and IDE support for test scripts.
+- Horizontal scaling via cloud execution without managing injector nodes.
 
-See also: [[qa/performance-testing-qa]] for NFR acceptance criteria and [[technical-qa/k6]] for k6 in depth.
+**Migration path:** if a client has existing `.jmx` files that must be preserved while modernising the CI pipeline, wrap JMeter with Taurus (`bzt`) rather than rewriting immediately. Taurus provides clean YAML configuration and proper CI exit codes while preserving the existing `.jmx` investment.
+
+---
+
+## JMeter Plugins
+
+The JMeter Plugins Manager (available at `jmeter-plugins.org`) extends the core installation with additional samplers, controllers, listeners, and timers. Install via `Plugins Manager -> Available Plugins`.
+
+**Essential plugins for performance testing engagements:**
+
+**Stepping Thread Group** -- staircase load profiles with configurable step size, hold duration, and target thread count. Easier to reason about than a ramp for capacity tests. (Plugin: `jpgc-tst`)
+
+**Throughput Shaping Timer** -- rate-based test scheduling with a time-series schedule (RPS vs time). More precise than Constant Throughput Timer for complex load shapes. (Plugin: `jpgc-graphs-basic`)
+
+```
+Time (s)   Target RPS
+0-60       10           # warm-up
+60-660     100          # steady state
+660-780    200          # stress spike
+780-840    0            # cooldown
+```
+
+**3 Basic Graphs** -- adds active threads, transactions per second, and response time over time graphs to the GUI. The only listeners worth running locally for visual debugging. (Plugin: `jpgc-graphs-basic`)
+
+**WebSocket Sampler** -- full WebSocket testing support (open connection, send/receive, close). Required for any real-time feature load testing. (Plugin: `websocket-samplers`)
+
+**Custom Thread Groups** -- includes Ultimate Thread Group, Arrivals Thread Group, and Free-Form Arrivals Thread Group for advanced load shaping beyond what the standard thread group supports. (Plugin: `jpgc-casutg`)
+
+---
+
+## Reading Results
+
+The HTML report generated by `jmeter -e -o report/` and the Aggregate Report listener share the same column set.
+
+| Column | Meaning | Notes |
+|---|---|---|
+| # Samples | Total requests sent | |
+| Average | Mean response time (ms) | Do not use as your SLO metric |
+| Median | p50 latency | |
+| 90% Line | p90 latency | Standard SLO anchor for most clients |
+| 95% Line | p95 latency | Use for stricter SLOs |
+| 99% Line | p99 latency | Catches tail latency and timeouts |
+| Min | Fastest sample | |
+| Max | Slowest sample | Round numbers (e.g. 30000ms) = timeout |
+| Error % | Failed assertions + non-2xx responses | Primary CI gate metric |
+| Throughput | Sustained RPS | Compare to target |
+| Received KB/s | Response bandwidth | |
+
+**Diagnosing bottlenecks from results:**
+
+- **p50 stable, p99 rising** -- a subset of requests hitting a slow path (DB lock, cold cache, GC pause). Not yet at capacity ceiling.
+- **p50 and p99 both rising together** -- overall capacity ceiling; scale out or optimise the hot path.
+- **Error rate > 1% before target RPS reached** -- server rejecting requests; check for connection pool exhaustion, 5xx errors, or rate limiting.
+- **Throughput plateaus below target** -- server saturated; adding threads only inflates errors from this point.
+- **Max = exactly N * 1000** -- requests hitting a configured timeout. Identify and fix the upstream call or timeout config.
+
+---
+
+## Common Mistakes
+
+**Running load tests in GUI mode.** The GUI loads all listeners into memory and renders samples in real time. This consumes 3-5x more heap than headless mode and reduces the throughput the load generator can sustain, making results unrepresentative. Use the GUI only to build and debug scripts.
+
+**No correlation.** A script that replays recorded traffic with hardcoded session tokens will fail at any user count above 1. Every dynamic value (session ID, CSRF token, auth token, order ID) must be extracted from the response that creates it and injected into subsequent requests. Always verify correlation at 1 thread with View Results Tree open before scaling.
+
+**Hardcoded think times.** A constant 1000ms think time applied uniformly produces synthetic, uniform traffic. Real users have variance. Use Gaussian or Uniform Random Timers. Worse: no think time at all accidentally turns a concurrency test into an unintended stress test.
+
+**Listeners left enabled for load tests.** View Results Tree in particular will cause OOM with more than ~50 threads. Disable all listeners except the Backend Listener before running at load. Add a comment to the `.jmx` noting which listeners are debug-only.
+
+**CSV exhaustion.** If the CSV Data Set Config file has fewer rows than `threads * iterations`, JMeter recycles rows or stops threads depending on the `recycle` setting. In authenticated flows this causes session collisions. Size the data file and set `recycle=false` + `stopThread=true` to detect the problem early.
+
+**Insufficient heap.** The default JVM heap is 512 MB. A 200-thread test with several extractors and assertions can exhaust this quickly. Always set `JVM_ARGS="-Xms1g -Xmx4g"` before running load tests. On distributed injectors, set this in `jmeter-server.sh`.
+
+**Measuring from the wrong point.** Response time in JMeter is measured from the moment the request is sent to the moment the last byte of the response is received, at the load generator. Network latency between the injector and the system under test is included. For fair comparisons, run injectors in the same region or data centre as the system under test, unless geo-distributed latency is the test objective.
 
 ---
 
 ## Connections
 
-[[qa/performance-testing-qa]] · [[qa/non-functional-testing]] · [[qa/performance-test-reporting]] · [[qa/test-automation-strategy]] · [[qa/qa-tools]] · [[technical-qa/k6]] · [[technical-qa/gatling]] · [[protocols/mcp]]
+[[performance-testing]] · [[load-testing-advanced]] · [[api-performance-testing]] · [[k6]] · [[technical-qa/ci-cd-quality-gates]] · [[technical-qa/test-observability]] · [[technical-qa/tqa-hub]]

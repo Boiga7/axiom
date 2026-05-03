@@ -1,356 +1,446 @@
 ---
 type: concept
 category: ai-tools
-tags: [ai-testing, test-generation, copilot, codiumai, automation, llm]
+tags: [ai-testing, test-generation, llm, claude-code, copilot, automated-testing]
 sources: []
 updated: 2026-05-03
 para: resource
-tldr: AI tools that generate test cases, test code, and test data — covering GitHub Copilot, CodiumAI/Qodo, Diffblue Cover, PR-Agent, and Claude/ChatGPT patterns, with a consultant selling angle for GitHub Enterprise clients.
 ---
 
-# AI Test Generation Tools
+# AI-Assisted Test Generation
 
-> **TL;DR** A field guide to tools that generate tests using AI — what each tool does well, where each breaks, how to measure ROI, and how to pitch the capability to a client who already holds GitHub Enterprise licences.
+AI-assisted test generation uses LLMs to produce test code from implementation code, API specifications, user stories, or requirement descriptions. It is an augmentation capability, not a replacement for QA engineering judgment. The LLM handles the mechanical work of scaffolding tests; the engineer is responsible for verifying that those tests are actually checking the right behaviour.
 
-AI test generation covers three distinct problems: writing unit/integration test code, generating test cases (scenarios and acceptance criteria) from requirements, and producing synthetic test data. The tools addressing each are different. The sales motion is different. This page maps the landscape, surface limitations honestly, and gives you the language to position the capability without over-promising.
+The positioning matters for client conversations: the pitch is not "AI writes your tests," it is "your engineers write more tests, faster, and with fewer coverage blind spots."
 
----
-
-## The Core Tools
-
-### GitHub Copilot — `/tests` and Inline Generation
-
-Copilot is the entry point for most enterprise clients because they already pay for it under GitHub Enterprise Cloud ($39/user/month). The test generation surface has two modes.
-
-**`/tests` slash command (Copilot Chat):** Open a file or select a function, type `/tests` in Copilot Chat, and Copilot generates a test file targeting that code. For a Python function it will produce a `pytest` file with a handful of cases. For a TypeScript React component it will produce a Vitest or Jest file with RTL render assertions.
-
-What it actually does: it reads the selected code, infers the framework from `package.json` / `pyproject.toml` context in the workspace, and generates tests that call the function with representative inputs and assert on outputs. It does not run the tests. It does not know whether the assertions are correct.
-
-**Inline generation:** In any open test file, start a function signature (`def test_`) and Copilot completes a full test body based on context. Works well when existing tests in the same file establish the pattern.
-
-**Copilot Edits for test coverage gaps:** You can ask Copilot Edits (multi-file mode) to "add tests for all uncovered paths in `auth.py`". It will scan the file and write tests. Quality varies significantly with function complexity.
-
-**Practical limits:**
-- Happy path bias — Copilot over-generates sunny-day cases and under-generates edge cases unless you explicitly ask for them.
-- No mutation testing awareness — it cannot tell you whether its assertions would catch a bug.
-- Assertion hallucination — for complex business logic, Copilot may assert the wrong expected value because it infers expected outputs from function names rather than running the code.
-- Context window constraints — for large source files (>500 lines), Copilot may generate tests only for the first few visible functions.
-
-**Prompt pattern that improves output:**
-```
-/tests
-Focus on: null inputs, boundary values, and error paths.
-Use pytest parametrize for input variations.
-Do not assert on log output or print statements.
-The function is pure — no mocks needed.
-```
+See also: [[ai-tools/claude-code]], [[ai-tools/cursor-copilot]], [[test-automation/playwright]], [[technical-qa/testing-llm-apps]], [[qa/ai-testing]], [[technical-qa/pytest-patterns]]
 
 ---
 
-### CodiumAI / Qodo — Intent Analysis and Edge Case Generation
+## What AI Test Generation Is
 
-CodiumAI rebranded to Qodo in 2024. The VS Code and JetBrains extension analyses code *intent* before generating tests — it tries to understand what the function is supposed to do, not just what the code does. This produces more meaningful edge cases than Copilot's pattern-matching approach.
+An LLM receives context — source code, a spec, a natural language description of a feature — and returns test code in a specified framework. The model draws on its training data of open-source test suites to apply familiar patterns: arrange/act/assert, fixtures, parametrize decorators, mock objects. It can enumerate boundary conditions faster than a human can type them, and it does not forget to add the negative case after the happy path.
 
-**How it works:**
-1. You open a function or class and trigger Qodo.
-2. Qodo generates a natural-language description of the function's intended behaviour (the "intent").
-3. From that intent, it generates a test plan: a list of scenarios covering normal flow, edge cases, and error handling.
-4. You review the plan, add/remove scenarios, and Qodo generates the test code.
+What it cannot do is understand the business invariants that live only in a domain expert's head, or reliably distinguish tests that pass because the code is correct from tests that pass because the test is written to agree with a buggy implementation.
 
-The plan review step is the differentiator. You are approving test intent before code is written, which catches "wrong test" failures before they're committed.
+The practical division of labour:
 
-**Edge case generation approach:** Qodo uses a coverage taxonomy:
-- Boundary values (off-by-one, max/min)
-- Type edge cases (None, empty string, empty list, zero)
-- Concurrency (if the function has shared state)
-- Idempotency (calling twice produces same result)
-- Exception paths
-
-**Pricing:** Free tier (limited daily requests). Teams plan at $19/user/month. Enterprise pricing on request.
-
-**Where it falls short:**
-- The intent analysis is only as good as the code's naming and structure. Cryptic legacy code produces vague intent descriptions, and the test plan degrades accordingly.
-- No awareness of downstream integration contracts — it tests functions in isolation and will not catch integration-level breaks.
-- Requires developers to actively review the test plan. If the team rubber-stamps the plan without reading it, the quality advantage over Copilot largely disappears.
-
-**Consultant positioning:** Qodo is the upgrade path when a team already has Copilot but finds test quality poor. The intent review step gives QA engineers an explicit sign-off point, which matters for teams working under ISO 25010 or similar quality frameworks.
+| Human responsibility | AI responsibility |
+|---|---|
+| Define what "correct" means | Scaffold the test skeleton |
+| Review assertions for semantic validity | Enumerate boundary conditions |
+| Identify business-critical invariants | Generate test data variants |
+| Approve final test suite | Apply framework conventions |
+| Maintain tests as requirements change | Draft parametrised cases |
 
 ---
 
-### Diffblue Cover — Java Unit Tests for Legacy Codebases
+## Use Cases
 
-Diffblue Cover is purpose-built for Java. It generates JUnit tests through static and symbolic analysis — no LLM at the core of the test generation itself; it uses a combination of formal methods and ML to produce tests that actually pass. This distinction matters: the generated assertions are verified against real execution, not inferred from function names.
+### Unit Test Generation from Implementation Code
 
-**Primary use case:** Legacy Java codebases with low or zero test coverage. Diffblue calls this "test debt elimination". A typical engagement runs Cover against the codebase, generates a test suite, commits it, and uses it as a safety net for subsequent refactoring.
+The highest-fidelity use case. Given a function or class, the model can generate a comprehensive set of unit tests covering:
 
-**How it differs from LLM tools:**
-- Tests are guaranteed to pass against the current code. They encode current behaviour, not intended behaviour.
-- Better for regression nets than for TDD or specification-first testing.
-- No hallucinated assertions — it runs the code to determine expected outputs.
+- The happy path with representative inputs
+- Boundary values at the edges of each parameter's valid range
+- Invalid inputs that should raise exceptions or return error states
+- Mocked dependencies to keep tests isolated
 
-**Integration:** Diffblue integrates with Maven and Gradle. It runs as a plugin or via CLI in a CI pipeline. The IntelliJ IDEA plugin provides inline test generation.
+The output quality correlates strongly with how clean the implementation is. Pure functions with clear signatures and typed parameters produce better tests than methods with hidden state, global dependencies, or overloaded semantics.
 
-**Cover Enterprise:** Includes the `dfb fix` command, which updates broken tests when production code changes. This addresses the maintenance burden problem directly — when code is refactored, Cover regenerates affected tests.
+### API Test Generation from OpenAPI Specifications
 
-**Limitations:**
-- Java only. No Python, TypeScript, or C#.
-- Tests encode current behaviour, including bugs. If the production code has a defect, the generated test will assert the buggy output. You need to run Cover again after fixing bugs.
-- Complex dependency graphs (deep Spring autowiring, JPA repositories) require additional configuration before Cover can generate meaningful tests.
-- Licensing cost is significant — the enterprise offering is not publicly priced, typically negotiated. Not a casual purchase.
+OpenAPI specs are dense, structured contracts — exactly the kind of context LLMs parse well. Given a spec, the model can generate:
 
-**When to recommend it:** Client has a Java monolith, 20%+ test coverage, and is planning a refactor or migration. Cover gives them a regression safety net in days rather than months of manual test authoring. ROI is immediate and measurable.
+- Request builders for each endpoint with valid payloads drawn from `example` and `default` values in the schema
+- Schema validation assertions that verify response bodies match the declared structure
+- Status code coverage (200, 400, 401, 404, 422, 500 paths)
+- Parametrised tests over path and query parameters
 
----
+The model can also infer negative cases: send a required field as null, omit a required header, send a payload that violates a `minLength` constraint. This boundary coverage is tedious to write by hand and LLMs do it reliably.
 
-### PR-Agent — Test Suggestions on Pull Requests
+Integration with WireMock or similar mocking layers means these tests can run without a live backend from day one. See [[technical-qa/wiremock]].
 
-PR-Agent (by CodiumAI/Qodo) is a GitHub/GitLab app that runs on every PR and posts automated review comments. Among its review modes is `/improve` which suggests missing tests as part of the review.
+### E2E Test Scenario Generation from User Stories
 
-**How the test suggestion works:** PR-Agent reads the diff, identifies changed functions without corresponding test additions, and posts a comment listing suggested test cases (as natural-language descriptions, not code) with a brief rationale for each.
+Given a user story with acceptance criteria, an LLM can draft a Playwright or Cypress scenario in natural language (Gherkin) or directly in code. The model translates the "Given / When / Then" structure into:
 
-**The `/add_docs` and `/test` commands:** The `/test` command generates a test file for the PR's changed code and posts it as a comment. Reviewers can copy it into the codebase directly.
+- Navigation to the correct URL
+- Interaction steps (fill, click, select)
+- Assertion checkpoints at each step
+- Negative flows (what happens if the user submits without filling required fields)
 
-**Pricing:** Open-source version is free (self-hosted or GitHub Actions). Pro version ($15/user/month) adds the full test generation, enhanced review, and analytics.
+The value here is speed to first draft, not accuracy of the final test. User story language is often ambiguous on implementation details (which selector to use, what the exact success message says) and the generated test will require manual calibration. Having a structure to edit is faster than writing from scratch.
 
-**Where it adds value:** It catches "PR without tests" before the review conversation starts. Rather than a reviewer manually asking "where are the tests?", PR-Agent flags it automatically with suggested scenarios. It lowers the friction of the "you need to write tests for this" conversation.
+See [[test-automation/playwright]] for selector strategy and locator best practices that should guide the review of any AI-generated E2E test.
 
-**Limitations:**
-- Post-commit workflow — tests are suggested after code is written, not before. The TDD discipline is not enforced.
-- Quality of suggestions degrades for PRs with large diffs touching many files simultaneously.
-- Requires buy-in from the PR review culture. If reviewers ignore bot comments, the tool adds no value.
+### Test Data Generation
 
----
+Generating realistic, structurally valid test data is mechanical work that LLMs handle well:
 
-## Claude and ChatGPT for Requirements-to-Test-Cases
+- Factories that produce valid model instances with overridable fields
+- Edge-case data sets: empty strings, maximum-length strings, Unicode edge cases, negative numbers, zero, null
+- Relational sets: a user with three orders, two of which are fulfilled and one pending
+- Anonymised realistic data: plausible names, addresses, dates — not obviously fake but not PII
 
-Beyond IDE-integrated tools, using Claude or ChatGPT directly for test case generation from requirements is a distinct and high-value workflow — particularly for black-box and acceptance test design.
+The model can also generate data that violates constraints on demand ("give me a payload where `end_date` is before `start_date`"), which is useful for negative test coverage.
 
-### Prompt Patterns That Work
+### Boundary Value Analysis Assistance
 
-**From user story to Gherkin scenarios:**
-```
-You are a QA engineer. Convert this user story into Gherkin scenarios.
-Include: the happy path, at least 3 edge cases, and 2 error scenarios.
-Do not generate step definitions — scenarios only.
+BVA is a technique every QA engineer knows and few enjoy doing manually for large parameter spaces. An LLM can enumerate the boundary set automatically:
 
-User story:
-As a registered user, I can reset my password via email.
-The reset link expires after 24 hours.
-```
+- For a parameter with `minimum: 0, maximum: 100`: generate cases for -1, 0, 1, 99, 100, 101
+- For a string with `minLength: 3, maxLength: 50`: generate the empty string, "ab", "abc", a 50-char string, a 51-char string
+- For an enum: generate each valid value and at least one invalid value
 
-Claude produces well-structured scenarios because Gherkin syntax is heavily represented in training data. The 24-hour expiry will appear as an edge case unprompted if you mention it in the story — which is a good signal for what to include.
-
-**From API contract to test matrix:**
-```
-Given this OpenAPI spec endpoint:
-POST /api/orders
-[paste schema]
-
-Generate a test matrix covering:
-- Required field validation (each field missing individually)
-- Type mismatches
-- Boundary values for numeric fields
-- Authentication failure scenarios
-- Idempotency (duplicate request with same order ID)
-```
-
-This is significantly faster than manual test matrix authoring. The output is a table the QA engineer reviews and prioritises, not final test code.
-
-**Generating parametrized test data:**
-```
-Generate 20 rows of test data for a UK address form.
-Requirements:
-- Mix of valid and invalid postcodes (flag which are invalid)
-- Include edge cases: very long street names, apostrophes, numbers-only town names
-- Include 3 rows designed to test SQL injection vulnerability
-- Output as JSON array
-```
-
-### Limitations of LLM-Based Test Generation
-
-**Hallucinated assertions on complex logic:** If you ask Claude to write a unit test for a function with complex business rules (tax calculation, date arithmetic, financial rounding), it will infer expected outputs from the code. If the code is wrong, the test may encode the bug. Always verify expected values against the specification, not the implementation.
-
-**Prompt-dependency:** Test quality is directly proportional to the quality of the input. Vague requirements produce vague test cases. This is not a tool limitation — it is a requirements quality detector. Low-signal prompts surface requirements gaps.
-
-**No execution feedback loop:** Claude cannot run the tests it generates. A generated pytest file may have import errors, incorrect mock setup, or wrong fixture signatures. There is always a human (or CI) integration step between generation and usable tests.
-
-**Coverage blind spots:** LLMs tend to generate tests for paths that are easy to describe in natural language. Concurrent execution bugs, memory leaks, and timing-sensitive paths are systematically under-represented in LLM output. These require specialist tooling (thread sanitizers, profilers) not LLM generation.
-
-**Context window limits for large codebases:** Pasting a 2,000-line service class and asking for tests produces diminishing returns past roughly 500 lines. Decompose into functions before generating.
+This is particularly valuable when reviewing AI-generated API tests against an OpenAPI spec — ask the model to enumerate the full boundary set for each field.
 
 ---
 
-## AI-Generated Test Data
+## Claude Code for Test Generation
 
-### Faker with LLM Seeding
+[[ai-tools/claude-code]] is the most capable general-purpose test generation tool for complex codebases. The workflow:
 
-The `Faker` library (Python/JS/Ruby) generates structurally valid fake data. The pattern with LLMs is to use Faker for structure and an LLM to produce the seed list — the set of representative values the tests actually cover.
+### The Core Workflow
+
+1. Write the implementation code (or open an existing file)
+2. Ask Claude to generate tests with a focused prompt
+3. Review the output: check assertions, check coverage, check independence
+4. Iterate on specific gaps ("add tests for the error cases" / "the assertion on line 34 is wrong, it should check X")
+5. Run the tests and fix failures — some generated tests will fail because they misread the implementation
+
+The iteration loop is fast because Claude maintains context across the conversation. You can say "the `test_invalid_input` test is wrong — the function returns None, it doesn't raise ValueError" and Claude will correct just that test.
+
+### Effective Prompts for Test Generation
+
+The difference between a mediocre and a useful output is almost entirely in the prompt. Key elements:
+
+**Provide the implementation and name the framework explicitly:**
+
+```
+Here is the implementation of `calculate_discount`:
+
+[paste code]
+
+Write pytest tests for this function. Use the `pytest.mark.parametrize` decorator
+for the boundary cases. Mock the database call in `get_user_tier`. Follow the
+arrange/act/assert pattern with blank lines between sections. Use descriptive
+test names in the format `test_<method>_<scenario>_<expected_outcome>`.
+```
+
+**Ask for unhappy paths explicitly.**
+LLMs default to happy-path tests unless pushed. Always add:
+
+```
+Include tests for:
+- Invalid input types
+- Out-of-range values
+- None/null inputs where the type annotation allows them
+- The case where the dependency raises an exception
+```
+
+**Request test data factories alongside the tests:**
+
+```
+Also generate a factory function `make_order(...)` that creates a valid Order
+object with sensible defaults and accepts keyword arguments to override specific
+fields. Use it in all the tests instead of constructing objects inline.
+```
+
+**Specify what "done" looks like:**
+
+```
+The test suite should achieve 100% branch coverage on the `calculate_discount`
+function. List the branches you are covering in a comment at the top of the file.
+```
+
+### Using CLAUDE.md to Set Testing Conventions
+
+The `CLAUDE.md` file in the project root is read by Claude Code at session start. Use it to enforce testing conventions once rather than repeating them in every prompt:
+
+```markdown
+## Testing conventions
+- Framework: pytest with pytest-asyncio (mode=auto)
+- All fixtures in conftest.py, never inline in test files
+- Factory functions in tests/factories.py
+- Mock external HTTP calls with respx, never with unittest.mock.patch
+- Test names: test_<method>_<scenario>_<expected_outcome>
+- No hardcoded UUIDs or timestamps — generate them in fixtures
+- Every test file must have a module docstring describing what it tests
+```
+
+With these conventions in CLAUDE.md, generated tests respect them without explicit prompting. See [[ai-tools/claude-code]] for the full CLAUDE.md governance model.
+
+---
+
+## GitHub Copilot for Tests
+
+[[ai-tools/cursor-copilot]] covers Copilot in depth. The test-generation-specific patterns:
+
+### Inline Suggestions
+
+Copilot's autocomplete works well for test files because test code is highly repetitive. Type the name of a new test function (`def test_invalid_email`) and Copilot will infer from the context of the existing test file what pattern to follow. It picks up the fixture names, the assertion style, and the naming convention from the surrounding file.
+
+This is the lowest-friction mode: you stay in flow, Copilot fills in the boilerplate, you tab-accept or discard.
+
+### `/tests` Slash Command in Chat
+
+Copilot Chat supports `/tests` as a dedicated slash command for test generation. Highlight a function or class, open Chat, and type `/tests`. Copilot generates a test file for the selection using conventions inferred from the project.
+
+Copilot Chat also supports `/fixTestFailure` — paste a failing test and the error output and it will suggest the fix. Useful for the post-generation correction loop.
+
+### When Copilot Works Well vs Poorly
+
+**Works well:**
+- Autocomplete within an existing test file that establishes context
+- Test generation for simple, self-contained functions with clear signatures
+- Projects with strong existing test patterns for the model to imitate
+- TypeScript/JavaScript projects (Copilot's training data skews heavily toward JS)
+
+**Works poorly:**
+- Complex domain logic with many interacting objects
+- Custom frameworks or DSLs the model has not seen
+- Tests that require understanding of business rules not expressed in code
+- Integration tests that depend on specific infrastructure setup
+
+Copilot's test generation is shallower than Claude's because it has less context window available and cannot be prompted interactively to iterate. The `/tests` command is a good starting point; Claude Code is the better tool for iterating on quality.
+
+---
+
+## Cursor Composer for Test Suites
+
+Cursor's Composer mode can generate entire test files from context across multiple open files simultaneously. The workflow:
+
+1. Open the implementation file(s) and any relevant schema or type files in the editor
+2. Open Composer (Cmd+I / Ctrl+I)
+3. Prompt: "Generate a complete test suite for `[module name]`. Use the existing test files in `tests/` as the pattern. Cover happy path, boundary values, and error cases."
+
+Composer's advantage over single-file generation is that it can read the full project context — related models, services, config — without you explicitly pasting them. This matters for integration-adjacent tests where you need to know what objects your code interacts with.
+
+The `.cursorrules` file plays the same role as `CLAUDE.md` for enforcing conventions. Add testing rules there and Composer will apply them. See [[ai-tools/cursor-copilot]].
+
+---
+
+## Prompt Patterns for High-Quality Output
+
+### Pattern 1: Implementation + Expected Behaviour Description
+
+Do not just paste the code. Add a natural language description of what the code is supposed to do and what the invariants are:
+
+```
+Here is `apply_coupon(cart, coupon_code)`:
+
+[code]
+
+This function should:
+- Return the cart with the discount applied if the coupon is valid and not expired
+- Raise `CouponExpiredError` if the coupon's expiry_date is in the past
+- Raise `CouponNotFoundError` if the coupon_code does not exist in the database
+- Raise `CouponAlreadyUsedError` if the user in the cart has already used this coupon
+- Never apply a discount greater than the cart total (minimum final price is 0)
+
+Write pytest tests covering all of these behaviours.
+```
+
+The description disambiguates intent from implementation. If the code has a bug (e.g., the expiry check is wrong), the test generated from the description will catch it. A test generated from the code alone would agree with the bug.
+
+### Pattern 2: Ask for Boundary Cases and Unhappy Paths Explicitly
+
+After a first-pass generation, always follow up:
+
+```
+What boundary conditions and unhappy paths are missing from this test suite?
+List them, then add the missing tests.
+```
+
+LLMs are reliably self-critical on this prompt — they will identify gaps they did not cover in the first pass. This two-step approach consistently produces more complete coverage than a single "write comprehensive tests" prompt.
+
+### Pattern 3: Request Test Data Factories Alongside Tests
+
+Inline object construction in every test leads to fragile, verbose test files that break when the object's constructor changes. Ask for factories upfront:
+
+```
+Before writing the tests, generate a `make_user(**kwargs)` factory and a
+`make_order(user=None, **kwargs)` factory that create valid instances with
+defaults. All tests should use these factories. The factories should accept
+keyword overrides for any field.
+```
+
+This pattern also makes it easy to generate the specific edge-case data tests need (`make_order(status="cancelled")`) without repetitive inline construction. See [[technical-qa/pytest-patterns]] for the full factory fixture pattern.
+
+### Pattern 4: Specify the Framework and Patterns to Follow
+
+Never leave the framework implicit:
+
+```
+Framework: pytest
+Async: pytest-asyncio with mode=auto, use `async def test_` and `await` directly
+Mocking: respx for HTTP mocks, pytest-mock's `mocker` fixture for everything else
+Assertions: assert statements only, no unittest-style self.assertEqual
+Coverage target: all branches in the function under test
+```
+
+When the model knows the exact framework and patterns, it does not make framework choices that conflict with the project's existing setup.
+
+---
+
+## Quality Review Checklist for AI-Generated Tests
+
+Before merging AI-generated tests, validate against this checklist:
+
+### No False Positives
+
+Run the test suite against a deliberately broken version of the code. Change a comparison operator, negate a return value, remove a condition. At least the directly relevant tests should fail. If they pass against a broken implementation, the assertions are not testing the behaviour.
+
+### Assertion Quality
+
+For each assertion, ask: what exactly is this verifying? Common problems:
+
+- `assert result is not None` — verifies the function returned something, not that it returned the right thing
+- `assert len(result) == 3` — verifies count, not content
+- `assert "error" in response.json()` — verifies a key exists, not the error message or code
+
+Replace weak assertions with specific ones: `assert result.status == "approved"`, `assert response.json()["error"]["code"] == "COUPON_EXPIRED"`.
+
+### Test Independence
+
+Each test must pass in isolation and in any order. Check for:
+
+- Shared mutable state between tests (class-level variables, module-level lists)
+- Tests that depend on execution order (test B assumes test A ran first)
+- Side effects that leak: files created and not cleaned up, database rows not rolled back
+- Hardcoded port numbers that clash in parallel execution
+
+### No Hardcoded Test Data
+
+Hardcoded IDs, timestamps, and magic numbers make tests brittle and hard to read:
 
 ```python
-# LLM generates the edge case seeds; Faker handles format compliance
-names_to_test = [
-    "O'Brien",          # apostrophe
-    "Van Der Berg",     # space in surname  
-    "Smith-Jones",      # hyphen
-    "王伟",              # CJK characters
-    "A" * 255,          # max-length boundary
-    "",                 # empty (should fail validation)
-]
+# Bad
+user = User(id="abc-123", created_at=datetime(2024, 1, 15))
+
+# Good
+user = make_user()  # generates UUID and current timestamp
 ```
 
-This is more reliable than asking an LLM to generate raw fake data at volume, because Faker handles locale-correct formatting and the LLM handles semantic edge case selection.
+Exception: testing behaviour that is explicitly tied to a specific value (e.g., testing that the system rejects a known-bad identifier format).
 
-### Synthetic PII for Test Environments
+### Meaningful Test Names
 
-Production-like test data without real PII is a compliance requirement under GDPR Article 25 (data minimisation by design). The pattern:
+Test names are the first signal when a test fails. AI-generated names are often too generic:
 
-1. Identify PII fields in the production schema (name, email, NI number, DOB, address).
-2. For each field, generate a Faker provider or LLM prompt that produces structurally valid but non-real values.
-3. Run the generation at scale to populate a staging database.
+- `test_calculate_discount` — what scenario? what outcome?
+- `test_invalid_input` — invalid how?
 
-For complex domains (UK National Insurance numbers, IBAN account numbers, NHS numbers), ask Claude to generate a regex or validation spec first, then use Faker's `bothify`/`numerify` or a custom provider to generate compliant values.
+Enforce the pattern: `test_<method>_<scenario>_<expected_outcome>`
 
-```
-Generate 50 valid-format UK National Insurance numbers for test data.
-These must pass format validation (two letters, six digits, one letter A-D)
-but must NOT match any real person. Add 5 rows that are intentionally
-malformed to test validation rejection.
-```
-
-**Important:** Validate that generated "synthetic PII" does not accidentally collide with real records by running it against a deduplication check before loading to shared environments.
+- `test_calculate_discount_expired_coupon_raises_coupon_expired_error`
+- `test_calculate_discount_cart_total_zero_returns_zero_not_negative`
 
 ---
 
-## Measuring ROI
+## Where AI Test Generation Falls Short
 
-Clients respond to three metrics:
+### Complex Business Logic Tests
 
-**1. Test authoring time reduction**
-Baseline: measure how long a developer spends writing tests for a representative feature (a sprint's worth of stories). Pilot the tool for one sprint. Compare hours logged against "test writing" tasks.
+When correct behaviour requires domain knowledge that is not expressed in the code — pricing rules, regulatory constraints, contractual edge cases — the model cannot generate tests that verify correctness. It will generate tests that verify whatever the code currently does. If the code is wrong, the tests will be wrong too.
 
-Typical reported results: 40–60% reduction in test authoring time for unit tests. Lower (20–30%) for integration and E2E tests because those require environment and mock setup that AI cannot automate.
+This is the most dangerous failure mode: a complete, passing test suite that provides false confidence. The mitigation is to write these tests from the specification, not the implementation, and to provide that specification explicitly in the prompt.
 
-**2. Test coverage delta**
-Run your coverage tool before and after introducing AI generation. A team with 45% line coverage going to 70% in one sprint is a concrete, reportable outcome. Note: coverage increase alone is not quality — use mutation testing to validate.
+### Integration Tests with State
 
-**3. Time-to-first-test on new code**
-Measure the lag between a function being committed and its first test being committed. AI tools reduce this from "end of sprint" to "same PR". This is the metric most relevant to defect escape rate.
+Integration tests that exercise multiple components across a database transaction, a message queue, and an external API require deep knowledge of the infrastructure setup. The model can generate the structural skeleton, but the fixture setup, the state teardown, and the correct assertions about side effects in the external system require human knowledge of how that system behaves.
 
-**What not to claim:** Do not claim "AI-generated tests have fewer bugs" without mutation testing evidence. The hallucination risk is real. The claim is time savings, not quality improvement beyond baseline coverage increase.
+### Performance Assertions
+
+"The response time should be under 200ms at p99 under 100 RPS" cannot be expressed as a deterministic assertion in a unit test. Performance tests require knowledge of the SLOs, the test infrastructure, and the measurement methodology. An LLM will generate timing-based tests that pass on a fast machine and fail on CI — the wrong kind of unreliable.
+
+### Security Boundary Tests
+
+Testing that a user cannot access another user's data, that an admin token cannot be forged, that SQL injection is rejected — these tests require understanding the threat model. An LLM may generate plausible-looking auth tests that do not actually probe the attack surface. Security tests should be written by someone who has read the threat model document, not auto-generated. See [[technical-qa/testing-llm-apps]] for LLM-specific security test patterns.
 
 ---
 
-## Quality Gates for AI-Generated Tests
+## Mutation Testing as a Quality Check
 
-### Mutation Testing Pass Rate
+Mutation testing deliberately introduces small bugs ("mutants") into the source code — flipping `>` to `>=`, negating a boolean, replacing a constant — and then runs the test suite. A test that fails on a mutant is "killing" it. The mutation score is the percentage of mutants killed.
 
-Mutation testing (via Pitest for Java, mutmut for Python, Stryker for JS/TS) introduces small code changes and checks whether tests catch them. A test suite with 90% line coverage but a 40% mutation score is full of tests that never actually assert anything meaningful.
+This is the most rigorous way to validate AI-generated tests. A suite with 80% line coverage but a 40% mutation score is not testing behaviour; it is testing execution paths.
 
-Run mutation testing against AI-generated test suites before committing them. A mutation score below 60% indicates the AI generated tests that execute code without asserting on outputs. This is common with Copilot's default test output.
+### Stryker (JavaScript/TypeScript)
 
-**Stryker for TypeScript:**
 ```bash
 npx stryker run
 ```
 
-**mutmut for Python:**
+Stryker generates mutations, runs the tests, and reports which mutants survived. A surviving mutant means a bug of that type would go undetected. Stryker integrates with Jest, Mocha, Jasmine, and Vitest.
+
+### mutmut (Python)
+
 ```bash
+pip install mutmut
 mutmut run --paths-to-mutate src/
 mutmut results
 ```
 
-Require a minimum mutation score of 70% as a merge gate for AI-generated test PRs.
+mutmut is slower than Stryker but integrates cleanly with pytest. Run it on the module under test only, not the whole codebase — mutation testing is computationally expensive. Use `mutmut show <id>` to inspect what each surviving mutant changed.
 
-### Code Review Checklist for AI-Generated Tests
+### Interpreting Results
 
-Before approving AI-generated tests:
+A mutation score of 80%+ is a reasonable target for business-critical code. For AI-generated tests, expect an initial score of 50–65% and use the surviving mutants as a punch list of assertions to strengthen. This is more actionable than asking the model to "improve coverage" without a specific target.
 
-- [ ] Every assertion is independently verifiable against the specification (not just against the current implementation)
-- [ ] Expected values for numeric/financial calculations are cross-checked against a separate calculation (spreadsheet or specification document), not inferred from the code under test
-- [ ] Test names describe the scenario, not the implementation ("should reject negative quantities" not "test_line_73")
-- [ ] No assertions on log output, print statements, or internal state that is not part of the contract
-- [ ] Edge cases include: None/null, empty collections, negative numbers, unicode input, and maximum-length strings where relevant
-- [ ] Mocks reflect real interface contracts — not just patching until green
-- [ ] Tests are independent: no shared mutable state between test cases
-- [ ] Mutation testing pass rate meets the project threshold
+When a mutant survives, the fix is usually to make an assertion more specific, not to add more tests.
 
 ---
 
-## Pitching to a GitHub Enterprise Client
+## Client Positioning
 
-### The Situation
+### As a Capability Differentiator
 
-The client already pays $39/user/month for GitHub Enterprise Cloud, which includes Copilot Enterprise. They have the test generation capability today and are not using it, or using it inconsistently. The pitch is not "buy a new tool" — it is "extract value from the licence you already hold".
+When presenting AI test generation on an engagement, frame it around speed to coverage and quality uplift, not cost reduction (clients are suspicious of "AI saves money" claims).
 
-### The Opening Frame
+Concrete talking points:
 
-> "Your Copilot Enterprise licence includes test generation. Most teams use it for code completion and ignore the `/tests` command. We can run a two-week pilot with one team, measure test authoring time before and after, and quantify what you're leaving on the table."
+- **Time to first test suite:** A service with no tests can have a baseline suite generated and reviewed in hours rather than days. This makes it feasible to add testing to legacy code that has never had budget for it.
+- **Coverage uplift speed:** AI generation can take a suite from 40% to 80% branch coverage in a single session. The remaining 20% — the hard, business-logic-specific tests — is where engineers spend their time instead.
+- **Consistency:** AI-generated tests apply the same naming conventions, assertion patterns, and factory usage across every file. Human-written tests in large codebases diverge over time.
+- **Onboarding acceleration:** New engineers can understand what a module does by reading its AI-generated test suite, even before reading the implementation.
 
-This is a no-cost pilot framing. It removes procurement friction.
+### ROI Framing
 
-### The Upgrade Path Story
+Do not claim the AI writes tests autonomously. The honest and defensible ROI:
 
-Position tools in a maturity model:
-
-| Stage | Tool | Trigger |
+| Metric | Manual baseline | With AI generation |
 |---|---|---|
-| Start | Copilot `/tests` | Any team, no changes to existing toolchain |
-| Improve | Qodo / CodiumAI | Test quality complaints, need intent review step |
-| Scale to legacy | Diffblue Cover | Java team, large test coverage gap, planned refactor |
-| Process embed | PR-Agent | Want to enforce test presence at PR level |
+| Time to draft test file for a 200-line module | 2-4 hours | 20-40 minutes |
+| Branch coverage achievable in a sprint | 40-60% | 70-85% |
+| Time spent on mechanical scaffolding | ~60% of test writing time | ~10% |
+| Time spent on assertion quality review | ~40% | ~90% |
 
-Show this table. Clients like staged adoption — it reduces perceived risk and creates a natural follow-on engagement.
-
-### Handling the "We Already Have Copilot" Objection
-
-> "Right, and Copilot generates tests that look correct. The question is whether they would actually catch a bug. In our pilots, Copilot's default test output scores between 35–45% on mutation testing — meaning more than half the tests pass with broken code. Adding a mutation testing gate and a structured prompt template gets that to 65–70%. That's the work we'd do in the pilot."
-
-This reframes the conversation from "do you have the tool" to "are you using the tool effectively". The gap between tool ownership and effective deployment is a QA consulting engagement.
-
-### Regulatory and Quality Management Angle
-
-For clients in regulated sectors (financial services, healthcare, defence):
-- ISO 25010 quality characteristics — AI test generation directly addresses functional correctness and testability attributes
-- GDPR Article 25 — synthetic PII generation replaces production data in test environments
-- ISTQB Foundation alignment — AI tools accelerate test design techniques (boundary value analysis, equivalence partitioning) without replacing them
-
-Frame the tooling as an accelerator for practices they already have to do, not as a replacement for structured testing.
-
-### What Not to Promise
-
-- Do not claim AI-generated tests eliminate the need for QA engineers. The human review step is not optional.
-- Do not claim specific coverage percentage improvements without running the numbers in their actual codebase.
-- Do not promise Diffblue will work on a heavily annotated Spring codebase without a proof-of-concept run.
-- Do not say "AI catches more bugs" — AI generates more tests faster. Bugs caught depends on test quality, and that depends on the review gate.
+The last row is the key claim: AI generation shifts engineer time from typing boilerplate to validating correctness. That is a quality improvement, not just a speed improvement.
 
 ---
 
-## Connections
+## Risks
 
-- [[ai-tools/cursor-copilot]] — GitHub Copilot features including `/tests`; MCP integration; IDE context
-- [[ai-tools/claude-code]] — Claude Code as a test generation environment; subagent patterns for test authoring
-- [[test-automation/playwright]] — E2E testing; AI-generated locators; Healer agent for broken selectors
-- [[evals/evals-overview]] -- LLM-as-judge patterns applicable to evaluating AI-generated test quality
-- [[security/owasp-llm-top10]] -- prompt injection in test generation prompts; synthetic PII risks
-- [[prompting/prompt-engineering]] -- prompt patterns for better test output; few-shot examples in test generation
+### Tests That Pass but Do Not Test the Right Thing
 
----
+The most common and least visible risk. An LLM generating tests from implementation code produces tests that are consistent with the implementation, including its bugs. A test suite with 95% coverage built entirely by AI against an untested codebase should be treated with significant scepticism until it has been validated against a specification.
 
-## Key Facts
+Mitigation: always generate tests from the expected behaviour description, not only from the code. Run mutation testing. Have a human review assertions one by one before merging.
 
-- GitHub Copilot `/tests` is included in Copilot Enterprise ($39/user/month under GitHub Enterprise Cloud)
-- CodiumAI rebranded to Qodo in 2024; Teams plan is $19/user/month
-- Diffblue Cover is Java-only; uses formal methods + ML, not LLM generation; assertions are verified against execution
-- PR-Agent open-source is free; Pro is $15/user/month
-- Typical reported unit test authoring time reduction: 40–60%
-- Integration/E2E time reduction is lower (20–30%) due to environment setup overhead
-- Mutation testing minimum viable threshold: 60% to avoid "green but useless" tests; target 70%+
-- Copilot default `/tests` output mutation score in practice: 35–45% (internal pilot data) [unverified]
-- Stryker (JS/TS), mutmut (Python), Pitest (Java) are the standard mutation testing tools per ecosystem
+### Over-Reliance and Deskilling
 
-## Open Questions
+If a team adopts AI test generation wholesale and stops critically evaluating test quality, they will accumulate a test suite that gives false confidence. The risk compounds: each sprint adds more AI-generated tests; no one develops the skill to evaluate them; a significant regression ships because the tests all pass.
 
-- Does Qodo's intent analysis approach outperform Copilot on mutation scores in independent benchmarks?
-- What is Diffblue Cover's current pricing model after the 2024 restructure?
-- Does GitHub plan to integrate mutation testing feedback natively into Copilot's test generation loop?
-- How does PR-Agent's test suggestion quality compare to Copilot's `/tests` for the same diff?
+Mitigation: treat AI-generated tests as a first draft requiring mandatory human review, not a finished deliverable. Keep the quality review checklist above visible in the team's test contribution guide.
+
+### Test Maintenance as Code Changes
+
+AI-generated tests are often more verbose and less resilient than hand-written ones. When the code changes — a method is renamed, a parameter is added, a response schema changes — a large AI-generated test suite can require extensive updates.
+
+The factory pattern mitigates this for object construction. For structural changes, the same AI tools can assist with the update, but the engineer must understand what the test is doing before accepting the AI's proposed fix.
+
+### Confidentiality
+
+Pasting proprietary implementation code into a cloud LLM API sends it to a third-party service. For client engagements with code confidentiality requirements, use Claude Code with an enterprise contract (where data is not used for training), Copilot Business/Enterprise (which has similar commitments), or a self-hosted model. Confirm the data handling terms before using AI test generation on client IP.

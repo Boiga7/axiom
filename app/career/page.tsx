@@ -60,17 +60,17 @@ export default function CareerPage() {
 
           <div className="flex flex-wrap gap-3">
             <div className="rounded-lg border border-white/[0.08] bg-card px-5 py-4 min-w-[140px]">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Days Until Board</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-secondary mb-1">Days Until Board</p>
               <p className="font-display text-3xl font-semibold text-ae">{daysUntil}</p>
             </div>
             <div className="rounded-lg border border-white/[0.08] bg-card px-5 py-4 min-w-[140px]">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Effective</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-secondary mb-1">Effective</p>
               <p className="font-display text-3xl font-semibold text-primary">1 Apr 2027</p>
             </div>
             <div className="rounded-lg border border-white/[0.08] bg-card px-5 py-4 min-w-[140px]">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Pages Mapped</p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-secondary mb-1">Pages Mapped</p>
               <p className="font-display text-3xl font-semibold text-ae">{totalPages}</p>
-              <p className="font-mono text-[10px] text-muted mt-0.5">across {REQUIREMENT_AREAS.length} areas</p>
+              <p className="font-mono text-[10px] text-secondary mt-0.5">across {REQUIREMENT_AREAS.length} areas</p>
             </div>
           </div>
         </section>
@@ -108,7 +108,7 @@ export default function CareerPage() {
                     {area.label}
                   </h3>
 
-                  <p className="font-mono text-[11px] text-secondary leading-relaxed mb-4 flex-1">
+                  <p className="font-mono text-[11px] text-secondary leading-relaxed mb-4">
                     {area.description}
                   </p>
 
