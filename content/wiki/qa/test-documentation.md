@@ -200,4 +200,4 @@ Session notes:
 
 ## Connections
 
-[[qa/qa-hub]] · [[qa/test-planning]] · [[qa/test-strategy]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing-advanced]] · [[qa/qa-metrics]] · [[qa/qa-leadership]]
+[[qa/qa-hub]] · [[qa/test-planning]] · [[qa/test-strategy]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing]] · [[qa/qa-metrics]] · [[qa/qa-leadership]]

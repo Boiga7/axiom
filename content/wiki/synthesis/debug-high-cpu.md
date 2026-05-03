@@ -77,7 +77,7 @@ If CPU is high but profiling shows no single hot function:
 - The system may be doing the right work but simply need more capacity — check whether load has genuinely grown
 - Check for noisy neighbours on the host — another container may be competing for CPU on the same node
 
-Pivot to [[cloud/cost-optimisation-cloud]] to evaluate whether right-sizing or autoscaling is the appropriate response once the algorithmic ceiling is confirmed.
+Pivot to [[cloud/finops-cost-management]] to evaluate whether right-sizing or autoscaling is the appropriate response once the algorithmic ceiling is confirmed.
 
 ---
 

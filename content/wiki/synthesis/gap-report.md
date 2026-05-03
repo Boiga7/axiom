@@ -70,6 +70,9 @@ No urgent gaps. Next candidates when adding new pages:
 - [[para/projects]] — source of active project context
 - [[index]] — coverage map source
 - [[synthesis/graph-health]] — orphan and link-density analysis
+- [[synthesis/audit-report]] — first full vault audit (2026-05-02); baseline for structural health
+- [[synthesis/data-as-system]] — data lineage, contracts, freshness — production data engineering synthesis
+- [[synthesis/technical-communication]] — ADRs, RFCs, stakeholder translation — the communication layer for senior engineers
 
 ## Open Questions
 

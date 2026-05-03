@@ -260,4 +260,4 @@ Detect: a newly created tenant immediately hits rate limits on first use; checki
 Fix: never reuse tenant IDs; generate UUIDs v4 (essentially impossible to collide); also set Redis key TTLs to expire naturally within the rate limit window.
 
 ## Connections
-[[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/database-design]] · [[cloud/cost-optimisation-cloud]]
+[[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/database-design]] · [[cloud/finops-cost-management]]

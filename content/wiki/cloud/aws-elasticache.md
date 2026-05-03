@@ -248,4 +248,4 @@ Detect: CloudWatch `EngineCPUUtilization` spikes coincide with latency spikes; `
 Fix: replace `KEYS` with `SCAN` (cursor-based, non-blocking) for all production pattern lookups; the `invalidate_pattern` helper in the code above is an example of this anti-pattern to fix.
 
 ## Connections
-[[cloud-hub]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/caching-strategies]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/cost-optimisation-cloud]]
+[[cloud-hub]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/caching-strategies]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/finops-cost-management]]

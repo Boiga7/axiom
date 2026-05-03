@@ -267,4 +267,4 @@ Fix: set `healthCheckGracePeriod` to at least as long as your app's slowest cold
 
 ## Connections
 
-[[cloud-hub]] · [[cloud/aws-ecs]] · [[cloud/docker]] · [[cloud/kubernetes]] · [[cloud/container-security]] · [[cloud/cost-optimisation-cloud]]
+[[cloud-hub]] · [[cloud/aws-ecs]] · [[cloud/docker]] · [[cloud/kubernetes]] · [[cloud/container-security]] · [[cloud/finops-cost-management]]

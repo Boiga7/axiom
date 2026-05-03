@@ -241,4 +241,4 @@ Detect: Cloud Run console shows revision deployment failed with "Container faile
 Fix: verify the secret version exists and is not destroyed; grant the Cloud Run service account the `roles/secretmanager.secretAccessor` IAM role on the specific secret; redeploy.
 
 ## Connections
-[[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-step-functions]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-api-gateway]] · [[cloud/cost-optimisation-cloud]] · [[llms/ae-hub]]
+[[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-step-functions]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-api-gateway]] · [[cloud/finops-cost-management]] · [[llms/ae-hub]]

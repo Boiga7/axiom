@@ -253,4 +253,4 @@ Detect: Glue job run history shows multiple concurrent runs for the same `source
 Fix: Trigger only on `s3:ObjectCreated:CompleteMultipartUpload` and `s3:ObjectCreated:Put` (not wildcard); add an idempotency check in the Lambda that records the S3 ETag in DynamoDB before starting the Glue job and skips if already processed.
 
 ## Connections
-[[cloud-hub]] · [[cloud/aws-core]] · [[cloud/serverless-patterns]] · [[cloud/aws-step-functions]] · [[cloud/cost-optimisation-cloud]] · [[llms/ae-hub]]
+[[cloud-hub]] · [[cloud/aws-core]] · [[cloud/serverless-patterns]] · [[cloud/aws-step-functions]] · [[cloud/finops-cost-management]] · [[llms/ae-hub]]

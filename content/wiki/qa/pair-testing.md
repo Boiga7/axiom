@@ -200,4 +200,4 @@ Fix: apply the rule: pair when the cost of a miss exceeds the cost of pairing; f
 
 ## Connections
 
-[[qa-hub]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing-advanced]] · [[qa/test-planning]] · [[qa/agile-qa]] · [[qa/shift-left-testing]]
+[[qa-hub]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing]] · [[qa/test-planning]] · [[qa/agile-qa]] · [[qa/shift-left-testing]]

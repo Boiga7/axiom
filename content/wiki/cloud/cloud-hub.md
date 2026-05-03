@@ -33,7 +33,7 @@ Central hub for all cloud and platform engineering knowledge. Every page in the 
 [[cloud/cloud-networking]] · [[cloud/secrets-management]] · [[cloud/cloud-security]] · [[cloud/service-mesh]] · [[cloud/security-compliance]] · [[cloud/load-balancing-advanced]] · [[cloud/vpc-design-patterns]]
 
 ## Observability and Cost
-[[cloud/cloud-monitoring]] · [[cloud/observability-stack]] · [[cloud/cost-optimisation-cloud]] · [[infra/caching]] · [[cloud/infrastructure-monitoring]] · [[cloud/finops-cost-management]]
+[[cloud/cloud-monitoring]] · [[cloud/observability-stack]] · [[cloud/finops-cost-management]] · [[infra/caching]] · [[cloud/infrastructure-monitoring]] · [[cloud/finops-cost-management]]
 
 ## Disaster Recovery and Reliability
 [[cloud/disaster-recovery]] · [[cloud/keda]] · [[cloud/cloud-native-patterns]] · [[cloud/blue-green-deployment]]

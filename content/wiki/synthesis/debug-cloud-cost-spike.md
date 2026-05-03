@@ -53,10 +53,10 @@ tldr: Runbook for diagnosing unexpected cloud bill spikes and identifying the so
 | Suspect | Go to |
 |---|---|
 | NAT Gateway and VPC endpoint costs | [[cloud/vpc-design-patterns]] |
-| Autoscaling and right-sizing | [[cloud/cost-optimisation-cloud]] |
+| Autoscaling and right-sizing | [[cloud/finops-cost-management]] |
 | FinOps tooling and tagging strategy | [[cloud/finops-cost-management]] |
 | LLM token cost monitoring | [[observability/langfuse]] |
-| Identifying idle resources | [[cloud/cost-optimisation-cloud]] |
+| Identifying idle resources | [[cloud/finops-cost-management]] |
 
 ---
 
@@ -83,4 +83,4 @@ Pivot to [[cloud/finops-cost-management]] for a systematic approach to ongoing c
 
 ## Connections
 
-[[cloud/finops-cost-management]] · [[cloud/cost-optimisation-cloud]] · [[cloud/vpc-design-patterns]] · [[observability/langfuse]]
+[[cloud/finops-cost-management]] · [[cloud/finops-cost-management]] · [[cloud/vpc-design-patterns]] · [[observability/langfuse]]

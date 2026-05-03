@@ -253,4 +253,4 @@ Detect: CloudFront analytics show `CacheHitRate` near zero for the `/api/*` beha
 Fix: Remove session-specific query parameters from CDN-facing requests (handle them in the app layer); set explicit `Cache-Control` headers with a TTL greater than zero for cacheable endpoints; normalise the cache key to exclude parameters irrelevant to the response.
 
 ## Connections
-[[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/aws-core]] · [[cloud/cost-optimisation-cloud]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/performance-optimisation-se]]
+[[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/aws-core]] · [[cloud/finops-cost-management]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/performance-optimisation-se]]

@@ -56,7 +56,7 @@ tldr: Runbook for diagnosing autoscalers that fail to scale up under load or sca
 | KEDA event-driven autoscaling | [[cloud/keda]] |
 | Cluster autoscaler and node groups | [[cloud/aws-eks]] |
 | PodDisruptionBudget blocking scale-down | [[cloud/kubernetes]] |
-| Cost impact of over-provisioning | [[cloud/cost-optimisation-cloud]] |
+| Cost impact of over-provisioning | [[cloud/finops-cost-management]] |
 
 ---
 
@@ -83,4 +83,4 @@ Pivot to [[synthesis/debug-api-timeout]] if the degradation during scale-up look
 
 ## Connections
 
-[[cloud/kubernetes]] · [[cloud/keda]] · [[cloud/aws-eks]] · [[cloud/cost-optimisation-cloud]] · [[synthesis/debug-api-timeout]]
+[[cloud/kubernetes]] · [[cloud/keda]] · [[cloud/aws-eks]] · [[cloud/finops-cost-management]] · [[synthesis/debug-api-timeout]]

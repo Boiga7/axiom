@@ -245,4 +245,4 @@ Detect: data inconsistency after cache restart; DB shows fewer records than the 
 Fix: use write-behind only for truly disposable data (counters, analytics); use write-through or outbox pattern for anything that must persist.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[cloud/aws-rds-aurora]] · [[cloud/cost-optimisation-cloud]]
+[[se-hub]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[cloud/aws-rds-aurora]] · [[cloud/finops-cost-management]]
