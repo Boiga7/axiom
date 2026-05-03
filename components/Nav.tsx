@@ -26,6 +26,18 @@ export default function Nav({ searchIndex }: NavProps) {
           <span className="text-ae font-mono text-sm opacity-80 group-hover:opacity-100 transition-opacity">⬡</span>
         </Link>
 
+        {/* Practice link */}
+        <Link
+          href="/practice"
+          className="hidden sm:flex items-center gap-1.5 shrink-0 group"
+          aria-label="Practice Lab"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-ae/70 group-hover:bg-ae transition-colors" />
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ae/60 group-hover:text-ae/90 transition-colors">
+            Lab
+          </span>
+        </Link>
+
         {/* Search */}
         <div className="flex-1 min-w-0">
           <Search index={searchIndex} />

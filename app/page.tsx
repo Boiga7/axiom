@@ -53,7 +53,7 @@ export default function HomePage() {
     <>
       <Nav searchIndex={searchIndex} />
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 pb-24">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="pt-16 pb-14 relative">
           <div

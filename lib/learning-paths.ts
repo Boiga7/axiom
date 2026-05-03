@@ -1,4 +1,4 @@
-// lib/learning-paths.ts
+﻿// lib/learning-paths.ts
 // Client-safe — no fs/path imports.
 import type { Brain } from "./constants";
 import { BRAIN_MAP } from "./constants";
@@ -39,7 +39,7 @@ export const LEARNING_PATHS: LearningPath[] = [
       { category: "security", slug: "prompt-injection", note: "Failure modes: injection, data leakage, tool misuse" },
       { category: "observability", slug: "tracing", note: "Trace every prompt, tool call, and latency spike in production" },
       { category: "security", slug: "owasp-llm-top10", note: "The full threat surface for AI systems" },
-      { category: "agents", slug: "mcp-server-development", note: "Build tool integrations" },
+      { category: "protocols", slug: "mcp-server-development", note: "Build tool integrations" },
     ],
   },
   {
@@ -179,7 +179,7 @@ export const TOPIC_BUNDLES: LearningPath[] = [
       { category: "agents", slug: "langgraph", note: "Production standard for stateful agents" },
       { category: "agents", slug: "multi-agent-patterns" },
       { category: "protocols", slug: "mcp", note: "The protocol all agents use for tools" },
-      { category: "agents", slug: "mcp-server-development", note: "Build your own tool servers" },
+      { category: "protocols", slug: "mcp-server-development", note: "Build your own tool servers" },
       { category: "agents", slug: "strands-agents-sdk", note: "AWS-native alternative" },
       { category: "security", slug: "owasp-llm-top10", note: "Attacks specific to agents" },
     ],
@@ -248,7 +248,7 @@ export const TOPIC_BUNDLES: LearningPath[] = [
       { category: "fine-tuning", slug: "dpo-grpo", note: "Alignment without a reward model" },
       { category: "fine-tuning", slug: "frameworks", note: "The frameworks that make it practical" },
       { category: "data", slug: "annotation-tooling", note: "Your data quality sets the ceiling" },
-      { category: "rag", slug: "ragas", note: "Eval framework built for RAG pipelines" },
+      { category: "evals", slug: "ragas", note: "Eval framework built for RAG pipelines" },
     ],
   },
 ];

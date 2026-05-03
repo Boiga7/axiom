@@ -47,7 +47,7 @@ export default function CategoryPage({ params }: Props) {
     <>
       <Nav searchIndex={searchIndex} />
 
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-24">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         {/* Header */}
         <section className="pt-14 pb-10 relative">
           <div
