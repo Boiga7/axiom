@@ -83,11 +83,9 @@ export default function CareerPage() {
               <p className="font-display text-3xl font-semibold text-primary">1 Apr 2027</p>
             </div>
             <div className="rounded-lg border border-white/[0.08] bg-card px-5 py-4 min-w-[140px]">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Areas Covered</p>
-              <p className="font-display text-3xl font-semibold text-primary">
-                {highCount}
-                <span className="text-muted text-lg font-normal"> / {REQUIREMENT_AREAS.length}</span>
-              </p>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted mb-1">Strong Areas</p>
+              <p className="font-display text-3xl font-semibold text-ae">{highCount}</p>
+              <p className="font-mono text-[10px] text-muted mt-0.5">of {REQUIREMENT_AREAS.length} covered</p>
             </div>
           </div>
         </section>
@@ -109,7 +107,6 @@ export default function CareerPage() {
             {REQUIREMENT_AREAS.map((area) => {
               const level = getCoverageLevel(area.pages.length)
               const styles = COVERAGE_STYLES[level]
-              const barWidth = Math.min(100, (area.pages.length / 5) * 100)
 
               return (
                 <div
@@ -145,11 +142,13 @@ export default function CareerPage() {
                     ))}
                   </div>
 
-                  <div className="h-0.5 rounded-full bg-white/[0.06]">
-                    <div
-                      className={`h-full rounded-full transition-all ${styles.bar}`}
-                      style={{ width: `${barWidth}%` }}
-                    />
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <div
+                        key={n}
+                        className={`h-1 flex-1 rounded-full ${n <= area.pages.length ? styles.bar : 'bg-white/[0.06]'}`}
+                      />
+                    ))}
                   </div>
                 </div>
               )
@@ -160,27 +159,24 @@ export default function CareerPage() {
         {/* Board Checklist */}
         <section className="mb-16">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-1.5 h-5 rounded-full bg-white/20" />
-            <h2 className="font-mono text-[11px] uppercase tracking-widest text-secondary">
-              Promotion Board Criteria
+            <div className="w-1.5 h-5 rounded-full bg-ae/60" />
+            <h2 className="font-mono text-[11px] uppercase tracking-widest text-ae/80">
+              Presentation Brief
             </h2>
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
-          <p className="font-mono text-[11px] text-muted mb-6 ml-4">
-            10–15 min presentation. Prepare specific evidence for each of these.
+          <p className="font-mono text-[11px] text-muted mb-8 ml-4">
+            10–15 min to a panel of up to 3. Cover each of these with specific evidence.
           </p>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col divide-y divide-white/[0.04]">
             {BOARD_CRITERIA.map((criterion, i) => (
-              <div
-                key={criterion.id}
-                className="flex gap-4 rounded-lg border border-white/[0.06] bg-card px-5 py-4"
-              >
-                <div className="mt-0.5 w-5 h-5 shrink-0 rounded border border-white/[0.12] flex items-center justify-center">
-                  <span className="font-mono text-[9px] text-muted">{i + 1}</span>
-                </div>
-                <div>
-                  <p className="font-display text-sm font-semibold text-primary mb-1">
+              <div key={criterion.id} className="flex gap-6 py-6 group">
+                <span className="font-display text-4xl font-semibold text-ae/[0.12] group-hover:text-ae/25 transition-colors shrink-0 w-10 text-right leading-none select-none">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="pt-0.5">
+                  <p className="font-display text-base font-semibold text-primary mb-1.5">
                     {criterion.label}
                   </p>
                   <p className="font-mono text-[11px] text-muted leading-relaxed">
@@ -202,18 +198,21 @@ export default function CareerPage() {
             <div className="flex-1 h-px bg-white/[0.04]" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col gap-px">
             {PREREQUISITES.map((prereq) => (
               <div
                 key={prereq.id}
-                className="rounded-lg border border-white/[0.06] bg-card px-5 py-4"
+                className="flex items-start gap-4 px-4 py-4 rounded-lg hover:bg-white/[0.02] transition-colors group"
               >
-                <p className="font-display text-sm font-semibold text-primary mb-1">
-                  {prereq.label}
-                </p>
-                <p className="font-mono text-[11px] text-muted leading-relaxed">
-                  {prereq.detail}
-                </p>
+                <span className="font-mono text-ae/40 text-xs shrink-0 mt-0.5 group-hover:text-ae/70 transition-colors">◆</span>
+                <div>
+                  <p className="font-mono text-xs font-semibold text-primary/80 mb-0.5">
+                    {prereq.label}
+                  </p>
+                  <p className="font-mono text-[11px] text-muted leading-relaxed">
+                    {prereq.detail}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
