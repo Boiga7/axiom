@@ -41,3 +41,7 @@ next-env.d.ts
 content/wiki/.obsidian/
 
 .vercel
+
+# local dev artefacts
+dev-server.log
+.superpowers/
