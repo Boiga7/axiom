@@ -4,7 +4,7 @@ category: javascript
 para: resource
 tags: [javascript, typescript, nodejs, npm, pnpm, ai-sdk, hub]
 sources: []
-updated: 2026-05-02
+updated: 2026-05-04
 tldr: "JavaScript/TypeScript Brain hub — covers the full JS/TS ecosystem for AI engineers: Node.js async model, TypeScript type system, pnpm package management, and production AI SDK patterns."
 ---
 
@@ -144,15 +144,6 @@ export async function POST(req: Request) {
 
 ---
 
-## Cross-Brain Connections
-
-- [[web-frameworks/nextjs]] — App Router is TypeScript-native; Server Components, Server Actions
-- [[web-frameworks/vercel-ai-sdk]] — deep dive into streamText, generateObject, useChat, middleware
-- [[apis/anthropic-api]] — the HTTP API that @anthropic-ai/sdk wraps
-- [[protocols/mcp]] — MCP TypeScript SDK is the reference implementation
-- [[python/ecosystem]] — Python parallel; comparison of async models
-- [[cs-fundamentals/concurrency]] — async programming fundamentals across languages
-
 ## Key Facts
 
 - Node.js uses a single-threaded event loop backed by libuv's thread pool for I/O — not the same as Python's asyncio GIL limitation
@@ -179,6 +170,15 @@ Fix: See [[javascript/nodejs-async]] for the event loop model. Use `Promise.all(
 Why: The npm ecosystem has two module systems (CJS `require()` and ESM `import`). Mixing them causes `ERR_REQUIRE_ESM` or `Cannot use import statement` errors.
 Detect: `"type": "module"` in `package.json` with a dependency that only ships CJS; or vice versa.
 Fix: Use `"moduleResolution": "bundler"` in tsconfig for Next.js. For plain Node.js scripts, use `"moduleResolution": "node16"` and `.mts` extension for ESM files.
+
+## Connections
+
+- [[web-frameworks/nextjs]] — App Router is the primary deployment target for TypeScript AI applications
+- [[web-frameworks/vercel-ai-sdk]] — the AI SDK abstraction built on top of this JS/TS foundation
+- [[apis/anthropic-api]] — the Anthropic HTTP API that @anthropic-ai/sdk wraps; understanding both avoids abstraction confusion
+- [[protocols/mcp]] — MCP TypeScript SDK is the reference implementation; MCP servers for Claude Code are TypeScript-native
+- [[python/ecosystem]] — the Python counterpart; the two runtimes communicate via HTTP in production AI stacks
+- [[cs-fundamentals/concurrency]] — the event loop model underpins all async patterns in this section
 
 ## Open Questions
 

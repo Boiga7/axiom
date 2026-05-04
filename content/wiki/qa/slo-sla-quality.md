@@ -2,7 +2,8 @@
 type: concept
 category: qa
 tags: [slo, sla, quality-gates, observability, release-management, governance]
-updated: 2026-05-03
+updated: 2026-05-04
+tldr: How QA teams derive, apply, and govern SLOs and error budgets as objective release gates — covering SLI/SLO/SLA vocabulary, error budget policies, go/no-go decision frameworks, and tooling with Prometheus and Datadog.
 para: resource
 ---
 
@@ -403,6 +404,21 @@ spec:
 Sloth (open-source) takes a similar approach — define SLOs in YAML, generate Prometheus rules. More mature than Pyrra at the time of writing for standalone (non-Kubernetes) environments.
 
 ---
+
+## Connections
+
+- [[qa/performance-testing-qa]] — load test thresholds derived directly from SLO targets; SLO-derived NFRs turn performance tests into binary gates
+- [[qa/production-monitoring-qa]] — observing SLI behaviour post-release; the runtime layer where error budget is consumed
+- [[qa/qa-metrics]] — SLO compliance surfaces as a top-level QA reporting metric alongside escape rate and coverage
+- [[qa/non-functional-testing]] — NFR taxonomy; SLO-derived acceptance criteria replace vague NFR wording
+- [[qa/continuous-testing]] — automated SLI checks as CI/CD pipeline gates; shift-right quality signal
+- [[qa/test-strategy]] — where SLO definitions are captured and tied to release governance policy
+
+## Open Questions
+
+- How should QA handle SLO targets for services that have never been measured — should a provisional target be set from industry benchmarks or held at 0% until a measurement window closes?
+- When staging environment capacity is a known fraction of production, is there a principled formula for scaling load-test SLO thresholds rather than accepting the coverage gap?
+- Who owns the error budget policy in organisations where SRE and QA operate as separate functions with no formal handoff process?
 
 ## Cross-References
 

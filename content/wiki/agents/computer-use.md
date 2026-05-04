@@ -4,7 +4,7 @@ category: agents
 para: resource
 tags: [computer-use, agents, automation, anthropic, gui-automation, screenshot, tool-use]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Computer Use lets Claude control a computer by observing screenshots and issuing mouse/keyboard actions in a tight loop — use only when structured APIs are unavailable, always inside a sandbox container."
 ---
 
@@ -257,6 +257,21 @@ OpenAI ships a Computer Using Agent (CUA) built on GPT-4o (and latterly GPT-5):
 On CUB (Computer Use Benchmark — complex multi-step workflows), both systems score in single digits (below 10.4%), illustrating that multi-step GUI automation at production scale is still an unsolved problem for all current models.
 
 ---
+
+## Connections
+
+- [[agents/react-pattern]] — Computer Use is a direct instantiation of the ReAct loop with screenshots as observations
+- [[protocols/tool-design]] — structured tool calling is the preferred alternative before falling back to Computer Use
+- [[security/prompt-injection]] — on-screen content is the primary indirect injection surface for Computer Use agents
+- [[test-automation/playwright]] — lower-cost browser automation to prefer over Computer Use when possible
+- [[multimodal/vision]] — the vision capability that Computer Use depends on for perceiving state
+- [[infra/deployment]] — Docker containerisation patterns required for safe agent hosting
+
+## Open Questions
+
+- At what point does the OSWorld benchmark score translate to reliable production use — and what task types remain out of reach for current models?
+- What is the most practical strategy for handling multi-monitor or high-DPI displays without coordinate drift?
+- How should teams scope the blast radius when a Computer Use agent encounters a prompt injection mid-task?
 
 ## Integration Points
 

@@ -3,7 +3,7 @@ type: concept
 category: security
 tags: [owasp, wstg, security-testing, web-testing, methodology]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 tldr: WSTG is a structured, test-ID-driven methodology for web application security testing — not a risk list. Use it to scope engagements, document findings against test IDs, and produce defensible deliverables.
 ---
@@ -366,3 +366,20 @@ After testing:
 - [[security/prompt-injection]] -- prompt injection in detail
 - [[security/oauth-boundary-testing]] -- OAuth and authentication boundary testing
 - [[test-automation/playwright]] -- automated browser testing (distinct from security testing, but shares tooling concepts)
+
+---
+
+## Connections
+
+- [[security/owasp-llm-top10]] — the risk categorisation that WSTG's methodology is applied on top of; WSTG answers how to test, Top 10 answers what to prioritise
+- [[security/threat-modelling]] — threat models scope which WSTG categories are highest priority for a given system; the two are used in sequence
+- [[security/red-teaming]] — WSTG covers web application testing; red teaming extends this to AI/LLM-specific attack surfaces
+- [[security/oauth-boundary-testing]] — AUTHN/AUTHZ categories in WSTG; OAuth testing is a specialised extension of these categories
+- [[security/snyk]] — Snyk Priority Score uses WSTG check taxonomy to classify and weight vulnerability findings
+- [[security/security-scorecard-methodology]] — WSTG check taxonomy can inform which injection and disclosure checks to include in a composite scorecard
+
+## Open Questions
+
+- WSTG v4.2 was published in 2021 — is the APIT category still adequate for modern GraphQL and gRPC API surfaces, or does the community have a published extension covering these?
+- How should WSTG test IDs be mapped to MITRE ATT&CK techniques in a deliverable that needs to satisfy both a technical audience and a SOC team working from ATT&CK?
+- For AI-augmented penetration testing (using LLMs to generate payloads or analyse responses), which WSTG categories benefit most from automation and which still require irreducibly human judgement?

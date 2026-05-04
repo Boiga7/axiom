@@ -2,8 +2,9 @@
 type: concept
 category: technical-qa
 tags: [performance-testing, capacity-planning, infrastructure, load-testing]
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
+tldr: Consultant playbook for sizing test environments proportionally, deriving load targets from business data, and translating soak test results into procurement recommendations with headroom calculations.
 ---
 
 # Performance Testing Capacity Planning
@@ -301,6 +302,21 @@ After test execution:
 - [ ] Soak test resource exhaustion findings summarised with remediation steps
 
 ---
+
+## Connections
+
+- [[technical-qa/jmeter]] — primary tool for generating the load that feeds capacity planning data
+- [[technical-qa/load-testing-advanced]] — advanced load scenario design (soak, spike, stress) referenced in this playbook
+- [[technical-qa/performance-testing]] — test type taxonomy and NFR acceptance criteria
+- [[technical-qa/api-performance-testing]] — API-specific measurement patterns for latency and throughput
+- [[technical-qa/tqa-hub]] — central index for all technical QA pages
+- [[qa/test-environments]] — environment provisioning and production parity decisions
+
+## Open Questions
+
+- Does the HikariCP connection pool formula (`core_count * 2 + spindle_count`) still hold as a reasonable starting point for NVMe-backed cloud databases, or has the recommended formula shifted?
+- What is the practical threshold at which PgBouncer transaction-mode pooling introduces measurable latency overhead relative to direct connections?
+- How should the 70% utilisation headroom rule be adjusted for auto-scaling groups with sub-60-second scale-out times?
 
 ## See Also
 

@@ -4,7 +4,7 @@ category: infra
 para: resource
 tags: [model-routing, cost-optimisation, routellm, inference, frugalgpt, llm-cascade]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Model routing dynamically directs each LLM request to the cheapest model capable of answering it — trained classifiers or cascade strategies cut frontier-model call volume by 45-98% with under 5% quality loss."
 ---
 
@@ -211,3 +211,21 @@ Combined, these four levers applied together commonly achieve 80-95% cost reduct
 - [[llms/model-families]] — model capability and pricing comparison
 - [[apis/anthropic-api]] — Anthropic Batch API and prompt caching
 - [[fine-tuning/decision-framework]] — routing vs fine-tuning vs RAG decision tree
+
+---
+
+## Connections
+
+- [[synthesis/cost-optimisation]] — routing is one of seven cost levers; this page provides the routing detail
+- [[infra/caching]] — semantic caching can short-circuit routing entirely for near-duplicate queries
+- [[infra/litellm]] — multi-provider proxy that enables the fallback and load-balancing patterns routing sits on top of
+- [[infra/inference-serving]] — vLLM's Semantic Router integrates routing directly into the inference server
+- [[evals/methodology]] — calibrating router thresholds requires the same eval-in-production patterns used for model evaluation
+- [[observability/platforms]] — routing decisions must be logged and traced to support retraining and A/B analysis
+- [[llms/model-families]] — the price gap between strong and weak models determines how much routing can save
+
+## Open Questions
+
+- RouteLLM is trained on Chatbot Arena data (general Q&A). Is there a published approach for building domain-specific routing training sets for specialist workloads (legal, medical, code), or does the field assume Arena generalises sufficiently?
+- For latency-sensitive pipelines, what is the practical overhead of a matrix factorisation router inference call, and at what QPS does that overhead become significant relative to savings?
+- As frontier model prices continue to drop, does the strong/weak price ratio narrow enough to make routing less economically justified — and at what ratio does prompt caching become the better first investment?

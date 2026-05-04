@@ -2,9 +2,10 @@
 type: concept
 category: security
 tags: [threat-modelling, stride, dread, security-testing, architecture]
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 sources: []
+tldr: Structured methodology for identifying and prioritising security threats at design time — covers STRIDE categorisation, DREAD scoring, PASTA risk analysis, workshop facilitation, and mapping threats to test cases.
 ---
 
 # Threat Modelling
@@ -356,3 +357,20 @@ Best for: organisations with compliance requirements that mandate formal threat 
 - [[protocols/mcp]] — MCP security model; threat modelling for agentic tool use
 - [[security/oauth-boundary-testing]] — Elevation of Privilege threats at OAuth trust boundaries
 - [[evals/index]] — capability evaluations as a form of threat modelling for AI systems
+
+---
+
+## Connections
+
+- [[security/owasp-wstg]] — WSTG provides the test execution methodology that translates threat model outputs into structured test cases; the two are used in sequence
+- [[security/owasp-llm-top10]] — LLM-specific threat categories to walk through STRIDE when modelling AI systems
+- [[security/prompt-injection]] — STRIDE Tampering + Elevation threat in AI pipelines; threat modelling is the design-time stage that should catch this class of risk
+- [[security/red-teaming]] — red teaming is the adversarial testing phase downstream of a threat model
+- [[protocols/mcp]] — agentic tool-use introduces new trust boundaries (tool descriptions, STDIO transport) that require their own STRIDE walk
+- [[security/security-scorecard-methodology]] — OWASP Risk Rating Methodology (Likelihood × Impact) informs category weight derivation in composite scorecards
+
+## Open Questions
+
+- STRIDE was designed for traditional software systems — is it sufficient for AI pipelines where the "attacker" can influence model behaviour through training data or prompt injection, or does the field need an AI-specific extension (STRIDE-AI)?
+- When threat modelling microservice architectures with 50+ services, is there a published approach for determining which service boundaries warrant a full STRIDE walk vs a lightweight heuristic check?
+- How should the threat register be maintained in fast-moving teams — as a living document in the repo (like ADRs), or as issues in the project tracker, and what triggers a mandatory revisit vs an optional review?

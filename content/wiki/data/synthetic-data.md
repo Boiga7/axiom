@@ -3,7 +3,7 @@ type: concept
 category: data
 tags: [synthetic-data, fine-tuning, datasets, llm, data-generation, distillation]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-04
 para: resource
 tldr: LLM-generated synthetic data enables thousands of domain-specific training examples per hour for pennies, but requires quality filtering to remove the 10-30% garbage and must guard against model collapse across generations.
 ---
@@ -214,6 +214,7 @@ Fix: explicitly exclude known benchmark examples from the seed set; run contamin
 - [[apis/anthropic-api]] — Batch API for high-volume generation at 50% cost reduction
 - [[data/rlhf-datasets]] — preference pair generation as one synthetic data use case
 - [[data/pipelines]] — Airflow/Prefect orchestration for the generation, filtering, and dedup stages
+- [[data/model-cards]] — documenting synthetic data generation methodology is a model card section
 
 ## Open Questions
 

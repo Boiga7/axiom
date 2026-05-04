@@ -2,7 +2,8 @@
 type: concept
 category: qa
 tags: [change-management, process-improvement, pim, consultancy, stakeholder-management]
-updated: 2026-05-03
+updated: 2026-05-04
+tldr: How to apply ADKAR and Kotter's models to drive and sustain QA transformation on a client site, covering coalition-building, resistance patterns, capability building, adoption measurement, and post-disengagement sustainability.
 para: resource
 ---
 
@@ -309,6 +310,20 @@ The disengagement phase is where most transformations fail. The energy that came
 **Schedule a re-engagement check-in.** Even a one-hour call three months post-disengagement is valuable. It signals to the internal team that the consultant cares about outcomes, not just deliverables. It gives you an honest picture of what sustained and what didn't. And it creates an opportunity to course-correct before full regression sets in.
 
 ---
+
+## Connections
+
+- [[qa/process-improvement-model]] — the PIM engagement that change management wraps around; ADKAR and Kotter map directly onto its five phases
+- [[qa/qa-metrics]] — adoption metrics (coverage delta, MTTD, escaped defect rate) that make behaviour change visible
+- [[qa/benefits-realisation]] — outcome measurement that reinforces the change and justifies sustained investment
+- [[qa/test-strategy]] — the artefact that codifies the new process; change management determines whether teams follow it
+- [[qa/qa-leadership]] — senior stakeholder engagement and sponsor briefing skills used throughout
+
+## Open Questions
+
+- How do you measure desire (ADKAR D) objectively without relying on self-reported survey data that is susceptible to social desirability bias?
+- What is the minimum internal coalition size needed for a QA transformation to survive consultant disengagement in a 50-person engineering organisation?
+- When change fatigue is severe, at what point is it more effective to pause a transformation and resume later rather than narrowing scope further?
 
 ## Related Pages
 

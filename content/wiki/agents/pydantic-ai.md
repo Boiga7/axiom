@@ -4,7 +4,7 @@ category: agents
 para: resource
 tags: [pydantic-ai, agents, python, typed-agents, dependency-injection, structured-output]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Python-first agent framework by the Pydantic team — type-safe agents with Pydantic-validated outputs, dependency injection via RunContext, and automatic retry on validation failure."
 ---
 
@@ -289,6 +289,21 @@ pip install "pydantic-ai[openai,groq]"
 Requires Python 3.9+. Uses [[python/ecosystem]] tooling: compatible with `uv`, ships with `py.typed` marker, full mypy and pyright support.
 
 ---
+
+## Connections
+
+- [[python/instructor]] — structured output at the single-call level; complementary rather than competing with PydanticAI
+- [[agents/langgraph]] — graph-based stateful alternative; better choice when workflows require durable execution or complex branching
+- [[agents/react-pattern]] — the Thought/Action/Observation loop PydanticAI implements internally per agent run
+- [[observability/tracing]] — OTel integration pattern for capturing PydanticAI agent spans
+- [[cs-fundamentals/dependency-injection]] — PydanticAI's RunContext is a practical implementation of this pattern
+- [[security/guardrails]] — output validation libraries that complement PydanticAI's built-in retry mechanism
+
+## Open Questions
+
+- Does the automatic retry on validation failure introduce meaningful latency or cost at scale, and what is the recommended `max_retries` ceiling for production?
+- How well does PydanticAI's DI system compose with async context managers and connection pools in long-lived FastAPI apps?
+- Is structured streaming with `ModelRetry` likely to be supported, and what is the recommended workaround until it is?
 
 ## Related Pages
 

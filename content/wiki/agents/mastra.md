@@ -4,7 +4,7 @@ category: agents
 para: resource
 tags: [mastra, typescript, agents, workflows, framework, yc-w25]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "TypeScript-native agent and workflow framework from the Gatsby team — batteries-included alternative to LangGraph for JS/TS stacks, with built-in memory, evals, observability, and durable workflows."
 ---
 
@@ -181,6 +181,21 @@ In real-world comparisons, the Mastra implementation required roughly 60% less c
 - **Community:** Active Discord; YC-backed; production-proven at Replit, WorkOS
 
 ---
+
+## Connections
+
+- [[agents/langgraph]] — primary Python alternative; head-to-head comparison in the When to Use section
+- [[agents/pydantic-ai]] — Python type-safe alternative for teams not on TypeScript
+- [[protocols/mcp]] — Mastra supports bidirectional MCP as both consumer and provider
+- [[rag/pipeline]] — RAG pipeline that Mastra wraps as a first-class primitive
+- [[evals/methodology]] — Mastra's built-in `@mastra/evals` package implements this workflow
+- [[observability/langfuse]] — one of the OTel backends Mastra integrates with out of the box
+
+## Open Questions
+
+- How does Mastra's durable workflow suspend/resume hold up under high concurrency compared to LangGraph's checkpointing?
+- Does the 3,300+ model router abstract away enough provider differences to make provider switching truly one-line in practice?
+- What are the operational limits of Mastra Cloud vs self-hosted for teams with strict data residency requirements?
 
 ## Related Pages
 

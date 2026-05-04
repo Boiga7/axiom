@@ -3,7 +3,7 @@ type: concept
 category: cloud
 tags: [gitops, quality-gates, ci-cd, argocd, flux, deployment]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 tldr: Quality gates in a GitOps flow split across two distinct planes — CI gates (PR checks before a commit lands in Git) and GitOps gates (sync hooks, analysis runs, and promotion policies that execute after Git already holds the desired state). QA practitioners own both planes.
 ---
@@ -686,3 +686,15 @@ ArgoCD syncs production/
 - [[container-security]] — image scanning, supply chain gates
 - [[cloud-monitoring]] — Prometheus, alerting on sync failures
 - [[secrets-management]] — SOPS, External Secrets Operator
+
+## Connections
+- [[cloud/cloud-hub]] — parent hub for all cloud and platform engineering content
+- [[cloud/gitops-patterns]] — foundational GitOps principles this page extends with quality gate specifics
+- [[cloud/github-actions]] — CI plane where pre-merge gates are implemented
+- [[cloud/argocd]] — GitOps plane operator that runs sync hooks and consumes AnalysisTemplates
+- [[cloud/cloud-security]] — OPA/Kyverno policy enforcement referenced throughout
+
+## Open Questions
+- At what point does a PRM-style step-level verification for reasoning models parallel the PreSync hook pattern — and can the same ownership model (QA vs Platform) be applied?
+- How should teams handle gate failures that are transient (flaky tests) vs structural (policy violation) without bypassing the gate?
+- Is there a standard pattern for propagating gate results back into a DORA metrics dashboard for audit evidence?

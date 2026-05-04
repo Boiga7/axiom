@@ -3,8 +3,9 @@ type: entity
 category: observability
 tags: [datadog, monitoring, apm, logs, metrics, synthetic-testing]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
+tldr: Unified SaaS observability platform correlating metrics, distributed traces, logs, and synthetic tests across multi-cloud stacks — strongest when cross-service correlation and zero operational overhead outweigh the per-host cost.
 ---
 
 # Datadog
@@ -605,6 +606,21 @@ datadog-ci event create \
 ```
 
 ---
+
+## Connections
+
+- [[observability/tracing]] — OpenTelemetry conventions and auto-instrumentation that feed Datadog APM
+- [[observability/platforms]] — broader platform comparison including Langfuse, LangSmith, and Arize
+- [[cloud/cloud-monitoring]] — CloudWatch, Prometheus/Grafana, and PromQL as alternatives to Datadog
+- [[technical-qa/performance-testing]] — k6 scenarios and DogStatsD export for load test observability
+- [[qa/slo-sla-quality]] — SLO definitions and error budget policy that Datadog's SLO objects implement
+- [[test-automation/playwright]] — Playwright reporter integration for sending E2E test results to CI Visibility
+
+## Open Questions
+
+- How does Datadog's custom metrics cost model behave at scale when k6 or distributed tracing produce high-cardinality tag sets — and what is the practical ceiling before Prometheus/Grafana becomes cheaper?
+- Does Test Impact Analysis reliably reduce CI time on large monorepos, or does the coverage instrumentation overhead negate the savings?
+- What is the recommended data residency strategy for EU-regulated clients who need Datadog's APM but cannot send traces outside a specific region?
 
 ## See Also
 

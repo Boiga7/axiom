@@ -3,8 +3,9 @@ type: concept
 category: ai-tools
 tags: [ai-testing, test-generation, llm, claude-code, copilot, automated-testing]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
+tldr: LLMs accelerate test scaffolding — boundary cases, factories, and API coverage — but engineers must validate assertions and generate from specs rather than implementations to avoid false-confidence test suites.
 ---
 
 # AI-Assisted Test Generation
@@ -444,3 +445,18 @@ The factory pattern mitigates this for object construction. For structural chang
 ### Confidentiality
 
 Pasting proprietary implementation code into a cloud LLM API sends it to a third-party service. For client engagements with code confidentiality requirements, use Claude Code with an enterprise contract (where data is not used for training), Copilot Business/Enterprise (which has similar commitments), or a self-hosted model. Confirm the data handling terms before using AI test generation on client IP.
+
+## Connections
+
+- [[ai-tools/claude-code]] — primary tool for iterative, context-aware test generation in complex codebases
+- [[ai-tools/cursor-copilot]] — inline autocomplete and `/tests` slash command for lower-friction test scaffolding
+- [[test-automation/playwright]] — locator and selector best practices that should guide review of AI-generated E2E tests
+- [[technical-qa/pytest-patterns]] — factory fixture patterns and conventions that AI-generated pytest suites should follow
+- [[technical-qa/testing-llm-apps]] — LLM-specific security and correctness test patterns beyond standard unit testing
+- [[technical-qa/wiremock]] — mocking layer for running AI-generated API tests without a live backend
+
+## Open Questions
+
+- At what mutation score threshold does an AI-generated test suite provide genuine regression protection vs false confidence?
+- How should teams enforce a mandatory spec-first (not code-first) generation workflow when engineers are under delivery pressure?
+- Does structured output from the model (e.g., a JSON test plan before code) improve assertion quality compared to direct code generation?

@@ -3,7 +3,7 @@ type: concept
 category: security
 tags: [mcp, cve, security, vulnerabilities, rce, prompt-injection]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-04
 para: area
 tldr: MCP is the largest new AI attack surface of 2026 — a systemic STDIO RCE vulnerability affects all official SDKs, with 6+ named CVEs and up to 200,000 vulnerable instances in the wild.
 ---
@@ -155,6 +155,8 @@ Fix: isolate server contexts by running each in a separate execution environment
 - [[security/owasp-llm-top10]] — LLM03 (supply chain/rug pull) and LLM01 (prompt injection) both apply here
 - [[agents/langgraph]] — LangGraph agents that use MCP tool nodes inherit this attack surface
 - [[ai-tools/claude-code]] — Claude Code uses MCP servers; these CVEs apply directly to its plugin ecosystem
+- [[security/security-scorecard-methodology]] — how to score and weight these CVEs in a composite security scorecard; the scoring framework for mcpindex
+- [[security/socket-dev]] — Socket.dev detects MCP-relevant supply chain signals (install scripts, network access)
 
 ## Open Questions
 

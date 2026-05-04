@@ -3,7 +3,7 @@ type: entity
 category: protocols
 tags: [mcp, model-context-protocol, agents, tools, security]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-04
 para: resource
 tldr: MCP is the standard for agent-to-tool connectivity — stdio for local, HTTP/SSE for remote, OAuth 2.0 auth, 66% of 1,808 scanned servers had security findings, 30+ CVEs in April 2026.
 ---
@@ -129,7 +129,7 @@ See [[security/mcp-cves]] for the live CVE tracker and [[security/owasp-llm-top1
 
 ## Ecosystem
 
-- **MCP Registry** — official directory of community-built servers
+- **MCP Registry** — official directory of community-built servers; see [[protocols/mcp-registry]] for submission, schema, and governance detail
 - **MCP Inspector** — visual debugger; connects to any server and lets you call tools interactively
 - **Claude Code** — ships with 10+ first-party MCP servers; supports plugin system via `claude mcp add`
 - **LangGraph** — `langchain-mcp-adapters` turns any MCP server into a LangGraph tool node

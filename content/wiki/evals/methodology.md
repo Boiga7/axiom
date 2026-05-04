@@ -3,7 +3,7 @@ type: concept
 category: evals
 tags: [evals, llm-as-judge, swe-bench, braintrust, inspect-ai, evaluation, benchmarks]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-04
 para: resource
 tldr: LLM evaluation methodology — only 52% of AI orgs have evals in place, making this the most common gap; covers offline/online/agent/RAG eval types, framework selection, golden set construction, and CI integration.
 ---
@@ -229,6 +229,7 @@ Fix: version the golden set alongside the product; schedule a quarterly review; 
 - [[apis/anthropic-api]] — Batch API for running large eval suites at 50% cost
 - [[observability/platforms]] — online evals in production; annotation queues; feedback loops
 - [[data/pipelines]] — eval suites reuse the same Airflow/Prefect orchestration as training data flows
+- [[evals/deepeval]] — DeepEval implements the LLM-as-judge and CI gating patterns described here
 
 ## Open Questions
 

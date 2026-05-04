@@ -4,7 +4,7 @@ category: cs-fundamentals
 para: resource
 tags: [hub, software-engineering, brain]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-04
 tldr: Central hub for all software engineering knowledge. Every page in the SE brain connects here.
 ---
 
@@ -43,7 +43,13 @@ Central hub for all software engineering knowledge. Every page in the SE brain c
 
 ## JVM Ecosystem
 [[java/langchain4j]] · [[java/spring-ai]]
-## Open Questions
 
-- What are the most common misapplications of this concept in production codebases?
-- When should you explicitly choose not to use this pattern or technique?
+## Connections
+- [[para/resources]] — parent node for all SE brain content
+- [[cloud/cloud-hub]] — cloud infrastructure and DevOps practices that SE patterns deploy onto
+- [[llms/ae-hub]] — AI engineering hub that draws on SE fundamentals for agent and pipeline design
+
+## Open Questions
+- Which CS fundamentals categories have the thinnest coverage and most need new pages?
+- Are there SE domains (e.g. compilers, formal verification) absent from this hub that belong here?
+- How should the hub handle cross-cutting concerns like security that span multiple categories?

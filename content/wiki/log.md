@@ -798,3 +798,19 @@ Critical gaps: GitHub Marketplace listing for GitHub Apps (blocks evalcheck), se
 Concept gaps: DeepEval (mentioned in security/llm-red-teaming-tools), feature stores (mentioned in data/data-engineering-hub), model cards (implied by landscape/open-source-models and data/synthetic-data).
 
 Index fix: safety/responsible-ai added to wiki/index.md (page existed on disk, missing from index).
+
+## [2026-05-04] ingest | github-marketplace-apps — GitHub App Marketplace listing, submission workflow, free vs paid plan requirements, review process, evalcheck distribution context
+## [2026-05-04] ingest | security-scorecard-methodology — OpenSSF Scorecard model, CVSS scoring, composite score design, category weighting, reproducibility requirements, mcpindex scorecard framework
+## [2026-05-04] ingest | mcp-registry — AAIF/Linux Foundation governance, namespace-verified submission, metadata schema, discoverability, mcpindex distribution paths
+
+## [2026-05-04] lint | Gap Intelligence — 0 critical gaps, 5 concept gaps found
+
+## [2026-05-04] ingest | deepeval — DeepEval by Confident AI, G-Eval metric, 50+ built-in metrics, pytest CI gating, vs RAGAS/promptfoo
+## [2026-05-04] ingest | feature-stores — Feast/Tecton/Hopsworks, online vs offline split, point-in-time correctness, LLM embedding use cases
+## [2026-05-04] ingest | model-cards — Mitchell 2018 spec, HuggingFace Hub format, EU AI Act alignment, vs Anthropic system cards
+## [2026-05-04] ingest | socket-dev — Socket.dev supply chain scanner, behavioral signal detection, 5 scoring categories, MCP package relevance
+## [2026-05-04] ingest | snyk — Snyk Priority Score (0-1000), Risk Score ML layer, reachability analysis, mcpindex scorecard reference
+## [2026-05-04] lint | Graphify — 464 pages, score 100/100, 0 orphans, 115 under-linked, 111 hubs
+## [2026-05-04] lint | vault:lint run — 11 missing tldr:, 32 missing Connections, 5 new under-linked pages, 0 stale unverified, 0 orphans
+
+## [2026-05-04] lint | Full fix pass — 11 tldr: added, 32 Connections added, 32 Open Questions added, 13 back-links wired, 0 issues remaining

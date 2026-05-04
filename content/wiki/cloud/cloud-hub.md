@@ -4,7 +4,7 @@ category: cloud
 para: resource
 tags: [hub, cloud-engineering, brain]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-04
 tldr: Central hub for all cloud and platform engineering knowledge. Every page in the Cloud brain connects here.
 ---
 
@@ -55,7 +55,14 @@ Central hub for all cloud and platform engineering knowledge. Every page in the 
 
 ## Data Engineering
 [[cloud/data-engineering-cloud]]
-## Open Questions
 
-- What monitoring and alerting matter most when this is deployed in production?
-- At what scale or workload does this approach hit its practical limits?
+## Connections
+- [[para/resources]] — parent node for all Cloud brain content
+- [[cs-fundamentals/se-hub]] — SE fundamentals hub that cloud patterns build on
+- [[llms/ae-hub]] — AI engineering hub; cloud infra hosts AI inference and training workloads
+- [[landscape/aws-cloud-practitioner]] — foundational AWS knowledge underpinning the cloud brain
+
+## Open Questions
+- Which cloud categories have the thinnest page coverage and most need new entries?
+- Are there major cloud topics (e.g. FinOps tooling, multi-cloud strategy) absent from this hub?
+- How should the hub handle provider-agnostic patterns vs AWS-specific pages?

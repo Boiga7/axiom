@@ -4,7 +4,7 @@ category: landscape
 para: resource
 tags: [aws, certification, cloud-practitioner, clf-c02]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: AWS Certified Cloud Practitioner (CLF-C02) — all 4 domains, key services, concepts and exam approach
 ---
 
@@ -974,3 +974,14 @@ These are the services AWS explicitly names as in-scope for CLF-C02.
 - [[protocols/mcp]] (cloud protocol context)
 - [[infra/vector-stores]] (AWS services in AI infra context)
 - [[security/owasp-llm-top-10]] (cloud security context)
+
+## Connections
+- [[landscape/aws-ai-practitioner]] — companion AIF-C01 exam that extends CLF-C02 with AI/ML depth
+- [[cloud/cloud-hub]] — cloud engineering hub that operationalises the AWS services surveyed here
+- [[cloud/aws-core]] — deep-dive AWS core services page for practitioners moving beyond foundational level
+- [[cs-fundamentals/se-hub]] — software engineering fundamentals needed alongside AWS knowledge
+
+## Open Questions
+- CLF-C02 retirement dates are unconfirmed — when is the next scheduled exam version update?
+- Which CLF-C02 domain has changed most significantly between CLF-C01 and CLF-C02, and are further changes anticipated?
+- At what point does CLF-C02 preparation overlap enough with SAA-C03 that it is more efficient to target SAA-C03 directly?

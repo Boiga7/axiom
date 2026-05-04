@@ -3,8 +3,9 @@ type: concept
 category: technical-qa
 tags: [websocket, real-time, testing, k6, playwright, performance]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
+tldr: Full testing stack for WebSocket — protocol fundamentals, Playwright functional tests with `page.routeWebSocket()`, k6 load testing with custom metrics, SSE comparison, contract testing, and CI integration patterns.
 ---
 
 # WebSocket Testing

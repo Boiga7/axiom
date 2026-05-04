@@ -2,7 +2,7 @@
 type: concept
 category: qa
 tags: [uat, governance, stakeholder-management, sign-off, consultancy]
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 sources: []
 tldr: The process ownership layer above UAT execution — entry/exit criteria, stakeholder briefings, scope dispute resolution, defect triage with business owners, formal sign-off, and managing the politics that determine whether a UAT phase lands cleanly or collapses.
@@ -301,6 +301,22 @@ The consistent senior consultant behaviour in all of these is to hold the govern
 | Change request log | Out-of-scope items | Test manager / project manager |
 
 ---
+
+## Connections
+
+- [[qa/uat]] — execution mechanics this governance layer sits above: test case writing, tester management, execution tracking
+- [[qa/test-planning]] — test plan structure that captures entry/exit criteria and the coverage matrix referenced throughout
+- [[qa/bug-lifecycle]] — defect states and resolution workflow that underpin the UAT triage process
+- [[qa/risk-based-testing]] — risk-based scope decisions applied when business testers challenge coverage prioritisation
+- [[qa/qa-leadership]] — senior consultant stakeholder skills: scope dispute resolution, sponsor briefing, sign-off negotiation
+- [[qa/test-estimation]] — UAT phase capacity planning; named tester availability is the key input to the estimation model
+- [[qa/agile-qa]] — agile UAT governance: story-level acceptance vs release-level sign-off and the PI boundary pattern
+
+## Open Questions
+
+- When a business owner refuses to sign off for political rather than quality reasons, what formal escalation path exists that does not require the test manager to make an organisational decision above their authority?
+- How should the severity classification framework be adapted for a regulatory deployment where even Medium defects may have compliance implications?
+- In scaled agile (SAFe), what is the minimum viable artefact set that constitutes genuine UAT governance at PI boundary without replicating a full waterfall UAT phase?
 
 ## Related Pages
 

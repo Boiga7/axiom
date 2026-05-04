@@ -4,7 +4,7 @@ category: security
 para: resource
 tags: [red-teaming, garak, pyrit, promptfoo, nemo-guardrails, security-tooling, llm-security, deepteam]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Five automated tools for adversarially testing LLM applications: Garak (pre-deployment scanner), PyRIT (enterprise multi-turn attack framework), Promptfoo (eval + security combined), NeMo Guardrails (runtime filtering), and DeepTeam (DeepEval-integrated red teaming)."
 ---
 
@@ -343,6 +343,7 @@ Fix: make `define user` patterns as specific as possible; add a catch-all defaul
 - [[security/prompt-injection]] — LLM01 in depth; patterns these tools probe for
 - [[security/guardrails]] — output validation at runtime (instructor, Guardrails AI, NeMo Guardrails)
 - [[evals/methodology]] — promptfoo's dual role as eval framework and security scanner
+- [[evals/deepeval]] — DeepEval's HallucinationMetric and ToxicityMetric are evaluation complements to adversarial red-teaming
 
 ## Open Questions
 

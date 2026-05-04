@@ -138,6 +138,7 @@ updated: 2026-05-03
 - [[evals/llm-as-judge]] — Rubric design, calibration, bias types, pairwise vs absolute, judge system prompt design
 - [[evals/benchmarks]] — SWE-bench Verified (Opus 4.6 80.8%), GPQA (91.3%), MMLU, Chatbot Arena, custom benchmarks
 - [[evals/bfcl]] — Berkeley Function Calling Leaderboard v4: the de facto tool-use benchmark; agentic evaluation (web search, memory, format sensitivity), overall score formula, top performers, how to run it, limitations vs ToolBench
+- [[evals/deepeval]] — DeepEval by Confident AI: G-Eval metric (LLM-as-judge with criteria decomposition), 50+ built-in metrics (hallucination/toxicity/bias/faithfulness), pytest CI gating, vs RAGAS/promptfoo
 
 ### `multimodal/` — Vision and Multimodal AI
 - [[multimodal/vision]] — VLM comparison, Claude vision API, document processing, multimodal RAG, image generation
@@ -176,6 +177,9 @@ updated: 2026-05-03
 - [[security/guardrails]] — Output validation libraries: instructor (schema enforcement), Guardrails AI (multi-rule pipelines), NeMo Guardrails (conversation flow control)
 - [[security/llm-red-teaming-tools]] — Garak, PyRIT, Promptfoo, NeMo Guardrails, DeepTeam — the runnable tools for adversarially testing LLM apps pre-deployment and at runtime
 - [[security/threat-modelling]] — STRIDE (Spoofing/Tampering/Repudiation/InfoDisclosure/DoS/EoP), DREAD scoring, PASTA, workshop facilitation, DFDs, trust boundaries, threat register format, OWASP mapping, tooling
+- [[security/socket-dev]] — Socket.dev supply chain scanner: pre-CVE behavioral signal detection (install scripts, network access, obfuscation), 5 scoring categories, vs Snyk/OpenSSF, MCP package relevance
+- [[security/snyk]] — Snyk developer security platform: Priority Score (0-1000, CVSS + reachability + exploit maturity), Risk Score ML layer, reachability analysis, 4-product suite, mcpindex scorecard reference
+- [[security/security-scorecard-methodology]] — OpenSSF Scorecard model, CVSS v3/v4 metric groups, graduated 0-10 composite scoring, category weighting conventions, public disclosure norms, reproducibility requirements
 
 ### `observability/` — LLM Monitoring
 - [[observability/platforms]] — Langfuse (MIT/ClickHouse acquisition), LangSmith, Arize Phoenix; platform comparison; online evals
@@ -195,6 +199,7 @@ updated: 2026-05-03
 - [[protocols/github-apps]] — JWT + installation token auth flow; webhook processing; App vs OAuth App; permissions; secrets management
 - [[protocols/oauth-server-metadata]] — RFC 8414 discovery endpoint (/.well-known/oauth-authorization-server): metadata document fields, PKCE capability detection, MCP OAuth integration
 - [[protocols/rfc-7591-dynamic-client-registration]] — RFC 7591 dynamic client registration: POST /register, client_id issuance, public vs confidential clients, MCP self-registration, security testing
+- [[protocols/mcp-registry]] — MCP Registry (AAIF/Linux Foundation governance), namespace-verified submission, metadata schema, discoverability, mcpindex integration paths
 
 ---
 
@@ -228,6 +233,9 @@ updated: 2026-05-03
 - [[apis/openai-responses-api]] — Stateful successor to Chat Completions (March 2025); server-side state via previous_response_id; built-in web search/file search/code interpreter/MCP tools; Assistants API deprecated Aug 2025
 - [[apis/google-ai]] — Gemini 2.5 Pro/Flash, Google AI Studio vs Vertex AI, vision, function calling, thinking mode
 - [[apis/aws-bedrock]] — Converse API (model-agnostic boto3), Knowledge Bases (managed RAG), Guardrails (content safety), Bedrock Agents — AWS-native LLM platform
+
+### `tools/` — Distribution and Platform Tooling
+- [[tools/github-marketplace-apps]] — GitHub Marketplace listing for GitHub Apps: submission workflow, required metadata, free vs paid plan requirements, review process, OAuth App vs GitHub App distinction
 
 ### `ai-tools/` — Developer Tooling
 - [[ai-tools/claude-code]] — CLI capabilities, CLAUDE.md governance, hooks system, skills, settings.json, /ultrareview
@@ -454,6 +462,8 @@ updated: 2026-05-03
 - [[data/pipelines]] — dbt transformations, Airflow/Prefect orchestration, DVC versioning, RLHF feedback loops
 - [[data/data-engineering-hub]] — data engineering hub: orchestration comparison, storage tiers, AI-specific quality checks, deduplication
 - [[data/annotation-tooling]] — Label Studio (pairwise RLHF templates, ML pre-annotation) and Argilla (purpose-built LLM preference collection) — the human-in-the-loop layer for fine-tuning datasets
+- [[data/feature-stores]] — Feature stores (Feast/Tecton/Hopsworks): online vs offline split, point-in-time correctness, pre-computed embeddings and user vectors for LLM applications
+- [[data/model-cards]] — Model cards: Mitchell 2018 spec, HuggingFace Hub format, EU AI Act documentation alignment, vs Anthropic system cards
 
 ### `papers/` — Research Papers
 - [[papers/key-papers]] — Reading list by area: Architecture, Alignment, Agents, RAG, Efficient Training, Safety, Scaling — one-day and one-week priority order

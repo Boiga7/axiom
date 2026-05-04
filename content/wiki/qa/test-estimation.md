@@ -3,7 +3,7 @@ type: concept
 category: qa
 tags: [estimation, capacity-planning, test-management, planning, consultancy]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 tldr: Estimation is the skill of turning scope uncertainty into a defensible commitment. Done well it protects the team from over-promise and protects the client from surprise. Done badly it destroys trust in both directions.
 ---
@@ -559,6 +559,21 @@ Do not silently absorb a major scope change and then miss the original deadline.
 ```
 
 ---
+
+## Connections
+
+- [[qa/test-planning]] — scope definition and exit criteria that set the boundaries estimation works within
+- [[qa/risk-based-testing]] — risk prioritisation determines which test activities receive the largest effort allocations
+- [[qa/agile-qa]] — sprint velocity tracking and story point calibration ground the PERT and T-shirt models in real team data
+- [[qa/test-automation-strategy]] — automation build-vs-maintain trade-off directly feeds the estimation breakdown for automation effort
+- [[qa/qa-leadership]] — client-facing estimate presentation and expectation-setting are core senior QA consultant skills
+- [[qa/uat-governance]] — UAT phase estimation sits within the same capacity model; named tester availability is a hard input
+
+## Open Questions
+
+- When a client's requirements are incomplete at estimate time, at what point does the uncertainty range become wide enough that quoting a range is commercially misleading and a fixed discovery phase is the right answer instead?
+- How should context-switch tax be communicated to a client who is simultaneously requesting estimates for three parallel workstreams without accepting that serial sequencing would be faster overall?
+- Is there an industry-accepted standard for new-client ramp-up productivity curves, or is the 40/60/80/95% weekly model purely empirical and team-dependent?
 
 ## Related Pages
 

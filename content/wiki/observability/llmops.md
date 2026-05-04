@@ -4,7 +4,7 @@ category: observability
 para: resource
 tags: [llmops, prompt-versioning, prompt-registry, a-b-testing, langfuse, production, eval-gates]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "LLMOps treats prompts as versioned production artifacts — a registry replaces hardcoded strings, eval gates block regressions, and A/B testing on real traffic replaces intuition-driven prompt changes."
 ---
 
@@ -285,6 +285,21 @@ Use Langfuse when data residency matters or you are self-hosting. Use Braintrust
 Most teams operating in production are at Level 1 or 2. Level 3 is the target for any team with more than one prompt in production and a non-trivial user base.
 
 ---
+
+## Connections
+
+- [[observability/langfuse]] — the de facto open-source LLMOps platform implementing all four primitives covered here
+- [[evals/methodology]] — eval framework selection and golden set construction that back the eval gate pattern
+- [[evals/llm-as-judge]] — rubric design for the LLM-as-judge scoring used in A/B tests and eval gates
+- [[prompting/techniques]] — prompt engineering craft that produces the versioned artifacts LLMOps manages
+- [[prompting/dspy]] — automated prompt optimisation as an alternative to manual registry-based workflows
+- [[cs-fundamentals/feature-flags]] — consistent hashing and gradual rollout patterns that underpin prompt A/B testing
+
+## Open Questions
+
+- At what scale (number of prompts, traffic volume) does a full Level 3 LLMOps setup pay off versus the simpler config-file approach?
+- How should teams handle model provider silent updates — is there a reliable way to detect behavioural drift without running the full eval suite continuously?
+- What is the right minimum sample size for prompt A/B tests when query difficulty varies significantly across users?
 
 ## Related Pages
 

@@ -3,7 +3,7 @@ type: concept
 category: technical-qa
 tags: [test-automation, self-healing, selenium, playwright, ai-testing, flaky-tests]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
 tldr: Self-healing test frameworks automatically repair broken element locators when the UI changes, reducing maintenance burden. Healenium wraps Selenium with ML-based fallback selectors. Playwright Healer auto-opens a GitHub PR with the fix. Cloud platforms (Mabl, testRigor) remove locators entirely.
 ---
@@ -446,6 +446,21 @@ Self-healing frameworks share common limitations regardless of vendor:
 | Applitools | Cloud SaaS | Yes (SDK overlay) | Yes (SDK overlay) | No | Visual AI | Screenshot diff |
 
 ---
+
+## Connections
+
+- [[technical-qa/flaky-test-management]] — root cause taxonomy for flaky suites; locator drift is one slice, timing and data issues are the rest
+- [[technical-qa/visual-testing]] — Applitools visual AI layer that complements rather than replaces locator-based healing
+- [[technical-qa/selenium-grid]] — infrastructure for running the legacy Selenium suites that Healenium wraps
+- [[technical-qa/test-architecture]] — when restructuring tests (adding test-IDs, role-based locators) eliminates the need for healing
+- [[test-automation/playwright-advanced]] — Playwright locator best practices and Healer PR workflow configuration
+- [[technical-qa/tqa-hub]] — central index for all technical QA pages
+
+## Open Questions
+
+- Has Playwright Healer's reported 75% success rate been independently validated on large real-world suites, and what locator types account for the 25% failure cases?
+- Does Healenium's tree-edit-distance algorithm handle Shadow DOM components correctly, or does it require a separate strategy for web components?
+- At what test suite size does the Healenium PostgreSQL backend become a performance bottleneck during parallel CI runs?
 
 ## Related Pages
 

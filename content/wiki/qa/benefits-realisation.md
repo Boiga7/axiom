@@ -2,7 +2,8 @@
 type: concept
 category: qa
 tags: [process-improvement, benefits-realisation, metrics, roi, pim, consultancy]
-updated: 2026-05-03
+updated: 2026-05-04
+tldr: Discipline of quantifying whether a QA improvement initiative delivered its promised outcomes — covering baseline measurement, target-setting, benefits tracking, and 12-month post-implementation review.
 para: resource
 ---
 
@@ -398,6 +399,21 @@ The PIR is the formal close of the benefits realisation window. It answers: did 
 The PIR should be presented to the same sponsor who approved the original investment. It closes the accountability loop and creates the evidence base for the next initiative's business case.
 
 ---
+
+## Connections
+
+- [[qa/process-improvement-model]] — the PIM engagement that generates the roadmap these benefits are tracked against
+- [[qa/qa-metrics]] — metric definitions and calculation methods used in baseline and tracking
+- [[qa/qa-leadership]] — executive communication and stakeholder reporting formats
+- [[qa/test-reporting]] — dashboard and report design for ongoing benefits visibility
+- [[qa/root-cause-analysis]] — framework applied when benefits fail to materialise
+- [[qa/qa-change-management]] — people-side disciplines that determine whether improvements are adopted and benefits are realised
+
+## Open Questions
+
+- How should benefits be normalised when delivery volume changes significantly mid-measurement window (e.g. team doubles in size)?
+- At what point does a partial-adoption situation warrant formally revising the benefits target rather than continuing to track against the original?
+- What is the minimum cadence for sponsor reporting that keeps executive engagement without creating reporting overhead that the QA team cannot sustain?
 
 ## Related Pages
 

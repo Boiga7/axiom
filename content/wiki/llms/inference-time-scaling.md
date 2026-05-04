@@ -4,7 +4,7 @@ category: llms
 para: resource
 tags: [inference-time-scaling, test-time-compute, PRM, MCTS, best-of-N, reasoning-models, self-consistency, speculative-reasoning]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Allocating more compute at inference time — through sampling, search, or extended reasoning traces — produces quality gains that compound independently of training compute, with math and code tasks benefiting most."
 ---
 
@@ -162,3 +162,16 @@ Longer reasoning traces expand the attack surface for [[security/prompt-injectio
 - [[apis/anthropic-api]] — `budget_tokens`, Extended Thinking API parameters
 - [[security/prompt-injection]] — indirect injection risk in reasoning traces
 - [[infra/inference-serving]] — serving infrastructure cost implications of long reasoning traces
+
+## Connections
+- [[llms/ae-hub]] — parent hub for all foundation model and LLM content
+- [[llms/transformer-architecture]] — the architectural substrate that makes extended reasoning traces expensive
+- [[papers/chain-of-thought]] — origin of self-consistency, the first inference-time scaling technique
+- [[security/prompt-injection]] — inference-time scaling expands the attack surface for intermediate injection
+- [[infra/inference-serving]] — serving cost and latency implications of long reasoning traces
+- [[synthesis/reasoning-model-patterns]] — practical production guidance for when to apply these techniques
+
+## Open Questions
+- At what `budget_tokens` threshold does Extended Thinking produce diminishing returns on non-math tasks, and is there published data?
+- How does non-monotonic depth scaling interact with Anthropic's internal compaction mechanism for very long reasoning traces?
+- Are there emerging verifier architectures between scalar ORMs and full generative PRMs (ThinkPRM) that offer better cost-quality tradeoffs?

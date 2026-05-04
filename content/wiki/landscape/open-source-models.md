@@ -3,7 +3,7 @@ type: synthesis
 category: landscape
 tags: [open-source, llama, mistral, deepseek, qwen, gemma, phi, open-weights]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-04
 para: resource
 tldr: Open-weight models (Llama, Mistral, DeepSeek, Qwen, Gemma, Phi) are now credible production choices for most tasks — covering model selection, licensing, hardware requirements, and the specific strengths of each family.
 ---
@@ -268,6 +268,7 @@ See [[infra/huggingface]] for loading with `transformers`.
 - [[fine-tuning/decision-framework]] — when to fine-tune open models vs use them as-is
 - [[infra/inference-serving]] — vLLM and llama.cpp for serving open models in production
 - [[infra/gpu-hardware]] — VRAM requirements for each model size tier
+- [[data/model-cards]] — HuggingFace Hub requires a model card for every published model
 
 ## Open Questions
 

@@ -4,7 +4,7 @@ category: landscape
 para: resource
 tags: [aws, certification, ai-practitioner, aif-c01, generative-ai]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: AWS Certified AI Practitioner (AIF-C01) — all 5 domains, AWS AI/ML services, generative AI on AWS, responsible AI
 ---
 
@@ -601,3 +601,17 @@ Amazon CloudWatch, Amazon DynamoDB, Amazon EC2, Amazon EventBridge, Amazon OpenS
 | RAG vs fine-tuning | RAG = inject external knowledge at inference time, no training; fine-tuning = retrain model weights on labelled data |
 | Hallucination mitigation | Temperature reduction + RAG grounding + Bedrock Guardrails grounding check |
 | Bias vs fairness | Bias = the problem (systematic error); fairness = the property we want (equitable outcomes); Clarify measures bias |
+
+## Connections
+- [[landscape/aws-cloud-practitioner]] — foundational CLF-C02 certification; AIF-C01 is the AI-specialist companion
+- [[llms/ae-hub]] — AI engineering hub that covers the underlying concepts tested in domains 1-3
+- [[rag/pipeline]] — RAG architecture that Bedrock Knowledge Bases implements; heavy exam coverage
+- [[agents/practical-agent-design]] — agentic patterns that Bedrock Agents implement
+- [[safety/responsible-ai]] — responsible AI concepts mapped to domain 4
+- [[landscape/iso42001]] — ISO 42001 referenced in domain 5 governance materials
+- [[landscape/regulation]] — EU AI Act and NIST AI RMF covered in domain 5
+
+## Open Questions
+- How closely does the AIF-C01 exam track changes in Bedrock's service offerings, and how often does the question bank refresh?
+- Which domain 3 fine-tuning concepts (LoRA, QLoRA, DPO) appear at the level of definition recognition vs deeper implementation understanding?
+- Does passing AIF-C01 provide meaningful exemption credit toward AWS Solutions Architect or ML Specialty exams?

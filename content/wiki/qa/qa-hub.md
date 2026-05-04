@@ -4,7 +4,7 @@ category: qa
 para: resource
 tags: [hub, quality-assurance, brain]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-04
 tldr: Central hub for all quality assurance knowledge. Every page in the QA brain connects here.
 ---
 
@@ -55,6 +55,13 @@ Central hub for all quality assurance knowledge. Every page in the QA brain conn
 
 ## Reporting and Communication
 [[qa/performance-test-reporting]] · [[synthesis/technical-communication]]
+## Connections
+
+- [[qa/process-improvement-model]] — the consulting methodology that frames many of the QA practices indexed here
+- [[qa/benefits-realisation]] — outcome measurement layer that connects QA practice improvement to business value
+- [[qa/qa-change-management]] — the people-side discipline that determines whether practices in this hub are actually adopted
+- [[synthesis/technical-communication]] — cross-domain communication skills applied to QA reporting and stakeholder briefing
+
 ## Open Questions
 
 - What testing scenarios does this technique systematically miss?

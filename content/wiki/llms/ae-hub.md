@@ -5,7 +5,7 @@ para: resource
 tags: [hub, ai-engineering, brain]
 sources: []
 tldr: Central hub for the AI Engineering brain — every major category linked from one place. Start here to navigate foundation models, agents, RAG, fine-tuning, evals, prompting, security, and infrastructure.
-updated: 2026-05-02
+updated: 2026-05-04
 ---
 
 # AI Engineering Brain
@@ -64,7 +64,14 @@ Central hub for all AI engineering knowledge. Every page in the AE brain connect
 
 ## Synthesis
 [[synthesis/rag-vs-finetuning]] · [[synthesis/llm-decision-guide]] · [[synthesis/architecture-patterns]] · [[synthesis/cost-optimisation]] · [[synthesis/getting-started]] · [[synthesis/learning-path]] · [[synthesis/software-engineer-to-ai-engineer]] · [[synthesis/data-as-system]] · [[synthesis/technical-communication]]
-## Open Questions
 
-- What capability limitations most surprise practitioners using this model in production?
-- How does the architecture or training approach limit what this model can do reliably?
+## Connections
+- [[para/resources]] — parent node for all AE brain content
+- [[cs-fundamentals/se-hub]] — SE fundamentals hub; software engineering underpins agent and pipeline design
+- [[cloud/cloud-hub]] — cloud infrastructure hub; AI inference and training workloads run on cloud
+- [[landscape/aws-ai-practitioner]] — AWS AI certification content that maps AWS services to concepts in this hub
+
+## Open Questions
+- Which AE brain categories have the thinnest page coverage and most need new entries?
+- Are there emerging areas (e.g. world models, video generation, AI hardware) absent from this hub that belong here?
+- How should the hub handle topics that span both AE and SE (e.g. distributed training, MLOps pipelines)?

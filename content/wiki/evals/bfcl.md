@@ -4,7 +4,7 @@ category: evals
 para: resource
 tags: [bfcl, function-calling, tool-use, benchmarks, evals, agents]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Berkeley Function Calling Leaderboard — the de facto standard benchmark for LLM tool-use capability; v4 adds agentic evaluation (web search, memory, format sensitivity) on top of the classic single-turn categories."
 ---
 
@@ -155,3 +155,20 @@ See [[evals/llm-as-judge]] for the judge-based approach ToolEval uses, and [[age
 - [[agents/practical-agent-design]] — production agent design; where tool-calling reliability matters most
 - [[prompting/techniques]] — prompt patterns that improve tool-calling reliability (few-shot examples of well-formed calls)
 - [[protocols/tool-design]] — how to write tool schemas that models call accurately
+
+---
+
+## Connections
+
+- [[evals/benchmarks]] — where BFCL sits in the broader benchmark landscape alongside SWE-bench and MMLU
+- [[evals/methodology]] — how to interpret BFCL scores and combine public benchmarks with custom evals
+- [[agents/practical-agent-design]] — production agents are the primary consumers of BFCL signal; multi-turn and agentic categories are the most predictive
+- [[protocols/tool-design]] — well-designed tool schemas improve BFCL scores; the two pages are tightly coupled
+- [[apis/anthropic-api]] — Anthropic's tool_choice and parallel tools directly affect agentic category performance
+- [[evals/llm-as-judge]] — ToolEval uses LLM-as-judge where BFCL uses AST comparison; understanding the tradeoff matters for benchmark selection
+
+## Open Questions
+
+- Will BFCL v5 address the English-only limitation, or will the field produce a separate multilingual tool-use benchmark?
+- The agentic category's memory management sub-task is where frontier models struggle most — is this a prompting failure or a fundamental architectural gap, and does chain-of-thought help?
+- How should BFCL scores be combined with latency benchmarks when selecting a model for a latency-sensitive production agent, and is there a published Pareto-front analysis for quality vs speed across frontier models?

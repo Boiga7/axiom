@@ -3,7 +3,7 @@ type: concept
 category: rag
 tags: [embeddings, embedding-models, cohere, openai, bge, mteb, semantic-search]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-04
 para: resource
 tldr: MTEB leaderboard comparison — Cohere embed-v4 (65.2, best managed), BGE-M3 (63.0, best open), Matryoshka truncation for 12x storage reduction, and Cohere input_type for 5% retrieval gain.
 ---
@@ -171,6 +171,7 @@ Fix: batch in groups of 96 with exponential backoff on 429; checkpoint progress 
 - [[rag/hybrid-retrieval]] — BM25 + embeddings together
 - [[rag/chunking]] — how to split text before embedding
 - [[infra/vector-stores]] — storing and searching embeddings
+- [[data/feature-stores]] — feature stores are the production infrastructure for serving pre-computed embeddings at low latency
 
 ## Open Questions
 

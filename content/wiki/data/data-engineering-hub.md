@@ -128,3 +128,21 @@ dvc push  # pushes to S3/GCS remote
 - [[infra/vector-stores]] — where embeddings live after generation
 - [[sql/sql-for-ai]] — SQL patterns for querying AI datasets and training metadata
 - [[sql/window-functions]] — window functions for time-series data engineering tasks
+
+---
+
+## Connections
+
+- [[data/pipelines]] — full treatment of Airflow, Prefect, and dbt orchestration patterns
+- [[data/feature-stores]] — feature stores (Feast, Tecton) are the serving layer bridging training pipelines and online inference
+- [[data/synthetic-data]] — LLM-generated training data; shares ingestion and deduplication pipeline patterns with real data
+- [[data/rlhf-datasets]] — preference data collection; same pipeline infrastructure as standard annotation workflows
+- [[infra/vector-stores]] — downstream consumer of embedding pipelines built on this stack
+- [[sql/sql-for-ai]] — SQL patterns used at the transformation layer (dbt, DuckDB)
+- [[synthesis/cost-optimisation]] — data pipeline efficiency directly affects training and inference costs
+
+## Open Questions
+
+- At what data volume does DuckDB become a bottleneck, and when does it make sense to migrate transformation workloads from DuckDB to Spark?
+- Is MinHash deduplication sufficient for RLHF datasets where near-duplicates with different labels are specifically harmful, or are more precise semantic deduplication approaches needed?
+- How should data versioning (DVC) be integrated with model versioning (MLflow) to produce a single reproducible experiment record that ties dataset version to model artefact?

@@ -4,7 +4,7 @@ category: qa
 para: resource
 tags: [process-improvement, TMMi, TPI, maturity-model, consulting, qa-leadership]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-04
 tldr: "Structured methodology for assessing client test capability against industry maturity frameworks (TMMi, TPI Next), identifying gaps, and delivering a measurable benefits-driven improvements roadmap."
 ---
 
@@ -288,6 +288,22 @@ LLM-assisted analysis of historical defect reports can surface clustering patter
 The implication: a consultant in 2026 can produce a higher-confidence baseline assessment faster than traditional TAM methods, because objective pipeline data supplements interview evidence rather than being replaced by it.
 
 ---
+
+## Connections
+
+- [[qa/benefits-realisation]] — the benefits tracking discipline that proves the PIM roadmap delivered its promised ROI
+- [[qa/qa-change-management]] — the people-side layer without which PIM technical recommendations fail to embed
+- [[qa/qa-metrics]] — metric definitions for defect escape rate, MTTD, and automation ROI used throughout the assessment and roadmap
+- [[qa/qa-leadership]] — stakeholder engagement, executive briefing formats, and maturity model communication
+- [[qa/test-automation-strategy]] — automation ROI model that underpins the strategic investment horizon of the roadmap
+- [[qa/defect-clustering]] — hotspot analysis that feeds baseline assessment findings
+- [[qa/test-strategy]] — the organisation-wide artefact that TMMi L2 and TPI Next both require as a deliverable
+
+## Open Questions
+
+- When CI/CD pipeline data allows auto-assessment of several TMMi process areas, should those areas still require structured interviews, or does objective data supersede them entirely?
+- Is TPI Next's cluster-based approach reliably superior to TMMi's staged ladder in agile organisations, or does the answer depend on which business driver is dominant?
+- How should a PIM consultant handle the situation where the client's senior sponsor leaves mid-engagement — restart the stakeholder alignment or continue with the replacement?
 
 ## Related Pages
 

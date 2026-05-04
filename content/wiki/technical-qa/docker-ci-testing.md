@@ -2,8 +2,9 @@
 type: concept
 category: technical-qa
 tags: [docker, ci-cd, integration-testing, github-actions, testcontainers]
-updated: 2026-05-03
+updated: 2026-05-04
 para: resource
+tldr: Run ephemeral Docker service containers (Postgres, Redis, WireMock, RabbitMQ) inside CI jobs so every test run starts from a clean, isolated state with no shared infrastructure.
 ---
 
 # Docker Service Containers for CI Testing
@@ -753,6 +754,20 @@ jobs:
 When a `container:` is set on the job, services are accessed by their service name as hostname (same as GitLab). Without a job-level container, services are on `localhost`.
 
 ---
+
+## Connections
+
+- [[technical-qa/testcontainers]] — code-first alternative to the `services:` block; runs containers inside the test process
+- [[technical-qa/wiremock]] — common service container used for HTTP dependency stubbing
+- [[technical-qa/database-testing]] — seeding strategies and schema management for DB service containers
+- [[technical-qa/ci-cd-quality-gates]] — how service container test results feed into pass/fail gates
+- [[technical-qa/tqa-hub]] — central index for all technical QA pages
+
+## Open Questions
+
+- When GitLab CI adds native health-check polling (equivalent to GitHub Actions `options: --health-cmd`), does the workaround wait script become redundant or still preferred for portability?
+- At what service count does Docker Compose's `--wait` flag become more reliable than the `services:` block health-check mechanism?
+- Is Testcontainers' Ryuk resource reaper compatible with rootless Docker on all major CI platforms?
 
 ## Decision Reference
 
