@@ -10,7 +10,7 @@ para: resource
 
 Running integration tests against real infrastructure — databases, caches, message brokers, mock HTTP servers — in CI without leaking state between runs or managing long-lived shared instances. Service containers give every CI job its own ephemeral stack, torn down automatically when the job ends.
 
-Related: [[testcontainers]] | [[wiremock]] | [[ci-cd-quality-gates]] | [[parallel-test-execution]] | [[database-testing]] | [[mock-strategies]]
+Related: [[technical-qa/testcontainers]] | [[wiremock]] | [[ci-cd-quality-gates]] | [[parallel-test-execution]] | [[database-testing]] | [[mock-strategies]]
 
 ---
 
@@ -405,7 +405,7 @@ The `--wait` flag (Docker Compose v2.1+) blocks until all services with health c
 
 ## Testcontainers: Code-First Alternative
 
-[[Testcontainers]] embeds container lifecycle management inside test code. No CI configuration changes needed — the test itself starts and stops the container.
+[[technical-qa/testcontainers]] embeds container lifecycle management inside test code. No CI configuration changes needed — the test itself starts and stops the container.
 
 ### Java (JUnit 5)
 

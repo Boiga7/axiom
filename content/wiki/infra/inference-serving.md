@@ -189,6 +189,9 @@ Fix: rebuild the engine for each GPU type; maintain separate engine binaries per
 - [[infra/vector-stores]] — vector stores frequently collocated with inference serving in RAG systems
 - [[infra/huggingface]] — model hub provides the checkpoints that vLLM and llama.cpp load
 - [[infra/gpu-hardware]] — GPU selection determines which serving approach is viable
+- [[infra/ai-gateway]] — API gateway layer that sits in front of inference serving for routing, rate limiting, and cost control
+- [[infra/inference-platforms]] — serverless and managed inference platforms (Replicate, Modal, Hugging Face Endpoints, AWS SageMaker)
+- [[cloud/serverless-patterns]] — serverless inference as an alternative to always-on GPU servers
 - [[math/transformer-math]] — KV cache memory calculations underlie paged attention design
 - [[fine-tuning/lora-qlora]] — quantisation affects inference serving choices
 
