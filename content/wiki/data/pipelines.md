@@ -382,6 +382,8 @@ Fix: separate read and write files — use `data/raw/input.jsonl` as input and `
 - [[data/rlhf-datasets]] — preference datasets for alignment training
 - [[infra/huggingface]] — HuggingFace datasets library for loading and processing
 - [[evals/methodology]] — eval pipelines that plug into these data flows; eval-as-gate pattern
+- [[infra/mlops-pipelines]] — ML pipeline orchestration with Kubeflow, MLflow, and SageMaker Pipelines
+- [[synthesis/data-as-system]] — treating data as a product with ownership, SLAs, and observability
 
 ## Open Questions
 

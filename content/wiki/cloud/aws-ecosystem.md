@@ -41,6 +41,6 @@ The boundary shifts based on service type: EC2 (IaaS) requires customer OS patch
 ## Connections
 
 - [[landscape/aws-ai-practitioner]] — AIF-C01 certification covering AWS AI/ML services in depth
-- [[cloud/aws-bedrock-agentcore]] — Bedrock AgentCore, the managed agentic runtime on AWS
+- [[cloud/bedrock-agentcore]] — Bedrock AgentCore, the managed agentic runtime on AWS
 - [[infra/vector-stores]] — vector store options including Aurora pgvector and OpenSearch
 - [[apis/anthropic-api]] — Claude API patterns that run on Bedrock

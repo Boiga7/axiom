@@ -138,7 +138,7 @@ export default function Search({ index }: Props) {
                 i === active ? "bg-ae/10" : "hover:bg-white/[0.04]"
               }`}
             >
-              <span className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-muted shrink-0 w-16 truncate">
+              <span className="mt-0.5 font-mono text-[9px] uppercase tracking-widest text-muted shrink-0 w-20 leading-tight">
                 {slugToLabel(r.category)}
               </span>
               <div className="flex-1 min-w-0">

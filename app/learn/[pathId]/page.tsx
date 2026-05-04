@@ -2,7 +2,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { LEARNING_PATHS, TOPIC_BUNDLES } from "@/lib/learning-paths";
-import { getPage, getSearchIndex, BRAIN_COLORS } from "@/lib/wiki";
+import { getPage, getSearchIndex, BRAIN_COLORS, getBrainVar } from "@/lib/wiki";
 import Nav from "@/components/Nav";
 import PathSteps from "@/components/PathSteps";
 import type { Metadata } from "next";
@@ -30,6 +30,7 @@ export default function LearnPathPage({ params }: Props) {
 
   const searchIndex = getSearchIndex();
   const color = BRAIN_COLORS[learningPath.brain as keyof typeof BRAIN_COLORS] ?? "#94a3b8";
+  const colorVar = getBrainVar((learningPath.brain as keyof typeof BRAIN_COLORS) ?? "other");
 
   // Resolve each step to a live wiki page (skip steps whose page doesn't exist)
   const resolvedSteps = learningPath.steps
@@ -71,7 +72,7 @@ export default function LearnPathPage({ params }: Props) {
           <div className="flex items-center gap-2 mb-4">
             <span
               className="font-mono text-[10px] uppercase tracking-widest px-2 py-1 rounded"
-              style={{ color, background: color + "18" }}
+              style={{ color: colorVar, background: color + "18" }}
             >
               Learning Path
             </span>
@@ -101,6 +102,7 @@ export default function LearnPathPage({ params }: Props) {
           steps={steps}
           pathId={params.pathId}
           color={color}
+          colorVar={colorVar}
           estimatedHours={learningPath.estimatedHours}
         />
       </main>

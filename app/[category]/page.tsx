@@ -6,6 +6,7 @@ import {
   getPagesByCategory,
   getSearchIndex,
   BRAIN_COLORS,
+  getBrainVar,
   slugToLabel,
 } from "@/lib/wiki";
 import Nav from "@/components/Nav";
@@ -32,6 +33,7 @@ export default function CategoryPage({ params }: Props) {
   const cats = getCategories();
   const catMeta = cats.find((c) => c.slug === category);
   const color = catMeta ? BRAIN_COLORS[catMeta.brain] : "#94a3b8";
+  const colorVar = catMeta ? getBrainVar(catMeta.brain) : "#94a3b8";
   const label = slugToLabel(category);
 
   // Detect hub page (named <category>-hub or anything ending in -hub)
@@ -71,7 +73,7 @@ export default function CategoryPage({ params }: Props) {
             <div className="flex items-center gap-3 mb-3">
               <div
                 className="w-1 h-8 rounded-full"
-                style={{ background: color }}
+                style={{ background: colorVar }}
               />
               <h1
                 className="font-display text-4xl font-semibold text-primary"
@@ -103,13 +105,13 @@ export default function CategoryPage({ params }: Props) {
             >
               <div
                 className="w-0.5 self-stretch rounded-full shrink-0"
-                style={{ background: color }}
+                style={{ background: colorVar }}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span
                     className="font-mono text-[9px] uppercase tracking-widest"
-                    style={{ color }}
+                    style={{ color: colorVar }}
                   >
                     Hub
                   </span>
@@ -147,8 +149,8 @@ export default function CategoryPage({ params }: Props) {
               className="group flex items-start gap-4 rounded-lg border border-white/[0.05] bg-card px-5 py-4 transition-all duration-150 hover:border-white/[0.1] hover:bg-elevated min-w-0 overflow-hidden"
             >
               <div
-                className="w-0.5 self-stretch rounded-full mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity shrink-0"
-                style={{ background: color }}
+                className="w-0.5 self-stretch rounded-full mt-0.5 opacity-60 group-hover:opacity-100 transition-opacity shrink-0"
+                style={{ background: colorVar }}
               />
               <div className="flex-1 min-w-0">
                 <h2 className="font-display text-sm font-semibold text-primary group-hover:text-white transition-colors mb-1">
@@ -166,8 +168,8 @@ export default function CategoryPage({ params }: Props) {
                         key={tag}
                         className="font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded"
                         style={{
-                          color: color + "cc",
-                          background: color + "12",
+                          color: colorVar,
+                          background: color + "22",
                         }}
                       >
                         {tag}

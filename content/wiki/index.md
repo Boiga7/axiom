@@ -5,7 +5,7 @@ updated: 2026-05-03
 
 # Nexus — Content Index
 
-349 pages across 28 categories. Updated 2026-05-04.
+354 pages across 28 categories. Updated 2026-05-04.
 
 ---
 
@@ -89,10 +89,12 @@ updated: 2026-05-03
 
 ### `safety/` — Alignment and Interpretability
 - [[safety/alignment]] — RSP (ASL tiers), red teaming, scalable oversight, superalignment, safety vs helpfulness
+- [[safety/alignment-overview]] — alignment hub: RLHF, CAI, DPO, scalable oversight, open research problems, lab comparison
 - [[safety/constitutional-ai]] — CAI two-phase training (SL-CAF + RLAIF), constitution as principles, vs RLHF
 - [[safety/mechanistic-interpretability]] — Superposition, SAEs, circuits, Anthropic's Golden Gate Claude demo
 - [[safety/red-teaming-methodology]] — structured adversarial testing, failure mode discovery, automated red teaming in CI
 - [[safety/scalable-oversight]] — debate, amplification, recursive reward modeling, prover-verifier games; Anthropic's #2 research priority (2025)
+- [[safety/responsible-ai]] — responsible AI principles, fairness, accountability, transparency, harm assessment frameworks
 
 ### `agents/` — Agentic Systems
 - [[agents/langchain]] — LCEL pipe operator, document loaders, text splitters, prompt templates, RAG chains, conversation memory; relationship to LangGraph
@@ -200,6 +202,8 @@ updated: 2026-05-03
 
 ### `infra/` — AI Infrastructure
 - [[infra/vector-stores]] — pgvector, Chroma, Qdrant, Weaviate, Pinecone, Redis; HNSW index, hybrid search; selection guide
+- [[infra/pgvector]] — PostgreSQL vector extension; cosine/L2/inner-product operators, IVFFlat/HNSW indexing, SQLAlchemy integration
+- [[infra/aws-bedrock-agentcore]] — AWS managed agent runtime; memory, sandboxed tool execution, CloudWatch observability
 - [[infra/weaviate]] — Open-source vector DB; hybrid search (BM25 + dense, alpha=0.75); multi-tenancy; GraphQL API; Weaviate Cloud managed option
 - [[infra/inference-serving]] — vLLM paged attention, llama.cpp GGUF, TensorRT-LLM, speculative decoding; managed options
 - [[infra/huggingface]] — transformers, datasets, PEFT, Trainer, Inference API, Hub — the open-source LLM ecosystem
@@ -250,6 +254,7 @@ updated: 2026-05-03
 ### `python/` — Python Ecosystem
 - [[python/python-hub]] — Python Brain central hub: all Python tooling, async, data, testing, packaging
 - [[python/ecosystem]] — uv, async httpx, Pydantic v2, Click+Rich, pytest+respx, structlog, polars+duckdb
+- [[python/async]] — asyncio, async/await, concurrent LLM calls with gather+Semaphore, async generators for streaming
 - [[python/sqlalchemy]] — SQLAlchemy 2.0 async: Mapped types, AsyncSession, selectinload, connection pooling, FastAPI integration
 - [[python/polars-duckdb]] — Polars lazy API + expression engine; DuckDB in-process SQL on Parquet/CSV; AI data use cases
 - [[python/instructor]] — structured LLM outputs via Pydantic schema enforcement and automatic retry; wraps Anthropic and OpenAI clients
@@ -447,6 +452,7 @@ updated: 2026-05-03
 - [[data/datasets]] — HuggingFace datasets library; Alpaca/OpenHermes/HH-RLHF/The Stack; streaming large datasets; push_to_hub
 - [[data/rlhf-datasets]] — HH-RLHF, UltraFeedback, building custom preference datasets, LLM-as-judge labelling, quality checks
 - [[data/pipelines]] — dbt transformations, Airflow/Prefect orchestration, DVC versioning, RLHF feedback loops
+- [[data/data-engineering-hub]] — data engineering hub: orchestration comparison, storage tiers, AI-specific quality checks, deduplication
 - [[data/annotation-tooling]] — Label Studio (pairwise RLHF templates, ML pre-annotation) and Argilla (purpose-built LLM preference collection) — the human-in-the-loop layer for fine-tuning datasets
 
 ### `papers/` — Research Papers

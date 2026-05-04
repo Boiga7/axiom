@@ -6,6 +6,14 @@
   --font-fraunces: "Fraunces", Georgia, serif;
   --font-jakarta: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", Menlo, monospace;
+
+  /* Brain color tokens */
+  --brain-ai-engineering: #22d3ee;
+  --brain-research: #fb923c;
+  --brain-infrastructure: #60a5fa;
+  --brain-engineering: #a78bfa;
+  --brain-intelligence: #34d399;
+  --brain-other: #94a3b8;
 }
 
 * {
@@ -254,6 +262,14 @@ body {
 html[data-theme="light"] {
   background: #f8fafc;
   color: #0f172a;
+
+  /* Brain color tokens — darkened for WCAG AA on white */
+  --brain-ai-engineering: #0891b2;
+  --brain-research: #c2410c;
+  --brain-infrastructure: #2563eb;
+  --brain-engineering: #7c3aed;
+  --brain-intelligence: #059669;
+  --brain-other: #64748b;
 }
 
 html[data-theme="light"] body {

@@ -94,6 +94,10 @@ export const BRAIN_COLORS: Record<Brain, string> = {
   other: "#94a3b8",
 };
 
+export function getBrainVar(brain: Brain): string {
+  return `var(--brain-${brain})`;
+}
+
 export function slugToLabel(slug: string): string {
   const overrides: Record<string, string> = {
     llms: "LLMs",

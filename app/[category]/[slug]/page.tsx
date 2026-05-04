@@ -7,6 +7,7 @@ import {
   getAllPages,
   getSearchIndex,
   BRAIN_COLORS,
+  getBrainVar,
   slugToLabel,
 } from "@/lib/wiki";
 import Nav from "@/components/Nav";
@@ -69,6 +70,7 @@ export default function WikiPage({ params }: Props) {
   const cats = getCategories();
   const catMeta = cats.find((c) => c.slug === category);
   const color = catMeta ? BRAIN_COLORS[catMeta.brain] : "#94a3b8";
+  const colorVar = catMeta ? getBrainVar(catMeta.brain) : "#94a3b8";
 
   // Build wikilink resolution map: basename -> href, full path -> href
   const allPages = getAllPages();
@@ -118,7 +120,7 @@ export default function WikiPage({ params }: Props) {
               <Link
                 href={`/${category}`}
                 className="hover:text-secondary transition-colors"
-                style={{ color: color + "cc" }}
+                style={{ color: colorVar }}
               >
                 {slugToLabel(category)}
               </Link>
@@ -159,7 +161,7 @@ export default function WikiPage({ params }: Props) {
                           href={`/?q=${encodeURIComponent(tag)}`}
                           className="font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded transition-opacity hover:opacity-100 opacity-80"
                           style={{
-                            color: color + "cc",
+                            color: colorVar,
                             background: color + "15",
                           }}
                         >
@@ -189,7 +191,7 @@ export default function WikiPage({ params }: Props) {
                     >
                       <span
                         className="font-mono text-[9px] uppercase tracking-widest shrink-0 w-24 truncate"
-                        style={{ color: color + "70" }}
+                        style={{ color: colorVar }}
                       >
                         {slugToLabel(r.category)}
                       </span>
@@ -227,7 +229,7 @@ export default function WikiPage({ params }: Props) {
           <aside className="hidden lg:block w-56 shrink-0">
             <div className="sticky top-20 flex flex-col gap-8">
               {/* Table of contents */}
-              <TableOfContents content={page.content} color={color} />
+              <TableOfContents content={page.content} color={colorVar} />
 
               {/* Sibling pages */}
               {siblings.length > 0 && (

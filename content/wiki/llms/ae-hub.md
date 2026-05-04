@@ -15,22 +15,22 @@ Central hub for all AI engineering knowledge. Every page in the AE brain connect
 ---
 
 ## Foundation Models
-[[llms/claude]] · [[llms/transformer-architecture]] · [[llms/model-families]] · [[llms/tokenisation]] · [[llms/hallucination]]
+[[llms/claude]] · [[llms/transformer-architecture]] · [[llms/model-families]] · [[llms/tokenisation]] · [[llms/hallucination]] · [[llms/inference-time-scaling]] · [[llms/small-language-models]]
 
 ## Safety and Alignment
 [[safety/alignment]] · [[safety/constitutional-ai]] · [[safety/mechanistic-interpretability]]
 
 ## Agents and Orchestration
-[[agents/langchain]] · [[agents/langgraph]] · [[agents/langgraph-cloud]] · [[agents/practical-agent-design]] · [[agents/crewai]] · [[agents/autogen]] · [[agents/react-pattern]] · [[agents/multi-agent-patterns]] · [[agents/memory]] · [[agents/langmem]] · [[agents/openai-agents-sdk]]
+[[agents/langchain]] · [[agents/langgraph]] · [[agents/langgraph-cloud]] · [[agents/practical-agent-design]] · [[agents/crewai]] · [[agents/autogen]] · [[agents/react-pattern]] · [[agents/multi-agent-patterns]] · [[agents/memory]] · [[agents/agent-memory-systems]] · [[agents/langmem]] · [[agents/openai-agents-sdk]] · [[agents/pydantic-ai]] · [[agents/mastra]] · [[agents/computer-use]]
 
 ## RAG and Retrieval
 [[rag/pipeline]] · [[rag/chunking]] · [[rag/embeddings]] · [[rag/hybrid-retrieval]] · [[rag/reranking]] · [[rag/query-expansion]] · [[rag/graphrag]]
 
 ## Prompting and Context
-[[prompting/techniques]] · [[prompting/dspy]] · [[prompting/context-engineering]]
+[[prompting/techniques]] · [[prompting/dspy]] · [[prompting/context-engineering]] · [[prompting/structured-outputs]]
 
 ## Evaluation
-[[evals/methodology]] · [[evals/llm-as-judge]] · [[evals/benchmarks]] · [[evals/openai-evals]]
+[[evals/methodology]] · [[evals/llm-as-judge]] · [[evals/benchmarks]] · [[evals/openai-evals]] · [[evals/bfcl]]
 
 ## Fine-Tuning
 [[fine-tuning/decision-framework]] · [[fine-tuning/lora-qlora]] · [[fine-tuning/dpo-grpo]] · [[fine-tuning/frameworks]]
@@ -45,13 +45,13 @@ Central hub for all AI engineering knowledge. Every page in the AE brain connect
 [[apis/anthropic-api]] · [[apis/openai-api]] · [[apis/google-ai]] · [[protocols/mcp]] · [[protocols/mcp-http-transport]] · [[protocols/a2a]] · [[protocols/tool-design]]
 
 ## AI Tools
-[[ai-tools/claude-code]] · [[ai-tools/cursor-copilot]] · [[ai-tools/tavily]]
+[[ai-tools/claude-code]] · [[ai-tools/cursor-copilot]] · [[ai-tools/tavily]] · [[ai-tools/openai-codex]]
 
 ## Observability
-[[observability/platforms]] · [[observability/helicone]] · [[observability/tracing]]
+[[observability/platforms]] · [[observability/helicone]] · [[observability/tracing]] · [[observability/llmops]]
 
 ## Security
-[[security/owasp-llm-top10]] · [[security/prompt-injection]] · [[security/mcp-cves]] · [[security/red-teaming]] · [[security/guardrails]] · [[security/oauth-boundary-testing]]
+[[security/owasp-llm-top10]] · [[security/prompt-injection]] · [[security/mcp-cves]] · [[security/red-teaming]] · [[security/guardrails]] · [[security/oauth-boundary-testing]] · [[security/llm-red-teaming-tools]]
 
 ## Infrastructure
 [[infra/vector-stores]] · [[infra/inference-serving]] · [[infra/huggingface]] · [[infra/gpu-hardware]] · [[infra/flash-attention]] · [[infra/deepspeed-zero]] · [[infra/experiment-tracking]]
@@ -63,7 +63,7 @@ Central hub for all AI engineering knowledge. Every page in the AE brain connect
 [[landscape/ai-labs]] · [[landscape/model-timeline]] · [[landscape/open-source-models]] · [[landscape/regulation]] · [[landscape/enterprise-ai-adoption]] · [[landscape/ai-use-case-identification]] · [[papers/attention-is-all-you-need]] · [[papers/key-papers]]
 
 ## Synthesis
-[[synthesis/rag-vs-finetuning]] · [[synthesis/llm-decision-guide]] · [[synthesis/architecture-patterns]] · [[synthesis/cost-optimisation]] · [[synthesis/getting-started]] · [[synthesis/learning-path]] · [[synthesis/software-engineer-to-ai-engineer]]
+[[synthesis/rag-vs-finetuning]] · [[synthesis/llm-decision-guide]] · [[synthesis/architecture-patterns]] · [[synthesis/cost-optimisation]] · [[synthesis/getting-started]] · [[synthesis/learning-path]] · [[synthesis/software-engineer-to-ai-engineer]] · [[synthesis/data-as-system]] · [[synthesis/technical-communication]]
 ## Open Questions
 
 - What capability limitations most surprise practitioners using this model in production?

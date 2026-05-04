@@ -17,10 +17,12 @@ type Props = {
   steps: Step[];
   pathId: string;
   color: string;
+  colorVar?: string;
   estimatedHours: number;
 };
 
-export default function PathSteps({ steps, pathId, color, estimatedHours }: Props) {
+export default function PathSteps({ steps, pathId, color, colorVar, estimatedHours }: Props) {
+  const cv = colorVar ?? color;
   const storageKey = `axiom-path-${pathId}`;
   const [done, setDone] = useState<Set<number>>(new Set());
   const [mounted, setMounted] = useState(false);
@@ -73,7 +75,7 @@ export default function PathSteps({ steps, pathId, color, estimatedHours }: Prop
               }}
             />
           </div>
-          <span className="font-mono text-[10px] shrink-0" style={{ color: allDone ? "#34d399" : color + "99" }}>
+          <span className="font-mono text-[10px] shrink-0 text-muted">
             {allDone ? "Complete" : `${completedCount}/${totalCount}`}
           </span>
         </div>
@@ -111,13 +113,13 @@ export default function PathSteps({ steps, pathId, color, estimatedHours }: Prop
                     <div>
                       <p
                         className="font-mono text-[9px] uppercase tracking-widest mb-1"
-                        style={{ color: color + "80" }}
+                        style={{ color: cv }}
                       >
                         {slugToLabel(step.category)}
                       </p>
                       <h2
-                        className="font-display text-base font-semibold leading-snug transition-colors"
-                        style={{ color: isDone ? color + "cc" : "#f0f4f8" }}
+                        className={`font-display text-base font-semibold leading-snug transition-colors ${isDone ? "" : "text-primary"}`}
+                        style={isDone ? { color: cv } : undefined}
                       >
                         {step.title}
                       </h2>
@@ -142,7 +144,7 @@ export default function PathSteps({ steps, pathId, color, estimatedHours }: Prop
                   {step.note && (
                     <p
                       className="font-mono text-[10px] mt-2"
-                      style={{ color: color + "90" }}
+                      style={{ color: cv }}
                     >
                       ↳ {step.note}
                     </p>

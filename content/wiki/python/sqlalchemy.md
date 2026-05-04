@@ -278,7 +278,7 @@ Fix: call `await session.flush()` before any bulk `execute(update(...))` to sync
 
 ## Connections
 
-[[python/python-hub]] · [[python/ecosystem]] · [[cs-fundamentals/database-design]] · [[technical-qa/database-testing]] · [[web-frameworks/fastapi]] · [[cloud/aws-rds-aurora]]
+[[python/python-hub]] · [[python/ecosystem]] · [[python/async]] · [[cs-fundamentals/database-design]] · [[technical-qa/database-testing]] · [[web-frameworks/fastapi]] · [[cloud/aws-rds-aurora]]
 ## Open Questions
 
 - What performance characteristics only become problems at production scale?

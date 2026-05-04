@@ -27,7 +27,7 @@ Central hub for all software engineering knowledge. Every page in the SE brain c
 [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/grpc]] · [[cs-fundamentals/api-versioning]] · [[cs-fundamentals/message-queues]]
 
 ## Data and Performance
-[[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/performance-optimisation-se]]
+[[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/performance-optimisation-se]] · [[cs-fundamentals/nosql-databases]]
 
 ## Observability and Security
 [[cs-fundamentals/observability-se]] · [[cs-fundamentals/security-fundamentals-se]] · [[cs-fundamentals/linux-fundamentals]] · [[cs-fundamentals/api-security]] · [[cs-fundamentals/logging-best-practices]]

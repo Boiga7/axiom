@@ -209,6 +209,7 @@ For teams building LLM products in regulated environments:
 - [[safety/alignment]] — Anthropic's RSP as voluntary safety governance complementing regulation
 - [[security/red-teaming]] — adversarial testing required by EU AI Act for GPAI systemic risk models
 - [[security/owasp-llm-top10]] — security obligations align with OWASP LLM guidance
+- [[landscape/iso42001]] — ISO/IEC 42001:2023 AI management system standard, the enterprise compliance framework that pairs with the EU AI Act
 
 ## Open Questions
 

@@ -1,11 +1,12 @@
 // components/LearningPathCard.tsx
 import Link from "next/link";
-import { BRAIN_COLORS } from "@/lib/constants";
+import { BRAIN_COLORS, getBrainVar } from "@/lib/constants";
 import type { LearningPath } from "@/lib/learning-paths";
 import type { Brain } from "@/lib/constants";
 
 export default function LearningPathCard({ path }: { path: LearningPath }) {
   const color = BRAIN_COLORS[path.brain as Brain] ?? "#94a3b8";
+  const colorVar = getBrainVar((path.brain as Brain) ?? "other");
 
   return (
     <Link
@@ -23,8 +24,8 @@ export default function LearningPathCard({ path }: { path: LearningPath }) {
       <div className="relative">
         {/* Meta */}
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-          <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color: color + "90" }}>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: colorVar }} />
+          <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color: colorVar }}>
             {path.steps.length} topics · ~{path.estimatedHours}h
           </span>
         </div>
@@ -44,7 +45,7 @@ export default function LearningPathCard({ path }: { path: LearningPath }) {
 
         {/* CTA */}
         <div className="flex items-center gap-1.5 mt-4">
-          <span className="font-mono text-[10px]" style={{ color }}>
+          <span className="font-mono text-[10px]" style={{ color: colorVar }}>
             Start →
           </span>
         </div>

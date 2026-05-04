@@ -767,6 +767,16 @@ Updated wiki/index.md (observability/ section).
 - Replaced `wiki/cs-fundamentals/sql.md` with redirect stub (para: archive)
 - Updated wiki/index.md: 346 → 349 pages; sql/ section expanded from 3 to 6 pages
 
+## [2026-05-04] lint | Gap resolution — 5 stubs created, 1 broken link fixed, 19 orphans linked
+
+- Created `wiki/infra/pgvector.md` — PostgreSQL vector extension; operators, IVFFlat/HNSW indexing, SQLAlchemy integration, hybrid search
+- Created `wiki/safety/alignment-overview.md` — alignment hub; RLHF, CAI, DPO, scalable oversight, open problems, lab comparison
+- Created `wiki/infra/aws-bedrock-agentcore.md` — AWS managed agent runtime; memory, tool execution, observability, when to use vs self-hosted
+- Created `wiki/python/async.md` — asyncio, async generators, concurrent LLM calls, Semaphore rate limiting, FastAPI integration
+- Created `wiki/data/data-engineering-hub.md` — data engineering hub; orchestration (Airflow, Prefect, dbt), storage patterns, AI-specific quality checks
+- Fixed `[[Testcontainers]]` → `[[testcontainers]]` in wiki/technical-qa/docker-ci-testing.md (case sensitivity)
+- Added 19 orphan page links across 7 hub pages: ae-hub.md (9 links), se-hub.md, infra/inference-serving.md, data/pipelines.md, landscape/regulation.md, qa/qa-hub.md (2 links), synthesis section
+
 ## [2026-05-04] ingest | Axiom practice exercises — code snippets added to 6 exercises
 
 Added working code snippets to practice-data.ts steps across 6 exercises:
@@ -778,3 +788,13 @@ Added working code snippets to practice-data.ts steps across 6 exercises:
 - `sdet/streaming-endpoint-test` — 5 steps: Playwright route interception, SSE parser, response reconstruction, chunk + full response assertions, progressive UI rendering test
 - `sdet/database-fixture-chain` — 5 steps: session-scoped engine, Alembic migration fixture, savepoint transaction rollback, realistic seed data, isolation verification tests
 - `sdet/k6-load-test` — 5 steps: basic script with check+sleep, staged ramp profile, thresholds (p95/error-rate), summary reading guide, group-based bottleneck isolation
+
+## [2026-05-04] lint | Gap Intelligence — 3 critical gaps, 3 concept gaps found
+
+gap-report.md (run 4) written. Active projects: evalcheck (distribution phase), mcpindex (Weekend 2).
+
+Critical gaps: GitHub Marketplace listing for GitHub Apps (blocks evalcheck), security scorecard methodology (blocks mcpindex), MCP Registry ecosystem page (blocks mcpindex distribution planning).
+
+Concept gaps: DeepEval (mentioned in security/llm-red-teaming-tools), feature stores (mentioned in data/data-engineering-hub), model cards (implied by landscape/open-source-models and data/synthetic-data).
+
+Index fix: safety/responsible-ai added to wiki/index.md (page existed on disk, missing from index).
