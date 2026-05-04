@@ -45,3 +45,5 @@ content/wiki/.obsidian/
 # local dev artefacts
 dev-server.log
 .superpowers/
+.claude/
+.playwright-mcp/
