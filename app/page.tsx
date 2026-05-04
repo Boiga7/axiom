@@ -4,7 +4,6 @@ import {
   getAllPages,
   getCategories,
   getSearchIndex,
-  BRAIN_COLORS,
   BRAIN_LABELS,
   getBrainVar,
   type Brain,
