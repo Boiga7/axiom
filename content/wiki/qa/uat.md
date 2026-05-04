@@ -179,3 +179,7 @@ Estimated fix: 2 days. Revised release date: 5 May.
 - [[qa/bug-lifecycle]] — UAT-found bugs enter the standard lifecycle
 - [[qa/exploratory-testing]] — UAT participants often explore beyond their scenarios
 - [[qa/risk-based-testing]] — UAT prioritises high-risk business scenarios
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

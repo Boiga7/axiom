@@ -84,3 +84,7 @@ Pivot to [[cs-fundamentals/event-driven-architecture]] to trace whether multiple
 ## Connections
 
 [[cs-fundamentals/error-handling-patterns]] · [[cs-fundamentals/message-queues]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/cqrs-event-sourcing]] · [[cs-fundamentals/api-design]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

@@ -85,3 +85,7 @@ Pivot to [[prompting/techniques]] to tighten the prompt's instruction to ground 
 ## Connections
 
 [[rag/pipeline]] · [[rag/chunking]] · [[rag/embeddings]] · [[evals/methodology]] · [[prompting/techniques]] · [[llms/hallucination]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

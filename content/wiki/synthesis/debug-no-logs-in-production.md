@@ -83,3 +83,7 @@ Pivot to [[cs-fundamentals/logging-best-practices]] to add structured logging wi
 ## Connections
 
 [[cs-fundamentals/logging-best-practices]] · [[cloud/observability-stack]] · [[observability/tracing]] · [[cloud/aws-ecs]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

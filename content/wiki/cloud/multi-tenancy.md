@@ -261,3 +261,7 @@ Fix: never reuse tenant IDs; generate UUIDs v4 (essentially impossible to collid
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/database-design]] · [[cloud/finops-cost-management]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

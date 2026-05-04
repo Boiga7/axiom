@@ -1,4 +1,4 @@
----
+﻿---
 type: entity
 category: apis
 tags: [anthropic, api, claude, prompt-caching, batch-api, streaming, tool-use]
@@ -14,7 +14,7 @@ tldr: The Anthropic Messages API covers prompt caching, batch processing, stream
 
 The primary interface for all Claude models. REST API with Python and TypeScript SDKs. This page covers the features that matter most for production AI engineering.
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 ---
 
@@ -269,3 +269,4 @@ Fix: use a webhook for batch completion notification; or schedule a polling job 
 - What are the rate limits and document size caps for the citations API in production use?
 - How does the extended-output beta header interact with prompt caching — does it affect cache key?
 - What are the cross-workspace cache sharing options beyond workspace isolation for enterprise teams?
+

@@ -242,3 +242,7 @@ Fix: verify the secret version exists and is not destroyed; grant the Cloud Run 
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-step-functions]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-api-gateway]] · [[cloud/finops-cost-management]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

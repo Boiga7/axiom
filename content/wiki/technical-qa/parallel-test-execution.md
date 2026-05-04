@@ -279,3 +279,7 @@ Fix: use `scope="session"` with `autouse=True` in `conftest.py` and a file lock 
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/test-architecture]] · [[technical-qa/flaky-test-management]] · [[qa/continuous-testing]] · [[qa/end-to-end-testing]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

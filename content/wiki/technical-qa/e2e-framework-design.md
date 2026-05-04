@@ -296,3 +296,7 @@ Fix: return only the new page object from the method; the caller owns navigation
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/test-architecture]] · [[technical-qa/parallel-test-execution]] · [[qa/end-to-end-testing]] · [[technical-qa/pytest-advanced]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

@@ -294,3 +294,7 @@ Fix: update the credential in `argocd repo add --upsert` or patch the `argocd-re
 - [[cloud/docker]] — images that ArgoCD deploys
 - [[cloud/terraform]] — Terraform provisions the cluster; ArgoCD manages workloads on it
 - [[cloud/secrets-management]] — ArgoCD Vault Plugin or External Secrets for secret injection
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

@@ -703,6 +703,8 @@ Punch list:
 
 ## [2026-05-03] research | Multi-head Latent Attention (MLA) -- DeepSeek low-rank KV cache compression, V2/V3/R1 usage
 
+## [2026-05-03] ingest | gitops-quality-gates — GitOps pipeline quality gates, ArgoCD, Flux, progressive delivery
+
 ## [2026-05-03] ingest | 9 new pages -- computer-use, pydantic-ai, model-routing, reasoning-model-patterns, openai-codex, mastra, bfcl, structured-outputs, voice-agents
 
 ## [2026-05-03] ingest | 14-page batch -- agent-memory-systems, llm-red-teaming-tools, small-language-models, inference-time-scaling, eu-ai-act, ai-gateway, mlops-pipelines, iso42001, inference-platforms, llmops, process-improvement-model (new); benchmarks, caching, experiment-tracking (updated)
@@ -730,3 +732,49 @@ Mirrored to axiom/content/wiki/technical-qa/self-healing-tests.md.
 ## [2026-05-03] ingest | test-estimation — new QA page covering three-point PERT with worked examples, T-shirt sizing, analogy-based estimation, UCP; activity breakdown (test writing/execution/retesting/regression/automation separately); estimation in agile (story points, velocity tracking); common biases and counters; context-switch tax for concurrent streams; capacity model (headcount × days × utilisation); new-client ramp-up model (40% week 1 → 100% week 4); tracking estimate vs actuals; presenting ranges to clients; scope creep playbook (Type 1/2/3); re-baselining process with worked delta calculation.
 Updated wiki/index.md.
 Mirrored to axiom/content/wiki/qa/test-estimation.md.
+
+## [2026-05-03] ingest | Release Sign-Off and Go/No-Go Governance
+
+Created wiki/qa/release-sign-off.md — RACI for release decisions, entry/exit criteria design, measurable exit criteria templates (specific thresholds not vague pass/fail language), release readiness report format, known-defect risk documentation with P1-P4 severity thresholds, emergency release checklist, rollback trigger criteria (auto and manual), communicating no-go to senior stakeholders, managing override pressure with written documentation, CI/CD vs waterfall sign-off models, quality gates vs leading/lagging metrics, production monitoring as the final gate, example exit criteria tables for web app and API releases.
+Updated wiki/qa/qa-hub.md with Release Governance section.
+Mirrored both to axiom/content/wiki/qa/.
+
+## [2026-05-03] ingest | ai-test-generation — AI-assisted test generation, Claude Code, Copilot, prompt patterns, quality review
+
+Created wiki/ai-tools/ai-test-generation.md — comprehensive page covering: augmentation positioning, five use cases (unit/API/E2E/data/BVA), Claude Code workflow + CLAUDE.md convention enforcement, Copilot inline + /tests slash command, Cursor Composer, four prompt patterns (implementation+spec description, boundary case follow-up, factory-first, explicit framework declaration), quality review checklist (false positives, assertion quality, independence, hardcoded data, naming), four failure zones (complex business logic, stateful integration, performance, security boundaries), mutation testing with Stryker and mutmut, client ROI framing with metrics table, three risk categories (agreement with bugs, deskilling, maintenance burden), confidentiality guidance.
+Updated wiki/index.md (ai-tools/ section).
+Mirrored to axiom/content/wiki/ai-tools/ai-test-generation.md.
+
+## [2026-05-03] ingest | websocket-testing — WebSocket functional and performance testing, Playwright, k6, SSE
+
+## [2026-05-03] ingest | jmeter — Apache JMeter performance testing, test plan structure, CLI mode, CI integration
+
+## [2026-05-03] ingest | datadog — Datadog unified observability platform, APM, synthetic testing, CI Visibility
+
+Created wiki/observability/datadog.md — ~470-line page covering: unified observability platform (metrics/traces/logs/events), four metric types (gauge/count/rate/histogram), Datadog Agent and DogStatsD, APM setup (auto vs manual instrumentation, trace sampling, QA span tags), dashboards (timeboard vs screenboard, template variables, SLO widgets), monitors (metric, APM, composite, alert routing, downtime scheduling), synthetic monitoring (browser tests, multi-step API tests, CI/CD continuous testing with --tunnel), log management (facets, Grok pipelines, log-to-metrics, archives), SLO objects (metric-based, monitor-based, error budget, burn rate alerts), CI Visibility (flaky test detection, Test Impact Analysis, JUnit XML upload), integrations (Playwright reporter, k6 DogStatsD, REST Assured), practical QA use cases (correlating a performance test run with APM traces, finding bottlenecks during load tests), pricing model (host/custom metrics/log ingestion), and Grafana/Prometheus comparison.
+Mirrored to axiom/content/wiki/observability/datadog.md.
+Updated wiki/index.md (observability/ section).
+
+## [2026-05-04] ingest | sql category — 3 new pages (window-functions, query-optimization, sql-for-ai); sql/ added to index as 28th category
+
+## [2026-05-04] lint | Vault housekeeping — 11 missing pages created, 18 orphan pages linked
+
+## [2026-05-04] ingest | sql expansion — 3 new pages + cs-fundamentals/sql moved to sql/sql-fundamentals
+
+- Created `wiki/sql/sql-fundamentals.md` — full SQL reference moved from cs-fundamentals/sql.md; updated category to sql; added cross-links to new sql/ pages
+- Created `wiki/sql/sqlalchemy-patterns.md` — async engine, session management, DeclarativeBase, SelectAPI, eager loading, Alembic migrations, bulk ops, common pitfalls
+- Created `wiki/sql/postgresql-features.md` — JSONB (GIN index, containment queries), full-text search (tsvector, trgm), advanced index types, LATERAL joins, upsert, partitioning, pg_stat_statements, VACUUM, useful extensions
+- Replaced `wiki/cs-fundamentals/sql.md` with redirect stub (para: archive)
+- Updated wiki/index.md: 346 → 349 pages; sql/ section expanded from 3 to 6 pages
+
+## [2026-05-04] ingest | Axiom practice exercises — code snippets added to 6 exercises
+
+Added working code snippets to practice-data.ts steps across 6 exercises:
+- `ai-engineer/rag-pipeline` — 6 steps: PyMuPDF chunking, sentence-transformers embedding, Chroma store/retrieve, Claude citation-aware answering
+- `ai-engineer/llm-judge-eval` — 3 steps: judge prompt with XML tags and score parsing, per-case runner, aggregate reporting
+- `ai-engineer/tool-use` — 6 steps: JSON Schema tool definitions, first turn, tool execution, tool_result, multi-step loop, error handling with is_error
+- `ai-engineer/prompt-caching` — 4 steps: baseline measurement, cache_control block, hit/miss logging, cost calculation
+- `ai-engineer/structured-outputs` — 4 steps: Pydantic model + schema inspection, extraction prompt with prefill, sample loop, retry with error message appended to conversation
+- `sdet/streaming-endpoint-test` — 5 steps: Playwright route interception, SSE parser, response reconstruction, chunk + full response assertions, progressive UI rendering test
+- `sdet/database-fixture-chain` — 5 steps: session-scoped engine, Alembic migration fixture, savepoint transaction rollback, realistic seed data, isolation verification tests
+- `sdet/k6-load-test` — 5 steps: basic script with check+sleep, staged ramp profile, thresholds (p95/error-rate), summary reading guide, group-based bottleneck isolation

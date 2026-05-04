@@ -191,3 +191,7 @@ Fix: define the sanity scope explicitly in the bug ticket (which component, whic
 
 ## Connections
 [[qa-hub]] · [[qa/regression-testing]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/qa-metrics]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

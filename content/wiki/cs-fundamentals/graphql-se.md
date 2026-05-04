@@ -306,3 +306,7 @@ Fix: disable introspection in production (`schema = strawberry.Schema(..., intro
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/grpc]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/microservices-patterns]] · [[technical-qa/graphql-testing]] · [[web-frameworks/fastapi]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -280,3 +280,7 @@ Fix: replace all sleeps with `expect(locator).to_be_visible()` or `page.wait_for
 ## Connections
 
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/test-automation-strategy]] · [[qa/continuous-testing]] · [[technical-qa/playwright-advanced]] · [[technical-qa/flaky-test-management]] · [[technical-qa/e2e-framework-design]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

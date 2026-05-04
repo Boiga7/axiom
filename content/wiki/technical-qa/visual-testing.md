@@ -213,3 +213,7 @@ Fix: identify all dynamic regions with `data-testid` attributes and add them to 
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/cypress]] · [[qa/cross-browser-testing]] · [[qa/regression-testing]] · [[qa/accessibility-testing]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

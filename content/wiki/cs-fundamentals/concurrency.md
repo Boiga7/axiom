@@ -264,3 +264,7 @@ Fix: always use `async with semaphore:` (context manager). It releases on except
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[python/ecosystem]] · [[llms/ae-hub]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

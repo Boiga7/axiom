@@ -55,3 +55,7 @@ Central hub for all cloud and platform engineering knowledge. Every page in the 
 
 ## Data Engineering
 [[cloud/data-engineering-cloud]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

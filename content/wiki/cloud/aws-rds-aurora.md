@@ -195,3 +195,7 @@ Fix: route time-sensitive reads (e.g., post-write confirmations) to the writer e
 
 ## Connections
 [[cloud-hub]] · [[cloud/secrets-management]] · [[cloud/aws-lambda-patterns]] · [[cloud/cloud-monitoring]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

@@ -83,3 +83,7 @@ Pivot to [[synthesis/debug-rag-wrong-context]] for a broader diagnostic of the f
 ## Connections
 
 [[rag/embeddings]] · [[rag/chunking]] · [[rag/pipeline]] · [[evals/ragas]] · [[synthesis/debug-rag-wrong-context]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

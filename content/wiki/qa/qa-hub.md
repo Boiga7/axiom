@@ -49,6 +49,9 @@ Central hub for all quality assurance knowledge. Every page in the QA brain conn
 
 ## Extended Testing
 [[qa/usability-testing]] · [[qa/performance-testing-qa]]
+
+## QA Consulting and Process Improvement
+[[qa/benefits-realisation]] · [[qa/qa-change-management]] · [[qa/test-estimation]] · [[qa/uat-governance]]
 ## Open Questions
 
 - What testing scenarios does this technique systematically miss?

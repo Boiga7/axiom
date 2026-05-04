@@ -255,3 +255,7 @@ Fix: increase `ThresholdCount` in the endpoint group health check configuration 
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-ecs]] · [[cloud/kubernetes]] · [[cloud/blue-green-deployment]] · [[cloud/aws-api-gateway]] · [[cloud/cloud-networking]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

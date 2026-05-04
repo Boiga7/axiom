@@ -189,3 +189,7 @@ Fix: add explicit `opts=pulumi.ResourceOptions(depends_on=[...])` to resources t
 
 ## Connections
 [[cloud-hub]] · [[cloud/terraform]] · [[cloud/aws-cdk]] · [[cloud/github-actions]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

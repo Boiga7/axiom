@@ -54,6 +54,8 @@ The dot product `QK^T` computes a similarity score between every query and every
 
 **Multi-head attention:** Run H attention heads in parallel with different learned Q/K/V projections. Each head can attend to different aspects of the input. Outputs are concatenated and projected.
 
+**Attention variants for inference efficiency:** MHA caches H full KV pairs per layer. MQA (Multi-Query) shares a single KV pair across all heads. GQA (Grouped Query, used in Llama 3 and Mistral) shares one KV pair per group of heads, reducing cache by H/G. MLA ([[llms/multi-head-latent-attention]]) takes a different approach: it projects K and V jointly into a low-rank latent vector and caches only that, achieving ~32× compression while preserving near-MHA quality.
+
 ---
 
 ## KV Cache
@@ -110,7 +112,7 @@ FFN width is typically 4x model dimension. It stores factual knowledge. This is 
 
 Instead of all tokens passing through the same FFN, MoE routes each token to one of N "expert" FFNs via a router. Only 2 experts active per token typically.
 
-**Why it matters:** GPT-4, Gemini 1.5, Mistral 8x7B, and Mixtral are MoE. At inference, MoE activates a fraction of parameters per token — lower effective compute than the total parameter count suggests. A 141B parameter MoE model might only activate 22B parameters per forward pass.
+**Why it matters:** GPT-4, Gemini 1.5, and Mixtral 8x7B are MoE. At inference, MoE activates a fraction of parameters per token — lower effective compute than the total parameter count suggests. Mixtral 8x7B: 46.7B total / 12.9B active. A 141B parameter MoE model might only activate 22B parameters per forward pass. See [[papers/mistral]] for Mixtral's specific routing design and load-balancing approach.
 
 ---
 

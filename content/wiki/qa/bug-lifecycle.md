@@ -214,3 +214,7 @@ Fix: move unreproduce bugs to Deferred with a "Cannot Reproduce" label rather th
 - [[qa/exploratory-testing]] — exploratory sessions are a major source of New bugs
 - [[qa/qa-tools]] — TestRail, Zephyr, Jira for bug tracking and test management
 - [[qa/qa-metrics]] — defect metrics tracked across the lifecycle
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

@@ -1,9 +1,9 @@
 ---
 type: concept
 category: evals
-tags: [benchmarks, swe-bench, mmlu, gpqa, humaneval, lmsys, evaluation]
+tags: [benchmarks, swe-bench, mmlu, gpqa, humaneval, lmsys, evaluation, livecodebench]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-03
 para: resource
 tldr: Standard LLM benchmarks and what they actually measure — knowing which are saturated, contaminated, or misused prevents drawing wrong production decisions from benchmark scores.
 ---
@@ -19,7 +19,7 @@ Standard benchmarks used to compare models. Knowing what each measures (and what
 ## The Benchmark Problem
 
 Benchmarks become invalid as soon as models are trained on them. "Training on benchmarks" (data contamination) inflates scores without reflecting real capability. This is why:
-- HumanEval is saturated (90%+ for frontier models)
+- HumanEval is saturated (95%+ for frontier models — o3 at 97%; cannot differentiate between frontier models)
 - MMLU is near-saturated for frontier models (~90%+)
 - The community constantly needs harder benchmarks
 
@@ -29,30 +29,47 @@ Always look at multiple benchmarks. No single benchmark tells the whole story.
 
 ## Coding
 
-### SWE-bench Verified
+### SWE-bench
 
 **What it measures:** Resolving real GitHub issues. Model generates a code patch; it passes if the repo's test suite passes.
 
 **Why it matters:** Tests real program synthesis, not pattern matching. Can't be gamed with memorisation — every issue requires reasoning about the actual codebase.
 
-**Scores (April 2026):**
+**Variants:**
+
+**SWE-bench Verified** — 500 human-validated tasks (subset of the original 2,294-issue set filtered for test reliability). Was the standard frontier comparison benchmark. OpenAI now recommends SWE-bench Pro over Verified for frontier model comparison.
+
+**SWE-bench Pro** — harder successor. 1,865 tasks from proprietary codebases, multi-language (includes Go and TypeScript in addition to Python). Designed to resist saturation as frontier models approach ceiling scores on Verified.
+
+**Scores on SWE-bench Verified (May 2026):**
+- Claude Mythos Preview: ~93.9% [unverified]
 - Claude Opus 4.6: 80.8%
 - Claude Sonnet 4.6: 79.6%
 - Claude Haiku 4.5: 73.3%
-- DeepSeek R1: ~72%
+- [[llms/deepseek-r1|DeepSeek R1]]: ~72%
 - GPT-4o: ~50–60%
 
 > [Source: Perplexity research, 2026-04-29] [unverified — scores change frequently]
 
-**"Verified" variant:** Filtered to 2,294 issues where test failures are reliable. The standard version had 19.7% ambiguous test failures.
+**"Verified" naming note:** The original SWE-bench had 19.7% ambiguous test failures. The Verified subset filtered to 2,294 issues where test failures are reliable. The newer SWE-bench Pro is the separate harder benchmark described above.
 
 ### HumanEval / MBPP
 
 **What it measures:** Writing Python functions from docstrings. Pass@1: does the first attempt pass all test cases?
 
-**Problem:** Saturated. Frontier models score 90%+. Mostly measures whether the model saw the problem in training data.
+**Problem:** Fully saturated. Frontier models all score 95%+ (o3 at 97%). Differences between frontier models at this ceiling are not statistically meaningful. Mostly measures whether the model saw the problem in training data.
 
-**Use:** Still valid for comparing small/open-source models. Useless for comparing frontier models.
+**Use:** Still valid as a minimum capability bar and for comparing small or open-source models. Not a frontier discriminator — use SWE-bench for any frontier coding comparison.
+
+### LiveCodeBench
+
+**What it measures:** Competitive programming problems sourced from contests that post-date model training cutoffs (problems added monthly). Because the problems did not exist when frontier models were trained, scores reflect genuine problem-solving ability rather than training data recall.
+
+**Why it matters:** Contamination resistance is the core design goal. Most coding benchmarks (HumanEval included) are in training data for all frontier models. LiveCodeBench's rolling update mechanism gives it a structural advantage over static benchmarks for measuring real coding capability.
+
+**Maintained by:** Researchers from MIT, Princeton, and UT Austin.
+
+**Use:** Preferred over HumanEval for measuring coding capability on problems models have not seen. Complements SWE-bench (real-world repo tasks) with a pure problem-solving signal.
 
 ---
 
@@ -139,8 +156,10 @@ See [[evals/methodology]] for the full golden set construction guide. Short vers
 
 ## Key Facts
 
-- SWE-bench Verified: 2,294 real GitHub issues; Claude Sonnet 4.6 scores 79.6%, Opus 4.6 scores 80.8%
-- HumanEval is saturated at 90%+ for frontier models — useless for frontier comparisons
+- SWE-bench Verified: 500 human-validated tasks; Claude Sonnet 4.6 scores 79.6%, Opus 4.6 scores 80.8%, Claude Mythos Preview ~93.9% [unverified]
+- SWE-bench Pro: 1,865 tasks, proprietary codebases, multi-language — OpenAI recommends over Verified for frontier comparison
+- HumanEval is saturated at 95%+ for frontier models (o3 at 97%) — useless for frontier comparisons; minimum capability bar only
+- LiveCodeBench: contamination-resistant coding benchmark, new problems added monthly from post-training-cutoff contests
 - MMLU: 57 subjects, 14K questions; frontier models at 85-90%+ (near-saturated)
 - GPQA Diamond: domain experts score ~65%; frontier models scoring 85%+ is genuinely meaningful
 - LMSYS Chatbot Arena has verbosity bias — longer responses get preferred regardless of accuracy
@@ -150,9 +169,9 @@ See [[evals/methodology]] for the full golden set construction guide. Short vers
 ## Common Failure Cases
 
 **Citing HumanEval scores to justify a model choice for production coding tasks**  
-Why: HumanEval is saturated at 90%+ for frontier models; differences of 1-3 percentage points are not statistically meaningful, and the benchmark's synthetic docstring-to-function tasks do not reflect real engineering work.  
-Detect: two models show HumanEval scores of 92% and 90%; the 90% model actually outperforms on SWE-bench.  
-Fix: use SWE-bench Verified for coding evaluations; treat HumanEval as a sanity check for open-source models, not a differentiator for frontier models.
+Why: HumanEval is saturated at 95%+ for frontier models (o3 at 97%); differences of 1-3 percentage points are not statistically meaningful, and the benchmark's synthetic docstring-to-function tasks do not reflect real engineering work.  
+Detect: two models show HumanEval scores of 96% and 94%; the lower-scoring model actually outperforms on SWE-bench.  
+Fix: use SWE-bench Verified or SWE-bench Pro for coding evaluations; treat HumanEval as a minimum capability bar for open-source models, not a differentiator for frontier models.
 
 **Comparing benchmark scores across different token budgets as if they are equivalent**  
 Why: a model running with extended thinking enabled will score significantly higher on GPQA than the same model without extended thinking; comparing the two numbers as "model A vs model B" is misleading.  
@@ -181,4 +200,4 @@ Fix: prefer benchmarks run by independent third parties (EleutherAI, HuggingFace
 
 - What replaces MMLU and HumanEval as the canonical general-purpose benchmarks once they're fully saturated?
 - How does SWE-bench Verified handle the risk of test-suite contamination for models trained on GitHub data?
-- Is there a reliable, contamination-resistant coding benchmark for frontier model comparison?
+- LiveCodeBench addresses contamination-resistant coding evaluation — does its monthly update cadence keep pace with training data recency for the fastest-training labs?

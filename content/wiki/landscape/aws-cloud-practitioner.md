@@ -970,6 +970,7 @@ These are the services AWS explicitly names as in-scope for CLF-C02.
 ## Related Pages
 
 - [[landscape/aws-solutions-architect-associate]] (next certification up)
+- [[landscape/aws-ai-practitioner]] — AIF-C01; the AI-specialist companion certification to CLF-C02
 - [[protocols/mcp]] (cloud protocol context)
 - [[infra/vector-stores]] (AWS services in AI infra context)
 - [[security/owasp-llm-top-10]] (cloud security context)

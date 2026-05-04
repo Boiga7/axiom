@@ -1,4 +1,4 @@
----
+﻿---
 type: entity
 category: landscape
 tags: [anthropic, openai, google, deepmind, meta, ai-labs, landscape, funding]
@@ -38,7 +38,7 @@ The frontier AI landscape as of April 2026. Four major labs dominate; open-sourc
 
 ## OpenAI
 
-**Valuation:** ~$300B [unverified] (recent internal rounds)  
+**Valuation:** ~$852B post-money (funding round closed March 2026)  
 **Revenue:** ~$24–25B ARR (Q1 2026 revenue miss reported)  
 **Compute:** Projected $25B cash burn in 2026; heavily invested in custom Stargate datacenters  
 **Flagship:** GPT-4o, o3 (reasoning), GPT-5 (rumoured/unconfirmed for 2026) [unverified]
@@ -91,7 +91,7 @@ The frontier AI landscape as of April 2026. Four major labs dominate; open-sourc
 **Flagship:** Mistral Large 2, Mixtral 8x22B, Codestral  
 **License:** Apache 2.0 for smaller models; proprietary for larger (Mistral Large)
 
-**Strategic position:** The European frontier lab. Best density per parameter of any lab — Mixtral 8x7B outperforms GPT-3.5 at much lower compute. Strong MoE architecture.
+**Strategic position:** The European frontier lab. Best density per parameter of any lab — Mixtral 8x7B outperforms GPT-3.5 at much lower compute. Strong MoE architecture. See [[papers/mistral]] for the architectural deep-dive on Mistral 7B and Mixtral 8x7B.
 
 ---
 
@@ -102,11 +102,11 @@ The frontier AI landscape as of April 2026. Four major labs dominate; open-sourc
 | **Llama 3.x** | Meta | 405B instruct | Best open model at frontier |
 | **Mistral/Mixtral** | Mistral AI | Large 2 | Best European lab |
 | **Qwen 2.5** | Alibaba | 72B instruct | Best Chinese open model |
-| **DeepSeek V3/R1** | DeepSeek | R1 | Best reasoning open model; GRPO training |
+| **DeepSeek V3/R1** | DeepSeek | [[llms/deepseek-r1\|R1]] | Best reasoning open model; GRPO training |
 | **Gemma 2** | Google | 27B | Best sub-30B open |
 | **Phi-4** | Microsoft | 14B | Best small model |
 
-DeepSeek R1 is notable: comparable to OpenAI o1 on reasoning benchmarks, trained with GRPO (no PPO reward model), open weights, 96% cheaper via API. Major disruption to the economics of reasoning models.
+[[llms/deepseek-r1|DeepSeek R1]] is notable: comparable to OpenAI o1 on reasoning benchmarks, trained with GRPO (no PPO reward model), open weights, 96% cheaper via API. Major disruption to the economics of reasoning models.
 
 ---
 
@@ -121,7 +121,7 @@ DeepSeek R1 is notable: comparable to OpenAI o1 on reasoning benchmarks, trained
 | Llama 3 405B | ~50% | ~73% | ~85% |
 | DeepSeek R1 | ~72% | ~71% | ~90% |
 
-> [Source: Perplexity research, 2026-04-29] [unverified — benchmarks move quickly]
+> [Source: Perplexity research, 2026-04-29 — benchmarks move quickly, check current leaderboards]
 
 ---
 
@@ -145,7 +145,7 @@ Frontier models triggering GPAI provisions under the EU AI Act must publish mode
 - OpenAI revenue: ~$24-25B ARR (Q1 2026 miss reported); 300M+ weekly ChatGPT users
 - Google DeepMind: 650M monthly Gemini users; also the largest Anthropic strategic investor
 - Llama Community License: commercial use allowed up to 700M MAU
-- DeepSeek R1: o1-level reasoning benchmarks; 96% cheaper API; trained with GRPO (no reward model)
+- [[llms/deepseek-r1|DeepSeek R1]]: o1-level reasoning benchmarks; 96% cheaper API; trained with GRPO (no reward model)
 - EU AI Act GPAI obligations: model cards, evaluation cooperation, adversarial testing for frontier models
 - Anthropic SWE-bench Verified: Opus 4.6 at 80.8%, Sonnet 4.6 at 79.6%
 
@@ -163,3 +163,4 @@ Frontier models triggering GPAI provisions under the EU AI Act must publish mode
 - When will Anthropic IPO and what valuation multiple will the market apply to $30B ARR?
 - Can DeepSeek's R1 GRPO approach be replicated for other reasoning domains (law, medicine)?
 - What happens to the open-source model tier when frontier capability pulls ahead faster than open models can follow?
+

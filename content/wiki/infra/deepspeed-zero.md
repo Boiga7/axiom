@@ -190,3 +190,7 @@ Fix: treat them as separate code paths; use ZeRO for DeepSpeed-only stacks and F
 - [[fine-tuning/lora-qlora]] — QLoRA + ZeRO Stage 2 is the standard setup for multi-GPU LoRA training
 - [[infra/experiment-tracking]] — W&B/MLflow log memory usage per GPU during ZeRO training runs
 - [[infra/inference-serving]] — ZeRO is training-only; vLLM handles inference distribution separately
+## Open Questions
+
+- What operational burden does this introduce that the documentation does not cover?
+- At what scale does this infrastructure pattern stop being cost-effective?

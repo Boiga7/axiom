@@ -341,3 +341,7 @@ Fix: always use `git add <specific-file>` or `git add -p`; maintain a comprehens
 - [[infra/deployment]] — GitHub Actions CI/CD is triggered by git events (push, PR)
 - [[protocols/github-apps]] — GitHub Apps authenticate to the GitHub API to read/write git repositories
 - [[python/pypi-distribution]] — PyPI release workflow is triggered from git tags via GitHub Actions
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

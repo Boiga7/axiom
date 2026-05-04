@@ -227,3 +227,7 @@ Fix: write tasks as goal-based scenarios ("find a product called Widget Pro and 
 
 ## Connections
 [[qa-hub]] · [[qa/exploratory-testing]] · [[qa/non-functional-testing]] · [[qa/accessibility-testing]] · [[qa/uat]] · [[qa/test-strategy]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

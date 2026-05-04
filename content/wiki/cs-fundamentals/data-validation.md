@@ -283,3 +283,7 @@ Fix: add a `field_validator` that calls `.strip()` before the pattern check, or 
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/api-security]] · [[web-frameworks/fastapi]] · [[python/instructor]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -179,3 +179,7 @@ Fix: use a null check: `Objects.requireNonNullElseThrow(System.getenv("ANTHROPIC
 - [[java/anthropic-java-sdk]] — official Anthropic SDK for Java
 - [[java/grpc]] — gRPC: high-performance Java↔Python service communication
 - [[java/build-tools]] — Maven and Gradle project setup for AI projects
+## Open Questions
+
+- How does this integrate with the broader JVM ecosystem in practice?
+- What performance characteristics are not obvious from the API surface?

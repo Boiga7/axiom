@@ -24,7 +24,7 @@ OX Security disclosed a critical systemic vulnerability in April 2026: Anthropic
 
 **Root cause:** MCP's STDIO transport passes tool arguments directly to subprocess calls without mandatory sandboxing. This is an architectural decision, not a bug — Anthropic confirmed the behaviour is by design and declined to change the protocol. Input sanitisation is the developer's responsibility.
 
-**Scale:** 7,000+ publicly accessible servers, 150M downloads, up to 200,000 vulnerable instances. [unverified — as of April 2026 research]
+**Scale:** 7,000+ publicly accessible servers, 150M downloads, up to 200,000 vulnerable instances. (OX Security disclosure, April 2026)
 
 **Anthropic's position:** The STDIO execution model is a secure default in trusted environments (local CLI tools). Developers must sanitise inputs for any server accepting untrusted data.
 
@@ -120,7 +120,7 @@ mcpindex scan https://your-mcp-server.com
 
 - Systemic STDIO RCE disclosed by OX Security in April 2026 — affects Python, TypeScript, Java, and Rust official SDKs
 - Anthropic confirmed the STDIO execution model is by design; input sanitisation is the developer's responsibility
-- Scale: 7,000+ publicly accessible servers, 150M downloads, up to 200,000 vulnerable instances [unverified — April 2026]
+- Scale: 7,000+ publicly accessible servers, 150M downloads, up to 200,000 vulnerable instances (OX Security disclosure, April 2026)
 - 6 named CVEs as of April 2026: 2 Critical (CVE-2025-49596, CVE-2025-54994), 3 High, plus 3 undisclosed in mcp-server-git
 - Five attack categories: Tool Poisoning, Rug Pull, SSRF via Tool Input, Cross-Origin Tool Escalation, Namespace Shadowing
 - 66% of 1,808 scanned MCP servers had security findings (per CLAUDE.md domain notes)

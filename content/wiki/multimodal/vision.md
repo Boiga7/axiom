@@ -44,7 +44,7 @@ The vision encoder (typically a ViT, Vision Transformer) divides the image into 
 | **LLaVA-1.6 / Idefics3** | Open-source | Good for self-hosted vision tasks |
 | **Qwen-VL** | Strong for documents + Chinese | Best open OCR |
 
-> [Source: general knowledge as of 2026-04-29, specific benchmark rankings may vary] [unverified]
+> [Source: general knowledge as of 2026-04-29. Claude 3.5 Sonnet was best-in-class for document understanding at mid-2024 release; as of 2026, Gemini 2.5 Pro and Qwen3-VL-235B are competitive across multimodal benchmarks. Rankings shift frequently — check current leaderboards before model selection.]
 
 ---
 

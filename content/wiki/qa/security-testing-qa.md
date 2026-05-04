@@ -199,3 +199,7 @@ Fix: make writing a regression test for every confirmed pen test finding a manda
 
 ## Connections
 [[qa-hub]] · [[qa/risk-based-testing]] · [[qa/qa-in-devops]] · [[technical-qa/security-automation]] · [[security/guardrails]] · [[cs-fundamentals/auth-patterns]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

@@ -237,3 +237,7 @@ Fix: expose both ports in docker-compose: `- "8080:8080"` and `- "50051:50051"`;
 ## Connections
 
 [[infra/vector-stores]] · [[rag/pipeline]] · [[rag/reranking]] · [[evals/ragas]] · [[observability/arize]]
+## Open Questions
+
+- What operational burden does this introduce that the documentation does not cover?
+- At what scale does this infrastructure pattern stop being cost-effective?

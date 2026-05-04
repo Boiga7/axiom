@@ -334,3 +334,7 @@ Fix: send the token as the first message after the connection is established (an
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/networking]] · [[cs-fundamentals/concurrency]] · [[web-frameworks/fastapi]] · [[cs-fundamentals/streaming-patterns]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

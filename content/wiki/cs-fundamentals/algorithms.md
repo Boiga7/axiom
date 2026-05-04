@@ -325,3 +325,7 @@ Fix: convert the list to a `set` before the loop for O(1) membership checks, red
 - [[math/optimisation]] — gradient descent is an optimisation algorithm; same tradeoffs between local and global optima apply
 - [[math/probability]] — randomised algorithms (quicksort pivot selection, hash functions) rely on probability theory
 - [[python/ecosystem]] — `heapq`, `bisect`, `collections`, `functools.lru_cache` are the practical implementations
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -84,3 +84,7 @@ Pivot to [[synthesis/debug-api-timeout]] to diagnose connection failures where D
 ## Connections
 
 [[cloud/kubernetes]] · [[cloud/aws-networking-advanced]] · [[cloud/vpc-design-patterns]] · [[cloud/service-mesh]] · [[synthesis/debug-api-timeout]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

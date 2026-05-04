@@ -129,7 +129,7 @@ Any LangChain/LangGraph code now auto-traces to LangSmith.
 
 ## Arize Phoenix
 
-**Best for unified ML + LLM observability.** Raised $70M Series C [unverified]. Bridges traditional ML monitoring and LLM tracing in one platform.
+**Best for unified ML + LLM observability.** Raised $70M Series C (February 2025). Bridges traditional ML monitoring and LLM tracing in one platform.
 
 **Differentiator:** UMAP embeddings visualisation — see the shape of your embedding space and spot distribution drift visually.
 
@@ -194,7 +194,7 @@ Build an annotation queue for human review of borderline scores. Use the scored 
 - Langfuse scale: 2,000+ paying customers, 26M+ SDK installs/month, 63 of Fortune 500 [Source: Perplexity research, 2026-04-29]
 - Langfuse v3: migrated to ClickHouse because PostgreSQL couldn't handle high-throughput ingestion + fast analytical reads
 - LangSmith: added OTel support March 2025 — now receives traces from any OTel-compatible system
-- Arize Phoenix: $70M Series C [unverified]; best for unified ML monitoring + LLM tracing; Apache 2.0
+- Arize Phoenix: $70M Series C (February 2025); best for unified ML monitoring + LLM tracing; Apache 2.0
 - Cost gates: soft warn at 80% of token budget, hard stop at 100%
 - OTel GenAI conventions: gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, gen_ai.request.model are the key attributes
 
@@ -228,6 +228,7 @@ Fix: hash or bucket high-cardinality values before attaching as span attributes;
 ## Connections
 
 - [[observability/tracing]] — OTel instrumentation and Langfuse/LangSmith integration patterns
+- [[observability/datadog]] — Datadog unified observability: APM, synthetic monitoring, CI Visibility, and SLOs
 - [[evals/methodology]] — offline evaluation methodology complementing online evals
 - [[agents/langgraph]] — tracing LangGraph agent runs with Langfuse callback
 - [[apis/anthropic-api]] — token usage and cost in API response object

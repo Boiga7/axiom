@@ -248,3 +248,7 @@ Fix: delete the conflicting VPC and recreate with a non-overlapping CIDR; mainta
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/aws-networking-advanced]] · [[cloud/aws-eks]] · [[cloud/aws-fargate]] · [[cloud/multi-tenancy]] · [[cloud/aws-cdk]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

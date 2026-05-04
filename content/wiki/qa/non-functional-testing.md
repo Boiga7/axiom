@@ -178,3 +178,7 @@ Fix: after each quarter, lower the `maxNumericValue` thresholds to 110% of the m
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/accessibility-testing]] · [[qa/cross-browser-testing]] · [[technical-qa/performance-testing]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

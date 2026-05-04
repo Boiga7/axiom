@@ -193,3 +193,7 @@ Fix: use NVIDIA Transformer Engine's `FP8GlobalStateManager` with `fp8_autocast`
 ## Connections
 
 [[math/backpropagation]] · [[math/optimisation]] · [[infra/gpu-hardware]] · [[infra/inference-serving]] · [[fine-tuning/lora-qlora]] · [[papers/lora]]
+## Open Questions
+
+- Where does the mathematical idealisation diverge most from real implementation behaviour?
+- What intuition does a practitioner need that the formal definitions do not convey?

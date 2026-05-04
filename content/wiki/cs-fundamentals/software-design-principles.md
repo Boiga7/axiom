@@ -215,3 +215,7 @@ class Barkable(Protocol):
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

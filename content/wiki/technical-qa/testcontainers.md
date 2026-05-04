@@ -236,3 +236,7 @@ Fix: use a unique consumer group ID per test (e.g., incorporate `uuid4()`) to gu
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/database-testing]] · [[technical-qa/api-testing]] · [[technical-qa/wiremock]] · [[technical-qa/contract-testing]] · [[cloud/docker]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

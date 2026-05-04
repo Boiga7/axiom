@@ -280,3 +280,7 @@ Fix: export environments with all secret values cleared (empty string), use `--e
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[technical-qa/api-testing]] · [[technical-qa/api-performance-testing]] · [[technical-qa/api-contract-testing]] · [[qa/test-reporting]] · [[technical-qa/test-reporting-dashboards]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

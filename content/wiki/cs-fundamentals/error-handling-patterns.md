@@ -299,3 +299,7 @@ Fix: use exhaustive pattern matching; pyright with `--strict` will flag missing 
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/software-design-principles]] · [[web-frameworks/fastapi]] · [[cs-fundamentals/logging-best-practices]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

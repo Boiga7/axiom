@@ -258,3 +258,7 @@ Fix: scope custom rules with `metavariable-regex` constraints and set `severity:
 
 ## Connections
 [[tqa-hub]] · [[qa/security-testing-qa]] · [[cloud/cloud-security]] · [[security/guardrails]] · [[cloud/github-actions]] · [[cloud/kubernetes]] · [[cs-fundamentals/auth-patterns]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

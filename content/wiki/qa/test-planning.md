@@ -184,3 +184,7 @@ Before approving a test plan, verify:
 ## Connections
 
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/test-case-design]] · [[qa/agile-qa]] · [[qa/qa-metrics]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

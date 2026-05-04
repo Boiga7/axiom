@@ -84,3 +84,7 @@ Pivot to [[cloud/cloud-networking]] to verify service-to-pod routing and DNS res
 ## Connections
 
 [[cloud/kubernetes]] · [[cloud/aws-eks]] · [[cloud/secrets-management]] · [[cloud/container-security]] · [[cloud/cloud-networking]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

@@ -48,7 +48,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jakarta.variable} ${mono.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${jakarta.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})()`
+        }} />
+      </head>
       <body className="antialiased bg-base text-primary">
         {children}
       </body>

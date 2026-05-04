@@ -293,3 +293,7 @@ Fix: wrap the subscription loop in `asyncio.wait_for` with a reasonable timeout,
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/wiremock]] · [[technical-qa/testcontainers]] · [[technical-qa/playwright-advanced]] · [[cs-fundamentals/api-design]] · [[test-automation/testing-llm-apps]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

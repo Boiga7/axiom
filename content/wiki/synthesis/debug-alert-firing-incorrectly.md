@@ -83,3 +83,7 @@ Pivot to [[cs-fundamentals/observability-se]] to redesign the alerting strategy 
 ## Connections
 
 [[cs-fundamentals/observability-se]] · [[cloud/cloud-monitoring]] · [[cloud/observability-stack]] · [[observability/tracing]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

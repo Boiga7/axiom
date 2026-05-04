@@ -304,3 +304,7 @@ Fix: set `debug=False` in production config and add a global exception handler t
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/security-fundamentals-se]] · [[security/owasp-llm-top10]] · [[cs-fundamentals/api-versioning]] · [[cloud/cloud-security]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -19,7 +19,7 @@ See also: [[performance-testing]] for test type taxonomy and NFR acceptance crit
 
 ## Test Plan Structure
 
-JMeter organises tests as a tree. The nesting order is not arbitrary -- it defines both scope and execution order.
+JMeter organises tests as a tree. The nesting order is not arbitrary — it defines both scope and execution order.
 
 ```
 Test Plan
@@ -34,21 +34,21 @@ Test Plan
         └── Listeners             (View Results Tree, Aggregate Report, Summary Report, Backend Listener)
 ```
 
-**Test Plan** -- root node. Sets global user-defined variables, classpath additions, whether thread groups run serially or in parallel, and the teardown thread group behaviour on shutdown.
+**Test Plan** — root node. Sets global user-defined variables, classpath additions, whether thread groups run serially or in parallel, and the teardown thread group behaviour on shutdown.
 
-**Thread Group** -- one population of virtual users. Each thread runs the sampler chain sequentially, in order. One thread group per user journey is the recommended pattern: separate groups for `browse`, `checkout`, `admin` to model realistic concurrency ratios.
+**Thread Group** — one population of virtual users. Each thread runs the sampler chain sequentially, in order. One thread group per user journey is the recommended pattern: separate groups for `browse`, `checkout`, `admin` to model realistic concurrency ratios.
 
-**Samplers** -- the actual requests sent to the system under test. The HTTP Request sampler covers the vast majority of web and API testing.
+**Samplers** — the actual requests sent to the system under test. The HTTP Request sampler covers the vast majority of web and API testing.
 
-**Config Elements** -- applied before samplers within their scope. Shared configuration (host, port, protocol) lives here rather than in every sampler individually.
+**Config Elements** — applied before samplers within their scope. Shared configuration (host, port, protocol) lives here rather than in every sampler individually.
 
-**Pre/Post-Processors** -- run immediately before and after their parent sampler. Pre-processors handle dynamic payload construction; post-processors extract values from responses for use in later requests (correlation).
+**Pre/Post-Processors** — run immediately before and after their parent sampler. Pre-processors handle dynamic payload construction; post-processors extract values from responses for use in later requests (correlation).
 
-**Assertions** -- validate sampler output. Failures increment the error count but do not stop the thread by default. Failed assertions mark the sample red in listeners and contribute to the error rate in summary reports.
+**Assertions** — validate sampler output. Failures increment the error count but do not stop the thread by default. Failed assertions mark the sample red in listeners and contribute to the error rate in summary reports.
 
-**Timers** -- pause execution after the sampler they are attached to (or all samplers in scope if placed at thread group level). They model user think time.
+**Timers** — pause execution after the sampler they are attached to (or all samplers in scope if placed at thread group level). They model user think time.
 
-**Listeners** -- collect, aggregate, and display results. They are memory-intensive. Never include listeners other than the Backend Listener in a production load run.
+**Listeners** — collect, aggregate, and display results. They are memory-intensive. Never include listeners other than the Backend Listener in a production load run.
 
 ---
 
@@ -56,13 +56,13 @@ Test Plan
 
 Thread Group configuration is where the load profile is defined.
 
-**Number of Threads (virtual users)** -- concurrent users. Each thread executes the sampler chain independently. Start at 1-5 to verify the script functions correctly before scaling.
+**Number of Threads (virtual users)** — concurrent users. Each thread executes the sampler chain independently. Start at 1–5 to verify the script functions correctly before scaling.
 
-**Ramp-Up Period** -- seconds to reach the target thread count. JMeter adds `threads / ramp_time` threads per second. A zero-second ramp creates a thundering herd and does not reflect real traffic; always ramp. A 60-second ramp for 100 threads adds ~1.67 threads per second.
+**Ramp-Up Period** — seconds to reach the target thread count. JMeter adds `threads / ramp_time` threads per second. A zero-second ramp creates a thundering herd and does not reflect real traffic; always ramp. A 60-second ramp for 100 threads adds ~1.67 threads per second.
 
-**Loop Count / Scheduler** -- use the scheduler (duration-based) for load tests; loop count is only appropriate for functional smoke validation. Set duration to at least 5x the longest expected transaction time, minimum 15 minutes for steady-state measurement.
+**Loop Count / Scheduler** — use the scheduler (duration-based) for load tests; loop count is only appropriate for functional smoke validation. Set duration to at least 5x the longest expected transaction time, minimum 15 minutes for steady-state measurement.
 
-**Stepping Thread Group (plugin)** -- from the JMeter Plugins Manager. Adds threads incrementally in steps rather than continuously, making staircase load profiles easy:
+**Stepping Thread Group (plugin)** — from the JMeter Plugins Manager. Adds threads incrementally in steps rather than continuously, making staircase load profiles easy:
 
 ```
 Start threads count:   0
@@ -97,12 +97,12 @@ This adds 10 threads every 30 seconds until 100 VUs are running, holding each st
 The workhorse. Covers all standard web and REST API testing.
 
 Key fields:
-- **Server Name or IP** -- can reference a variable (`${BASE_URL}`). Set this once in HTTP Request Defaults and leave it blank in individual samplers.
-- **HTTP Method** -- GET, POST, PUT, PATCH, DELETE, OPTIONS.
-- **Path** -- the URL path, e.g. `/api/v1/products/${product_id}`.
-- **Body Data / Parameters** -- switch to `Body Data` for JSON payloads; use `Parameters` for form-encoded data.
-- **Files Upload** -- for multipart form submissions.
-- **Advanced** -- connect timeout, response timeout, keep-alive, follow redirects.
+- **Server Name or IP** — can reference a variable (`${BASE_URL}`). Set this once in HTTP Request Defaults and leave it blank in individual samplers.
+- **HTTP Method** — GET, POST, PUT, PATCH, DELETE, OPTIONS.
+- **Path** — the URL path, e.g. `/api/v1/products/${product_id}`.
+- **Body Data / Parameters** — switch to `Body Data` for JSON payloads; use `Parameters` for form-encoded data.
+- **Files Upload** — for multipart form submissions.
+- **Advanced** — connect timeout, response timeout, keep-alive, follow redirects.
 
 Minimal POST sampler:
 
@@ -219,9 +219,9 @@ Parameterises test data from an external CSV file. Critical for authenticated fl
 </CSVDataSet>
 ```
 
-`shareMode.all` -- all threads share one pointer into the CSV; each thread gets the next unused row.
-`shareMode.group` -- threads within the same thread group share a pointer.
-`shareMode.thread` -- each thread gets its own pointer, cycling independently.
+`shareMode.all` — all threads share one pointer into the CSV; each thread gets the next unused row.
+`shareMode.group` — threads within the same thread group share a pointer.
+`shareMode.thread` — each thread gets its own pointer, cycling independently.
 
 `recycle=false` + `stopThread=true` stops threads when the CSV is exhausted, preventing row reuse in auth-sensitive tests. Size the CSV to at least 2x the peak concurrent thread count.
 
@@ -244,15 +244,15 @@ Override at runtime: `jmeter -n -t test.jmx -JBASE_URL=api.prod.example.com`
 
 Logic controllers modify the order or condition under which samplers execute.
 
-**Loop Controller** -- repeats its children N times (or indefinitely). Use inside a thread group to repeat a sub-flow independently of the thread group loop count.
+**Loop Controller** — repeats its children N times (or indefinitely). Use inside a thread group to repeat a sub-flow independently of the thread group loop count.
 
-**If Controller** -- conditionally executes children based on a JavaScript condition or JMeter function. Use Groovy via JSR223 for performance; avoid JavaScript in hot paths.
+**If Controller** — conditionally executes children based on a JavaScript condition or JMeter function. Use Groovy via JSR223 for performance; avoid JavaScript in hot paths.
 
 ```
 ${__groovy(vars.get("STATUS_CODE") == "200",)}
 ```
 
-**Transaction Controller** -- groups multiple samplers into a single reportable unit. The transaction's elapsed time covers all child samplers, giving a meaningful "end-to-end checkout time" metric rather than per-request metrics. Always wrap user journeys in transaction controllers for reporting.
+**Transaction Controller** — groups multiple samplers into a single reportable unit. The transaction's elapsed time covers all child samplers, giving a meaningful "end-to-end checkout time" metric rather than per-request metrics. Always wrap user journeys in transaction controllers for reporting.
 
 ```xml
 <TransactionController testname="Complete Checkout">
@@ -261,9 +261,9 @@ ${__groovy(vars.get("STATUS_CODE") == "200",)}
 </TransactionController>
 ```
 
-`parent=true` -- the transaction appears as a parent row in aggregate reports, with children collapsed. `parent=false` -- both the transaction and its children appear as rows.
+`parent=true` — the transaction appears as a parent row in aggregate reports, with children collapsed. `parent=false` — both the transaction and its children appear as rows.
 
-**Throughput Controller** -- restricts how often its children execute as a percentage of total executions or an absolute call count. Use to model a realistic endpoint distribution: 80% read, 15% write, 5% delete.
+**Throughput Controller** — restricts how often its children execute as a percentage of total executions or an absolute call count. Use to model a realistic endpoint distribution: 80% read, 15% write, 5% delete.
 
 ---
 
@@ -271,10 +271,10 @@ ${__groovy(vars.get("STATUS_CODE") == "200",)}
 
 ### JSR223 Pre-Processor (Groovy)
 
-The fastest scripting option in JMeter. Groovy runs on the JVM with a compiled cache -- far faster than BeanShell for hot paths. Use for dynamic payload construction, timestamp generation, HMAC signing, or request mutation.
+The fastest scripting option in JMeter. Groovy runs on the JVM with a compiled cache — far faster than BeanShell for hot paths. Use for dynamic payload construction, timestamp generation, HMAC signing, or request mutation.
 
 ```groovy
-// JSR223 Pre-Processor -- generate ISO timestamp and HMAC signature
+// JSR223 Pre-Processor — generate ISO timestamp and HMAC signature
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import java.util.Base64
@@ -326,7 +326,7 @@ Preferred over Regex for JSON APIs. Uses JSONPath expressions.
 Use for complex extraction logic, conditional variable setting, or logging extracted values to a file for debugging.
 
 ```groovy
-// Log extraction result -- remove before load test
+// Log extraction result — remove before load test
 def token = vars.get("AUTH_TOKEN")
 if (token == "TOKEN_NOT_FOUND") {
     log.error("Auth token extraction failed for user: " + vars.get("USERNAME"))
@@ -359,7 +359,7 @@ Test type integers: `2` = Contains, `8` = Equals, `1` = Matches (regex), `16` = 
 
 ### Duration Assertion
 
-Marks a sample failed if elapsed time exceeds the threshold. Does not abort the request. Use as an SLO gate in load tests -- when p95 breaches the threshold, the error rate rises, and CI can fail on error rate.
+Marks a sample failed if elapsed time exceeds the threshold. Does not abort the request. Use as an SLO gate in load tests — when p95 breaches the threshold, the error rate rises, and CI can fail on error rate.
 
 ```xml
 <DurationAssertion testname="Assert Under 2s">
@@ -450,7 +450,7 @@ This produces pauses between 500ms and 2500ms.
 
 ### Constant Throughput Timer
 
-Controls requests per minute (not per second -- the unit is RPM) across all active threads. Use when the test objective is a target RPS rather than a target concurrency.
+Controls requests per minute (not per second — the unit is RPM) across all active threads. Use when the test objective is a target RPS rather than a target concurrency.
 
 ```xml
 <ConstantThroughputTimer testname="300 RPM Cap">
@@ -483,7 +483,7 @@ Shows per-sampler statistics: sample count, average, median, p90, p95, p99, min,
 
 Lightweight aggregate with fewer columns. Lower memory overhead than Aggregate Report. Acceptable for CI where you only need pass/fail decisions, not full percentile breakdowns.
 
-### Backend Listener (InfluxDB -> Grafana)
+### Backend Listener (InfluxDB → Grafana)
 
 The only listener suitable for production load runs. Streams metrics asynchronously to an external time-series database rather than accumulating them in memory.
 
@@ -546,7 +546,7 @@ jmeter \
 | `-R <ip,ip>` | Distribute test to remote injector nodes |
 | `-X` | Exit remote engines after the test |
 
-**JVM heap** -- set before running:
+**JVM heap** — set before running:
 
 ```bash
 export JVM_ARGS="-Xms512m -Xmx4g -XX:MaxMetaspaceSize=256m"
@@ -654,7 +654,7 @@ if __name__ == "__main__":
 
 ## Distributed Testing
 
-A single JMeter process on a standard machine generates roughly 300-500 RPS before the load generator itself becomes the bottleneck. For higher concurrency (typically above 500 VUs or 500 RPS sustained), use JMeter's controller/injector model.
+A single JMeter process on a standard machine generates roughly 300–500 RPS before the load generator itself becomes the bottleneck. For higher concurrency (typically above 500 VUs or 500 RPS sustained), use JMeter's controller/injector model.
 
 **Architecture:**
 
@@ -704,14 +704,14 @@ For large cloud-scale runs, consider wrapping with Taurus (`bzt`) or using Blaze
 | Dimension | JMeter | [[k6]] |
 |---|---|---|
 | Test definition | XML (`.jmx`) + GUI | JavaScript / TypeScript |
-| Learning curve | Higher -- GUI concepts, XML structure | Lower -- code-first |
+| Learning curve | Higher — GUI concepts, XML structure | Lower — code-first |
 | Ecosystem age | 25+ years, vast plugin library | ~8 years, fast growing |
 | Protocol coverage | HTTP, JDBC, JMS, LDAP, FTP, SMTP, TCP | HTTP, WebSocket, gRPC (via extensions) |
 | Distributed testing | Built-in controller/injector | k6 Cloud or k6 Operator (Kubernetes) |
 | Resource usage per VU | Higher (JVM thread per VU) | Lower (Go goroutine per VU) |
 | Real-time dashboards | Backend Listener to InfluxDB/Grafana | k6 Cloud or Prometheus remote write |
 | CI integration | Taurus or raw CLI with JTL parsing | First-class (`k6 run`, threshold exit codes) |
-| Code review of tests | Difficult -- XML diffs are noisy | Natural -- JavaScript PRs |
+| Code review of tests | Difficult — XML diffs are noisy | Natural — JavaScript PRs |
 | Script version control | Possible but painful | Clean |
 
 **Choose JMeter when:**
@@ -735,27 +735,27 @@ For large cloud-scale runs, consider wrapping with Taurus (`bzt`) or using Blaze
 
 ## JMeter Plugins
 
-The JMeter Plugins Manager (available at `jmeter-plugins.org`) extends the core installation with additional samplers, controllers, listeners, and timers. Install via `Plugins Manager -> Available Plugins`.
+The JMeter Plugins Manager (available at `jmeter-plugins.org`) extends the core installation with additional samplers, controllers, listeners, and timers. Install via `Plugins Manager → Available Plugins`.
 
 **Essential plugins for performance testing engagements:**
 
-**Stepping Thread Group** -- staircase load profiles with configurable step size, hold duration, and target thread count. Easier to reason about than a ramp for capacity tests. (Plugin: `jpgc-tst`)
+**Stepping Thread Group** — staircase load profiles with configurable step size, hold duration, and target thread count. Easier to reason about than a ramp for capacity tests. (Plugin: `jpgc-tst`)
 
-**Throughput Shaping Timer** -- rate-based test scheduling with a time-series schedule (RPS vs time). More precise than Constant Throughput Timer for complex load shapes. (Plugin: `jpgc-graphs-basic`)
+**Throughput Shaping Timer** — rate-based test scheduling with a time-series schedule (RPS vs time). More precise than Constant Throughput Timer for complex load shapes. (Plugin: `jpgc-graphs-basic`)
 
 ```
 Time (s)   Target RPS
-0-60       10           # warm-up
-60-660     100          # steady state
-660-780    200          # stress spike
-780-840    0            # cooldown
+0–60       10           # warm-up
+60–660     100          # steady state
+660–780    200          # stress spike
+780–840    0            # cooldown
 ```
 
-**3 Basic Graphs** -- adds active threads, transactions per second, and response time over time graphs to the GUI. The only listeners worth running locally for visual debugging. (Plugin: `jpgc-graphs-basic`)
+**3 Basic Graphs** — adds active threads, transactions per second, and response time over time graphs to the GUI. The only listeners worth running locally for visual debugging. (Plugin: `jpgc-graphs-basic`)
 
-**WebSocket Sampler** -- full WebSocket testing support (open connection, send/receive, close). Required for any real-time feature load testing. (Plugin: `websocket-samplers`)
+**WebSocket Sampler** — full WebSocket testing support (open connection, send/receive, close). Required for any real-time feature load testing. (Plugin: `websocket-samplers`)
 
-**Custom Thread Groups** -- includes Ultimate Thread Group, Arrivals Thread Group, and Free-Form Arrivals Thread Group for advanced load shaping beyond what the standard thread group supports. (Plugin: `jpgc-casutg`)
+**Custom Thread Groups** — includes Ultimate Thread Group, Arrivals Thread Group, and Free-Form Arrivals Thread Group for advanced load shaping beyond what the standard thread group supports. (Plugin: `jpgc-casutg`)
 
 ---
 
@@ -779,17 +779,17 @@ The HTML report generated by `jmeter -e -o report/` and the Aggregate Report lis
 
 **Diagnosing bottlenecks from results:**
 
-- **p50 stable, p99 rising** -- a subset of requests hitting a slow path (DB lock, cold cache, GC pause). Not yet at capacity ceiling.
-- **p50 and p99 both rising together** -- overall capacity ceiling; scale out or optimise the hot path.
-- **Error rate > 1% before target RPS reached** -- server rejecting requests; check for connection pool exhaustion, 5xx errors, or rate limiting.
-- **Throughput plateaus below target** -- server saturated; adding threads only inflates errors from this point.
-- **Max = exactly N * 1000** -- requests hitting a configured timeout. Identify and fix the upstream call or timeout config.
+- **p50 stable, p99 rising** — a subset of requests hitting a slow path (DB lock, cold cache, GC pause). Not yet at capacity ceiling.
+- **p50 and p99 both rising together** — overall capacity ceiling; scale out or optimise the hot path.
+- **Error rate > 1% before target RPS reached** — server rejecting requests; check for connection pool exhaustion, 5xx errors, or rate limiting.
+- **Throughput plateaus below target** — server saturated; adding threads only inflates errors from this point.
+- **Max = exactly N * 1000** — requests hitting a configured timeout. Identify and fix the upstream call or timeout config.
 
 ---
 
 ## Common Mistakes
 
-**Running load tests in GUI mode.** The GUI loads all listeners into memory and renders samples in real time. This consumes 3-5x more heap than headless mode and reduces the throughput the load generator can sustain, making results unrepresentative. Use the GUI only to build and debug scripts.
+**Running load tests in GUI mode.** The GUI loads all listeners into memory and renders samples in real time. This consumes 3–5x more heap than headless mode and reduces the throughput the load generator can sustain, making results unrepresentative. Use the GUI only to build and debug scripts.
 
 **No correlation.** A script that replays recorded traffic with hardcoded session tokens will fail at any user count above 1. Every dynamic value (session ID, CSRF token, auth token, order ID) must be extracted from the response that creates it and injected into subsequent requests. Always verify correlation at 1 thread with View Results Tree open before scaling.
 
@@ -807,4 +807,4 @@ The HTML report generated by `jmeter -e -o report/` and the Aggregate Report lis
 
 ## Connections
 
-[[performance-testing]] · [[load-testing-advanced]] · [[api-performance-testing]] · [[k6]] · [[technical-qa/ci-cd-quality-gates]] · [[technical-qa/test-observability]] · [[technical-qa/tqa-hub]]
+[[performance-testing]] · [[load-testing-advanced]] · [[api-performance-testing]] · [[k6]] · [[technical-qa/ci-cd-quality-gates]] · [[technical-qa/test-observability]] · [[technical-qa/tqa-hub]] · [[technical-qa/performance-capacity-planning]]

@@ -191,3 +191,7 @@ Fix: increase `consecutive5xxErrors` to 5 or more and set `maxEjectionPercent` t
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/cloud-networking]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

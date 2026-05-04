@@ -253,3 +253,7 @@ Fix: add `page.keyboard.press("Escape")` or close open dialogs in a `finally` bl
 
 ## Connections
 [[tqa-hub]] · [[qa/accessibility-testing]] · [[technical-qa/playwright-advanced]] · [[qa/compliance-testing]] · [[technical-qa/visual-testing]] · [[qa/ci-cd-quality-gates]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

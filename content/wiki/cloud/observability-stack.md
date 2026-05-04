@@ -235,3 +235,7 @@ Fix: update the Grafana data source URL to match the actual query endpoint (loca
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[observability/platforms]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

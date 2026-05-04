@@ -186,3 +186,7 @@ Fix: patch the finalizer out manually: `kubectl patch myapp <name> -p '{"metadat
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/argocd]] · [[cloud/helm-advanced]] · [[cloud/secrets-management]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

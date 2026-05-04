@@ -338,7 +338,7 @@ Use OIDC (GitHub Actions → AWS role assumption). Never embed AWS credentials i
 
 ## Project Mantle (2026)
 
-AWS announced Project Mantle to allow teams using the OpenAI API format to run on Bedrock without code changes. Provides an OpenAI-compatible endpoint (`/v1/chat/completions`) backed by Bedrock models. Useful for migrating existing OpenAI-based applications. [unverified. Check current availability]
+AWS Project Mantle provides an OpenAI-compatible inference engine on Bedrock. Point existing OpenAI SDK code at `https://bedrock-mantle.<region>.api.aws/v1` with no other changes. Supports Chat Completions (`/v1/chat/completions`, all Bedrock models) and Responses API (`/v1/responses`, select models). GA March 2026.
 
 ---
 

@@ -257,3 +257,7 @@ Fix: Increase `maxQueueSize` and `maxExportBatchSize` in the `BatchSpanProcessor
 - [[cloud/kubernetes]] — container-level metrics, pod health, HPA signals
 - [[observability/platforms]] — AI/LLM-specific observability (Langfuse, LangSmith, Arize)
 - [[cloud/cloud-networking]] — network metrics (bandwidth, latency, packet loss)
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

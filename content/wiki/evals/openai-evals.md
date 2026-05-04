@@ -182,3 +182,7 @@ Fix: validate the JSONL file before running: check that all required fields (`in
 - [[evals/llm-as-judge]] — model-graded evals use LLM-as-judge; calibration and bias apply
 - [[evals/benchmarks]] — OpenAI Evals hosts the community benchmark registry
 - [[test-automation/pytest-patterns]] — for CI eval integration, combine OpenAI Evals with pytest markers
+## Open Questions
+
+- What systematic biases does this evaluation approach introduce?
+- At what point does this evaluation method stop being a reliable quality signal?

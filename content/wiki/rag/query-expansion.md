@@ -86,7 +86,7 @@ Answer:"""
 
 **When HyDE hurts:** factual lookups (the hypothetical answer may hallucinate; always rerank after). Not suitable as a standalone technique for high-precision applications.
 
-**Typical gain:** 10-30% improvement in recall on technical Q&A benchmarks [unverified].
+**Typical gain:** 5–15% improvement in recall on multi-hop benchmarks (e.g. HotPotQA); results are domain-dependent — HyDE can underperform vanilla dense retrieval on precise factual queries.
 
 ## Technique 2: Multi-Query
 

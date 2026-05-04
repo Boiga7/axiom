@@ -253,3 +253,7 @@ Fix: enforce a flaky test SLA: any test failing non-deterministically in 3 of th
 
 ## Connections
 [[qa-hub]] · [[qa/qa-in-devops]] · [[qa/smoke-sanity-testing]] · [[qa/test-automation-strategy]] · [[qa/defect-prevention]] · [[cloud/gitops-patterns]] · [[technical-qa/ci-cd-quality-gates]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

@@ -204,3 +204,7 @@ Fix: generate idempotency keys from a UUID or a hash of the full request content
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/caching-strategies]] · [[cloud/aws-sqs-sns]] · [[cloud/service-mesh]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

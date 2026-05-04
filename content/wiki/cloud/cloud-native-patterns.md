@@ -281,3 +281,7 @@ Fix: Remove all environment-specific `ENV` from Dockerfiles; inject config exclu
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes-operators]] · [[cloud/serverless-patterns]] · [[cloud/service-mesh]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/microservices-patterns]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

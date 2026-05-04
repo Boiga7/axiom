@@ -224,3 +224,7 @@ Fix: always set `fail-fast: false` in cross-browser matrix strategies so all bro
 
 ## Connections
 [[qa-hub]] · [[qa/accessibility-testing]] · [[qa/regression-testing]] · [[technical-qa/playwright-advanced]] · [[technical-qa/visual-testing]] · [[technical-qa/cypress]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

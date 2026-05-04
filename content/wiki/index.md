@@ -5,7 +5,7 @@ updated: 2026-05-03
 
 # Nexus — Content Index
 
-342 pages across 27 categories. Updated 2026-05-03.
+349 pages across 28 categories. Updated 2026-05-04.
 
 ---
 
@@ -182,6 +182,7 @@ updated: 2026-05-03
 - [[observability/helicone]] — open-source AI gateway + observability; one-line integration; semantic caching (20-30% cost reduction); 100+ provider routing
 - [[observability/tracing]] — OTel semantic conventions for LLMs, auto-instrumentation, cost tracking, Langfuse/LangSmith integration
 - [[observability/llmops]] — LLMOps as a discipline: prompt versioning, A/B testing at inference, eval gates, cost monitoring, and the LLMOps maturity model
+- [[observability/datadog]] — Datadog unified observability: metrics/traces/logs/synthetics/CI Visibility; APM setup, monitors, SLOs, QA use cases, pricing vs Grafana/Prometheus
 
 ### `protocols/` — Agent Communication
 - [[protocols/mcp]] — MCP spec, transports, tool schema, OAuth 2.0 auth, security surface, ecosystem
@@ -232,10 +233,19 @@ updated: 2026-05-03
 - [[ai-tools/continue]] — open-source VS Code/JetBrains extension; any model via config.json; context providers (@codebase, @docs, @diff, @web); tab autocomplete with dedicated small model
 - [[ai-tools/cline]] — open-source autonomous coding agent, VS Code extension, MCP support
 - [[ai-tools/openai-codex]] — OpenAI's Rust CLI coding agent and desktop app; codex-1 model (72.1% SWE-bench); three approval modes; cloud parallel containers; AGENTS.md config standard
+- [[ai-tools/ai-test-generation]] — AI-assisted test generation: unit/API/E2E/data use cases, Claude Code + Copilot + Cursor workflows, prompt patterns, quality review checklist, mutation testing, client positioning, risks
 
 ---
 
 ## Layer 4 — Engineering Stack
+
+### `sql/` — SQL
+- [[sql/sql-fundamentals]] — SELECT/JOIN/GROUP BY/HAVING, indexes, ACID, transactions, normalisation, N+1 problem, SQLAlchemy basics
+- [[sql/window-functions]] — ROW_NUMBER, RANK, LEAD/LAG, running totals, rolling averages, partition-by patterns
+- [[sql/query-optimization]] — EXPLAIN ANALYZE, index types (B-tree/GIN/HNSW), common performance traps, VACUUM, partitioning
+- [[sql/sql-for-ai]] — pgvector similarity queries, LLM call logging, feature store pattern, eval results store, JSONB patterns
+- [[sql/sqlalchemy-patterns]] — async engine, session management, selectinload, bulk ops, Alembic migrations, common pitfalls
+- [[sql/postgresql-features]] — JSONB, full-text search, GIN/BRIN/HNSW index types, LATERAL joins, pg_stat_statements, partitioning
 
 ### `python/` — Python Ecosystem
 - [[python/python-hub]] — Python Brain central hub: all Python tooling, async, data, testing, packaging
@@ -309,6 +319,7 @@ updated: 2026-05-03
 - [[cloud/keda]] — Kubernetes Event-Driven Autoscaling: Kafka/SQS/Prometheus scalers, TriggerAuthentication (IRSA), ScaledJob for batch, scale-to-zero
 - [[cloud/disaster-recovery]] — RTO/RPO definitions, 4 DR strategies, Aurora Global failover, S3 cross-region replication, Velero, DR runbook
 - [[cloud/gitops-patterns]] — GitOps principles, Flux vs ArgoCD comparison, Flux bootstrap, HelmRelease, SOPS encryption, ImageAutomation
+- [[cloud/gitops-quality-gates]] — Quality gates in a GitOps pipeline: CI gates, ArgoCD sync hooks (PreSync/PostSync), Flux health checks, Argo Rollouts canary analysis, environment promotion gates, drift detection, QA checklist
 - [[cloud/platform-engineering]] — SPACE framework, Backstage catalog+templates, golden paths, IDP scaffolding, platform KPIs (DORA)
 - [[cloud/serverless-patterns]] — Lambda invocation types, SAM template, Powertools (Logger/Tracer/Metrics), cold start mitigation, Cloud Run
 - [[cloud/aws-elasticache]] — Redis vs Memcached, ElastiCache Terraform, redis-py async, cache-aside, rate limiting, pub/sub, alarms
@@ -347,6 +358,7 @@ updated: 2026-05-03
 - [[qa/qa-metrics]] — Defect density, detection rate, escape rate, flaky test rate, automation ROI, dashboard design, reporting to stakeholders
 - [[qa/qa-tools]] — TestRail, Zephyr Scale, qTest, Jira JQL patterns, Postman collections, Newman CLI, accessibility tools, visual regression
 - [[qa/uat]] — UAT vs QA testing, types (Alpha/Beta/Contract/OAT/Regulation), UAT process, entry/exit criteria, regulated industries (GxP, SOX, GDPR)
+- [[qa/uat-governance]] — Process ownership layer above UAT execution: entry/exit criteria, stakeholder briefings, scope dispute resolution, defect triage with business owners, sign-off documentation, sign-off refusal, agile vs waterfall governance
 - [[qa/agile-qa]] — Sprint lifecycle, DoD/DoR checklists, Three Amigos questions, shift-left approach, continuous testing pipeline, sprint metrics
 - [[qa/regression-testing]] — Test selection strategies, smoke/core/full suite structure, git bisect, coverage gates, visual regression
 - [[qa/accessibility-testing]] — WCAG 2.2 POUR principles, axe-core (Playwright/Python), ARIA patterns, screen reader checklist, CI integration
@@ -421,6 +433,9 @@ updated: 2026-05-03
 - [[technical-qa/api-testing-advanced]] — Contract-first workflow (OpenAPI as source of truth), Schemathesis auto-generated tests + pytest plugin (case.validate_response), schema drift detection (jsonschema validate + CI check), Hypothesis fuzz testing (never-500 property, SQL injection payloads), API versioning tests (v1/v2 parametrize + legacy field name tests), error response quality assertions (no stack trace leakage, JSON-serialisable)
 - [[technical-qa/test-observability]] — Why test observability matters (flakiness hidden by retry-and-merge), test_runs/test_results PostgreSQL schema, pytest plugin (TestResultRecorder, pytest_runtest_makereport + pytest_sessionfinish → asyncpg flush), flakiness detection SQL (flakiness_rate_pct by test), duration trend query (P95 per week), Datadog CI Visibility YAML setup, Grafana dashboard panels + alerts
 - [[technical-qa/selenium-grid]] — Grid 4 architecture (Router/Hub/Node/Distributor), standalone mode, Docker Compose grid with node scaling, pytest remote webdriver fixture (parametrize chrome/firefox), CI with GitHub Actions services (selenium-hub + nodes), Grid vs Playwright decision guide
+- [[technical-qa/self-healing-tests]] — Healenium (tree-edit-distance algorithm, SelfHealingDriver, Docker backend, healing reports), Playwright Healer Agent v1.56 (75% success rate, GitHub PR auto-fix), Mabl (cloud ML multi-signal healing), testRigor (plain English, no selectors), Applitools visual AI, decision framework (Playwright migration vs Healenium wrapper), when self-healing is not the answer, ROI calculation, client presentation guide for 3000-test legacy suites
+- [[technical-qa/websocket-testing]] — WebSocket protocol (handshake, opcodes, lifecycle), why it differs from REST testing, Playwright framesent/framereceived/routeWebSocket, websocat CLI, Postman WS, k6/ws 10-minute soak script (100 connections), performance metrics (RTT p50/p95/p99, fan-out latency, drop rate), SSE vs WebSocket, JSON Schema contract validation, Pact async messaging, common failure modes (ordering, backpressure, token expiry), CI integration (Node.js echo server, WireMock limitation)
+- [[technical-qa/jmeter]] — Apache JMeter test plan structure (Test Plan/Thread Group/Samplers/Config Elements/Assertions/Timers/Listeners), HTTP/JDBC/WebSocket samplers, CSV Data Set Config parameterisation, correlation (Regex/JSON Extractor), Constant Throughput Timer, Backend Listener to InfluxDB/Grafana, CLI non-GUI mode (`jmeter -n -t`), distributed testing (controller/injector, >500 VUs), GitHub Actions CI integration with JTL threshold enforcement, JMeter vs k6 decision framework, plugin ecosystem (Stepping Thread Group, Throughput Shaping Timer, 3 Basic Graphs)
 
 ---
 

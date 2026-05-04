@@ -83,3 +83,7 @@ Pivot to [[synthesis/debug-auth-failing]] — a 401 from auth middleware before 
 ## Connections
 
 [[web-frameworks/fastapi]] · [[cs-fundamentals/api-security]] · [[cloud/aws-api-gateway]] · [[synthesis/debug-auth-failing]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

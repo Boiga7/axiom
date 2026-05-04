@@ -401,3 +401,7 @@ Fix: add an egress rule to the NetworkPolicy allowing port 53 to the `kube-syste
 - [[cloud/argocd]] — GitOps CD for Kubernetes
 - [[cloud/cloud-networking]] — CNI, ingress, network policies in depth
 - [[cloud/terraform]] — terraform-aws-eks and similar modules for cluster provisioning
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

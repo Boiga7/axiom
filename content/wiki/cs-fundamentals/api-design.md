@@ -260,3 +260,7 @@ Fix: flatten the hierarchy; expose deep relationships via query params (`/items?
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/networking]] · [[technical-qa/api-testing]] · [[technical-qa/contract-testing]] · [[web-frameworks/fastapi]] · [[web-frameworks/django]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

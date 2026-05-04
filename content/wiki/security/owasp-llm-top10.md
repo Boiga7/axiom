@@ -194,6 +194,8 @@ Fix: validate all content before writing to long-term memory; apply TTL to memor
 - [[protocols/mcp]] — the MCP attack surface
 - [[agents/multi-agent-patterns]] — multi-agent trust considerations
 - [[security/red-teaming]] — testing for these vulnerabilities
+- [[security/owasp-wstg]] — OWASP Web Security Testing Guide; structured methodology for web application security testing
+- [[security/threat-modelling]] — STRIDE and DREAD frameworks for identifying AI system threats
 
 ## Open Questions
 

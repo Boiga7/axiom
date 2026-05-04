@@ -290,3 +290,7 @@ Fix: switch new rule groups to `Count` mode initially using `override_action: CO
 ## Connections
 
 [[cloud-hub]] · [[cloud/cloud-security]] · [[cloud/aws-networking-advanced]] · [[cs-fundamentals/api-security]] · [[security/owasp-llm-top10]] · [[cloud/infrastructure-monitoring]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

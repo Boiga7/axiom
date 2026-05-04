@@ -177,3 +177,7 @@ Fix: use a larger subnet CIDR (at least `/24` for services with >20 tasks), or d
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/docker]] · [[cloud/cloud-networking]] · [[cloud/secrets-management]] · [[cloud/github-actions]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

@@ -300,3 +300,7 @@ Fix: use cooperative (incremental) rebalancing (`partition.assignment.strategy=c
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]] · [[llms/ae-hub]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

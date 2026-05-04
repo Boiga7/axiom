@@ -201,3 +201,7 @@ Session notes:
 ## Connections
 
 [[qa/qa-hub]] · [[qa/test-planning]] · [[qa/test-strategy]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing]] · [[qa/qa-metrics]] · [[qa/qa-leadership]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

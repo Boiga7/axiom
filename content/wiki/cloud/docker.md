@@ -287,3 +287,7 @@ Fix: Check image availability with `docker buildx imagetools inspect <base-image
 - [[cloud/aws-core]] — ECR stores Docker images for ECS/EKS
 - [[cloud/argocd]] — GitOps deployment of containerised applications
 - [[cloud/cloud-networking]] — container networking, overlay networks
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

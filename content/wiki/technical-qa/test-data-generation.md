@@ -244,3 +244,7 @@ Fix: clamp generated values to valid ranges after sampling (`min(value, MAX)`) a
 
 ## Connections
 [[tqa-hub]] · [[qa/test-data-management]] · [[technical-qa/testcontainers]] · [[technical-qa/database-testing]] · [[technical-qa/load-testing-advanced]] · [[qa/defect-prevention]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

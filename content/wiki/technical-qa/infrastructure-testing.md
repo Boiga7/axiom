@@ -258,3 +258,7 @@ Fix: pin the OPA policy input schema with a unit test that asserts the expected 
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/security-automation]] · [[technical-qa/chaos-engineering]] · [[cloud/gitops-patterns]] · [[cloud/platform-engineering]] · [[cloud/cloud-security]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

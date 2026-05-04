@@ -14,7 +14,7 @@ tldr: MCP is the standard for agent-to-tool connectivity — stdio for local, HT
 
 The standard protocol for connecting AI agents to external tools and data sources. Spec 2025-11-05 is the current stable revision (also referenced as 2025-03-26 in some SDK versions).
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 Called "the new HTTP for agents". Every major AI framework adopted it within 12 months of the first public release.
 
@@ -94,11 +94,11 @@ stdio is the default for local development. HTTP is required for remote servers 
 
 ## Auth
 
-- **OAuth 2.0** — spec-recommended for remote servers; supports PKCE
+- **OAuth 2.0** — spec-recommended for remote servers; PKCE (S256) is mandatory; see [[protocols/oauth-server-metadata]] for how clients discover endpoints via RFC 8414
 - **API keys** — headers or query params; simpler but less secure
 - **Scoped tokens** — limit what a server can do; principle of least privilege
 
-The MCP spec requires server discovery at `/.well-known/mcp` for HTTP servers.
+MCP clients must fetch `/.well-known/oauth-authorization-server` on startup, verify `code_challenge_methods_supported` contains `S256`, and refuse to proceed if PKCE is absent. Dynamic Client Registration (RFC 7591) allows MCP clients to self-register without pre-provisioned credentials.
 
 ---
 
@@ -204,3 +204,4 @@ Fix: list all non-optional parameters in the `required` array; write the `descri
 - Will MCP stabilise at a 1.0 spec in 2026, and will that reduce the current security findings rate?
 - How does the MCP Registry plan to handle malicious or poorly-maintained community servers at scale?
 - Does `langchain-mcp-adapters` introduce latency overhead that matters for high-frequency agent tool calls?
+

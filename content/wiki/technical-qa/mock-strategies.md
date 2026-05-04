@@ -221,3 +221,7 @@ Fix: use `MagicMock` for sync callables and `AsyncMock` for coroutines; check wh
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/testcontainers]] · [[technical-qa/wiremock]] · [[technical-qa/flaky-test-management]] · [[qa/test-data-management]] · [[cs-fundamentals/clean-code]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

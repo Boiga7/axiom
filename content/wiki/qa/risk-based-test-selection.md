@@ -244,3 +244,7 @@ Fix: filter the historical failure corpus to only include runs where failures we
 ## Connections
 
 [[qa/qa-hub]] · [[qa/risk-based-testing]] · [[qa/test-automation-strategy]] · [[qa/continuous-testing]] · [[technical-qa/parallel-test-execution]] · [[technical-qa/pytest-advanced]] · [[qa/qa-metrics]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

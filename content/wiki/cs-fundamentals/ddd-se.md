@@ -263,3 +263,7 @@ Fix: declare all value objects with `@dataclass(frozen=True)`; any "mutation" mu
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/architecture-patterns-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/database-design]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

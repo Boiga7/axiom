@@ -242,3 +242,7 @@ Useful for checking if a design is feasible before building it.
 - [[infra/caching]] — Redis semantic caching and Anthropic prompt caching
 - [[infra/cloud-platforms]] — managed versions of all these components on AWS/GCP/Azure
 - [[observability/tracing]] — distributed systems require tracing to understand what's happening
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

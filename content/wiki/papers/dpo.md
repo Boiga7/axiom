@@ -116,3 +116,7 @@ No reward model. No PPO. No KL penalty as a separate term. It's implicit in the 
 ## Connections
 
 [[papers/key-papers]] · [[papers/rlhf]] · [[papers/constitutional-ai]] · [[fine-tuning/lora-qlora]] · [[fine-tuning/frameworks]] · [[math/optimisation]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

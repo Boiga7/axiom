@@ -184,3 +184,7 @@ Fix: change `offsetResetPolicy` to `earliest` for new consumer groups, or ensure
 
 ## Connections
 [[cloud-hub]] · [[cloud/kubernetes]] · [[cloud/aws-sqs-sns]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes-operators]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

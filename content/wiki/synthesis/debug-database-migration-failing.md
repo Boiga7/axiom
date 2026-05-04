@@ -83,3 +83,7 @@ Pivot to [[synthesis/debug-error-rate-after-deploy]] to diagnose service errors 
 ## Connections
 
 [[cs-fundamentals/database-transactions]] · [[cs-fundamentals/database-design]] · [[cloud/blue-green-deployment]] · [[synthesis/debug-error-rate-after-deploy]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

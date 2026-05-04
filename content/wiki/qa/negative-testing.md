@@ -272,3 +272,7 @@ Fix: add a database-level unique constraint or advisory lock on the stock row; c
 ## Connections
 
 [[qa-hub]] · [[qa/test-case-design]] · [[qa/exploratory-testing]] · [[qa/security-testing-qa]] · [[qa/defect-prevention]] · [[technical-qa/load-testing-advanced]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

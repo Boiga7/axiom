@@ -198,3 +198,7 @@ Fix: use Pre-LN for all new transformer implementations (it is the modern standa
 ## Connections
 
 [[math/optimisation]] · [[math/transformer-math]] · [[math/numerical-precision]] · [[llms/transformer-architecture]] · [[fine-tuning/frameworks]]
+## Open Questions
+
+- Where does the mathematical idealisation diverge most from real implementation behaviour?
+- What intuition does a practitioner need that the formal definitions do not convey?

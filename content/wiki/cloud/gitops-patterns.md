@@ -231,3 +231,7 @@ Fix: add the drifting field to the `.spec.patches` ignore list in the Kustomizat
 
 ## Connections
 [[cloud-hub]] · [[cloud/argocd]] · [[cloud/argo-rollouts]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[cloud/secrets-management]] · [[cloud/helm-advanced]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

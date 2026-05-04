@@ -240,6 +240,7 @@ Fix: return 401 (with a `WWW-Authenticate` header) for unauthenticated requests 
 ## Connections
 - [[protocols/mcp]] — the MCP spec that mandates PKCE and Resource Indicators
 - [[protocols/mcp-http-transport]] — the transport layer auth boundaries sit on top of
+- [[protocols/rfc-7591-dynamic-client-registration]] — dynamic client registration endpoint is an additional auth boundary to test: open registration, wildcard redirect URIs, scope enforcement
 - [[security/owasp-llm-top10]] — OWASP Agentic Top 10 A3: delegated trust failures
 - [[security/mcp-cves]] — known MCP CVEs, many auth-related
 - [[para/projects]] — mcpindex Weekend 2 target

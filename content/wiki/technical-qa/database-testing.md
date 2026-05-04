@@ -196,3 +196,7 @@ Fix: test the actual cascade behaviour your application depends on; if items sho
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/testcontainers]] · [[technical-qa/test-architecture]] · [[cs-fundamentals/database-design]] · [[qa/test-data-management]] · [[cloud/aws-rds-aurora]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

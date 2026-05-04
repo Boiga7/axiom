@@ -228,3 +228,7 @@ Fix: add the soak test as a nightly scheduled CI job (not a pre-release gate) so
 
 ## Connections
 [[qa-hub]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[technical-qa/load-testing-advanced]] · [[qa/qa-metrics]] · [[cloud/observability-stack]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

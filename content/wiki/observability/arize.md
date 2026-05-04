@@ -233,3 +233,7 @@ Fix: call `tracer_provider.force_flush()` before reading spans programmatically 
 ## Connections
 
 [[observability/platforms]] · [[observability/langfuse]] · [[observability/tracing]] · [[rag/pipeline]] · [[evals/methodology]] · [[infra/vector-stores]]
+## Open Questions
+
+- What failure modes does this tool systematically fail to surface?
+- At what data volume does this observability approach become too expensive to maintain?

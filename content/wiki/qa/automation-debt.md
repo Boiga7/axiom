@@ -238,3 +238,7 @@ Fix: include test code in regular code reviews with the same quality bar as prod
 ## Connections
 
 [[qa/qa-hub]] · [[qa/test-automation-strategy]] · [[qa/qa-leadership]] · [[qa/qa-metrics]] · [[technical-qa/flaky-test-management]] · [[technical-qa/pytest-advanced]] · [[technical-qa/parallel-test-execution]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

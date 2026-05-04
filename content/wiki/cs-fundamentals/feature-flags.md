@@ -255,3 +255,7 @@ Fix: always derive the bucket from a stable hash of `flag_name + user_id` so ass
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/api-security]] · [[cloud/blue-green-deployment]] · [[qa/continuous-testing]] · [[qa/shift-left-testing]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

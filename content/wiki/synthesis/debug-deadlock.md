@@ -84,3 +84,7 @@ Pivot to [[synthesis/debug-api-timeout]] to check whether the hang is a timeout 
 ## Connections
 
 [[cs-fundamentals/database-transactions]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/distributed-systems]] · [[python/sqlalchemy]] · [[synthesis/debug-api-timeout]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

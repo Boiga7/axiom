@@ -228,3 +228,7 @@ Goal: achieve 80% automation, reduce QA bottleneck
 ## Connections
 
 [[qa-hub]] · [[qa/qa-metrics]] · [[qa/test-strategy]] · [[qa/defect-prevention]] · [[qa/continuous-testing]] · [[qa/shift-left-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

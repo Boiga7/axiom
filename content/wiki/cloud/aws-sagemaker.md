@@ -260,3 +260,7 @@ Fix: ensure the container starts a web server on port 8080 that responds `200` t
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-fargate]] · [[cloud/aws-eks]] · [[infra/inference-serving]] · [[llms/ae-hub]] · [[fine-tuning/frameworks]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

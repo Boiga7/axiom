@@ -84,3 +84,7 @@ Pivot to [[agents/langgraph]] to add explicit state checkpoints that let the age
 ## Connections
 
 [[agents/langgraph]] · [[protocols/mcp-server-development]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[security/owasp-llm-top10]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

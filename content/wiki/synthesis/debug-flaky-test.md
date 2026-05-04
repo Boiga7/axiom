@@ -85,3 +85,7 @@ Pivot to [[qa/test-environments]] to confirm the CI environment matches the assu
 ## Connections
 
 [[technical-qa/flaky-test-management]] · [[technical-qa/playwright-advanced]] · [[technical-qa/parallel-test-execution]] · [[technical-qa/database-testing]] · [[qa/test-environments]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

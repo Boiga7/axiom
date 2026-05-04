@@ -113,3 +113,7 @@ This zero-shot variant works because large models have seen enough reasoning dem
 ## Connections
 
 [[papers/key-papers]] · [[papers/react]] · [[prompting/techniques]] · [[prompting/chain-of-thought]] · [[llms/claude]] · [[agents/practical-agent-design]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

@@ -228,3 +228,7 @@ Fix: deploy the gateway in an HA configuration (2+ instances behind a load balan
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/oop-patterns]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

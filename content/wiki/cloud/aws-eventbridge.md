@@ -280,3 +280,7 @@ Fix: add a try/except in the enrichment Lambda that returns a valid (possibly en
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]] · [[cloud/aws-lambda-patterns]] · [[cloud/serverless-patterns]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

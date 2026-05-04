@@ -84,3 +84,7 @@ Pivot to [[cloud/cloud-security]] to review the full secrets management posture 
 ## Connections
 
 [[cloud/secrets-management]] · [[cloud/cloud-security]] · [[cs-fundamentals/git]] · [[cs-fundamentals/api-security]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

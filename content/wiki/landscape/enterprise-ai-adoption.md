@@ -107,8 +107,8 @@ The enterprise adoption picture creates two types of opportunity:
 
 The AI skills gap is real and current. See [[synthesis/software-engineer-to-ai-engineer]] for the fastest path from software engineering to AI engineering in this context.
 
-> [Source: Deloitte State of AI in the Enterprise 2026] [unverified]
-> [Source: McKinsey State of AI 2025] [unverified]
+> [Source: Deloitte State of AI in the Enterprise 2026 (3,235 leaders surveyed, Aug–Sep 2025)]
+> [Source: McKinsey State of AI 2025 (1,993 participants, published November 2025)]
 
 ## Common Failure Cases
 

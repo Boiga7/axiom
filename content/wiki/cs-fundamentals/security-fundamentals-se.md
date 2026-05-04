@@ -245,3 +245,7 @@ Fix: set `SameSite=Strict` on session cookies and add a `X-Requested-With` custo
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/auth-patterns]] · [[qa/security-testing-qa]] · [[technical-qa/security-automation]] · [[cloud/cloud-security]] · [[security/owasp-llm-top10]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

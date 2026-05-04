@@ -209,3 +209,7 @@ Fix: use `stream=True` with `requests` and iterate `response.iter_lines()`; or u
 - [[python/ecosystem]] — async HTTP clients (httpx, aiohttp) for calling APIs without blocking
 - [[web-frameworks/fastapi]] — building your own API endpoints with Python
 - [[security/owasp-llm-top10]] — API security concerns: key exposure, injection, rate limit bypass
+## Open Questions
+
+- What API behaviour is underdocumented but critical for production use?
+- When should you build an abstraction layer over this API versus calling it directly?

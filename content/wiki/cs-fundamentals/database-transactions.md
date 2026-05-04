@@ -285,3 +285,7 @@ Fix: only catch the specific expected exceptions (e.g., `EmailError`); re-raise 
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/sql]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/performance-optimisation-se]] · [[cloud/aws-rds-aurora]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

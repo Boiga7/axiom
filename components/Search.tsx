@@ -119,11 +119,8 @@ export default function Search({ index }: Props) {
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={handleKey}
           placeholder="Search the Axiom…"
-          className="w-full h-9 sm:h-8 pl-8 pr-3 sm:pr-14 rounded-md bg-card border border-white/[0.07] text-primary placeholder-muted text-xs font-mono focus:outline-none focus:border-ae/40 focus:bg-elevated transition-colors"
+          className="w-full h-9 sm:h-8 pl-8 pr-3 rounded-md bg-card border border-white/[0.07] text-primary placeholder-muted text-xs font-mono focus:outline-none focus:border-ae/40 focus:bg-elevated transition-colors"
         />
-        <span className="absolute right-2.5 text-[10px] font-mono text-muted bg-elevated border border-white/[0.07] rounded px-1.5 py-0.5 pointer-events-none hidden sm:block">
-          ⌘K
-        </span>
       </div>
 
       {/* Dropdown */}

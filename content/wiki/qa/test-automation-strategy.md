@@ -162,3 +162,7 @@ Fix: enforce phase gates: the Phase 2 prerequisite is a sustained pass rate abov
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/qa-metrics]] · [[qa/regression-testing]] · [[technical-qa/flaky-test-management]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

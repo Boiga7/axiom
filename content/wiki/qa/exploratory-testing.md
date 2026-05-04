@@ -289,3 +289,7 @@ Fix: log unexpected findings immediately and note them as follow-up charter cand
 - [[qa/bug-lifecycle]] — bugs found in sessions enter the standard lifecycle
 - [[qa/risk-based-testing]] — risk analysis informs which charters to prioritise
 - [[qa/bdd-gherkin]] — confirmed behaviour from exploration can be formalised as BDD scenarios
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

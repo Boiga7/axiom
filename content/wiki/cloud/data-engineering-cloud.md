@@ -254,3 +254,7 @@ Fix: Trigger only on `s3:ObjectCreated:CompleteMultipartUpload` and `s3:ObjectCr
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/serverless-patterns]] · [[cloud/aws-step-functions]] · [[cloud/finops-cost-management]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

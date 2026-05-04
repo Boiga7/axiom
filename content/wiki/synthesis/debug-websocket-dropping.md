@@ -83,3 +83,7 @@ Pivot to [[cs-fundamentals/networking]] to verify the full connection path inclu
 ## Connections
 
 [[cs-fundamentals/websockets-se]] · [[cs-fundamentals/networking]] · [[cloud/load-balancing-advanced]] · [[cs-fundamentals/error-handling-patterns]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

@@ -263,3 +263,7 @@ Fix: commit offsets only after the handler returns; use the cooperative rebalanc
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/event-driven-architecture]] · [[cs-fundamentals/distributed-systems]] · [[cloud/aws-sqs-sns]] · [[cs-fundamentals/microservices-patterns]] · [[llms/ae-hub]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

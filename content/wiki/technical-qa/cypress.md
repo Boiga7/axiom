@@ -256,3 +256,7 @@ Fix: retries are acceptable only for known infrastructure flakiness (network tim
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[technical-qa/flaky-test-management]] · [[qa/bdd-gherkin]] · [[cloud/github-actions]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

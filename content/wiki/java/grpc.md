@@ -338,3 +338,7 @@ Fix: change the address to `dns:///llm-service:50051` and set `defaultLoadBalanc
 - [[protocols/mcp]] — MCP uses HTTP/stdio; gRPC is for direct service-to-service inference calls
 - [[web-frameworks/fastapi]] — FastAPI often serves the Python side; use gRPC when streaming performance matters
 - [[cs-fundamentals/grpc]] — language-agnostic reference: protocol comparison table, proto syntax, 4 streaming modes
+## Open Questions
+
+- How does this integrate with the broader JVM ecosystem in practice?
+- What performance characteristics are not obvious from the API surface?

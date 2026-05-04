@@ -266,3 +266,7 @@ Fix: always send SIGTERM (`kill -15`) first and wait for graceful shutdown; only
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cloud/cloud-security]] · [[cs-fundamentals/security-fundamentals-se]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/concurrency]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

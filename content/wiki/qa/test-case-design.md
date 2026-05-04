@@ -204,3 +204,7 @@ Fix: for each state, write at least one test for every transition that should be
 - [[qa/bdd-gherkin]] — GIVEN/WHEN/THEN format for acceptance test cases
 - [[qa/risk-based-testing]] — prioritise which test cases to write first
 - [[qa/bug-lifecycle]] — what happens when a test case fails
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

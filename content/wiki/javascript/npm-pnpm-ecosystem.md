@@ -27,7 +27,7 @@ npm's `node_modules` design creates a flat directory where every package can acc
 | Add single package | 3s | 0.8s |
 | Disk per project | 200MB | ~5MB (hard links to global store) |
 
-*[unverified] — benchmarks vary by machine and package count*
+*Benchmarks vary by machine and package count; clean install ~3x faster, cache-warm ~1.7–3.7x*
 
 **Phantom dependency prevention:** pnpm's `node_modules` uses a `.pnpm/` virtual store directory. Packages can only `require()` what they declare in `dependencies` or `devDependencies`. This catches the class of bugs where code works in development (because an indirect dependency happened to be installed) but fails in production with a different install order.
 

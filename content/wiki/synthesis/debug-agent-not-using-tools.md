@@ -85,3 +85,7 @@ Pivot to [[llms/hallucination]] to diagnose whether the model is ignoring tool o
 ## Connections
 
 [[agents/langgraph]] · [[protocols/mcp-server-development]] · [[protocols/mcp]] · [[agents/multi-agent-patterns]] · [[observability/tracing]] · [[llms/hallucination]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

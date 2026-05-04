@@ -373,3 +373,7 @@ Fix: use per-test factory-created data with explicit cleanup (yield fixture with
 - [[technical-qa/api-testing]] — API test helper classes follow similar patterns
 - [[qa/test-strategy]] — test architecture determines maintainability of the whole suite
 - [[qa/qa-tools]] — Serenity BDD for Screenplay pattern tooling
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

@@ -193,3 +193,7 @@ Fix: the controller defaults to watching all namespaces; if it was scoped with `
 
 ## Connections
 [[cloud-hub]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/service-mesh]] · [[cloud/cloud-monitoring]] · [[cloud/kubernetes-operators]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

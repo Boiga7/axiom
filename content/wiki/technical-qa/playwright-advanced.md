@@ -260,3 +260,7 @@ Fix: disable Healer (`healer: 'off'`) in branches where deliberate selector chan
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/visual-testing]] · [[technical-qa/test-architecture]] · [[technical-qa/flaky-test-management]] · [[qa/cross-browser-testing]] · [[test-automation/playwright]] · [[llms/ae-hub]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

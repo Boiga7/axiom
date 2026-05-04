@@ -2,9 +2,9 @@
 type: concept
 category: infra
 para: resource
-tags: [weights-and-biases, mlflow, experiment-tracking, fine-tuning, training]
+tags: [weights-and-biases, mlflow, neptune, weave, experiment-tracking, fine-tuning, training]
 sources: []
-updated: 2026-05-01
+updated: 2026-05-03
 tldr: "Logging and comparing ML training runs. Distinct from production LLM observability: experiment tracking is for the training phase — comparing hyperparameter runs, catching overfitting, reproducing results."
 ---
 
@@ -13,6 +13,8 @@ tldr: "Logging and comparing ML training runs. Distinct from production LLM obse
 Logging and comparing ML training runs. Distinct from production LLM observability (see [[observability/platforms]]): experiment tracking is for the training phase. Comparing hyperparameter runs, catching overfitting, reproducing results.
 
 The two dominant tools: **Weights & Biases (W&B)** (industry standard, richer UX) and **MLflow** (open-source, self-hostable).
+
+> **Neptune deprecation notice:** Neptune SaaS was shut down in March 2026 following its acquisition by OpenAI. Any teams still using Neptune must migrate. Migration paths: MLflow (open-source, self-hosted, drop-in for most use cases), W&B (managed, best UX), Aim (open-source alternative). See the Migration section below.
 
 ---
 
@@ -109,6 +111,55 @@ sweep_config = {
 sweep_id = wandb.sweep(sweep_config, project="my-finetune")
 wandb.agent(sweep_id, function=train, count=20)
 ```
+
+### W&B Weave (LLM tracing and evaluation)
+
+Weave is a separate W&B product for LLM-specific observability, distinct from W&B core which targets training runs. It shares the W&B dashboard but is its own product surface.
+
+What Weave covers:
+- **LLM call tracing** — logs input, output, latency, and cost for every LLM call; supports nested traces for multi-step chains and agents
+- **Prompt versioning** — tracks prompt text alongside the model and parameters used, so you can diff prompts across experiments
+- **Evaluation datasets** — attach a dataset to an experiment, run the model over every row, and compare results across runs
+- **Human annotation** — annotation queues for labelling model outputs; feeds back into evals
+- **Experiment comparison UI** — side-by-side comparison of prompt versions, model outputs, and scores
+
+Quick setup:
+
+```python
+import weave
+from anthropic import Anthropic
+
+weave.init("my-llm-project")   # creates a W&B project with Weave enabled
+
+client = Anthropic()
+
+@weave.op()
+def call_model(prompt: str) -> str:
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text
+```
+
+Weave automatically wraps the call, captures inputs/outputs, and logs latency and token usage. No manual `wandb.log()` calls required for tracing.
+
+Relationship to W&B core: training metrics (loss curves, checkpoints) still go through `wandb.log()` / `wandb.init()`. Weave sits on top for the inference/evaluation side. Both appear in the same W&B project.
+
+---
+
+## Neptune Deprecation and Migration
+
+Neptune SaaS shut down in March 2026 after acquisition by OpenAI. If migrating off Neptune:
+
+| Destination | When to choose |
+|-------------|---------------|
+| MLflow | Self-hosted requirement; regulated environment; already in Databricks |
+| W&B | Fastest migration; best UX parity; fine-tuning-heavy workflow |
+| Aim | Open-source alternative with a local UI; lighter-weight than MLflow |
+
+All three support logging params, metrics, and artefacts via patterns nearly identical to Neptune's `run["metrics/loss"].log(value)` pattern. The HuggingFace `Trainer` `report_to` argument accepts `"mlflow"` or `"wandb"` directly.
 
 ---
 
@@ -252,3 +303,7 @@ Fix: serialize promotion through a deployment job that checks current production
 - [[fine-tuning/dpo-grpo]] — preference optimisation runs to compare
 - [[observability/platforms]] — production LLM monitoring (different from training tracking)
 - [[infra/huggingface]] — `Trainer` class that emits W&B/MLflow metrics
+## Open Questions
+
+- What operational burden does this introduce that the documentation does not cover?
+- At what scale does this infrastructure pattern stop being cost-effective?

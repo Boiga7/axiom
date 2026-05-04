@@ -297,3 +297,7 @@ Detect: add a deliberate `subprocess.call(user_input, shell=True)` in the new di
 
 ## Connections
 [[tqa-hub]] · [[qa/qa-in-devops]] · [[qa/test-automation-strategy]] · [[qa/smoke-sanity-testing]] · [[technical-qa/security-automation]] · [[cloud/gitops-patterns]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

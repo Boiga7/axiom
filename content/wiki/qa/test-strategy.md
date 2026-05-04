@@ -193,3 +193,7 @@ Fix: enforce environment parity via Infrastructure as Code (the same Terraform m
 - [[qa/bdd-gherkin]] — behaviour-driven acceptance criteria format
 - [[technical-qa/test-architecture]] — Page Object Model, test code structure
 - [[test-automation/playwright]] — E2E automation implementation
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

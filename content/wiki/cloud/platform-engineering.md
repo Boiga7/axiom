@@ -192,3 +192,7 @@ Fix: separately track rollback frequency and change failure rate; set alerts whe
 
 ## Connections
 [[cloud-hub]] · [[cloud/gitops-patterns]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/github-actions]] · [[cloud/observability-stack]] · [[cloud/secrets-management]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

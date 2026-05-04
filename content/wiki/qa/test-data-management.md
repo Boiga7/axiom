@@ -246,3 +246,7 @@ Fix: run a validation pass on LLM-generated data using Pydantic validators that 
 
 ## Connections
 [[qa-hub]] · [[qa/test-environments]] · [[qa/agile-qa]] · [[technical-qa/test-architecture]] · [[technical-qa/database-testing]] · [[llms/ae-hub]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

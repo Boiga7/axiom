@@ -137,9 +137,10 @@ Pricing page tips:
 
 ## Verified Publisher
 
-The Verified Publisher badge (blue checkmark) signals trust. Requirements [unverified. Check current docs]:
-- Publish at least one package to GitHub Packages (or similar GitHub ecosystem trust signal)
-- Have a verified domain associated with your GitHub organisation
+The Verified Publisher badge (blue checkmark) signals trust. Requirements:
+- Verify domain ownership (shows "Verified" badge on the org profile)
+- Confirm your email address with GitHub Support
+- Enable two-factor authentication org-wide
 - Agree to the GitHub Marketplace Partner Agreement
 
 The badge is not required for listing, but it improves conversion for paid plans because users see it before installing.

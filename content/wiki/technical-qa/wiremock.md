@@ -223,4 +223,8 @@ Detect: `wiremock/mappings/*.json` files contain `Authorization` or `Set-Cookie`
 Fix: add a post-recording scrubbing step that removes sensitive headers from all recorded mapping files; add `wiremock/mappings/` to `.gitignore` and require manual review before committing any recording.
 
 ## Connections
-[[tqa-hub]] · [[technical-qa/contract-testing]] · [[technical-qa/api-testing]] · [[technical-qa/testcontainers]] · [[qa/test-environments]]
+[[technical-qa/tqa-hub]] · [[technical-qa/contract-testing]] · [[technical-qa/api-testing]] · [[technical-qa/testcontainers]] · [[qa/test-environments]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

@@ -242,3 +242,7 @@ Fix: add a `is_rerun BOOLEAN` column to `test_results`, set it based on the `rep
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[technical-qa/flaky-test-management]] · [[technical-qa/test-reporting-dashboards]] · [[technical-qa/parallel-test-execution]] · [[cloud/infrastructure-monitoring]] · [[qa/qa-metrics]] · [[cs-fundamentals/observability-se]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

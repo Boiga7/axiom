@@ -42,3 +42,7 @@ Fix: always use fully qualified wikilinks for cross-category references; use `[[
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[web-frameworks/fastapi]] · [[apis/anthropic-api]]
+## Open Questions
+
+- What performance characteristics only become problems at production scale?
+- What does this library handle poorly that its documentation does not mention?

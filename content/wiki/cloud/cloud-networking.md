@@ -226,3 +226,7 @@ Fix: Point the health check at a deep health endpoint (`/health/ready`) that val
 - [[cloud/azure-core]] — Azure VNet, NSG, Application Gateway, Azure Front Door
 - [[cloud/kubernetes]] — container networking, CNI, ingress controllers, network policies
 - [[cloud/terraform]] — terraform-aws-vpc module for automated VPC provisioning
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

@@ -180,3 +180,7 @@ Fix: wrap the message parser in a try/except that catches schema errors and expl
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-lambda-patterns]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

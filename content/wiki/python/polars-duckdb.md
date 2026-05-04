@@ -299,3 +299,7 @@ Fix: apply filters after window functions, not before; if pre-filtering is requi
 ## Connections
 
 [[python/python-hub]] · [[python/ecosystem]] · [[evals/methodology]] · [[data/datasets]] · [[infra/vector-stores]]
+## Open Questions
+
+- What performance characteristics only become problems at production scale?
+- What does this library handle poorly that its documentation does not mention?

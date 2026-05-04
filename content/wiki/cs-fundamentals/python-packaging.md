@@ -294,3 +294,7 @@ Fix: explicitly declare every workspace dependency in `[tool.uv.sources]` with `
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[python/pypi-distribution]] · [[cs-fundamentals/cli-tooling]] · [[cloud/github-actions]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

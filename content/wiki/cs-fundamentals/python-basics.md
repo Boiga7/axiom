@@ -347,3 +347,7 @@ Fix: catch the specific exception type(s) you expect; let unexpected exceptions 
 - [[python/ecosystem]] — production Python: async, Pydantic, uv, structlog, polars
 - [[synthesis/getting-started]] — first API call using Python
 - [[synthesis/learning-path]] — where this page fits in the full 0→AE curriculum
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

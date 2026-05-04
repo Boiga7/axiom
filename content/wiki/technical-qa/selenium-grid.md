@@ -272,3 +272,7 @@ Fix: write tests against the W3C WebDriver standard only; avoid browser-specific
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[test-automation/selenium]] · [[technical-qa/parallel-test-execution]] · [[technical-qa/playwright-advanced]] · [[qa/cross-browser-testing]] · [[technical-qa/e2e-framework-design]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

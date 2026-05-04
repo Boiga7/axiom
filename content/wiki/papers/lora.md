@@ -116,3 +116,7 @@ LoRA is applied to the query (Wq), value (Wv), and occasionally key (Wk) and out
 ## Connections
 
 [[papers/key-papers]] · [[fine-tuning/lora-qlora]] · [[fine-tuning/frameworks]] · [[infra/huggingface]] · [[math/linear-algebra]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

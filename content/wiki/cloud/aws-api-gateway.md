@@ -199,3 +199,7 @@ Fix: create the ACM certificate in the same region as the API, verify the certif
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-lambda-patterns]] · [[cloud/secrets-management]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

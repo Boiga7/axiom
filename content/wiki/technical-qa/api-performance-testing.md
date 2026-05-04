@@ -280,3 +280,7 @@ Fix: either configure the load test to use a pre-seeded read-only dataset for re
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/load-testing-advanced]] · [[technical-qa/performance-testing]] · [[qa/performance-testing-qa]] · [[qa/continuous-testing]] · [[cs-fundamentals/observability-se]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

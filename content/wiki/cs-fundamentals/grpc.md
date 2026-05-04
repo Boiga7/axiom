@@ -294,3 +294,7 @@ Fix: use `add_secure_port` with `ssl_channel_credentials()` on the server and `s
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/api-design]] · [[cloud/service-mesh]] · [[java/grpc]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

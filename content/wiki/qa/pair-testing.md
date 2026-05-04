@@ -201,3 +201,7 @@ Fix: apply the rule: pair when the cost of a miss exceeds the cost of pairing; f
 ## Connections
 
 [[qa-hub]] · [[qa/exploratory-testing]] · [[qa/exploratory-testing]] · [[qa/test-planning]] · [[qa/agile-qa]] · [[qa/shift-left-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

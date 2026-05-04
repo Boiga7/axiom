@@ -300,3 +300,7 @@ Fix: add compiled artifacts to `.cdk-staging` excludes or use `lambda.Code.fromA
 - [[cloud/github-actions]] — CI/CD: `cdk synth` on PR, `cdk deploy` on merge
 - [[cloud/kubernetes]] — `aws-cdk-lib/aws-eks` module for EKS cluster provisioning
 - [[cloud/secrets-management]] — CDK creates Secrets Manager secrets; never hardcode in stacks
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

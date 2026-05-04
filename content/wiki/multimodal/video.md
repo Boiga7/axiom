@@ -285,3 +285,7 @@ Fix: for event-dense content, use Gemini's native video processing instead of fr
 - [[multimodal/image-generation]] — image gen is more mature and reliable than video gen
 - [[apis/anthropic-api]] — Claude does not natively process video; use frame extraction or Gemini
 - [[llms/model-families]] — Gemini 1.5 Pro / 2.0 Flash are the primary video-capable models
+## Open Questions
+
+- What input types or combinations produce unexpectedly poor results?
+- How does quality degrade at the edges of the training distribution?

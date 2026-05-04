@@ -230,3 +230,7 @@ Fix: integrate axe-core scans into the PR pipeline with a zero-new-Critical-viol
 
 ## Connections
 [[qa-hub]] · [[qa/security-testing-qa]] · [[qa/non-functional-testing]] · [[cs-fundamentals/security-fundamentals-se]] · [[cloud/cloud-security]] · [[qa/test-strategy]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

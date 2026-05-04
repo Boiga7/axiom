@@ -241,3 +241,7 @@ Fix: treat each prevention action as a task with a concrete acceptance criterion
 ## Connections
 
 [[qa-hub]] · [[qa/bug-lifecycle]] · [[qa/production-monitoring-qa]] · [[qa/defect-prevention]] · [[qa/risk-based-testing]] · [[qa/qa-metrics]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

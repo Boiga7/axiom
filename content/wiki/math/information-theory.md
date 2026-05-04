@@ -165,3 +165,7 @@ softmax(z/T)ᵢ = exp(zᵢ/T) / ∑ⱼ exp(zⱼ/T)
 ## Connections
 
 [[math/optimisation]] · [[math/transformer-math]] · [[papers/rlhf]] · [[papers/dpo]] · [[evals/methodology]] · [[rag/pipeline]]
+## Open Questions
+
+- Where does the mathematical idealisation diverge most from real implementation behaviour?
+- What intuition does a practitioner need that the formal definitions do not convey?

@@ -254,3 +254,7 @@ Fix: Remove session-specific query parameters from CDN-facing requests (handle t
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/aws-core]] · [[cloud/finops-cost-management]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/performance-optimisation-se]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

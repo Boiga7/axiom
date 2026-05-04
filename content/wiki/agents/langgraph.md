@@ -14,7 +14,7 @@ tldr: LangGraph v1.0 is the production standard for stateful multi-agent orchest
 
 Graph-based agent runtime from LangChain. Went GA as v1.0 in October 2025 and became the default runtime for production multi-agent systems in Python.
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 ---
 
@@ -180,4 +180,5 @@ Fix: give each parallel branch a distinct state key; merge the results in a join
 - How does LangGraph v1.0 compare to the OpenAI Agents SDK (released early 2025) on production workloads — which wins on latency, cost, and developer ergonomics for Claude-based agents?
 - What are the practical limits of `PostgresSaver` checkpointing at scale — what checkpoint size and throughput does it support before becoming a bottleneck?
 - Does LangGraph Cloud's horizontal scaling model handle stateful graphs correctly when a single thread's state is large (e.g., multi-turn agent with large message history)?
+
 

@@ -85,3 +85,7 @@ Pivot to [[cs-fundamentals/os-internals]] to understand whether the OS is reclai
 ## Connections
 
 [[cs-fundamentals/os-internals]] · [[cs-fundamentals/performance-optimisation-se]] · [[cs-fundamentals/linux-fundamentals]] · [[python/python-basics]] · [[cloud/kubernetes]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

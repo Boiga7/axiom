@@ -248,3 +248,144 @@ body {
 .wiki-prose .wikilink:hover {
   border-color: #22d3ee;
 }
+
+/* ── Light mode ─────────────────────────────────────────────────────── */
+
+html[data-theme="light"] {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(34, 211, 238, 0.05) 0%, transparent 65%),
+    #f8fafc;
+}
+
+/* Semantic surface classes */
+html[data-theme="light"] .bg-base    { background-color: #f8fafc; }
+html[data-theme="light"] .bg-card    { background-color: #ffffff; }
+html[data-theme="light"] .bg-card\/80 { background-color: rgba(255, 255, 255, 0.88); }
+html[data-theme="light"] .bg-elevated { background-color: #f1f5f9; }
+
+/* Opacity-variant nav backdrop */
+html[data-theme="light"] [class*="bg-base\/"] { background-color: rgba(248, 250, 252, 0.85); }
+
+/* Semantic text classes */
+html[data-theme="light"] .text-primary   { color: #0f172a; }
+html[data-theme="light"] .text-secondary { color: #475569; }
+html[data-theme="light"] .text-muted     { color: #94a3b8; }
+
+/* White-alpha borders → dark-alpha */
+html[data-theme="light"] [class*="border-white\/"] {
+  border-color: rgba(15, 23, 42, 0.10);
+}
+html[data-theme="light"] [class*="hover\:border-white\/"]:hover {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+/* White-alpha backgrounds → dark-alpha */
+html[data-theme="light"] [class*="bg-white\/"] {
+  background-color: rgba(15, 23, 42, 0.03);
+}
+html[data-theme="light"] [class*="hover\:bg-white\/"]:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+/* White-alpha text */
+html[data-theme="light"] [class*="text-white\/"] {
+  color: rgba(15, 23, 42, 0.50);
+}
+
+/* Scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track  { background: #f8fafc; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb  { background: rgba(34, 211, 238, 0.30); }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.50); }
+
+/* ── Wiki prose — light mode ─────────────────────────────────── */
+
+html[data-theme="light"] .wiki-prose          { color: #334155; }
+
+html[data-theme="light"] .wiki-prose h1,
+html[data-theme="light"] .wiki-prose h2,
+html[data-theme="light"] .wiki-prose h3       { color: #0f172a; }
+html[data-theme="light"] .wiki-prose h4       { color: #475569; }
+html[data-theme="light"] .wiki-prose h2       { border-bottom-color: rgba(15, 23, 42, 0.08); }
+
+html[data-theme="light"] .wiki-prose a        { color: #0891b2; border-bottom-color: rgba(8, 145, 178, 0.40); }
+html[data-theme="light"] .wiki-prose a:hover  { border-bottom-color: #0891b2; }
+
+html[data-theme="light"] .wiki-prose code {
+  background: #e2f0f5;
+  color: #0e7490;
+  border-color: rgba(14, 116, 144, 0.20);
+}
+
+html[data-theme="light"] .wiki-prose blockquote {
+  background: rgba(34, 211, 238, 0.06);
+  color: #475569;
+}
+
+html[data-theme="light"] .wiki-prose th {
+  background: #e2e8f0;
+  color: #1e293b;
+  border-bottom-color: rgba(15, 23, 42, 0.12);
+}
+html[data-theme="light"] .wiki-prose td         { color: #475569; border-bottom-color: rgba(15, 23, 42, 0.05); }
+html[data-theme="light"] .wiki-prose tr:hover td { background: rgba(15, 23, 42, 0.02); }
+html[data-theme="light"] .wiki-prose hr         { border-top-color: rgba(15, 23, 42, 0.08); }
+html[data-theme="light"] .wiki-prose strong      { color: #0f172a; }
+html[data-theme="light"] .wiki-prose em          { color: #475569; }
+
+html[data-theme="light"] .wiki-prose .wikilink {
+  color: #0891b2;
+  border-bottom-color: rgba(8, 145, 178, 0.40);
+}
+html[data-theme="light"] .wiki-prose .wikilink:hover { border-bottom-color: #0891b2; }
+
+/* ── Accent colour overrides for light mode ──────────────────────────
+   Bright pastels (#22d3ee cyan, #a78bfa violet, #60a5fa blue, #34d399
+   emerald) wash out to near-invisible on white. Remap to darker shades
+   that meet WCAG AA contrast on a light background.              ── */
+
+/* ae = cyan (#22d3ee → #0891b2 dark teal) */
+html[data-theme="light"] .text-ae,
+html[data-theme="light"] [class*="text-ae\/"] { color: #0891b2; }
+
+html[data-theme="light"] .bg-ae           { background-color: #0891b2; }
+html[data-theme="light"] [class*="bg-ae\/"] { background-color: rgba(8, 145, 178, 0.10); }
+
+html[data-theme="light"] .border-ae,
+html[data-theme="light"] [class*="border-ae\/"] { border-color: rgba(8, 145, 178, 0.35); }
+
+/* se = violet (#a78bfa → #7c3aed) */
+html[data-theme="light"] .text-se,
+html[data-theme="light"] [class*="text-se\/"] { color: #7c3aed; }
+html[data-theme="light"] [class*="bg-se\/"]   { background-color: rgba(124, 58, 237, 0.08); }
+html[data-theme="light"] [class*="border-se\/"] { border-color: rgba(124, 58, 237, 0.30); }
+
+/* cloud = blue (#60a5fa → #2563eb) */
+html[data-theme="light"] .text-cloud,
+html[data-theme="light"] [class*="text-cloud\/"] { color: #2563eb; }
+html[data-theme="light"] [class*="bg-cloud\/"]   { background-color: rgba(37, 99, 235, 0.08); }
+html[data-theme="light"] [class*="border-cloud\/"] { border-color: rgba(37, 99, 235, 0.30); }
+
+/* qa = emerald (#34d399 → #059669) */
+html[data-theme="light"] .text-qa,
+html[data-theme="light"] [class*="text-qa\/"] { color: #059669; }
+html[data-theme="light"] [class*="bg-qa\/"]   { background-color: rgba(5, 150, 105, 0.08); }
+html[data-theme="light"] [class*="border-qa\/"] { border-color: rgba(5, 150, 105, 0.30); }
+
+/* techqa = orange (#f97316 → #c2410c — already warm, just darken slightly) */
+html[data-theme="light"] .text-techqa,
+html[data-theme="light"] [class*="text-techqa\/"] { color: #c2410c; }
+
+/* papers = amber (#fb923c → #d97706) */
+html[data-theme="light"] .text-papers,
+html[data-theme="light"] [class*="text-papers\/"] { color: #d97706; }
+
+/* animate-pulse dot — keep accent colour visible */
+html[data-theme="light"] .bg-ae.animate-pulse { background-color: #0891b2; }
+
+/* Card hover: group-hover:text-white turns invisible on light bg — remap to dark */
+html[data-theme="light"] .group:hover .group-hover\:text-white { color: #0f172a; }

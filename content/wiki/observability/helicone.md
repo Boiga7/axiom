@@ -146,3 +146,7 @@ Fix: use `Helicone-Cache-Seed` with a version identifier tied to your prompt ver
 - [[observability/tracing]] — OTel tracing concepts; Helicone exports compatible traces
 - [[infra/caching]] — Helicone semantic caching vs Redis-based approaches
 - [[synthesis/cost-optimisation]] — semantic caching as cost lever
+## Open Questions
+
+- What failure modes does this tool systematically fail to surface?
+- At what data volume does this observability approach become too expensive to maintain?

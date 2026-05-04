@@ -262,6 +262,7 @@ Fix: increase the `timeout` to exceed the expected maximum stream duration; or w
 - [[python/ecosystem]] — pytest-asyncio patterns for async Playwright
 - [[ai-tools/claude-code]] — Playwright MCP for agent web browsing
 - [[web-frameworks/nextjs]] — the frontend Playwright most often tests in this stack
+- [[technical-qa/self-healing-tests]] — Playwright Healer agent and broader self-healing test landscape
 
 ## Open Questions
 

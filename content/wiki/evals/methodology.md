@@ -14,7 +14,7 @@ tldr: LLM evaluation methodology — only 52% of AI orgs have evals in place, ma
 
 The discipline of systematically measuring model and system performance. Only 52% of organisations building AI products have evaluations in place. Making this the single most common gap between teams shipping confidently and teams shipping on hope.
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 ---
 
@@ -103,7 +103,7 @@ Use SWE-bench to compare models for coding tasks. Don't benchmark on HumanEval a
 
 ### Reasoning: GPQA Diamond
 
-Graduate-level questions in physics, chemistry, biology. Hard enough that domain experts score ~65%. Tests genuine reasoning, not lookup. Claude Opus scores ~60–70% [unverified].
+Graduate-level questions in physics, chemistry, biology. Hard enough that domain experts score ~65%. Tests genuine reasoning, not lookup. Claude Opus 4.6 scores 91.3% on GPQA Diamond.
 
 ### General: BIG-bench and HELM
 
@@ -185,7 +185,7 @@ evalcheck wraps pytest with LLM-specific assertions and posts a comment to the P
 
 ## Key Facts
 
-- 52% of AI organisations have evaluations in place (majority do not) [unverified]
+- Comprehensive eval practices remain underdeveloped: only 27% of organisations review all AI-generated content before use, and fewer than 20% have mature AI governance frameworks (McKinsey State of AI 2025)
 - Golden set minimum: 50 examples; 200+ for statistical confidence; 1,000+ for fine-grained regression detection
 - promptfoo: 8K stars, YAML config, red-teaming support — best for prompt iteration
 - Braintrust: best for production CI/CD with datasets, scoring, and PR integration

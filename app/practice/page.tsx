@@ -32,7 +32,7 @@ export default function PracticePage() {
             Build real skills.
           </h1>
           <p className="text-secondary text-lg leading-relaxed max-w-2xl">
-            Five exercises per role path. Each one is a concrete task you can complete
+            Hands-on exercises per role path. Each one is a concrete task you can complete
             in a sitting: not reading, not watching, building.
           </p>
         </section>

@@ -122,6 +122,8 @@ export default function GraphView({ nodes, links }: Props) {
       const ctx = canvas.getContext("2d");
       if (!ctx) { animId = requestAnimationFrame(draw); return; }
 
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
       const W = canvas.width;
       const H = canvas.height;
       const cx = W / 2;
@@ -157,7 +159,7 @@ export default function GraphView({ nodes, links }: Props) {
           }
           prevZ = z;
         }
-        ctx.strokeStyle = "rgba(71, 85, 105, 0.18)";
+        ctx.strokeStyle = isLight ? "rgba(71, 85, 105, 0.30)" : "rgba(71, 85, 105, 0.18)";
         ctx.stroke();
       }
       for (const line of WIREFRAME) {
@@ -171,7 +173,7 @@ export default function GraphView({ nodes, links }: Props) {
           }
           prevZ = z;
         }
-        ctx.strokeStyle = "rgba(71, 85, 105, 0.32)";
+        ctx.strokeStyle = isLight ? "rgba(71, 85, 105, 0.50)" : "rgba(71, 85, 105, 0.32)";
         ctx.stroke();
       }
 
@@ -206,12 +208,14 @@ export default function GraphView({ nodes, links }: Props) {
           ctx.stroke();
         } else {
           const depth = Math.max(0, (a.z + b.z) / 2 + 0.55) / 1.55;
-          const opacity = depth * 0.09;
+          const opacity = depth * 0.16;
           if (opacity < 0.005) continue;
           ctx.beginPath();
           ctx.moveTo(a.px, a.py);
           ctx.lineTo(b.px, b.py);
-          ctx.strokeStyle = `rgba(148, 163, 184, ${opacity})`;
+          ctx.strokeStyle = isLight
+            ? `rgba(71, 85, 105, ${Math.min(opacity * 3, 0.48)})`
+            : `rgba(148, 163, 184, ${opacity})`;
           ctx.lineWidth = 0.4;
           ctx.stroke();
         }
@@ -225,7 +229,7 @@ export default function GraphView({ nodes, links }: Props) {
         const isSelected = sel === node.id;
         const isAdj = selAdj?.has(node.id);
 
-        const r = (1.4 + Math.sqrt(node.val ?? 1) * 0.45) * (0.4 + depthV * 0.6) * dpr;
+        const r = (0.5 + Math.sqrt(node.val ?? 1) * 0.95) * (0.4 + depthV * 0.6) * dpr;
         const alpha = Math.min(1, 0.3 + depthV * 0.7 + (isSelected ? 0.2 : isAdj ? 0.1 : 0));
 
         if (isSelected) {
@@ -257,7 +261,7 @@ export default function GraphView({ nodes, links }: Props) {
           const lx = Math.round(rpx - pillW / 2);
           const ly = Math.round(rpy - r - pillH - 6 * dpr);
 
-          ctx.fillStyle = "rgba(7, 9, 13, 0.92)";
+          ctx.fillStyle = isLight ? "rgba(248, 250, 252, 0.95)" : "rgba(7, 9, 13, 0.92)";
           ctx.beginPath();
           ctx.roundRect(lx, ly, pillW, pillH, 3 * dpr);
           ctx.fill();
@@ -266,7 +270,7 @@ export default function GraphView({ nodes, links }: Props) {
           ctx.lineWidth = 1 * dpr;
           ctx.stroke();
 
-          ctx.fillStyle = "rgba(226, 232, 240, 0.95)";
+          ctx.fillStyle = isLight ? "rgba(15, 23, 42, 0.9)" : "rgba(226, 232, 240, 0.95)";
           ctx.fillText(node.label, rpx, Math.round(ly + fontSize + pad * 0.55));
         }
       }

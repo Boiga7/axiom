@@ -83,3 +83,7 @@ Pivot to [[cs-fundamentals/networking]] to trace the full TLS handshake and iden
 ## Connections
 
 [[cs-fundamentals/networking]] · [[cloud/secrets-management]] · [[cloud/service-mesh]] · [[cloud/kubernetes]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

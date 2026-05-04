@@ -262,3 +262,7 @@ Fix: use `listen` on the handler and trigger it explicitly with `meta: flush_han
 
 ## Connections
 [[cloud-hub]] · [[cloud/github-actions]] · [[cloud/kubernetes]] · [[cloud/pulumi]] · [[cloud/aws-cdk]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

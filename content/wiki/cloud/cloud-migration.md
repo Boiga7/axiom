@@ -220,3 +220,7 @@ Fix: Apply the strangler fig pattern — wrap the monolith with a thin proxy and
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-networking-advanced]] · [[cloud/finops-cost-management]] · [[cloud/blue-green-deployment]] · [[cloud/platform-engineering]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

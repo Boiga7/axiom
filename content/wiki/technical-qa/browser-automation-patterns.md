@@ -260,3 +260,7 @@ Fix: chain a `wait_for` on the first element inside the frame before interacting
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/playwright-advanced]] · [[technical-qa/e2e-framework-design]] · [[technical-qa/accessibility-automation]] · [[qa/end-to-end-testing]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

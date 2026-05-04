@@ -24,25 +24,11 @@ export default function GraphPage() {
   // Build slug -> page map for link resolution
   const slugMap = new Map(allPages.map((p) => [p.slug, p]));
 
-  // Build nodes
-  const nodes = allPages.map((p) => {
-    const brain = (BRAIN_MAP[p.category] ?? "other") as keyof typeof BRAIN_COLORS;
-    const color = BRAIN_COLORS[brain];
-    // Node size based on content length (proxy for richness)
-    const val = Math.min(Math.max(p.content.length / 500, 1), 8);
-    return {
-      id: p.slug,
-      label: p.title,
-      category: p.category,
-      href: p.href,
-      color,
-      val,
-    };
-  });
-
-  // Build edges from wikilinks
+  // Build edges from wikilinks first so we can count them per node
   const edgeSet = new Set<string>();
   const links: { source: string; target: string }[] = [];
+  const linkCount = new Map<string, number>();
+  for (const p of allPages) linkCount.set(p.slug, 0);
 
   for (const page of allPages) {
     const targets = extractLinks(page.content);
@@ -53,9 +39,27 @@ export default function GraphPage() {
       if (!edgeSet.has(key)) {
         edgeSet.add(key);
         links.push({ source: page.slug, target: resolved.slug });
+        linkCount.set(page.slug, (linkCount.get(page.slug) ?? 0) + 1);
+        linkCount.set(resolved.slug, (linkCount.get(resolved.slug) ?? 0) + 1);
       }
     }
   }
+
+  // Build nodes — size by edge count so hub pages are visually prominent
+  const nodes = allPages.map((p) => {
+    const brain = (BRAIN_MAP[p.category] ?? "other") as keyof typeof BRAIN_COLORS;
+    const color = BRAIN_COLORS[brain];
+    const edges = linkCount.get(p.slug) ?? 0;
+    const val = Math.min(Math.max(edges, 1), 60);
+    return {
+      id: p.slug,
+      label: p.title,
+      category: p.category,
+      href: p.href,
+      color,
+      val,
+    };
+  });
 
   return (
     <>

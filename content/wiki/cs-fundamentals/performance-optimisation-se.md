@@ -277,3 +277,7 @@ Fix: align the partial index predicate with the actual query filter; or drop it 
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/caching-strategies]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/observability-se]] · [[technical-qa/load-testing-advanced]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

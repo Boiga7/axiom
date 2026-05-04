@@ -324,3 +324,7 @@ Fix: always use quoted parenthetical syntax in `.gradle.kts`; use the IDE Kotlin
 - [[java/grpc]] — Protobuf plugin in Gradle generates Java stubs from `.proto` files
 - [[java/anthropic-java-sdk]] — `com.anthropic:anthropic-java` Maven Central artifact
 - [[infra/deployment]] — GitHub Actions CI/CD with Maven/Gradle caching
+## Open Questions
+
+- How does this integrate with the broader JVM ecosystem in practice?
+- What performance characteristics are not obvious from the API surface?

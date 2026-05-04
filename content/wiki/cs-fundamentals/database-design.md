@@ -220,3 +220,7 @@ Fix: always include explicit timezone in date comparisons: `WHERE created_at >= 
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/caching-strategies]] · [[technical-qa/database-testing]] · [[cloud/aws-rds-aurora]] · [[python/ecosystem]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -297,3 +297,7 @@ Fix: replace average-based thresholds with percentile thresholds: `['p(95)<500',
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/chaos-engineering]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[cloud/observability-stack]] · [[llms/ae-hub]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

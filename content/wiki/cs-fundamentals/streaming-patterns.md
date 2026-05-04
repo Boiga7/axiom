@@ -280,3 +280,7 @@ Fix: always set `maxsize` on the queue to enforce backpressure — the producer 
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/websockets-se]] · [[cs-fundamentals/concurrency]] · [[web-frameworks/fastapi]] · [[apis/anthropic-api]] · [[llms/ae-hub]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

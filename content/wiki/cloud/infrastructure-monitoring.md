@@ -328,3 +328,7 @@ Fix: ensure the EMF JSON is the only content on the printed line (no prefix text
 ## Connections
 
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/observability-stack]] · [[cloud/aws-lambda-patterns]] · [[cloud/production-monitoring-qa]] · [[cloud/serverless-patterns]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

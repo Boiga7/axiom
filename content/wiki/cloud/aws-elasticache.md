@@ -249,3 +249,7 @@ Fix: replace `KEYS` with `SCAN` (cursor-based, non-blocking) for all production 
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-rds-aurora]] · [[cs-fundamentals/caching-strategies]] · [[cloud/serverless-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cloud/finops-cost-management]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

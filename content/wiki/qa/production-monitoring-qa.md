@@ -248,3 +248,7 @@ Fix: extend synthetic monitors to cover the full critical-path transaction inclu
 
 ## Connections
 [[qa-hub]] · [[qa/qa-in-devops]] · [[qa/smoke-sanity-testing]] · [[qa/qa-metrics]] · [[cloud/observability-stack]] · [[cloud/cloud-monitoring]] · [[qa/continuous-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

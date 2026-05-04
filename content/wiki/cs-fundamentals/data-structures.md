@@ -335,3 +335,7 @@ Fix: negate consistently on both push (`heappush(heap, -value)`) and pop (`-heap
 - [[cs-fundamentals/system-design]] — data structure choices affect system scalability
 - [[math/linear-algebra]] — vectors and matrices are multi-dimensional arrays; understanding memory layout matters for ML
 - [[python/ecosystem]] — Python's `collections`, `heapq`, `sortedcontainers` implementations
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

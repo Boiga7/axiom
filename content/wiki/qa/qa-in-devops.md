@@ -225,3 +225,7 @@ Fix: add a CI step that runs `detect-secrets scan` independently of pre-commit, 
 
 ## Connections
 [[qa-hub]] · [[qa/agile-qa]] · [[qa/regression-testing]] · [[qa/test-environments]] · [[cloud/github-actions]] · [[technical-qa/contract-testing]] · [[cloud/argo-rollouts]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

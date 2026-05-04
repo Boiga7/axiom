@@ -105,3 +105,7 @@ DPO (2023) removed the explicit reward model and PPO, replacing them with a dire
 ## Connections
 
 [[papers/key-papers]] · [[papers/constitutional-ai]] · [[papers/dpo]] · [[fine-tuning/rlhf-dpo]] · [[fine-tuning/frameworks]] · [[safety/constitutional-ai]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

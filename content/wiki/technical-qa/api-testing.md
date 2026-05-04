@@ -335,3 +335,7 @@ Fix: assert both the status code and the specific error field in the response bo
 - [[qa/qa-tools]] — Postman for exploratory API testing; REST Assured for automation
 - [[qa/test-case-design]] — EP and BVA apply directly to API input validation
 - [[web-frameworks/fastapi]] — FastAPI's TestClient for in-process API testing
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

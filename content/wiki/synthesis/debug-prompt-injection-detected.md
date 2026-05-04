@@ -84,3 +84,7 @@ Pivot to [[prompting/techniques]] to redesign the system prompt with clearer aut
 ## Connections
 
 [[security/prompt-injection]] · [[security/owasp-llm-top10]] · [[security/guardrails]] · [[protocols/mcp]] · [[prompting/techniques]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

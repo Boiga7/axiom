@@ -94,3 +94,7 @@ GPT-3 is a pure decoder-only Transformer. Causal attention masks prevent tokens 
 ## Connections
 
 [[papers/key-papers]] · [[papers/scaling-laws]] · [[papers/rlhf]] · [[llms/transformer-architecture]] · [[prompting/techniques]] · [[llms/model-families]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

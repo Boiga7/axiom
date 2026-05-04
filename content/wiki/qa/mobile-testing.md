@@ -217,3 +217,7 @@ Fix: write a dedicated rotation test using `driver.rotate(ScreenOrientation.LAND
 
 ## Connections
 [[qa-hub]] · [[qa/cross-browser-testing]] · [[qa/test-environments]] · [[technical-qa/browser-automation-patterns]] · [[technical-qa/test-architecture]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

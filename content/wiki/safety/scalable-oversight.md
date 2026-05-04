@@ -110,7 +110,7 @@ A preprint (arXiv:2504.18530) studies how oversight quality scales with:
 - The number of debate rounds
 - The complexity of the evaluation task
 
-Key finding: [unverified — full paper not reviewed] scaling laws for scalable oversight exist but are less favourable than scaling laws for raw capability.
+Key finding: oversight success probability drops sharply as the capability gap between overseer and overseen model grows — oversight scaling is materially less favourable than capability scaling. Validated across Debate, Mafia, Backdoor Code, and Wargames evaluation games. [Source: arXiv:2504.18530, "Scaling Laws For Scalable Oversight", April 2025, NeurIPS 2025 spotlight]
 
 ---
 

@@ -300,3 +300,7 @@ Fix: instantiate the HTTP client once at module or application level and reuse i
 - [[protocols/mcp-http-transport]] — Streamable HTTP lifecycle relies on SSE for streaming
 - [[apis/anthropic-api]] — streaming responses use SSE; rate limit headers (429) need exponential backoff
 - [[web-frameworks/fastapi]] — FastAPI serves HTTP; understanding the protocol makes middleware and routing clearer
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

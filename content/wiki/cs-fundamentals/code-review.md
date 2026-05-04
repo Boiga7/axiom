@@ -225,3 +225,7 @@ Fix: add `ruff`, `black`, and `isort` to a pre-commit hook and CI gate; agree to
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/tdd-se]] · [[qa/defect-prevention]] · [[qa/agile-qa]] · [[cs-fundamentals/oop-patterns]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

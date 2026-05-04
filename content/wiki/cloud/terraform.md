@@ -280,3 +280,7 @@ Fix: read the module's upgrade guide before bumping the version; use `terraform 
 - [[cloud/github-actions]] — CI/CD pipeline that runs Terraform plan/apply
 - [[cloud/secrets-management]] — never store secrets in tfvars; use Vault or Secrets Manager
 - [[cloud/kubernetes]] — terraform-aws-eks module for EKS cluster provisioning
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

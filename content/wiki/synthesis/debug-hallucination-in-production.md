@@ -84,3 +84,7 @@ Pivot to [[evals/methodology]] to build an offline eval that catches hallucinati
 ## Connections
 
 [[llms/hallucination]] · [[prompting/techniques]] · [[evals/methodology]] · [[synthesis/debug-rag-wrong-context]] · [[apis/anthropic-api]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

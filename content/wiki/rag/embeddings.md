@@ -37,7 +37,7 @@ MTEB (Massive Text Embedding Benchmark) is the standard. It evaluates embedding 
 | **GTE-Qwen2-7B-instruct** | 65.0+ | 3,584 | 32K tokens | Best open model as of late 2025 |
 | **fastembed (BAAI/bge-small-en-v1.5)** | ~62 | 384 | 512 tokens | Local, zero cost, fast; good for dev |
 
-> [Source: MTEB leaderboard, knowledge as of mid-2025; rankings may shift] [unverified for exact April 2026 state]
+> [Source: MTEB leaderboard v1; Cohere's latest model scores 66.3 on MTEB v1. Note: MTEB v2 launched in 2026 with a different scale — scores above are not directly comparable to MTEB v2 rankings. Check huggingface.co/spaces/mteb/leaderboard for current state.]
 
 ---
 

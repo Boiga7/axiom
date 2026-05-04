@@ -603,3 +603,7 @@ Fix: eager-load all needed relationships inside the repository method (`joinedlo
 - [[python/ecosystem]] — Python's `abc`, `dataclasses`, `typing.Protocol` are the implementation tools
 - [[evals/methodology]] — evalcheck uses repository and strategy patterns internally
 - [[test-automation/pytest-patterns]] — dependency injection (DI) makes code testable; pytest fixtures are a DI mechanism
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

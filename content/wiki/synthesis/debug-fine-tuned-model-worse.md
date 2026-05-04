@@ -84,3 +84,7 @@ Pivot to [[evals/methodology]] to design an eval set that genuinely reflects pro
 ## Connections
 
 [[fine-tuning/lora-qlora]] · [[fine-tuning/dpo-grpo]] · [[fine-tuning/frameworks]] · [[evals/methodology]] · [[data/annotation-tooling]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

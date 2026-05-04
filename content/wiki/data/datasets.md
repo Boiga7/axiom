@@ -218,3 +218,7 @@ Fix: use 2-gram or 3-gram MinHash shingles to capture phrase-level similarity; o
 - [[fine-tuning/frameworks]] — TRL, Axolotl, Unsloth consume these datasets for training
 - [[python/polars-duckdb]] — Polars and DuckDB for fast dataset preprocessing at scale
 - [[evals/benchmarks]] — HumanEval, MBPP, SWE-bench are datasets repurposed as benchmarks
+## Open Questions
+
+- What data quality issues does this approach fail to detect?
+- When does this pipeline design become a bottleneck at production scale?

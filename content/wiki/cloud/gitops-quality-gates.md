@@ -288,33 +288,6 @@ The promotion gate is a PR that bumps `imageTag` for `pre-prod` in this generato
 
 Flux's [[gitops-patterns#Flux v2]] image automation controllers (ImageRepository, ImagePolicy, ImageUpdateAutomation) form a pull-based promotion gate: Flux watches a container registry and updates the manifest in Git when a new image tag matches a policy.
 
-### Flux Kustomization health checks
-
-Before Flux considers a sync complete, it waits for all workloads referenced in the Kustomization to report ready. This health assessment runs after apply and before declaring the reconciliation successful.
-
-```yaml
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: my-api-production
-  namespace: flux-system
-spec:
-  interval: 10m
-  path: ./clusters/production/my-api
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: my-api
-      namespace: production
-  timeout: 5m   # fail the reconciliation if workloads not ready within 5 minutes
-```
-
-If the Deployment does not reach `Available` within the timeout, Flux marks the Kustomization as `NotReady` and emits a `ReconciliationFailed` event. Alert rules on this event can notify the team without any manual polling.
-
 ### ImagePolicy as a promotion gate
 
 ```yaml
@@ -526,64 +499,6 @@ spec:
 
 If either analysis metric exceeds `failureLimit`, Argo Rollouts aborts and rolls back automatically. The quality gate is the `AnalysisTemplate` — it encodes the production quality threshold in a versioned, reviewable YAML file.
 
-### Automated rollback triggers
-
-Argo Rollouts rolls back when an AnalysisRun reaches `Failed` status. The triggers are:
-
-| Metric | Typical threshold | What it catches |
-|---|---|---|
-| HTTP error rate | > 1% (5xx responses) | Application regressions, unhandled exceptions |
-| Latency p99 | > 500ms | Performance regressions, DB query regressions |
-| Custom business metric | Varies | Checkout failures, login failures, any KPI |
-| AnalysisRun timeout | No data within interval | Pod crashlooping before serving traffic |
-
-When a rollback fires, Argo Rollouts shifts 100% of traffic back to the stable version and marks the Rollout as `Degraded`. The failed AnalysisRun is preserved for post-mortem inspection. The ArgoCD Application transitions to `Degraded` state, which alert rules can pick up. See [[slo-sla-quality]] for SLO-aligned threshold selection.
-
----
-
-## Drift Detection
-
-Drift occurs when cluster state diverges from what Git declares — usually from a manual `kubectl apply` or `kubectl edit` directly against the cluster.
-
-### How ArgoCD detects drift
-
-ArgoCD compares the live state (from the Kubernetes API) against the desired state (from Git) on every sync interval (default 3 minutes). If they differ, the Application status transitions to `OutOfSync`. ArgoCD does not automatically correct drift unless `selfHeal: true` is set in the sync policy.
-
-```yaml
-syncPolicy:
-  automated:
-    prune: true
-    selfHeal: true   # re-apply from Git whenever live state drifts
-```
-
-With `selfHeal: false` (the safer default for most environments), ArgoCD alerts on drift but does not overwrite it. This is appropriate for production: a human should review the drift before the reconciliation loop overwrites it.
-
-### How Flux detects drift
-
-Flux's reconciliation loop compares the last-applied-configuration annotation against the current live state. Drift is reported via the Kustomization's `status.conditions` field. The Flux notification controller can forward `DriftDetected` alerts to Slack, PagerDuty, or any webhook.
-
-```yaml
-apiVersion: notification.toolkit.fluxcd.io/v1beta3
-kind: Alert
-metadata:
-  name: drift-alert
-  namespace: flux-system
-spec:
-  eventSeverity: error
-  eventSources:
-    - kind: Kustomization
-      name: '*'
-  filters:
-    - type: IncludeNode
-      reason: DriftDetected
-  providerRef:
-    name: slack-alert-provider
-```
-
-### QA perspective on drift detection
-
-Drift is a reliability signal, not just an ops concern. A cluster that drifts from Git is a cluster where your test evidence (written against the Git-declared state) no longer applies. Alert on drift the same way you alert on a failed PostSync hook.
-
 ---
 
 ## Smoke Tests and Synthetic Monitors Post-Sync
@@ -716,85 +631,6 @@ k8s/tests/                 @qa-team
 k8s/charts/                @platform-team
 k8s/overlays/production/   @qa-team-lead @platform-team-lead
 ```
-
----
-
-## Practical QA Checklist for Reviewing a GitOps Pipeline
-
-Use this when reviewing a client engagement's GitOps pipeline or assessing your own.
-
-### CI gate completeness
-
-- [ ] Branch protection rules block merge without CI passing
-- [ ] `helm lint` or `kustomize build` runs on every manifest PR
-- [ ] Container image vulnerability scan in CI (Trivy, Grype, or Snyk)
-- [ ] OPA/Kyverno policy dry-run runs in CI (not only at admission control)
-- [ ] Secret detection scan (`detect-secrets`, `trufflehog`) on every PR
-- [ ] `kubectl diff` or `argocd app diff` surfaces planned changes before merge
-
-### ArgoCD sync gate completeness
-
-- [ ] PreSync hooks present for environments where pre-apply checks are needed
-- [ ] PostSync hooks present for smoke tests or synthetic monitor registration
-- [ ] `hook-delete-policy` set on all hook Jobs (prevent accumulation)
-- [ ] Sync waves used to enforce migration-before-deploy ordering
-- [ ] ApplicationSet or separate Application per environment (no shared app across envs)
-- [ ] ArgoCD Projects restrict source repos to expected namespaces
-
-### Flux gate completeness
-
-- [ ] `healthChecks` defined in Kustomization manifests
-- [ ] Timeout configured (default is no timeout — a silent hang)
-- [ ] ImagePolicy filter restricts production to explicitly promoted tags
-- [ ] Drift alerts configured via notification controller
-
-### Progressive delivery
-
-- [ ] Argo Rollouts or Flagger present in production-tier environments
-- [ ] AnalysisTemplates define success-rate and latency-p99 thresholds
-- [ ] `failureLimit` is set (not just `successCondition`)
-- [ ] Rollout pause durations are long enough to collect meaningful signal
-
-### Promotion gates
-
-- [ ] Separate Git paths (or separate files) per environment
-- [ ] Human PR approval required at each environment boundary
-- [ ] CODEOWNERS defines who approves production-path PRs
-- [ ] Automated image tag updates do not bypass the approval step
-
-### Drift detection
-
-- [ ] `selfHeal: true` is intentional — review for all environments
-- [ ] Drift alerts configured and routed to the team's incident channel
-- [ ] Post-mortem process captures drift events (drift is a near-miss)
-
----
-
-## Common Mistakes
-
-### Manual kubectl apply breaking GitOps
-
-Someone applies a hotfix directly: `kubectl apply -f fix.yaml`. ArgoCD or Flux detects drift on the next reconciliation interval and either alerts (selfHeal: false) or silently overwrites (selfHeal: true). Either outcome is bad: the hotfix disappears, or the team is unaware the cluster drifted. Fix: enforce RBAC so application namespaces deny direct apply from outside the GitOps service account. All changes must go through Git.
-
-### Secrets in Git
-
-The most common GitOps security failure. Teams commit Kubernetes Secrets (base64-encoded, not encrypted) to the GitOps repo. The fix is never to commit raw Secrets. Use SOPS with age/KMS to encrypt secrets-at-rest in Git, or use External Secrets Operator to pull from AWS Secrets Manager / HashiCorp Vault at sync time. See [[secrets-management]].
-
-### No sync health checks
-
-An ArgoCD Application with `automated.prune: true` and no PostSync hooks will declare itself healthy as soon as Kubernetes accepts the manifest, not when the workload is actually serving traffic. A Deployment that crashes on startup looks healthy to ArgoCD. Fix: always pair automated sync with health checks (readinessProbe on the container) and a PostSync smoke test Job.
-
-### Single-environment pipeline
-
-All environments share one ArgoCD Application or one Flux Kustomization. A staging deploy overwrites production configuration. Fix: separate Application/Kustomization per environment, with separate Git paths and separate promotion approvals.
-
-### AnalysisTemplates without meaningful traffic
-
-A canary analysis that runs at 5% traffic weight with a 1-minute interval over a service handling 10 requests/minute will produce statistically meaningless results. `failureLimit: 3` on a metric that only fires once in the window guarantees a pass. Fix: set canary step durations long enough to accumulate at least 100 samples at the canary weight before each analysis step, or use a `count`-based analysis rather than interval-based.
-
-### Missing CODEOWNERS on production path
-
-Without CODEOWNERS, any developer can merge a PR that bumps the production image tag. Fix: add CODEOWNERS entries for all production-environment paths and require a minimum of two reviewers from the QA team lead group.
 
 ---
 

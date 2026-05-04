@@ -318,3 +318,7 @@ Fix: always supply explicit `pytest.param(..., id="...")` strings for complex pa
 ## Connections
 
 [[tqa-hub]] · [[test-automation/pytest-patterns]] · [[technical-qa/parallel-test-execution]] · [[technical-qa/mock-strategies]] · [[technical-qa/flaky-test-management]] · [[qa/continuous-testing]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

@@ -280,3 +280,7 @@ Fix: never use `set -x` in CI steps that handle secrets; mask secret values in C
 - [[cloud/kubernetes]] — External Secrets Operator, Vault Agent, CSI driver
 - [[cloud/github-actions]] — OIDC replaces stored credentials in CI
 - [[cloud/terraform]] — never store secrets in tfvars; use data sources to read at apply time
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

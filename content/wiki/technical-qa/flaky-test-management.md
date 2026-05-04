@@ -191,3 +191,7 @@ Fix: downscope the fixture to `function` or implement proper teardown that resto
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[technical-qa/playwright-advanced]] · [[qa/test-reporting]] · [[qa/qa-in-devops]] · [[qa/regression-testing]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

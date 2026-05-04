@@ -84,3 +84,7 @@ Pivot to [[cloud/finops-cost-management]] for a systematic approach to ongoing c
 ## Connections
 
 [[cloud/finops-cost-management]] · [[cloud/finops-cost-management]] · [[cloud/vpc-design-patterns]] · [[observability/langfuse]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

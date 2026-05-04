@@ -84,3 +84,7 @@ Pivot to [[cs-fundamentals/sql]] to validate the transformation query against a 
 ## Connections
 
 [[data/pipelines]] · [[cs-fundamentals/data-validation]] · [[cs-fundamentals/sql]] · [[cloud/data-engineering-cloud]] · [[observability/tracing]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

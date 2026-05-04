@@ -224,3 +224,7 @@ Fix: use native `<button>` elements; add ARIA only when no native HTML element f
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/qa-tools]] · [[technical-qa/test-architecture]] · [[test-automation/playwright]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

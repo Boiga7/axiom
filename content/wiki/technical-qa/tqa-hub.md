@@ -24,19 +24,23 @@ Central hub for all test automation and technical quality engineering knowledge.
 [[technical-qa/performance-testing]] · [[technical-qa/api-testing]] · [[technical-qa/visual-testing]]
 
 ## Service Virtualisation and Containers
-[[technical-qa/wiremock]] · [[technical-qa/testcontainers]] · [[technical-qa/database-testing]]
+[[technical-qa/wiremock]] · [[technical-qa/testcontainers]] · [[technical-qa/database-testing]] · [[technical-qa/docker-ci-testing]]
 
 ## Security and Advanced
 [[technical-qa/security-automation]] · [[technical-qa/chaos-engineering]] · [[technical-qa/infrastructure-testing]]
 
 ## Load and Performance
-[[technical-qa/load-testing-advanced]] · [[technical-qa/performance-testing]] · [[technical-qa/api-performance-testing]]
+[[technical-qa/load-testing-advanced]] · [[technical-qa/performance-testing]] · [[technical-qa/api-performance-testing]] · [[technical-qa/jmeter]] · [[technical-qa/performance-capacity-planning]]
 
 ## Mocking and Specialised
-[[technical-qa/mock-strategies]] · [[technical-qa/graphql-testing]] · [[technical-qa/ci-cd-quality-gates]] · [[technical-qa/browser-automation-patterns]] · [[technical-qa/test-reporting-dashboards]] · [[technical-qa/postman-newman]] · [[technical-qa/api-testing-advanced]] · [[technical-qa/test-observability]] · [[technical-qa/selenium-grid]]
+[[technical-qa/mock-strategies]] · [[technical-qa/graphql-testing]] · [[technical-qa/ci-cd-quality-gates]] · [[technical-qa/browser-automation-patterns]] · [[technical-qa/test-reporting-dashboards]] · [[technical-qa/postman-newman]] · [[technical-qa/api-testing-advanced]] · [[technical-qa/test-observability]] · [[technical-qa/selenium-grid]] · [[technical-qa/websocket-testing]] · [[technical-qa/self-healing-tests]]
 
 ## Contract and Accessibility
 [[technical-qa/api-contract-testing]] · [[technical-qa/accessibility-automation]]
 
 ## Data Generation
 [[technical-qa/test-data-generation]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

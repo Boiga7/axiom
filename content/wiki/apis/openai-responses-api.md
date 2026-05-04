@@ -72,12 +72,12 @@ No need to replay the full message history. OpenAI fetches the stored context, i
 ```python
 response = client.responses.create(
     model="gpt-4o",
-    tools=[{"type": "web_search_preview"}],
+    tools=[{"type": "web_search"}],
     input="What were the key announcements at Google I/O 2026?",
 )
 ```
 
-Model searches in real time and returns citations inline. Use `web_search_preview` — [unverified whether this is the stable tool name vs `web_search`].
+Model searches in real time and returns citations inline. Use `web_search` — `web_search_preview` is the legacy name, still accepted but does not support filters or `external_web_access`.
 
 ### File Search
 
@@ -151,7 +151,7 @@ response = client.responses.create(
 with client.responses.stream(
     model="gpt-4o",
     store=True,
-    tools=[{"type": "web_search_preview"}],
+    tools=[{"type": "web_search"}],
     input="Summarise the latest MCP security CVEs.",
 ) as stream:
     for event in stream:
@@ -196,9 +196,9 @@ Vector store IDs are portable between APIs — no re-upload needed.
 
 ## Cost and Cache
 
-- 40–80% improvement in cache hit rates vs Chat Completions (OpenAI internal tests) [unverified — reported in the Responses API announcement]
+- 40–80% improvement in cache hit rates vs Chat Completions (OpenAI internal tests)
 - Server-side state means OpenAI can cache reasoning traces and prior turns more effectively
-- `store=True` has a storage cost; stored responses are retained for 30 days by default [unverified — retention policy may differ by plan]
+- `store=True` has a storage cost; stored responses are retained for 30 days by default (Zero Data Retention accounts override this to `store=false`)
 
 ---
 

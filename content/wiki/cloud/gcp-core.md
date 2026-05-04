@@ -240,3 +240,7 @@ Fix: Set `min-instances=1` for latency-sensitive APIs to keep one warm instance 
 - [[cloud/terraform]] — Terraform google provider for GCP resources
 - [[infra/cloud-platforms]] — multi-cloud comparison
 - [[agents/langchain]] — Vertex AI as LLM provider in LangChain
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

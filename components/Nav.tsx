@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Search from "./Search";
+import ThemeToggle from "./ThemeToggle";
 import type { SearchEntry } from "@/lib/constants";
 
 type NavProps = {
@@ -54,6 +55,9 @@ export default function Nav({ searchIndex }: NavProps) {
         <div className="flex-1 min-w-0">
           <Search index={searchIndex} />
         </div>
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         {/* Nav */}
         <nav className="flex items-center gap-0.5 shrink-0">

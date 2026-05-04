@@ -84,3 +84,7 @@ Pivot to [[synthesis/debug-api-timeout]] if the degradation during scale-up look
 ## Connections
 
 [[cloud/kubernetes]] · [[cloud/keda]] · [[cloud/aws-eks]] · [[cloud/finops-cost-management]] · [[synthesis/debug-api-timeout]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

@@ -250,3 +250,7 @@ Fix: ground hallucination checks against a live product database query rather th
 
 ## Connections
 [[qa-hub]] · [[qa/non-functional-testing]] · [[qa/risk-based-testing]] · [[evals/methodology]] · [[evals/llm-as-judge]] · [[test-automation/testing-llm-apps]] · [[llms/ae-hub]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

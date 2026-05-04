@@ -1,4 +1,4 @@
----
+﻿---
 type: concept
 category: prompting
 tags: [prompting, xml, chain-of-thought, dspy, claude, few-shot, context-engineering]
@@ -14,7 +14,7 @@ tldr: Claude-specific XML structuring outperforms Markdown, 2-5 few-shot example
 
 The craft of eliciting the best output from a language model through input design. More accurately called **context engineering** now. The discipline covers what to put in the context window, not just how to phrase a question.
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 ---
 
@@ -292,3 +292,4 @@ Fix: mark critical constraints as anchor tokens that the compressor must preserv
 - Does XML structuring advantage persist for Claude 5+ or was it an artefact of specific training data?
 - How does the optimal few-shot count vary by task domain — is 2-5 still right for highly technical tasks?
 - When DSPy-optimised prompts are 40% better than hand-written ones, what does that imply about the upper bound of manual prompt engineering skill?
+

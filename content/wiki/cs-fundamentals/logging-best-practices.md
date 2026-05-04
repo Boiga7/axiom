@@ -258,3 +258,7 @@ Fix: reserve `exc_info=True` for ERROR and above; at WARNING, log the exception 
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/observability-se]] · [[cloud/infrastructure-monitoring]] · [[cs-fundamentals/api-security]] · [[web-frameworks/fastapi]] · [[cloud/lambda-powertools]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

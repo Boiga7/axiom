@@ -339,3 +339,7 @@ Fix: Set `timeout-minutes: 30` on every job (or a lower value per step for known
 - [[cloud/docker]] — GitHub Actions builds Docker images, pushes to GHCR/ECR
 - [[cloud/secrets-management]] — OIDC avoids storing static credentials as secrets
 - [[cs-fundamentals/cicd-pipelines]] — pipeline design discipline: stage ordering, DORA metrics, Jenkins/Azure DevOps patterns
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

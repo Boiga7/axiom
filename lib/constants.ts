@@ -73,6 +73,7 @@ export const BRAIN_MAP: Record<string, Brain> = {
   data: "intelligence",
   synthesis: "intelligence",
   security: "intelligence",
+  sql: "engineering",
 };
 
 export const BRAIN_LABELS: Record<Brain, string> = {
@@ -107,6 +108,7 @@ export function slugToLabel(slug: string): string {
     "technical-qa": "Technical QA",
     qa: "QA",
     javascript: "JavaScript / TypeScript",
+    sql: "SQL",
   };
   return (
     overrides[slug] ??

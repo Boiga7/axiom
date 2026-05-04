@@ -341,3 +341,7 @@ Fix: Use CloudWatch `EstimatedCharges` metric (updated multiple times per day) f
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/infrastructure-monitoring]] · [[cloud/github-actions]] · [[cloud/kubernetes]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

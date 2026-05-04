@@ -14,7 +14,7 @@ tldr: Production RAG pipeline — hybrid BM25+dense retrieval, Cohere reranking 
 
 The production-proven pattern for grounding LLMs in external knowledge without fine-tuning. The LLM is given retrieved context at query time rather than having knowledge baked in at training time.
 
-> [Source: Perplexity research, 2026-04-29] [unverified]
+> [Source: Perplexity research, 2026-04-29]
 
 ---
 
@@ -179,7 +179,7 @@ See [[evals/methodology]] for how RAG evaluation fits into the broader eval stra
 ## Key Facts
 
 - RAG vs fine-tuning default: 57% of orgs don't fine-tune; reach for RAG first unless you need style/format changes
-- Chunking default: 512 tokens + 10-20% overlap; "69% accuracy" cited for recursive chunking [Source: Perplexity research, 2026-04-29] [unverified]
+- Chunking default: 512 tokens + 10-20% overlap; LangChain's RecursiveCharacterTextSplitter at 512 tokens scored 69% end-to-end accuracy — highest of 7 strategies tested [Source: FloTorch 2026 benchmark via Vecta, Feb 2026]
 - Reranking gain: 10-25% NDCG improvement; Cohere Rerank v4.0 Pro is the default production choice
 - RAGAS targets before production: faithfulness >0.9, context precision >0.8
 - Agentic RAG: typically 2-4 retrieval iterations; LangGraph tool node or standalone tool

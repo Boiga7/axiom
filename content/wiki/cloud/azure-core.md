@@ -226,3 +226,7 @@ Fix: Use the `applicationInitialization` element in `web.config` or a startup pr
 - [[cloud/terraform]] — Terraform azurerm provider
 - [[cloud/secrets-management]] — Azure Key Vault in depth
 - [[infra/cloud-platforms]] — multi-cloud comparison
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

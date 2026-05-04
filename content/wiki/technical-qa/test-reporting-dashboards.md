@@ -263,3 +263,7 @@ Fix: use `--junitxml=junit.xml` with `pytest-xdist`'s merged output, or merge al
 ## Connections
 
 [[tqa-hub]] · [[technical-qa/flaky-test-management]] · [[technical-qa/parallel-test-execution]] · [[qa/qa-metrics]] · [[qa/test-reporting]] · [[cloud/github-actions]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

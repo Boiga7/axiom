@@ -294,3 +294,7 @@ Fix: check result types after `.batch()`; pass `config={"raise_on_error": True}`
 - [[rag/chunking]] — text splitting strategies
 - [[observability/platforms]] — LangSmith for tracing LangChain calls
 - [[python/instructor]] — alternative for structured output (more robust than LangChain's PydanticOutputParser)
+## Open Questions
+
+- What failure modes emerge in this agent pattern that do not appear in toy examples?
+- At what complexity threshold does a simpler architecture outperform this approach?

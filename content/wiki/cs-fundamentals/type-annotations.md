@@ -298,3 +298,7 @@ Fix: run mypy with `--strict` and confirm the `TypedDict` uses `NotRequired` cor
 ## Connections
 
 [[cs-fundamentals/se-hub]] · [[cs-fundamentals/data-validation]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/dependency-injection]] · [[python/ecosystem]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

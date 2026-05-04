@@ -68,7 +68,7 @@ accelerate launch -m axolotl.cli.train config.yml
 accelerate launch --num_processes 4 -m axolotl.cli.train config.yml
 ```
 
-Axolotl v0.29 (latest as of 2026-04-29 knowledge) added GRPO and improved FSDP2 support. [unverified for exact version]
+Axolotl v0.7.0 (February 2025) added GRPO support via HuggingFace TRL integration, including PEFT + vLLM support. Check [github.com/axolotl-ai-cloud/axolotl/releases](https://github.com/axolotl-ai-cloud/axolotl/releases) for the current version.
 
 ---
 
@@ -213,7 +213,7 @@ For runs that need multiple GPUs:
 
 ## Key Facts
 
-- Axolotl v0.29: added GRPO and improved FSDP2 support [unverified for exact version]
+- Axolotl v0.7.0 (February 2025): added GRPO support via TRL integration, including PEFT + vLLM support
 - Axolotl supports 30+ built-in dataset type parsers
 - Unsloth: 2-4x faster training, 50-80% less GPU memory; primarily single-GPU
 - Flash Attention 2: 3-4x faster attention, 5-8x less memory; required for long-context fine-tuning

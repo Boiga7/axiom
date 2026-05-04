@@ -241,3 +241,7 @@ Fix: use topology-aware scheduling (`volumeBindingMode: WaitForFirstConsumer` in
 ## Connections
 
 [[cloud/cloud-hub]] · [[cloud/kubernetes]] · [[cloud/aws-fargate]] · [[cloud/aws-cdk]] · [[cloud/github-actions]] · [[cloud/argocd]] · [[cloud/keda]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

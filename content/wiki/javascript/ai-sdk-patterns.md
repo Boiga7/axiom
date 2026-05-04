@@ -709,7 +709,7 @@ Required format:
 
 - `@anthropic-ai/sdk` v0.39+: `.messages.stream()` returns a high-level streaming object with `.textStream` async iterable and `.finalMessage()` awaitable
 - Vercel AI SDK v4: `streamText().toDataStreamResponse()` is the standard way to connect a route handler to `useChat`
-- `generateObject` with a Zod schema retries automatically if the model returns invalid JSON (up to 3 times by default) [unverified — verify retry behavior version-by-version]
+- `generateObject` does **not** retry automatically on invalid JSON — schema failures throw `AI_NoObjectGeneratedError` immediately. The built-in retry (2 retries, 3 total attempts) only covers network/HTTP errors. Wrap with a manual retry loop for schema validation failures.
 - Tool use with `@anthropic-ai/sdk`: check `stop_reason === "tool_use"` and handle all `tool_use` blocks in the response before continuing
 - Prompt caching requires the `anthropic-beta: prompt-caching-2024-07-31` header; cache TTL is 5 minutes for ephemeral
 - Error status codes to handle: 400 (bad request, no retry), 401 (auth, no retry), 429 (rate limited, use Retry-After header), 529 (overloaded, exponential backoff)

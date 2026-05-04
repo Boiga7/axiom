@@ -250,3 +250,7 @@ Fix: always place `@metrics.log_metrics` as the outermost decorator so metrics a
 ## Connections
 
 [[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/serverless-patterns]] · [[cloud/infrastructure-monitoring]] · [[cloud/aws-sqs-sns]] · [[cs-fundamentals/observability-se]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

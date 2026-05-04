@@ -138,3 +138,7 @@ Fix: load model in `torch.float8_e4m3fn` format; FA3's FP8 benefit only applies 
 - [[fine-tuning/frameworks]] — Axolotl and Unsloth both enable FA2 by default
 - [[llms/transformer-architecture]] — the standard attention mechanism FA2 replaces
 - [[math/transformer-math]] — attention formula: softmax(QKᵀ/√d)V that FA2 computes
+## Open Questions
+
+- What operational burden does this introduce that the documentation does not cover?
+- At what scale does this infrastructure pattern stop being cost-effective?

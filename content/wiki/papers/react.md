@@ -109,3 +109,7 @@ Action: Search[Francis Ford Coppola]
 ## Connections
 
 [[papers/key-papers]] · [[papers/chain-of-thought]] · [[agents/practical-agent-design]] · [[agents/langgraph]] · [[protocols/tool-design]] · [[prompting/techniques]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

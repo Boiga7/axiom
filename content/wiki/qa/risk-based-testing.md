@@ -200,3 +200,7 @@ Fix: trigger an FMEA review whenever a new component is added to the architectur
 - [[qa/exploratory-testing]] — high-risk areas warrant exploratory charters
 - [[qa/qa-metrics]] — defect density by module informs risk calibration
 - [[qa/bug-lifecycle]] — high-risk area bugs get Critical/P1 severity treatment
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

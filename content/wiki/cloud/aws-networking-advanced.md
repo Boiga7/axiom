@@ -275,3 +275,7 @@ Fix: configure the health check to call a dedicated `/health/deep` endpoint that
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-networking]] · [[cloud/cloud-security]] · [[cloud/aws-core]] · [[cloud/disaster-recovery]] · [[cloud/multi-tenancy]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

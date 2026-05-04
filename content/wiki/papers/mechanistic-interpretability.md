@@ -134,3 +134,7 @@ The long-term goal: verify that a model is safe by reading its "thoughts". Not j
 ## Connections
 
 [[papers/key-papers]] · [[safety/mechanistic-interpretability]] · [[safety/constitutional-ai]] · [[llms/transformer-architecture]] · [[math/linear-algebra]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import { getSearchIndex } from "@/lib/wiki";
 import { ROLE_PATHS, getRolePath, getExercise } from "@/lib/practice-data";
+import hljs from "highlight.js";
 
 type Props = {
   params: Promise<{ roleId: string; exerciseSlug: string }>;
@@ -123,6 +124,22 @@ export default async function ExercisePage({ params }: Props) {
                   <p className="text-secondary text-sm leading-relaxed">
                     {step.body}
                   </p>
+                  {step.code && (() => {
+                    const highlighted = hljs.highlight(step.code.snippet, {
+                      language: step.code.lang,
+                      ignoreIllegals: true,
+                    });
+                    return (
+                      <div className="wiki-pre-scroll mt-3">
+                        <pre className="wiki-prose">
+                          <code
+                            className={`hljs language-${step.code.lang}`}
+                            dangerouslySetInnerHTML={{ __html: highlighted.value }}
+                          />
+                        </pre>
+                      </div>
+                    );
+                  })()}
                 </div>
               </li>
             ))}

@@ -206,3 +206,7 @@ Fix: prefer duplication over the wrong abstraction; wait for three or more genui
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/software-design-principles]] · [[cs-fundamentals/tdd-se]] · [[cs-fundamentals/code-review]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

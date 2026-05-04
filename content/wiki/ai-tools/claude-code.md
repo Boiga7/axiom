@@ -157,9 +157,10 @@ claude /ultrareview 123      # review GitHub PR #123
 | **Cursor** | Medium | File + selection | Composer, MCP | $20 |
 | **GitHub Copilot** | Low–Medium | File context | MCP (VS Code 1.99+) | $10–19 |
 | **Aider** | High | Repo map | Limited | Free/usage |
+| **Cline** | High | Full codebase | MCP, 30+ providers | Free/usage |
 | **Devin** | Highest (async) | Full environment | VM access | $500 |
 
-See [[ai-tools/cursor-copilot]] for comparison details.
+See [[ai-tools/cursor-copilot]] and [[ai-tools/cline]] for comparison details.
 
 ---
 
@@ -202,6 +203,7 @@ Fix: add `.claude/settings.json` to `.gitignore` for project settings that conta
 - [[agents/multi-agent-patterns]] — subagent patterns Claude Code implements
 - [[apis/anthropic-api]] — the underlying API Claude Code runs on; prompt caching applies
 - [[ai-tools/cursor-copilot]] — comparison of autonomy, context, and pricing across tools
+- [[ai-tools/ai-test-generation]] — AI-assisted test generation patterns applicable in Claude Code workflows
 
 ## Open Questions
 

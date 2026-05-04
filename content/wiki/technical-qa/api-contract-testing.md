@@ -260,3 +260,7 @@ Fix: in the provider message pact setup, produce messages through the same seria
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/wiremock]] · [[technical-qa/ci-cd-quality-gates]] · [[cs-fundamentals/microservices-patterns]] · [[qa/qa-in-devops]] · [[cs-fundamentals/event-driven-architecture]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

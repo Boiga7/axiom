@@ -282,3 +282,7 @@ Fix: use `decimal(9.99)` or `integer(42)` matchers instead of `like(value)` for 
 - [[qa/test-strategy]] — contract tests sit at the integration layer of the testing pyramid
 - [[cloud/github-actions]] — CI gates using `pact-broker can-i-deploy`
 - [[web-frameworks/fastapi]] — FastAPI provider for Pact verification
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

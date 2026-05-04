@@ -283,3 +283,7 @@ Fix: ensure exactly one Beat process runs at any time — use a deployment const
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/event-driven-architecture]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-step-functions]] · [[web-frameworks/fastapi]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

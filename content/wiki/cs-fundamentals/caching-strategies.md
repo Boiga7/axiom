@@ -246,3 +246,7 @@ Fix: use write-behind only for truly disposable data (counters, analytics); use 
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/database-design]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[cloud/aws-rds-aurora]] · [[cloud/finops-cost-management]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

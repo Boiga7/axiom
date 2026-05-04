@@ -227,3 +227,7 @@ Fix: verify the `trace_id` matches an existing trace before calling `langfuse.sc
 ## Connections
 
 [[observability/platforms]] · [[observability/tracing]] · [[observability/helicone]] · [[evals/methodology]] · [[rag/pipeline]] · [[web-frameworks/fastapi]]
+## Open Questions
+
+- What failure modes does this tool systematically fail to surface?
+- At what data volume does this observability approach become too expensive to maintain?

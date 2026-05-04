@@ -1,4 +1,4 @@
----
+﻿---
 type: synthesis
 category: landscape
 para: resource
@@ -33,7 +33,7 @@ Analysis of 600+ enterprise AI deployments shows most use cases reduce to one of
 | **Conversation** | Multi-turn interaction with context | Customer support, internal Q&A, onboarding assistants, HR queries |
 | **Agentic execution** | Multi-step task completion with tool use | Workflow automation, research agents, code agents, data pipelines |
 
-> [Source: OpenAI Identifying and Scaling AI Use Cases, 2025] [unverified]
+> [Source: OpenAI Identifying and Scaling AI Use Cases, 2025]
 
 Each primitive applies across every department. The same summarisation primitive works for legal, finance, HR, and engineering. Build the primitive once; deploy it across business units.
 
@@ -154,3 +154,4 @@ Fix: supplement interviews with process mining — analyse system logs, ticket q
 - Do the 6 primitives hold across all industries, or do vertical-specific patterns emerge?
 - How do you pick the right quick win — what criteria matter most for demonstrating value to leadership?
 - At what point does an agentic execution use case require the full governance stack from day one?
+

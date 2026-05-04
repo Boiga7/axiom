@@ -239,3 +239,7 @@ Fix: give each service its own schema or database; share data via events or API 
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/oop-patterns]] · [[cs-fundamentals/ddd-se]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/clean-code]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

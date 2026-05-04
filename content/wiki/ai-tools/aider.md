@@ -123,7 +123,7 @@ aider --model claude-sonnet-4-6 --architect
 - **/voice**: voice input via whisper
 - **/paste**: paste clipboard content into context
 - **/run**: run shell commands and add output to context
-- **MCP servers**: can consume MCP tools as part of the workflow [unverified — check docs]
+- **MCP servers**: Aider does not natively consume MCP tools. Third-party community projects (e.g., aider-mcp-server) expose Aider *as* an MCP server for other clients to invoke.
 
 ---
 

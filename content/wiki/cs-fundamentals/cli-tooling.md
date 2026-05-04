@@ -322,3 +322,7 @@ Fix: add `[project.scripts] myapp = "myapp.cli:app"` to `pyproject.toml` and rei
 ## Connections
 
 [[se-hub]] · [[python/ecosystem]] · [[cs-fundamentals/linux-fundamentals]] · [[cs-fundamentals/performance-optimisation-se]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

@@ -104,3 +104,7 @@ The critical insight: a sufficiently capable LLM can evaluate responses against 
 ## Connections
 
 [[papers/key-papers]] · [[papers/rlhf]] · [[papers/dpo]] · [[safety/constitutional-ai]] · [[llms/claude]] · [[safety/red-teaming-methodology]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

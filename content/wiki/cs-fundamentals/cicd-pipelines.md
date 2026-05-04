@@ -353,6 +353,7 @@ Fix: use `git show -s --format=%ct` for the committer timestamp, not author time
 - [[cloud/platform-engineering]] — DORA metrics and the SPACE framework for developer productivity
 - [[technical-qa/ci-cd-quality-gates]] — gate taxonomy and full pipeline YAML implementation
 - [[cloud/github-actions]] — specific GitHub Actions patterns (OIDC, caching, reusable workflows)
+- [[cloud/gitops-quality-gates]] — quality gates in GitOps delivery; CI gates vs GitOps sync hooks
 
 ## Open Questions
 

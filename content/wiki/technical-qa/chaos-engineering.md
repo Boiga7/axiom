@@ -282,3 +282,7 @@ Fix: configure the application's `DATABASE_URL` to point at `0.0.0.0:25432` (the
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/load-testing-advanced]] · [[technical-qa/infrastructure-testing]] · [[qa/non-functional-testing]] · [[cloud/observability-stack]] · [[cloud/aws-step-functions]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

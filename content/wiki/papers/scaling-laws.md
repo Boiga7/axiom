@@ -110,3 +110,7 @@ Scaling laws predict smooth loss improvements. The emergence of capabilities (Co
 ## Connections
 
 [[papers/key-papers]] · [[papers/gpt-3]] · [[llms/transformer-architecture]] · [[fine-tuning/frameworks]] · [[math/optimisation]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

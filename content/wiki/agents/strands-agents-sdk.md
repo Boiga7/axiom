@@ -177,15 +177,11 @@ with agent.stream_async("Summarise last week's deployment logs.") as stream:
 For production serverless deployment, push the agent to Amazon Bedrock AgentCore Runtime. It handles scaling, session management, and secrets automatically:
 
 ```python
-# Deploy locally then push [unverified — AgentCoreDeployment API surface not confirmed from second source]
-from strands_deploy import AgentCoreDeployment
+# Deployment uses the bedrock-agentcore package (not strands_deploy)
+from bedrock_agentcore import BedrockAgentCoreApp
 
-deployment = AgentCoreDeployment(
-    agent=agent,
-    name="my-devops-agent",
-    memory_enabled=True
-)
-deployment.deploy()
+# Wrap and deploy via the AgentCore CLI: agentcore create / agentcore deploy
+app = BedrockAgentCoreApp(agent=agent)
 ```
 
 AgentCore Runtime is compatible with any Python agent framework (LangGraph, CrewAI, Strands, custom). Not Strands-exclusive.
@@ -210,7 +206,7 @@ AgentCore Runtime is compatible with any Python agent framework (LangGraph, Crew
 ## Key Facts
 
 - `@tool` decorator is the core primitive — any Python function with type hints and a docstring becomes an agent tool
-- Strands is used in production by Amazon Q Developer, AWS Glue, VPC Reachability Analyzer [unverified — from AWS blog]
+- Strands is used in production by Amazon Q Developer, AWS Glue, VPC Reachability Analyzer
 - Supports parallel tool execution when the model issues multiple tool calls in one turn
 - Session memory via Bedrock AgentCore or a custom memory store
 - Open-source at `github.com/strands-agents/sdk-python`

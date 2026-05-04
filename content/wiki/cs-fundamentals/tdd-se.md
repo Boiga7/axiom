@@ -210,3 +210,7 @@ Chicago school: no mocks, test state not interactions, use real collaborators.
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/clean-code]] · [[cs-fundamentals/oop-patterns]] · [[qa/defect-prevention]] · [[technical-qa/mutation-testing]] · [[qa/bdd-gherkin]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

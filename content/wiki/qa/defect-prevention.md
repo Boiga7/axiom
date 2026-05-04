@@ -195,3 +195,7 @@ Fix: mandate a Three Amigos review for any story estimated at 3+ points before i
 
 ## Connections
 [[qa-hub]] · [[qa/agile-qa]] · [[qa/test-strategy]] · [[qa/qa-in-devops]] · [[qa/security-testing-qa]] · [[qa/bdd-gherkin]] · [[technical-qa/mutation-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

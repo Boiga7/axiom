@@ -85,3 +85,7 @@ Pivot to [[observability/langfuse]] to break down latency per component across t
 ## Connections
 
 [[apis/anthropic-api]] · [[observability/tracing]] · [[observability/langfuse]] · [[prompting/techniques]] · [[cs-fundamentals/error-handling-patterns]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

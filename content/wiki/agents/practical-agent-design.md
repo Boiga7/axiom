@@ -1,4 +1,4 @@
----
+﻿---
 type: synthesis
 category: agents
 para: resource
@@ -132,7 +132,7 @@ Build guardrails incrementally: identify risks from real usage, add targeted gua
 4. **Scale** — add multi-agent patterns when the single-agent ceiling is genuinely hit
 5. **Monitor** — trace every production agent; track cost, latency, error rate. See [[observability/tracing]]
 
-> [Source: OpenAI Practical Guide to Building Agents, 2025] [unverified]
+> [Source: OpenAI Practical Guide to Building Agents, 2025]
 
 ## Common Failure Cases
 
@@ -176,3 +176,4 @@ Fix: summarise or prune old tool results; keep only the 3-5 most recent observat
 ## Open Questions
 - At what task complexity does multi-agent consistently outperform a well-tooled single agent?
 - How do you calibrate the right HITL threshold — too many checkpoints destroy the value proposition, too few create risk?
+

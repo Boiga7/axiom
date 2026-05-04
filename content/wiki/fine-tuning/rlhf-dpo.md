@@ -225,3 +225,7 @@ Fix: use G=8 as the minimum group size; increase to G=16 for high-variance rewar
 - [[fine-tuning/lora-qlora]] — LoRA is almost always used alongside DPO to reduce memory cost
 - [[fine-tuning/dpo-grpo]] — sibling page; covers the DPO/GRPO training objectives with TRL code patterns
 - [[data/rlhf-datasets]] — datasets of human preference pairs for training
+## Open Questions
+
+- What training data quality issues cause the most subtle fine-tuning failures?
+- When does fine-tuning produce worse results than prompt engineering alone?

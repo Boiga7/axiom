@@ -246,3 +246,7 @@ Fix: Use the Secrets Manager SDK's built-in cache client (AWS Secrets Manager Ca
 
 ## Connections
 [[cloud-hub]] · [[cloud/secrets-management]] · [[cloud/cloud-networking]] · [[cloud/aws-cdk]] · [[security/guardrails]] · [[cs-fundamentals/auth-patterns]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

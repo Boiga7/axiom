@@ -85,3 +85,7 @@ Pivot to [[cs-fundamentals/performance-optimisation-se]] to profile whether the 
 ## Connections
 
 [[cs-fundamentals/database-design]] · [[cs-fundamentals/database-transactions]] · [[cs-fundamentals/performance-optimisation-se]] · [[python/sqlalchemy]] · [[cs-fundamentals/debugging-systems]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

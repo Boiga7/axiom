@@ -243,3 +243,7 @@ Fix: use `re.findall(r'\{[^{}]*\}', text)` to find all top-level objects and sel
 - [[security/owasp-llm-top10]] — LLM02 (insecure output handling) and LLM06 (sensitive info disclosure)
 - [[evals/methodology]] — guardrails can be modelled as automated evals running on every call
 - [[agents/practical-agent-design]] — agent output validation as a safety layer
+## Open Questions
+
+- What attack vectors does this defence fail to address?
+- How does the threat model change when this is deployed in an agentic context?

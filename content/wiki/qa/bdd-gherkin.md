@@ -249,3 +249,7 @@ Fix: treat scenario authoring as a synchronous Three Amigos conversation, not an
 - [[qa/exploratory-testing]] — exploration informs which additional scenarios to add
 - [[technical-qa/test-architecture]] — Page Object Model applied to step definitions
 - [[test-automation/playwright]] — Playwright executes BDD scenarios for web UI
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

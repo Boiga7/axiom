@@ -206,3 +206,7 @@ Fix: specify the locale explicitly in the Testcontainers setup (`withEnv("POSTGR
 
 ## Connections
 [[qa-hub]] · [[qa/test-data-management]] · [[qa/agile-qa]] · [[qa/qa-in-devops]] · [[cloud/github-actions]] · [[cloud/kubernetes]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

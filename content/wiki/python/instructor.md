@@ -266,3 +266,7 @@ Fix: use `instructor.from_anthropic(AsyncAnthropic())` for the async client and 
 - [[prompting/techniques]] — structuring prompts for extraction tasks
 - [[security/guardrails]] — broader output validation and safety patterns
 - [[evals/methodology]] — use instructor to extract structured eval results from LLM judges
+## Open Questions
+
+- What performance characteristics only become problems at production scale?
+- What does this library handle poorly that its documentation does not mention?

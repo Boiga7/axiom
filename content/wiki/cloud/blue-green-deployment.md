@@ -256,3 +256,7 @@ Fix: Confirm the ALB target group health check path (`/health/live`) and port ma
 ## Connections
 
 [[cloud-hub]] · [[cloud/argo-rollouts]] · [[cloud/argocd]] · [[cloud/kubernetes]] · [[cloud/aws-ecs]] · [[cloud/github-actions]] · [[cloud/gitops-patterns]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

@@ -84,3 +84,7 @@ Pivot to [[technical-qa/ci-cd-quality-gates]] to audit the pipeline configuratio
 ## Connections
 
 [[cloud/github-actions]] · [[qa/test-environments]] · [[synthesis/debug-flaky-test]] · [[technical-qa/ci-cd-quality-gates]] · [[cloud/secrets-management]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

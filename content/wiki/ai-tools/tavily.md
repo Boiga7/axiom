@@ -136,3 +136,7 @@ Fix: implement result caching at the tool level (cache by query string for 1 hou
 - [[agents/langgraph]] — Tavily nodes are the standard web search integration in LangGraph graphs
 - [[rag/pipeline]] — use Tavily's Extract API to pull fresh content into a RAG pipeline at query time
 - [[agents/practical-agent-design]] — search tools are Type 2 (read-only external data)
+## Open Questions
+
+- What workflows does this tool handle poorly that its documentation does not mention?
+- When does this tool choice become a constraint rather than an enabler?

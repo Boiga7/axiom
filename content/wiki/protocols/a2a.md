@@ -105,13 +105,13 @@ A2A is not natively built into LangGraph, but the A2A Python SDK provides an ada
 
 ## Adoption Status (April 2026)
 
-A2A is younger than MCP. Adoption is concentrated in Google ecosystem (Vertex AI agents, ADK) and enterprises running multi-cloud agent networks. LangChain and AutoGen have experimental support. Less widespread than MCP in independent projects. [unverified]
+A2A was transferred to the Linux Foundation in June 2025 and has grown to 150+ supporting organisations as of April 2026, including LangChain, Salesforce, SAP, ServiceNow, Workday, and all major cloud platforms. Wider than MCP in enterprise multi-vendor contexts; MCP remains dominant for tool and data connectivity.
 
 ---
 
 ## ACP (Agent Communication Protocol)
 
-An alternative agent-to-agent protocol, developed by IBM and BeeAgent. More opinionated about message formats; tighter integration with enterprise workflow systems. Smaller ecosystem than A2A. [unverified]
+An alternative agent-to-agent protocol developed by IBM, originating from the open-source BeeAI project (reference implementation at `i-am-bee/acp`). Uses JSON-RPC over HTTP/WebSockets. Now under Linux Foundation governance. More opinionated about message formats than A2A; tighter integration with enterprise workflow systems. Smaller ecosystem than A2A.
 
 ---
 
@@ -122,7 +122,7 @@ An alternative agent-to-agent protocol, developed by IBM and BeeAgent. More opin
 - Task state machine: submitted → working → input-required → completed/failed
 - MCP vs A2A: MCP connects agent↔tool (stateless); A2A connects agent↔agent (stateful tasks)
 - ADK agents automatically expose an A2A endpoint when deployed
-- ACP (IBM/BeeAgent): alternative agent protocol; smaller ecosystem [unverified]
+- ACP (IBM/BeeAI): alternative agent protocol; JSON-RPC over HTTP/WS; Linux Foundation governance; smaller ecosystem than A2A
 - LangGraph: unofficial A2A adapter via Python SDK; not natively integrated
 
 ## Common Failure Cases

@@ -84,3 +84,7 @@ Pivot to [[synthesis/debug-llm-high-latency]] to diagnose latency in the generat
 ## Connections
 
 [[rag/pipeline]] · [[rag/embeddings]] · [[infra/vector-stores]] · [[observability/langfuse]] · [[synthesis/debug-llm-high-latency]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

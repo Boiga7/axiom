@@ -334,3 +334,7 @@ Fix: truncate at a paragraph boundary using `text[:100_000].rsplit('\n', 1)[0]`;
 - [[rag/pipeline]] — document processing feeds the ingestion stage of RAG systems
 - [[rag/chunking]] — after extraction, how to chunk document text for vector storage
 - [[infra/vector-stores]] — store extracted document embeddings for retrieval
+## Open Questions
+
+- What input types or combinations produce unexpectedly poor results?
+- How does quality degrade at the edges of the training distribution?

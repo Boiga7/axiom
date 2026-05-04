@@ -84,3 +84,7 @@ Pivot to [[cloud/finops-cost-management]] to evaluate whether right-sizing or au
 ## Connections
 
 [[cs-fundamentals/performance-optimisation-se]] · [[cs-fundamentals/algorithms]] · [[cloud/kubernetes]] · [[synthesis/debug-memory-leak]] · [[python/python-basics]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

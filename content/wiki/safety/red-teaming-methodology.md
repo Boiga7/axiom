@@ -200,3 +200,7 @@ Fix: explicitly include all data sources the agent reads as red team surfaces; t
 - [[security/owasp-llm-top10]] — OWASP LLM Top 10 defines the attack categories red teams should cover
 - [[protocols/mcp]] — MCP servers are a key injection surface for agentic systems
 - [[evals/methodology]] — red team results feed into eval suites for regression testing
+## Open Questions
+
+- What failure modes does this safety technique fail to address?
+- How does this approach need to evolve as model capabilities continue to improve?

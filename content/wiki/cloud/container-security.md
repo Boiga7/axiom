@@ -267,3 +267,7 @@ Fix: Deploy Sigstore Policy Controller or a Kyverno `ClusterPolicy` that verifie
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-security]] · [[cloud/kubernetes-operators]] · [[technical-qa/security-automation]] · [[technical-qa/infrastructure-testing]] · [[cs-fundamentals/security-fundamentals-se]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

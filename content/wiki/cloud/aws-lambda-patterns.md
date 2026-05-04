@@ -239,3 +239,7 @@ Fix: use RDS Proxy in front of the database; the proxy pools and multiplexes con
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-core]] · [[cloud/aws-api-gateway]] · [[cloud/aws-sqs-sns]] · [[cloud/secrets-management]] · [[cloud/cloud-monitoring]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

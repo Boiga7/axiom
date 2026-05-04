@@ -171,3 +171,7 @@ Fix: as a first response to any regression, run `git bisect start`, mark the kno
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/risk-based-testing]] · [[qa/qa-metrics]] · [[technical-qa/test-architecture]] · [[technical-qa/visual-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

@@ -238,3 +238,7 @@ Fix: enforce RBAC as a FastAPI `Depends` at the router or route decorator level,
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/security-fundamentals-se]] · [[cs-fundamentals/api-design]] · [[cloud/cloud-security]] · [[technical-qa/security-automation]] · [[qa/security-testing-qa]] · [[protocols/mcp]] · [[apis/anthropic-api]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

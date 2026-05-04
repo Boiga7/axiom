@@ -92,7 +92,7 @@ European lab. All models are either fully open (Apache 2.0) or commercially lice
 
 **Codestral:** Mistral's code-focused model. Best open option for code generation.
 
-**Architecture innovation:** Sliding window attention (2,048-token local attention window with 4K effective context), GQA, byte-pair tokeniser optimised for European languages.
+**Architecture innovation:** Sliding window attention (4,096-token local window; effective reach W × layers through residual connections), GQA (4:1 KV sharing for 4x cache reduction), byte-pair tokeniser optimised for European languages. See [[papers/mistral]] for the full treatment.
 
 ---
 
@@ -102,7 +102,7 @@ Chinese lab (backed by High-Flyer, a quant hedge fund). Caused significant marke
 
 **DeepSeek V3:** 671B MoE model. Claims $5.6M training cost. Competitive with GPT-4o and Claude Sonnet.
 
-**DeepSeek R1:** Reasoning model trained with GRPO (Group Relative Policy Optimization) — no human labels, no reward model, just rule-based rewards. o1-level reasoning. Open weights (MIT license). API is 96% cheaper than o1.
+**[[llms/deepseek-r1|DeepSeek R1]]:** Reasoning model trained with GRPO (Group Relative Policy Optimization) — no human labels, no reward model, just rule-based rewards. o1-level reasoning. Open weights (MIT license). API is 96% cheaper than o1.
 
 **DeepSeek R1 Distilled:** Smaller models (Qwen 7B/14B/32B, Llama 8B/70B base) distilled from R1. 7B model competitive with GPT-4o on math/coding benchmarks.
 

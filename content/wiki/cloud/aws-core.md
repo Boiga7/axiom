@@ -189,3 +189,7 @@ aws ecs describe-tasks --cluster my-cluster --tasks <task-arn>
 - [[cloud/cloud-monitoring]] — CloudWatch in depth
 - [[cloud/cloud-networking]] — VPC design patterns in depth
 - [[infra/cloud-platforms]] — AWS vs GCP vs Azure comparison
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

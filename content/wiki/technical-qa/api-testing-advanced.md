@@ -271,3 +271,7 @@ Fix: add a routing test that verifies v1 traffic stays on the v1 path end-to-end
 ## Connections
 
 [[technical-qa/tqa-hub]] · [[technical-qa/api-testing]] · [[technical-qa/api-contract-testing]] · [[technical-qa/api-performance-testing]] · [[technical-qa/security-automation]] · [[qa/negative-testing]] · [[cs-fundamentals/api-versioning]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

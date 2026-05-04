@@ -254,3 +254,7 @@ Fix: validate all factory or fixture data against the application's own validati
 - [[technical-qa/api-testing]] — Postman and REST Assured for API test automation
 - [[technical-qa/performance-testing]] — k6, JMeter for load testing
 - [[test-automation/playwright]] — Playwright as the primary E2E automation tool
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

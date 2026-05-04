@@ -3,7 +3,7 @@ type: concept
 category: infra
 tags: [caching, redis, semantic-cache, llm, cost, latency, vector-similarity]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-03
 para: resource
 tldr: LLM response caching combines semantic caching (Redis + vector similarity, eliminates API calls on hits) with Anthropic prompt caching (reduces token cost to 0.1x on repeated prefixes) — complementary strategies at different layers.
 ---
@@ -171,6 +171,101 @@ def semantic_search(r: redis.Redis, query_embedding: list[float], top_k: int = 1
         for doc in results.docs
     ]
 ```
+
+### How Semantic Caching Differs from Other Cache Layers
+
+| Layer | Mechanism | What it saves |
+|---|---|---|
+| Semantic cache (Redis + ANN) | Embed query, nearest-neighbour search, return stored response on hit | Entire API call |
+| Exact cache | SHA-256 hash of full prompt string | Entire API call, but only on identical prompts |
+| Provider prompt cache (Anthropic) | Reuse cached token prefix on server side | Input token cost (0.1x read rate) — API call still happens |
+
+Semantic caching catches queries that are phrased differently but mean the same thing. Prompt caching (Anthropic-side) saves on token cost for repeated large prefixes. The two stack on top of each other.
+
+### Reported Results
+
+Documented case studies show 50-93% cache hit rates on repetitive query patterns. One reported example: $234K/month reduced to $15.4K/month on the same traffic. [unverified — no primary source confirmed]
+
+### GPTCache
+
+Open-source Python library that wraps the OpenAI (and compatible) client in ~2 lines. Key characteristics:
+
+- Pluggable embedding backends (OpenAI, Cohere, local sentence-transformers) and similarity backends (FAISS, Qdrant, Redis)
+- Local-first — no external service required for dev/single-service deployments
+- Similarity evaluation is modular: swap cosine similarity for a model-based relevance scorer without changing the cache interface
+- Best fit: single-service deployments, prototyping, teams that want to avoid Redis infrastructure
+
+```python
+from gptcache import cache
+from gptcache.adapter import openai
+
+cache.init()          # defaults: local FAISS + OpenAI embeddings
+cache.set_openai_key()
+
+# Drop-in replacement — no other changes needed
+response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[{"role": "user", "content": "What is semantic caching?"}],
+)
+```
+
+### Redis Vector Cache
+
+Distributed semantic cache using Redis with the RediSearch / Redis Vector Library extension. Characteristics:
+
+- Multi-pod, production-scale — all application instances share a single cache namespace
+- O(log n) ANN lookup via HNSW indexing (see implementation above under "Production: Redis with RediSearch")
+- Pairs well with **Helicone AI gateway**, which has built-in semantic caching using Redis Vector Library — no custom implementation required; configure via Helicone dashboard and add the `Helicone-Cache-Enabled: true` header
+- Best fit: multi-instance deployments, teams already running Redis, organisations wanting gateway-level caching without application-layer changes
+
+### Similarity Threshold Tuning
+
+The cosine similarity threshold is the most consequential configuration parameter.
+
+**Too low (e.g., 0.85-0.90):** False cache hits. "What is the refund policy?" and "How do I file a refund request?" may share high cosine similarity but require different answers. Users receive wrong responses; the failure is silent.
+
+**Too high (e.g., 0.98-1.0):** Negligible hit rate. Only near-identical phrasings match, defeating the purpose of semantic caching.
+
+Calibration approach:
+1. Run shadow traffic: log similarity scores for all query pairs without serving cached responses yet
+2. Manually label a sample of query pairs at various similarity bands as "same intent" / "different intent"
+3. Set threshold at the score where same-intent precision exceeds 95%
+4. Typical starting point for general Q&A: 0.92-0.95 cosine similarity
+
+Domain sensitivity matters. Code-related queries warrant a higher threshold (0.95+) because small variations in phrasing often indicate meaningfully different requests. Definitional/FAQ queries can tolerate 0.90-0.92.
+
+### Scope Keys
+
+Do not mix cached responses across fundamentally different user contexts. Namespace cache keys by:
+
+- **Prompt version label** — invalidate automatically when the system prompt changes
+- **User context segment** — e.g., `enterprise` vs `free` users may receive different policy answers; cache separately
+
+```python
+def scoped_cache_key(query_hash: str, prompt_version: str, user_segment: str) -> str:
+    return f"llm_cache:{prompt_version}:{user_segment}:{query_hash}"
+```
+
+### Three-Layer Caching Stack
+
+Full production picture, outermost to innermost:
+
+```
+(1) Edge / CDN cache
+    └── Static or near-static responses (e.g., public FAQ pages, pre-rendered content)
+        Hit rate: depends on traffic patterns; near-zero latency
+
+(2) Semantic cache (Redis + vector search)
+    └── Similar queries against stored (embedding, response) pairs
+        Reported hit rates: 50–93% on repetitive domains; saves entire API call
+        [unverified at the high end]
+
+(3) Provider-side prompt cache (Anthropic cache_control)
+    └── Repeated large token prefixes (system prompt, RAG context)
+        Cost: 0.1x read rate on cached tokens; API call still executes
+```
+
+Each layer is complementary. A query that misses the semantic cache still benefits from prompt caching on the token cost. Edge caching applies only where responses are not user-specific.
 
 ---
 

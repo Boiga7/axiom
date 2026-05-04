@@ -77,7 +77,8 @@ SWE-bench Verified was introduced (500 manually verified issues). Scores rose ra
 |---|---|
 | Claude 3.5 Sonnet (2024) | 49% |
 | Claude 3.7 Sonnet (2025) | 62% |
-| Claude 4 / Code agents (2025+) | 70%+ [unverified] |
+| Claude Opus 4.6 (2025) | 80.8% |
+| Claude Opus 4.7 (2026) | 87.6% |
 
 The benchmark drove a rapid improvement cycle. Labs optimised their agents specifically for SWE-bench.
 
@@ -115,3 +116,7 @@ Key insight from SWE-agent: models need an interactive environment to efficientl
 ## Connections
 
 [[papers/key-papers]] · [[papers/react]] · [[agents/practical-agent-design]] · [[evals/methodology]] · [[ai-tools/claude-code]] · [[landscape/ai-labs]]
+## Open Questions
+
+- What claims in this paper have since been challenged or superseded by follow-up work?
+- What did later research reveal about the limitations of this approach?

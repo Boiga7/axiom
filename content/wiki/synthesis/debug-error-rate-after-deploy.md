@@ -85,3 +85,7 @@ Pivot to [[cs-fundamentals/debugging-systems]] for a systematic approach when th
 ## Connections
 
 [[cs-fundamentals/debugging-systems]] · [[cloud/blue-green-deployment]] · [[cs-fundamentals/database-design]] · [[observability/tracing]] · [[cloud/secrets-management]] · [[cloud/kubernetes]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

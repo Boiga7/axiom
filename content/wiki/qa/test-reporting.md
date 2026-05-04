@@ -221,3 +221,7 @@ Fix: add a CI step that reads the flaky test list and applies `@pytest.mark.skip
 
 ## Connections
 [[qa-hub]] · [[qa/qa-metrics]] · [[qa/qa-in-devops]] · [[qa/regression-testing]] · [[cloud/github-actions]] · [[technical-qa/flaky-test-management]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

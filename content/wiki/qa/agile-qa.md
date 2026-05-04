@@ -151,3 +151,7 @@ Every stage gates the next. A failing unit test blocks integration tests from ru
 
 ## Connections
 [[qa-hub]] · [[qa/test-strategy]] · [[qa/bdd-gherkin]] · [[qa/risk-based-testing]] · [[qa/test-case-design]] · [[qa/qa-metrics]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

@@ -43,3 +43,7 @@ Central hub for all software engineering knowledge. Every page in the SE brain c
 
 ## JVM Ecosystem
 [[java/langchain4j]] · [[java/spring-ai]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

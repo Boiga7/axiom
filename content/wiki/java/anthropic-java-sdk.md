@@ -322,3 +322,7 @@ Fix: always use the executor inside a `try-with-resources` block (`try (var exec
 - [[java/spring-ai]] — Spring Boot integration; auto-configures using `application.yml` rather than the SDK directly
 - [[apis/anthropic-api]] — the underlying API this SDK wraps; all features (batch, files, extended thinking) available
 - [[java/grpc]] — when streaming across services; use gRPC transport between Java and Python inference services
+## Open Questions
+
+- How does this integrate with the broader JVM ecosystem in practice?
+- What performance characteristics are not obvious from the API surface?

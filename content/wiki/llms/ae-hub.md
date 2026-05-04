@@ -64,3 +64,7 @@ Central hub for all AI engineering knowledge. Every page in the AE brain connect
 
 ## Synthesis
 [[synthesis/rag-vs-finetuning]] · [[synthesis/llm-decision-guide]] · [[synthesis/architecture-patterns]] · [[synthesis/cost-optimisation]] · [[synthesis/getting-started]] · [[synthesis/learning-path]] · [[synthesis/software-engineer-to-ai-engineer]]
+## Open Questions
+
+- What capability limitations most surprise practitioners using this model in production?
+- How does the architecture or training approach limit what this model can do reliably?

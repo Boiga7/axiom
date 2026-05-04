@@ -246,3 +246,7 @@ Fix: add a "defect detection stage" field to every bug ticket and produce a mont
 ## Connections
 
 [[qa-hub]] · [[qa/agile-qa]] · [[qa/test-planning]] · [[qa/bdd-gherkin]] · [[qa/defect-prevention]] · [[qa/continuous-testing]] · [[qa/qa-in-devops]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

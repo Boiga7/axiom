@@ -219,3 +219,7 @@ Fix: Configure the health check as `HTTPS` with a meaningful path (`/health/read
 
 ## Connections
 [[cloud-hub]] · [[cloud/cloud-monitoring]] · [[cloud/aws-rds-aurora]] · [[cloud/cloud-security]] · [[cloud/cloud-networking]] · [[cloud/argocd]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

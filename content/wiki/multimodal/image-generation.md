@@ -244,3 +244,7 @@ Fix: always call `pipe.enable_model_cpu_offload()` after loading the pipeline; t
 - [[multimodal/audio]] — audio generation follows similar managed API patterns (ElevenLabs for voice)
 - [[apis/anthropic-api]] — Claude cannot generate images; use the image gen APIs above alongside Claude for vision+generation pipelines
 - [[infra/gpu-hardware]] — local image gen GPU requirements; RTX 3080+ for Flux
+## Open Questions
+
+- What input types or combinations produce unexpectedly poor results?
+- How does quality degrade at the edges of the training distribution?

@@ -275,3 +275,7 @@ Fix: use the route template (e.g., `/users/{id}`) not the resolved path; extract
 
 ## Connections
 [[se-hub]] · [[cloud/observability-stack]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/microservices-patterns]] · [[qa/qa-metrics]] · [[llms/ae-hub]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

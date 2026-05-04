@@ -222,3 +222,7 @@ Fix: tighten thresholds progressively as the score improves (`"high": 80, "low":
 
 ## Connections
 [[tqa-hub]] · [[technical-qa/test-architecture]] · [[qa/regression-testing]] · [[qa/qa-metrics]] · [[qa/test-strategy]]
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

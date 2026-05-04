@@ -246,3 +246,7 @@ Fix: segment escape rate by defect category (see pattern analysis code) and prio
 ## Connections
 
 [[qa/qa-hub]] · [[qa/risk-based-testing]] · [[qa/qa-metrics]] · [[qa/defect-prevention]] · [[qa/root-cause-analysis]] · [[qa/qa-leadership]] · [[technical-qa/mutation-testing]]
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

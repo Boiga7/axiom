@@ -84,3 +84,7 @@ Pivot to [[cloud/aws-api-gateway]] to check whether the gateway is consuming or 
 ## Connections
 
 [[cs-fundamentals/auth-patterns]] · [[cs-fundamentals/api-security]] · [[cloud/secrets-management]] · [[cloud/aws-api-gateway]] · [[synthesis/debug-cors-error]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

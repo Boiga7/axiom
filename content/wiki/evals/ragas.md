@@ -217,3 +217,7 @@ Fix: evaluate at realistic k values (5-10); test with the k you'll use in produc
 ## Connections
 
 [[rag/pipeline]] · [[rag/reranking]] · [[evals/methodology]] · [[evals/llm-as-judge]] · [[observability/langfuse]] · [[observability/arize]]
+## Open Questions
+
+- What systematic biases does this evaluation approach introduce?
+- At what point does this evaluation method stop being a reliable quality signal?

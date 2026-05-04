@@ -85,3 +85,7 @@ Pivot to [[synthesis/request-flow-anatomy]] to trace where time is actually spen
 ## Connections
 
 [[synthesis/request-flow-anatomy]] · [[cs-fundamentals/error-handling-patterns]] · [[cs-fundamentals/distributed-systems]] · [[observability/tracing]] · [[cs-fundamentals/grpc]] · [[cloud/aws-api-gateway]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

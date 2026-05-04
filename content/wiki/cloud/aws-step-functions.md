@@ -258,3 +258,7 @@ Fix: set a finite `MaxConcurrency` (e.g., 5–20) appropriate to the downstream 
 
 ## Connections
 [[cloud-hub]] · [[cloud/aws-lambda-patterns]] · [[cloud/aws-sqs-sns]] · [[cloud/aws-cdk]] · [[cloud/cloud-monitoring]] · [[llms/ae-hub]]
+## Open Questions
+
+- What monitoring and alerting matter most when this is deployed in production?
+- At what scale or workload does this approach hit its practical limits?

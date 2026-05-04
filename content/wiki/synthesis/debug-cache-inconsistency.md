@@ -85,3 +85,7 @@ Pivot to [[cs-fundamentals/database-transactions]] to confirm the write is actua
 ## Connections
 
 [[cs-fundamentals/error-handling-patterns]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/database-transactions]] · [[synthesis/request-flow-anatomy]]
+## Open Questions
+
+- What has changed since this synthesis was written that would alter the conclusions?
+- What evidence would cause you to revise the key recommendation here?

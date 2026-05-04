@@ -237,3 +237,7 @@ Fix: before automating a test set, record the manual execution time per test and
 - [[qa/risk-based-testing]] — defect density by module calibrates risk scores
 - [[qa/test-case-design]] — test execution metrics depend on test case quality
 - [[qa/qa-tools]] — TestRail, Jira, and dashboarding tools that surface these metrics
+## Open Questions
+
+- What testing scenarios does this technique systematically miss?
+- How does this approach need to change when delivery cadence moves to continuous deployment?

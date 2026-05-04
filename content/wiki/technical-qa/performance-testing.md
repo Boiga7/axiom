@@ -273,3 +273,7 @@ Fix: add a custom metric tracking DB pool wait time and set a threshold on it (`
 - [[qa/test-strategy]] — performance testing sits in Q3 (critique product, technology-facing)
 - [[qa/risk-based-testing]] — performance tests prioritised for high-traffic endpoints
 - [[cloud/kubernetes]] — HPA behaviour under load is a key scenario to test
+## Open Questions
+
+- What is the most common failure mode when implementing this at scale?
+- How does this testing approach need to adapt for distributed or microservice architectures?

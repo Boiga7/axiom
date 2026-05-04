@@ -291,3 +291,7 @@ Fix: record `_last_call` *before* releasing the lock and calculate the next perm
 ## Connections
 
 [[se-hub]] · [[cs-fundamentals/concurrency]] · [[cs-fundamentals/streaming-patterns]] · [[cs-fundamentals/background-jobs]] · [[web-frameworks/fastapi]] · [[python/ecosystem]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?

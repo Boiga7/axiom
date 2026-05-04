@@ -229,3 +229,7 @@ Fix: adopt a formal deprecation policy with a minimum support window (e.g., 12 m
 
 ## Connections
 [[se-hub]] · [[cs-fundamentals/api-design]] · [[cs-fundamentals/microservices-patterns]] · [[cs-fundamentals/graphql-se]] · [[cs-fundamentals/grpc]] · [[qa/defect-prevention]]
+## Open Questions
+
+- What are the most common misapplications of this concept in production codebases?
+- When should you explicitly choose not to use this pattern or technique?
