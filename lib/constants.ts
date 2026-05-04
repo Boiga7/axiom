@@ -70,6 +70,7 @@ export const BRAIN_MAP: Record<string, Brain> = {
   qa: "engineering",
   "technical-qa": "engineering",
   "ai-tools": "engineering",
+  tools: "engineering",
   data: "intelligence",
   synthesis: "intelligence",
   security: "intelligence",
