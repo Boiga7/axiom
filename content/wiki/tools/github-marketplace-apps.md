@@ -12,7 +12,6 @@ updated: 2026-05-04
 
 > **TL;DR** To list a GitHub App on GitHub Marketplace, fill out a draft listing with logo, description, pricing plan, and policy links, then click "Request publish" — a GitHub onboarding expert reviews it manually, with no published SLA (community reports suggest 2–6 weeks).
 
-Directly relevant to [[para/projects]] — evalcheck is entering its distribution phase and needs to be listed here.
 
 ## Key Facts
 
@@ -113,11 +112,11 @@ GitHub's own documentation explicitly calls OAuth Apps a legacy pattern and reco
 
 ## Connections
 
-- [[para/projects]] — evalcheck distribution phase requires this listing; see "Next: Marketplace listing once installs exist"
 - [[protocols/github-apps]] — evalcheck's auth architecture; GitHub Apps are preferred over OAuth Apps on Marketplace
 - [[python/pypi-distribution]] — complementary distribution channel for the pytest plugin half of evalcheck
 - [[test-automation/pytest-patterns]] — evalcheck is a pytest plugin; PyPI and Marketplace are the two distribution targets
 - [[security/prompt-injection]] — webhook validation is a security boundary relevant to GitHub App webhook processing
+- [[tools/vscode-extension-marketplace]] — VS Code extension distribution: package.json manifest, VSIX, Open VSX Registry
 
 ## Open Questions
 

@@ -66,6 +66,8 @@ None.
 - [[para/areas]] — source of active area context
 - [[index]] — coverage map source
 - [[synthesis/graph-health]] — graph score; all known broken links fixed this session
+- [[synthesis/audit-report]] — vault health snapshot from 2026-05-03 audit run
+- [[synthesis/debugging-runbooks]] — runbooks for diagnosing common AI and infra failures
 
 ## Open Questions
 

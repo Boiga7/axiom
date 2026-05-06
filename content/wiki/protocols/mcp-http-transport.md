@@ -246,7 +246,6 @@ Fix: use a monotonically incrementing counter or UUID for each JSON-RPC `id`; th
 - [[security/mcp-cves]] — known CVEs, many involving transport-level issues
 - [[security/oauth-boundary-testing]] — auth boundaries sit on top of this transport
 - [[python/latency-benchmarking]] — how to benchmark this transport vs STDIO
-- [[para/projects]] — mcpindex HTTP transport scanning
 
 ## Open Questions
 - At what request rate does stateless HTTP transport become better than STDIO (which spawns a new process per scan)?

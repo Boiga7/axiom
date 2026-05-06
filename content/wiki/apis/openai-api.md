@@ -354,6 +354,7 @@ Fix: iterate `response.choices[0].message.tool_calls` in order; match each resul
 - [[infra/inference-serving]] — vLLM exposes an OpenAI-compatible endpoint for self-hosted serving
 - [[rag/embeddings]] — text-embedding-3-large vs Cohere embed-v4 vs BGE-M3 comparison
 - [[multimodal/audio]] — Whisper transcription and TTS endpoints exposed by the OpenAI audio APIs
+- [[apis/openai-responses-api]] — stateful Responses API with built-in tools (web search, code interpreter, file search)
 
 ## Open Questions
 

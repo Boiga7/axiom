@@ -243,7 +243,6 @@ Fix: return 401 (with a `WWW-Authenticate` header) for unauthenticated requests 
 - [[protocols/rfc-7591-dynamic-client-registration]] — dynamic client registration endpoint is an additional auth boundary to test: open registration, wildcard redirect URIs, scope enforcement
 - [[security/owasp-llm-top10]] — OWASP Agentic Top 10 A3: delegated trust failures
 - [[security/mcp-cves]] — known MCP CVEs, many auth-related
-- [[para/projects]] — mcpindex Weekend 2 target
 
 ## Open Questions
 - What is the recommended test fixture setup for a full OAuth 2.0 + PKCE flow in pytest without a live auth server?

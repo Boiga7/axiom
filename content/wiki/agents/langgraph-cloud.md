@@ -194,7 +194,6 @@ Fix: set `maxDuration` or timeout beyond the load balancer's idle timeout; emit 
 - [[agents/multi-agent-patterns]] — multi-agent patterns that the platform scales
 - [[observability/platforms]] — LangSmith (integrated with LangGraph Platform) for traces and evals
 - [[infra/deployment]] — self-hosted deployment considerations
-- [[para/projects]] — evalcheck and mcpindex are candidates for platform deployment when agent workflows are added
 
 ## Open Questions
 - What is the pricing model for LangGraph Platform (SaaS) — per-run, per-seat, or usage-based?

@@ -120,7 +120,6 @@ Bringing these patterns together, a principled composite score for mcpindex woul
 
 ## Connections
 
-- [[para/projects]] — mcpindex scorecard design needs this framework directly; the scoring model here should inform check weighting and report format
 - [[security/owasp-llm-top10]] — defines what to check (the vulnerability classes); this page defines how to score it
 - [[security/mcp-cves]] — raw CVE data that feeds into a scorecard; known CVEs directly reduce the Vulnerabilities check score
 - [[protocols/mcp]] — the protocol being scored; MCP-specific attack surfaces (tool poisoning, STDIO injection, rug pull) require custom check categories

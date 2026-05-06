@@ -297,7 +297,6 @@ Fix: identify synchronous blocking operations (JSON parsing of large payloads, r
 - [[protocols/mcp]] — STDIO transport as the comparison baseline
 - [[python/ecosystem]] — httpx, asyncio, structlog for the benchmark harness
 - [[observability/tracing]] — Langfuse/OTel for production latency (complement to benchmarking)
-- [[para/projects]] — mcpindex Weekend 2 target
 
 ## Open Questions
 - At what concurrency level does STDIO transport become worse than HTTP due to process spawn overhead?

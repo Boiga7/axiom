@@ -130,6 +130,8 @@ Most papers: read the abstract + figures + conclusion. You can skim the maths an
 - [[safety/mechanistic-interpretability]] — the interpretability papers in context
 - [[fine-tuning/lora-qlora]] — LoRA and QLoRA implementation
 - [[fine-tuning/dpo-grpo]] — DPO and GRPO training objectives from the alignment papers
+- [[papers/gpt-4-technical-report]] — GPT-4 system card and capabilities report
+- [[papers/toolformer]] — Toolformer: LLMs learn to use tools via self-supervised API calls
 
 ## Open Questions
 

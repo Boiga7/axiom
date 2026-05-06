@@ -198,6 +198,7 @@ Fix: list all non-optional parameters in the `required` array; write the `descri
 - [[ai-tools/claude-code]] — primary host that popularised MCP; plugin system
 - [[protocols/tool-design]] — how to write safe, well-designed MCP tool schemas
 - [[protocols/mcp-server-development]] — building MCP servers in Python with FastMCP
+- [[tools/mcp-server-distribution]] — packaging and distributing MCP servers: npm/npx, PyPI/uvx, Docker, Smithery
 
 ## Open Questions
 

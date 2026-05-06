@@ -1,4 +1,4 @@
-ï»¿---
+---
 type: concept
 category: infra
 para: archive
@@ -131,7 +131,7 @@ Screenshots:  3-5 showing the check run in a PR, failed eval diff,
 ```
 
 Pricing page tips:
-- Name the free tier "Community" or "Open Source" â€” not "Free" (sounds temporary)
+- Name the free tier "Community" or "Open Source" — not "Free" (sounds temporary)
 - Keep the paid tier name simple: "Pro" or the brand name
 - List bullet points that are concrete outcomes, not features ("Catch regressions in CI" not "CI integration")
 
@@ -171,7 +171,7 @@ def get_marketplace_plan(account_login: str, jwt_token: str) -> dict:
     return response.json()
 ```
 
-> [Source: GitHub Docs â€” Selling Your App on GitHub Marketplace, 2025]
+> [Source: GitHub Docs — Selling Your App on GitHub Marketplace, 2025]
 
 ## Common Failure Cases
 
@@ -196,9 +196,8 @@ Detect: an org that grew from 5 to 20 users is still billed and limited to 5-use
 Fix: update `unit_count` in your database on every `changed` event; use `GET /marketplace_listing/accounts/{account_login}` to verify the current `unit_count` on each plan check.
 
 ## Connections
-- [[protocols/github-apps]] â€” the App architecture that underlies the Marketplace listing
-- [[para/projects]] â€” evalcheck's next gate is the Marketplace listing
-- [[python/pypi-distribution]] â€” parallel distribution channel (PyPI) for the pytest plugin component
+- [[protocols/github-apps]] — the App architecture that underlies the Marketplace listing
+- [[python/pypi-distribution]] — parallel distribution channel (PyPI) for the pytest plugin component
 
 ## Open Questions
 - Does GitHub waive the 100-installation requirement for apps from verified publishers?

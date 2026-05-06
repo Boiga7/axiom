@@ -257,7 +257,6 @@ Detect: `pip install` from TestPyPI fails with `Could not find a version that sa
 Fix: use `pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ evalcheck` to fall back to PyPI for dependencies; or only test the upload step with TestPyPI, not the install step.
 
 ## Connections
-- [[para/projects]] — evalcheck v0.2.0 is the current release; this page governs release management
 - [[infra/github-marketplace]] — complementary distribution channel for the GitHub App component
 - [[python/ecosystem]] — uv, pyproject.toml, and the broader packaging ecosystem
 - [[test-automation/pytest-patterns]] — the pytest internals that the plugin hooks into

@@ -12,7 +12,6 @@ updated: 2026-05-01
 
 > **TL;DR** GitHub Apps authenticate in two steps — JWT (10-min) to get an installation token (1-hour). Webhooks carry the installation ID. Apps are scoped to repositories; OAuth Apps are scoped to users. Prefer GitHub Apps for bots and automation.
 
-Directly relevant to [[para/projects]]. Evalcheck is built as a GitHub App.
 
 ## Key Facts
 - GitHub App auth = JWT (signed with private key, 10-min TTL) → exchange for installation token (1-hour TTL)
@@ -216,7 +215,6 @@ Detect: all webhooks start returning auth errors simultaneously; JWT generation 
 Fix: add the new key to the App before removing the old one; update the `GITHUB_PRIVATE_KEY` secret in production; then remove the old key from GitHub.
 
 ## Connections
-- [[para/projects]] — evalcheck is a GitHub App; this page is the reference for its auth layer
 - [[infra/github-marketplace]] — listing evalcheck on GitHub Marketplace
 - [[infra/deployment]] — CI/CD patterns for deploying the App server
 - [[security/owasp-llm-top10]] — webhook validation is a boundary security concern

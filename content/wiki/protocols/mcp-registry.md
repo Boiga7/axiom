@@ -86,7 +86,6 @@ Option 1 is the lowest-friction path and does not depend on registry governance 
 ## Connections
 
 - [[protocols/mcp]] — parent protocol; the registry is the distribution layer for the MCP ecosystem
-- [[para/projects]] — mcpindex project; distribution planning depends on understanding what the registry supports
 - [[security/mcp-cves]] — CVE data that could be surfaced via registry entries or a linked scorecard
 - [[security/prompt-injection]] — tool poisoning via malicious descriptions is detectable by scanners; registry lacks built-in screening
 - [[ai-tools/claude-code]] — ships first-party MCP servers; registry is relevant for any third-party server users install
