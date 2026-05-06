@@ -4,7 +4,7 @@ category: agents
 para: resource
 tags: [memory, mem0, zep, letta, memgpt, graphiti, agent-infrastructure, production]
 sources: []
-updated: 2026-05-03
+updated: 2026-05-06
 tldr: "Production memory infrastructure for AI agents — Mem0 (ecosystem breadth), Zep/Graphiti (temporal facts), and Letta (long-horizon paging) — with the dual-layer hot/cold architecture as the emerging production standard."
 ---
 
@@ -285,6 +285,7 @@ The Letta team disputed Mem0's reported MemGPT comparison numbers and states the
 - [[rag/pipeline]] — retrieval mechanics shared with memory search; reranking applies to memory retrieval too
 - [[security/owasp-llm-top10]] — persistent memory exploitation listed in OWASP Agentic Top 10 2026
 - [[protocols/mcp]] — Graphiti ships a native MCP server for memory access from Claude Code / Cursor
+- [[landscape/regulation]] — GDPR Article 17 right-to-erasure and EU AI Act obligations apply directly to memory stores that accumulate personal data across sessions; see the open question about deletion across vector + graph stores
 
 ---
 

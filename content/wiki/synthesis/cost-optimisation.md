@@ -3,7 +3,7 @@ type: synthesis
 category: synthesis
 tags: [cost, optimisation, caching, batching, model-routing, prompt-compression, tokens]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-06
 para: resource
 tldr: Seven cost levers (prompt caching, model routing, Batch API, prompt compression, output token control, semantic caching, streaming) applied together typically reduce LLM API costs by 60-90% without quality loss.
 ---
@@ -28,6 +28,8 @@ At Claude Sonnet 4.6 ($3/$15 per M):
 - 10,000 token input + 500 token output × 10,000 calls/day = **$3,450/month**
 
 The input token count is usually the biggest lever, and it's where prompt caching helps most.
+
+> **Reasoning model cost warning:** The formula above assumes standard models. Extended thinking (Claude `budget_tokens`, o3 `reasoning_effort`, Gemini `thinkingConfig`) adds thinking tokens *before* the visible output — billed at output token rates. A call with `budget_tokens=10000` at Sonnet 4.6 pricing costs $0.15 in thinking overhead before the answer arrives. A 5-step pipeline with thinking at each step burns 50,000 thinking tokens ($0.75/call overhead). Reserve reasoning models for decision nodes only. See [[synthesis/reasoning-model-patterns]] for the full breakdown.
 
 ---
 
@@ -320,6 +322,7 @@ def log_call_cost(model: str, usage) -> float:
 
 ## Connections
 
+- [[synthesis/reasoning-model-patterns]] — thinking token cost breakdown; enabling reasoning at every pipeline step multiplies costs multiplicatively, not additively
 - [[apis/anthropic-api]] — prompt caching cache_control syntax and Batch API reference
 - [[llms/tokenisation]] — how tokens are counted and why it matters for cost
 - [[prompting/context-engineering]] — prompt compression and sliding window strategies

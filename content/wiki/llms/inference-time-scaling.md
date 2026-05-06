@@ -4,7 +4,7 @@ category: llms
 para: resource
 tags: [inference-time-scaling, test-time-compute, PRM, MCTS, best-of-N, reasoning-models, self-consistency, speculative-reasoning]
 sources: []
-updated: 2026-05-04
+updated: 2026-05-06
 tldr: "Allocating more compute at inference time — through sampling, search, or extended reasoning traces — produces quality gains that compound independently of training compute, with math and code tasks benefiting most."
 ---
 
@@ -170,6 +170,8 @@ Longer reasoning traces expand the attack surface for [[security/prompt-injectio
 - [[security/prompt-injection]] — inference-time scaling expands the attack surface for intermediate injection
 - [[infra/inference-serving]] — serving cost and latency implications of long reasoning traces
 - [[synthesis/reasoning-model-patterns]] — practical production guidance for when to apply these techniques
+- [[safety/mechanistic-interpretability]] — both converge on the same question: can we read model internals during extended reasoning? Interpretability studies circuit-level mechanisms; inference-time scaling generates the hidden scratchpads those circuits run inside
+- [[fine-tuning/dpo-grpo]] — GRPO trains models to reason better at training time; inference-time scaling applies compute at generation time — complementary levers
 
 ## Open Questions
 - At what `budget_tokens` threshold does Extended Thinking produce diminishing returns on non-math tasks, and is there published data?

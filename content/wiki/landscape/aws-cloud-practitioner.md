@@ -973,10 +973,13 @@ These are the services AWS explicitly names as in-scope for CLF-C02.
 - [[landscape/aws-ai-practitioner]] — AIF-C01; the AI-specialist companion certification to CLF-C02
 - [[protocols/mcp]] (cloud protocol context)
 - [[infra/vector-stores]] (AWS services in AI infra context)
-- [[security/owasp-llm-top-10]] (cloud security context)
+- [[security/owasp-llm-top10]] (cloud security context)
 
 ## Connections
 - [[landscape/aws-ai-practitioner]] — companion AIF-C01 exam that extends CLF-C02 with AI/ML depth
+- [[cloud/aws-analytics-services]] — Domain 3 (34%): Athena, EMR, Glue, Kinesis, OpenSearch, QuickSight, Redshift
+- [[cloud/aws-ai-recognition-services]] — Domain 3 (34%): pre-built AI APIs; scenario-to-service matching
+- [[cloud/aws-amazon-q]] — Domain 3 (34%): Amazon Q as part of the AI services catalogue
 - [[cloud/cloud-hub]] — cloud engineering hub that operationalises the AWS services surveyed here
 - [[cloud/aws-core]] — deep-dive AWS core services page for practitioners moving beyond foundational level
 - [[cs-fundamentals/se-hub]] — software engineering fundamentals needed alongside AWS knowledge

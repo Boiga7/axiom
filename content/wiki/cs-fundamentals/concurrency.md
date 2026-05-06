@@ -263,7 +263,7 @@ Detect: over time, fewer and fewer concurrent operations proceed; semaphore `_va
 Fix: always use `async with semaphore:` (context manager). It releases on exceptions; never `await semaphore.acquire()` without a matching `release()` in a `finally` block.
 
 ## Connections
-[[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[python/ecosystem]] · [[llms/ae-hub]]
+[[se-hub]] · [[cs-fundamentals/distributed-systems]] · [[cs-fundamentals/performance-optimisation-se]] · [[cs-fundamentals/database-transactions]] · [[python/ecosystem]] · [[llms/ae-hub]]
 ## Open Questions
 
 - What are the most common misapplications of this concept in production codebases?

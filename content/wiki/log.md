@@ -814,3 +814,13 @@ Index fix: safety/responsible-ai added to wiki/index.md (page existed on disk, m
 ## [2026-05-04] lint | vault:lint run — 11 missing tldr:, 32 missing Connections, 5 new under-linked pages, 0 stale unverified, 0 orphans
 
 ## [2026-05-04] lint | Full fix pass — 11 tldr: added, 32 Connections added, 32 Open Questions added, 13 back-links wired, 0 issues remaining
+
+## [2026-05-06] ingest | Cert exam gap pages — added ml-fundamentals, aws-sagemaker-studio, aws-analytics-services, aws-ai-recognition-services (4 pages, CLF-C02 + AIF-C01 coverage)
+
+## [2026-05-06] ingest | Wikilinks + tools expansion — 8 wikilink pairs added, 2 tools pages (vscode-extension-marketplace, mcp-server-distribution), index updated 464/31, practice.spec.ts counts dynamic, CI workflow added
+
+## [2026-05-06] lint | Gap Intelligence -- 2 critical gaps, 3 concept gaps found
+
+## [2026-05-06] lint | Gap Intelligence (run 2) -- 2 critical gaps, 3 concept gaps found; aws-amazon-q + aws-bedrock-guardrails created, owasp slug fixed
+
+## [2026-05-06] lint | Gap Intelligence (run 3) -- 0 critical gaps; all active areas current; responsible-ai expanded, study guide connections completed

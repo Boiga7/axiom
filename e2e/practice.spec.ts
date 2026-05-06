@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { ROLE_PATHS } from "../lib/practice-data";
 
 const ROLE_PATHS = [
   "AI Engineer",
@@ -29,14 +30,9 @@ test.describe("Practice page", () => {
     }
   });
 
-  const EXERCISE_COUNTS: Record<string, number> = {
-    "AI Engineer": 9,
-    "Software Engineer": 8,
-    "Cloud Engineer": 8,
-    "QA Engineer": 8,
-    "SDET": 8,
-    "Analytics Engineer": 8,
-  };
+  const EXERCISE_COUNTS = Object.fromEntries(
+    ROLE_PATHS.map((rp) => [rp.title, rp.exercises.length])
+  );
 
   test("each section has the correct exercise card count", async ({ page }) => {
     for (const path of ROLE_PATHS) {

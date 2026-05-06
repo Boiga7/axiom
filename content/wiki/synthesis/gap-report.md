@@ -3,85 +3,70 @@ type: synthesis
 category: synthesis
 para: resource
 tags: [gaps, intelligence]
-tldr: Ranked knowledge gaps relative to active projects — 0 critical gaps, 0 concept gaps. All gaps from runs 1-5 resolved. Both active projects are wiki-complete for their current phases.
-updated: 2026-05-04
+tldr: Ranked list of knowledge gaps relative to active areas — what to research next.
+updated: 2026-05-06
 ---
 
-# Knowledge Gap Report — 2026-05-04 (run 6)
+# Knowledge Gap Report — 2026-05-06 (run 3)
 
-> **TL;DR** 0 critical gaps, 0 concept gaps. All 5 concept gaps from run 5 were resolved this session (deepeval, feature-stores, model-cards, socket-dev, snyk). Both evalcheck and mcpindex are wiki-complete for their current phases.
+> **TL;DR** No critical gaps remain. One deferred item (SAA-C03) contingent on cert intent. Vault is current against all active areas.
 
-## Active Projects Detected
+No `para/projects.md` exists; running against active areas from `para/areas.md`.
 
-- **evalcheck**: pytest plugin + GitHub App for eval regression PR comments. Phase: Distribution (Show HN, cookbook PRs, dev.to). Wiki coverage: complete — [[tools/github-marketplace-apps]], [[python/pypi-distribution]], [[evals/methodology]], [[evals/deepeval]] all present.
-- **mcpindex**: CLI + public scorecard for MCP server security scanning. Phase: Weekend 2 (auth boundary tests, latency baselines, HTTP transport). Wiki coverage: complete — [[security/oauth-boundary-testing]], [[python/latency-benchmarking]], [[technical-qa/api-performance-testing]], [[protocols/mcp-http-transport]], [[security/security-scorecard-methodology]], [[protocols/mcp-registry]], [[security/socket-dev]], [[security/snyk]] all present.
+## Active Areas Status
+
+| Area | Status |
+|---|---|
+| LLM Release Tracking | Current — model-families, model-timeline, ai-labs up to date |
+| MCP Security Watch | Current — mcp-cves synced, protocols/mcp current |
+| AI Engineering Fundamentals | Current — rag/pipeline, langgraph, evals/methodology all production-current |
+| Nexus Health | Improved — 8 broken wikilinks fixed, graph connections added to study guide pages |
 
 ---
 
-## Critical Gaps (blocks active project)
+## Fixed Since Run 2
+
+- ✓ `safety/responsible-ai.md` expanded — full FATE framework, bias types, NIST AI RMF, AWS tooling per dimension, 10-row AIF-C01 scenario drill, Key Facts, Open Questions
+- ✓ Comprehend Custom section added to `cloud/aws-ai-recognition-services.md` — decision matrix vs Bedrock fine-tuning, exam triggers
+- ✓ `[[security/owasp-llm-top-10]]` slug corrected to `owasp-llm-top10` in aws-cloud-practitioner.md
+- ✓ `landscape/aws-ai-practitioner.md` Connections updated — now links to all 5 new cert pages (ml-fundamentals, aws-sagemaker-studio, aws-ai-recognition-services, aws-amazon-q, aws-bedrock-guardrails)
+- ✓ `landscape/aws-cloud-practitioner.md` Connections updated — now links to aws-analytics-services, aws-ai-recognition-services, aws-amazon-q
+- ✓ `apis/aws-bedrock.md` Connections updated — now links to aws-bedrock-guardrails and aws-amazon-q
+
+---
+
+## Critical Gaps
 
 None.
 
 ---
 
-## Concept Gaps (mentioned, no page)
+## Deferred (not a gap — contingent on intent)
 
-None.
-
----
-
-## Suggested Ingest Queue (ranked)
-
-Queue is empty. No known gaps relative to active projects. Next gaps will surface from:
-- New project phases (mcpindex Weekend 3, evalcheck post-Show HN)
-- Weekly Research Digest (automated — Mon 8:03am)
-- Model Release Watcher (automated — 1st/15th 9:07am)
+- **AWS SAA-C03 study guide** — `cloud/aws-analytics-services.md` is tagged `saa-c03`; no landscape study page exists. Not a gap unless SAA-C03 is a target cert.
+  → Create only if SAA-C03 is being pursued
 
 ---
 
-## Previously Resolved Gaps
+## What's Well Covered
 
-| Gap | Page | Sprint |
-|---|---|---|
-| DeepEval | [[evals/deepeval]] | 2026-05-04 (run 5→6) |
-| Feature stores | [[data/feature-stores]] | 2026-05-04 (run 5→6) |
-| Model cards | [[data/model-cards]] | 2026-05-04 (run 5→6) |
-| Socket.dev | [[security/socket-dev]] | 2026-05-04 (run 5→6) |
-| Snyk | [[security/snyk]] | 2026-05-04 (run 5→6) |
-| GitHub Marketplace listing for GitHub Apps | [[tools/github-marketplace-apps]] | 2026-05-04 (run 4→5) |
-| Security scorecard methodology | [[security/security-scorecard-methodology]] | 2026-05-04 (run 4→5) |
-| MCP Registry | [[protocols/mcp-registry]] | 2026-05-04 (run 4→5) |
-| protocols/rfc-7591-dynamic-client-registration | concept gap (run 3) — open | |
-| llms/multi-head-latent-attention | [[llms/multi-head-latent-attention]] | 2026-05-03 |
-| llms/deepseek-r1 | [[llms/deepseek-r1]] | 2026-05-03 (run 3) |
-| protocols/oauth-server-metadata | [[protocols/oauth-server-metadata]] | 2026-05-03 (run 3) |
-| papers/mistral | [[papers/mistral]] | 2026-05-03 (run 3) |
-| synthesis/debugging-runbooks hub | [[synthesis/debugging-runbooks]] | 2026-05-03 |
-| apis/openai-responses-api | [[apis/openai-responses-api]] | 2026-05-03 |
-| papers/toolformer | [[papers/toolformer]] | 2026-05-03 |
-| papers/gpt-4-technical-report | [[papers/gpt-4-technical-report]] | 2026-05-03 |
-| ai-tools/continue | [[ai-tools/continue]] | 2026-05-03 |
-| ai-tools/cline | [[ai-tools/cline]] | 2026-05-03 |
-| papers/llama | [[papers/llama]] | 2026-05-03 |
-| papers/llama-2 | [[papers/llama-2]] | 2026-05-03 |
-| web-frameworks/django-drf | [[web-frameworks/django-drf]] | 2026-05-03 |
-| agents/google-adk | [[agents/google-adk]] | 2026-05-03 |
-| ai-tools/aider | [[ai-tools/aider]] | 2026-05-03 |
-| safety/scalable-oversight | [[safety/scalable-oversight]] | 2026-05-03 |
-| cloud/bedrock-agentcore | [[cloud/bedrock-agentcore]] | 2026-05-03 |
-| JavaScript/TypeScript ecosystem | [[javascript/javascript-hub]] + 4 pages | 2026-05-02 |
-| OpenAI Agents SDK | [[agents/openai-agents-sdk]] | 2026-05-02 |
-| Strands Agents SDK | [[agents/strands-agents-sdk]] | 2026-05-02 |
-
----
+- **CLF-C02:** core AWS ✓, analytics services ✓, AI recognition services ✓, Amazon Q ✓, shared responsibility ✓, Well-Architected ✓
+- **AIF-C01 Domain 1 (20%):** ML fundamentals ✓, supervised/unsupervised/RL ✓, evaluation metrics ✓, ML lifecycle ✓
+- **AIF-C01 Domain 3 (28%):** SageMaker sub-services ✓, pre-built AI APIs ✓, Comprehend Custom ✓, Amazon Q Business ✓, Bedrock ✓
+- **AIF-C01 Domain 4 (14%):** FATE framework ✓, bias types ✓, NIST AI RMF ✓, AWS tooling ✓, scenario drill ✓
+- **AIF-C01 Domain 5 (14%):** Bedrock Guardrails (all 6 policies) ✓, IAM/security ✓, Acceptable Use Policy ✓
+- **MCP:** spec ✓, CVEs ✓, server development ✓, registry ✓, distribution ✓
+- **RAG:** pipeline ✓, chunking ✓, embeddings ✓, reranking ✓, GraphRAG ✓
+- **Agents:** LangGraph ✓, CrewAI ✓, memory systems ✓, multi-agent ✓
+- **Evals:** methodology ✓, LLM-as-judge ✓, RAGAS ✓, DeepEval ✓
+- **Tools:** GitHub Marketplace ✓, VS Code extension ✓, MCP server distribution ✓
 
 ## Connections
 
-- [[para/projects]] — source of active project context
+- [[para/areas]] — source of active area context
 - [[index]] — coverage map source
-- [[synthesis/audit-report]] — full vault audit (2026-05-03)
+- [[synthesis/graph-health]] — graph score; all known broken links fixed this session
 
 ## Open Questions
 
-- Which topics will surface as gaps once mcpindex enters Weekend 3?
-- Will RFC 7591 Dynamic Client Registration (flagged run 3, still open) ever need its own page or is the section in [[protocols/oauth-server-metadata]] sufficient?
+- Is SAA-C03 a target cert? If so, a landscape/aws-solutions-architect study guide is the only remaining cert gap.

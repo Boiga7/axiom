@@ -379,6 +379,8 @@ Fix: truncate or summarise tool results before returning them to the model; use 
 - [[infra/vector-stores]] — Bedrock Knowledge Bases manages vector storage internally
 - [[agents/strands-agents-sdk]] — AWS open-source agent framework that wraps the Converse API; the recommended Bedrock-native agent SDK
 - [[infra/litellm]] — use LiteLLM to call Bedrock models via an OpenAI-compatible interface
+- [[cloud/aws-bedrock-guardrails]] — Guardrails deep dive: all 6 policy types, grounding check, AIF-C01 Domain 5 reference
+- [[cloud/aws-amazon-q]] — Q Business is Bedrock-powered under the hood; Q Developer for AI coding assistance
 
 ## Open Questions
 

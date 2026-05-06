@@ -190,6 +190,7 @@ Fix: apply the same input validation to inter-agent messages as to user messages
 - [[security/mcp-cves]] — real-world injection via MCP tool descriptions
 - [[agents/multi-agent-patterns]] — injection propagation across multi-agent systems
 - [[rag/pipeline]] — RAG knowledge base as an attack surface
+- [[prompting/structured-outputs]] — schema-constrained output reduces injection surface by limiting what the model can output
 
 ## Open Questions
 

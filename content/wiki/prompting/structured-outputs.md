@@ -365,6 +365,7 @@ For complex tasks, forcing the model to generate valid JSON token-by-token can d
 - [[infra/inference-serving]] — vLLM deployment where XGrammar runs as the default backend
 - [[prompting/techniques]] — XML structuring for Claude; prompt design for extraction tasks
 - [[prompting/dspy]] — auto-optimising prompt modules; complementary to structured outputs
+- [[security/prompt-injection]] — constrained decoding limits what an injected payload can cause the model to output; structured schemas shrink the attack surface
 - [[python/ecosystem]] — Pydantic v2 validation that powers instructor
 - [[security/guardrails]] — broader output safety validation beyond schema conformance
 - [[evals/methodology]] — using structured output extraction to get LLM judge scores as typed objects

@@ -605,9 +605,14 @@ Amazon CloudWatch, Amazon DynamoDB, Amazon EC2, Amazon EventBridge, Amazon OpenS
 ## Connections
 - [[landscape/aws-cloud-practitioner]] — foundational CLF-C02 certification; AIF-C01 is the AI-specialist companion
 - [[llms/ae-hub]] — AI engineering hub that covers the underlying concepts tested in domains 1-3
+- [[llms/ml-fundamentals]] — Domain 1 (20%): supervised/unsupervised/RL, algorithms, evaluation metrics, ML lifecycle
+- [[cloud/aws-ai-recognition-services]] — Domain 3 (28%): pre-built AI APIs; scenario-to-service matching
+- [[cloud/aws-sagemaker-studio]] — Domain 3 (28%): SageMaker sub-services decision matrix
+- [[cloud/aws-amazon-q]] — Domain 3 (28%): Q Business vs Kendra exam trap; Q Developer
+- [[cloud/aws-bedrock-guardrails]] — Domain 5 (14%): Guardrails policy types; primary Bedrock security control
 - [[rag/pipeline]] — RAG architecture that Bedrock Knowledge Bases implements; heavy exam coverage
 - [[agents/practical-agent-design]] — agentic patterns that Bedrock Agents implement
-- [[safety/responsible-ai]] — responsible AI concepts mapped to domain 4
+- [[safety/responsible-ai]] — Domain 4 (14%): FATE framework, bias, NIST AI RMF, AWS tooling
 - [[landscape/iso42001]] — ISO 42001 referenced in domain 5 governance materials
 - [[landscape/regulation]] — EU AI Act and NIST AI RMF covered in domain 5
 

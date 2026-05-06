@@ -3,7 +3,7 @@ type: concept
 category: safety
 tags: [interpretability, mechanistic-interpretability, features, circuits, superposition, anthropic]
 sources: []
-updated: 2026-04-29
+updated: 2026-05-06
 para: resource
 tldr: Sparse autoencoders decompose polysemantic neurons into millions of monosemantic features — Scaling Monosemanticity (2024) applied SAEs to Claude 3 Sonnet; activation steering enables direct behavioural intervention.
 ---
@@ -128,6 +128,7 @@ Current status: interpretability can find features and circuits, but translating
 - [[llms/transformer-architecture]] — the architectural substrate (residual stream, attention heads, FFN)
 - [[papers/key-papers]] — links to Towards Monosemanticity and Scaling Monosemanticity
 - [[papers/mechanistic-interpretability]] — four paper summaries: Zoom In (2020), Toy Models (2022), Towards Monosemanticity (2023), Scaling Monosemanticity (2024)
+- [[llms/inference-time-scaling]] — extended thinking produces hidden reasoning traces that are the internals interpretability aims to read; the scratchpad injection attack surface is an open interpretability problem
 
 ## Open Questions
 

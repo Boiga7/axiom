@@ -227,6 +227,7 @@ Fix: version the golden set alongside the product; schedule a quarterly review; 
 - [[rag/pipeline]] — RAGAS eval for RAG-specific quality metrics
 - [[prompting/dspy]] — DSPy uses evals to automatically optimise prompts
 - [[apis/anthropic-api]] — Batch API for running large eval suites at 50% cost
+- [[observability/llmops]] — LLMOps eval gate pattern; prompt A/B testing and eval-driven deployment
 - [[observability/platforms]] — online evals in production; annotation queues; feedback loops
 - [[data/pipelines]] — eval suites reuse the same Airflow/Prefect orchestration as training data flows
 - [[evals/deepeval]] — DeepEval implements the LLM-as-judge and CI gating patterns described here

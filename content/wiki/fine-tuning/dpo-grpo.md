@@ -210,6 +210,7 @@ Fix: always start ORPO from an SFT checkpoint (not a base model), even if the SF
 - [[fine-tuning/frameworks]] — TRL `DPOTrainer`, `GRPOTrainer`, `ORPOTrainer` implement all objectives
 - [[safety/constitutional-ai]] — CAI uses RLHF with AI-generated preference labels
 - [[data/rlhf-datasets]] — the preference datasets DPO training consumes
+- [[llms/inference-time-scaling]] — GRPO improves reasoning at training time; inference-time scaling applies extra compute at generation time — complementary levers on the quality/cost curve
 
 ## Open Questions
 

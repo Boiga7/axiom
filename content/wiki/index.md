@@ -5,7 +5,7 @@ updated: 2026-05-03
 
 # Nexus — Content Index
 
-354 pages across 28 categories. Updated 2026-05-04.
+464 pages across 31 categories. Updated 2026-05-06.
 
 ---
 
@@ -86,6 +86,7 @@ updated: 2026-05-03
 - [[llms/multi-head-latent-attention]] — DeepSeek's low-rank KV cache compression: caches a latent vector instead of full K/V tensors, 93% KV cache reduction, used in V2/V3/R1
 - [[llms/small-language-models]] — SLM decision framework: Phi-4 (14B), Llama 3.2 (1B/3B), Gemma 3, Qwen 2.5, Mistral Ministral — edge, mobile, and cost-sensitive inference
 - [[llms/inference-time-scaling]] — Best-of-N, PRMs, MCTS, self-consistency, and extended CoT: how allocating more compute at inference time produces quality gains independent of training
+- [[llms/ml-fundamentals]] — Traditional ML foundations: supervised (regression, classification, Random Forest, XGBoost, SVM), unsupervised (k-Means, PCA), RL (PPO, RLHF), evaluation metrics, and the ML lifecycle — AIF-C01 Domain 1 core
 
 ### `safety/` — Alignment and Interpretability
 - [[safety/alignment]] — RSP (ASL tiers), red teaming, scalable oversight, superalignment, safety vs helpfulness
@@ -236,6 +237,8 @@ updated: 2026-05-03
 
 ### `tools/` — Distribution and Platform Tooling
 - [[tools/github-marketplace-apps]] — GitHub Marketplace listing for GitHub Apps: submission workflow, required metadata, free vs paid plan requirements, review process, OAuth App vs GitHub App distinction
+- [[tools/vscode-extension-marketplace]] — Publishing VS Code extensions: package.json manifest, contribution points, VSIX packaging, vsce publish, GitHub Actions CI, Open VSX Registry
+- [[tools/mcp-server-distribution]] — Distributing MCP servers via npm (npx), PyPI (uvx), Docker (STDIO -i flag), and Smithery registry; versioning and breaking change rules
 
 ### `ai-tools/` — Developer Tooling
 - [[ai-tools/claude-code]] — CLI capabilities, CLAUDE.md governance, hooks system, skills, settings.json, /ultrareview
@@ -353,6 +356,11 @@ updated: 2026-05-03
 - [[cloud/aws-eks]] — EKS vs self-managed K8s, CDK cluster with managed node groups + Fargate profiles, IRSA (IAM Roles for Service Accounts) CDK setup, managed addons (VPC CNI/EBS CSI/CoreDNS), eksctl cluster config + scale + upgrade commands, Cluster Autoscaler Helm install
 - [[cloud/cloud-migration]] — The 6 Rs (Retire/Retain/Rehost/Replatform/Repurchase/Re-architect), migration decision matrix, wave planning (Wave 0 foundation → Wave 3 revenue-critical), AWS Migration Hub CLI, DMS database migration (full-load + CDC + cutover), migration runbook template with rollback procedure
 - [[cloud/aws-sagemaker]] — SageMaker vs vLLM decision guide, HuggingFace model deploy to real-time endpoint, target tracking autoscaling (invocations/instance), batch transform (multi-record, async polling), model registry + A/B testing (weighted traffic split), when to use ECS/vLLM instead
+- [[cloud/aws-sagemaker-studio]] — SageMaker sub-services: Canvas (no-code ML), Autopilot (AutoML), Ground Truth (labelling), Data Wrangler (feature prep), Feature Store, Pipelines, Model Monitor (drift), Clarify (bias/explainability), JumpStart (model hub) — AIF-C01 Domain 3 core
+- [[cloud/aws-amazon-q]] — Amazon Q Business (GenAI assistant over company data, permission-aware answers, vs Kendra) and Q Developer (AI coding assistant, VS Code/JetBrains) — AIF-C01 Domain 3 exam trap
+- [[cloud/aws-bedrock-guardrails]] — Bedrock Guardrails: 6 policy types (content filters, denied topics, word filters, PII redaction, grounding check, contextual grounding); AIF-C01 Domain 5 security core
+- [[cloud/aws-analytics-services]] — Analytics services decision guide: Athena (serverless SQL on S3), EMR (Spark/Hadoop), Glue (serverless ETL), Kinesis (real-time streaming), OpenSearch (log search), QuickSight (BI dashboards), Redshift (data warehouse) — CLF-C02 + SAA-C03
+- [[cloud/aws-ai-recognition-services]] — Pre-built AWS AI APIs: Rekognition (vision), Comprehend (NLP), Lex (chatbots), Polly/Transcribe (speech), Translate (language), Textract (documents), Kendra (search), Personalize (recommendations), Forecast (time series) — CLF-C02 + AIF-C01
 - [[cloud/vpc-design-patterns]] — 3-tier VPC CIDR allocation, CDK ProductionVPC (NAT per AZ, flow logs, isolated data subnets), security groups vs NACLs (stateful vs stateless), CDK ALB/app/RDS security group chain, VPC endpoints (S3 gateway free, Secrets Manager interface), Fargate private subnet endpoints, multi-account Transit Gateway routing table isolation, NAT Gateway cost optimisation
 - [[cloud/bedrock-agentcore]] — AWS serverless agent hosting; microVM session isolation; $0.0895/vCPU-hr; LangGraph/Strands/CrewAI support; GA October 2025
 
