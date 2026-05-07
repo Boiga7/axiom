@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.1",
     "fuse.js": "^7.3.0",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
