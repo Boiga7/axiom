@@ -216,3 +216,9 @@ The sync session blocks the event loop. Switch to `create_async_engine` + `Async
 - [[web-frameworks/fastapi]] — FastAPI is built around async request handling
 - [[apis/anthropic-api]] — `AsyncAnthropic` client for concurrent LLM calls
 - [[cs-fundamentals/concurrency]] — threading vs async vs multiprocessing tradeoffs
+
+## Open Questions
+
+- When does `asyncio.gather` plus a semaphore produce better throughput than `asyncio.TaskGroup` with explicit concurrency control?
+- Is there a practical case for `uvloop` over standard `asyncio` for LLM API call concurrency, or is I/O-bound waiting the bottleneck regardless?
+- How does the GIL interact with async I/O — do async coroutines truly run concurrently or does it only matter for CPU-bound work?

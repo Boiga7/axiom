@@ -150,3 +150,9 @@ The CLI also supports other OpenAI models via the `--model` flag.
 - [[apis/openai-api]] — codex-1 is accessed via the OpenAI API; Responses API underpins cloud tasks
 - [[evals/benchmarks]] — SWE-bench Verified is the primary benchmark for coding agents
 - [[papers/swe-bench]] — the benchmark paper that established SWE-bench as the coding agent gold standard
+
+## Open Questions
+
+- How does Codex compare to Claude Code on multi-file refactors in practice — SWE-bench scores may not capture real-world complexity?
+- Do cloud-isolated containers in Codex's remote execution mode share state across tasks in the same session?
+- What's the latency difference between Codex CLI and Claude Code for a typical 20-file codebase task?

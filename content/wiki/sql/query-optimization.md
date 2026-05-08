@@ -190,3 +190,9 @@ ORDER BY pg_total_relation_size(relid) DESC;
 - [[infra/pgvector]] — vector index types (ivfflat, hnsw)
 - [[python/sqlalchemy]] — SQLAlchemy query profiling
 - [[observability/datadog]] — APM for database query tracing
+
+## Open Questions
+
+- At what row count does a partial index start to outperform a composite index for a status-filtered query with low cardinality status values?
+- When should you manually run `VACUUM ANALYZE` vs rely on autovacuum thresholds — what signals indicate autovacuum is falling behind?
+- Does parallel query planning offer meaningful speedup for the analytical queries common in AI engineering (eval result aggregations, cost reporting)?

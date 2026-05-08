@@ -199,3 +199,9 @@ CREATE INDEX idx_llm_calls_metadata ON llm_calls USING GIN (metadata);
 - [[observability/datadog]] — alternative for LLM call monitoring
 - [[sql/query-optimization]] — keeping these queries fast under load
 - [[sql/window-functions]] — analytical patterns for cost/latency reporting
+
+## Open Questions
+
+- Is a time-series database (TimescaleDB) a better fit than plain PostgreSQL for the eval results store pattern at high eval throughput?
+- How do you model multi-turn conversation logs in SQL while keeping per-turn retrieval efficient?
+- What's the practical row count ceiling for pgvector similarity search before a dedicated vector DB becomes necessary?

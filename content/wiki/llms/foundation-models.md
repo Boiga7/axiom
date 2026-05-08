@@ -56,6 +56,12 @@ Consumers of foundation models typically interact with the aligned output of thi
 - [[llms/claude]] — Anthropic's Claude family: Haiku, Sonnet, Opus
 - [[llms/model-families]] — comparison of model families across labs
 - [[landscape/ai-labs]] — the labs that train and release foundation models
-- [[fine-tuning/overview]] — when and how to fine-tune a foundation model
+- [[fine-tuning/decision-framework]] — when and how to fine-tune a foundation model
 - [[prompting/techniques]] — how to get the most from a foundation model without training
-- [[rag/overview]] — augmenting foundation models with external knowledge at inference time
+- [[rag/pipeline]] — augmenting foundation models with external knowledge at inference time
+
+## Open Questions
+
+- Is the foundation model paradigm converging or diverging — will multimodal models absorb specialist models over time?
+- At what capability level does prompting break down and fine-tuning become necessary for a given task type?
+- Does the CRFM "foundation model" definition meaningfully apply to open-weight models like Llama that lack commercial deployment APIs?

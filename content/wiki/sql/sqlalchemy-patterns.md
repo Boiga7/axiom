@@ -320,3 +320,9 @@ Always use `async with AsyncSessionLocal() as session:` — the context manager 
 - [[sql/query-optimization]] — EXPLAIN ANALYZE, diagnosing slow queries
 - [[web-frameworks/fastapi]] — FastAPI dependency injection pattern for DB sessions
 - [[python/async]] — asyncio, async generators, event loop context
+
+## Open Questions
+
+- How does SQLAlchemy's `AsyncSession` handle connection pool exhaustion under concurrent LLM call bursts?
+- Is `selectinload` preferable to `joinedload` for deeply nested relationships in async contexts, and when does the extra query become cheaper than the wider join?
+- How should Alembic migrations be run safely in a zero-downtime deployment where the app is already serving traffic?

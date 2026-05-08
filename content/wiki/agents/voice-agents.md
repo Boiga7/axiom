@@ -309,3 +309,9 @@ Need complex pipeline routing / multi-agent handoffs?
 - [[apis/openai-api]] — GPT-4o Realtime API, gpt-realtime-mini
 - [[security/owasp-llm-top10]] — voice agents are agentic systems; excessive agency and tool misuse risks apply
 - [[observability/platforms]] — tracing voice pipeline stages for latency debugging
+
+## Open Questions
+
+- Is WebRTC a better transport than WebSocket for voice agents given its native support for jitter buffers and packet loss recovery?
+- At what scale does self-hosting STT (faster-whisper) become cheaper than Deepgram or AssemblyAI managed APIs?
+- How do VAD false positives interact with barge-in handling — what's the acceptable false-positive rate for a good UX?

@@ -66,3 +66,9 @@ RAG status is meaningful only if the thresholds are defined and agreed before th
 - [[qa/qa-change-management]] — change management context for introducing new reporting to resistant organisations
 - [[qa/release-sign-off]] — the formal sign-off process that release readiness reports feed into
 - [[qa/test-estimation]] — estimation feeds the "planned" line in test progress vs plan charts
+
+## Open Questions
+
+- When RAG status is amber, what's the right threshold for escalating to a steering committee vs letting the test lead manage?
+- How frequently should release readiness dashboards refresh during a sprint-end crunch — daily, real-time, or at fixed checkpoints?
+- What's the correct documented response when a stakeholder overrides a red gate signal in the release sign-off?

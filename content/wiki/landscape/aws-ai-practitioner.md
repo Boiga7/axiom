@@ -12,7 +12,7 @@ tldr: AWS Certified AI Practitioner (AIF-C01) — all 5 domains, AWS AI/ML servi
 
 Foundational certification validating understanding of AI/ML concepts and AWS AI tooling. Target audience: developers, business analysts, product managers, and anyone who works adjacent to AI systems and wants a structured grounding in the field.
 
-Related: [[landscape/aws-ecosystem]], [[llms/foundation-models]], [[agents/overview]], [[prompting/techniques]], [[rag/overview]], [[safety/responsible-ai]], [[landscape/aws-cloud-practitioner]]
+Related: [[cloud/aws-ecosystem]], [[llms/foundation-models]], [[agents/practical-agent-design]], [[prompting/techniques]], [[rag/pipeline]], [[safety/responsible-ai]], [[landscape/aws-cloud-practitioner]]
 
 ---
 

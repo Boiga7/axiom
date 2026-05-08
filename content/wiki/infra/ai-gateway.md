@@ -237,3 +237,9 @@ The correct order: direct provider call → add [[infra/caching]] when you see r
 - [[synthesis/cost-optimisation]] — gateway features (caching, routing, batch) as cost levers in the seven-lever framework
 - [[apis/anthropic-api]] — prompt caching is an Anthropic-side mechanism that complements gateway-level semantic caching
 - [[security/owasp-llm-top10]] — excessive agency (A09) and model denial-of-service (A04) are mitigated by gateway-level rate limiting and budget controls
+
+## Open Questions
+
+- At what request volume do semantic cache hit rates stabilise enough to justify the added infrastructure overhead?
+- How does LiteLLM handle Anthropic-specific features (prompt caching, extended thinking) that aren't portable to other providers?
+- Is the operational overhead of a self-hosted AI gateway worth it before roughly 10M LLM calls/month?

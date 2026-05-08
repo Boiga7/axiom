@@ -97,3 +97,9 @@ For Claude specifically, AgentCore can use any Claude model available in Bedrock
 - [[security/owasp-llm-top10]] — security considerations apply to managed runtimes too
 - [[observability/platforms]] — CloudWatch/X-Ray vs Langfuse/LangSmith tradeoff
 - [[apis/anthropic-api]] — full Claude API available through Bedrock
+
+## Open Questions
+
+- What's the cold-start latency profile for AgentCore's microVM isolation compared to running agents on ECS Fargate?
+- Does AgentCore's memory store support LangGraph-style time-travel checkpointing, or is it append-only?
+- At what agent request volume does AgentCore's $0.0895/vCPU-hr pricing undercut a self-managed ECS fleet?

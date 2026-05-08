@@ -48,3 +48,9 @@ The mandate is not a project charter, though it resembles one. A project charter
 
 - [[qa/qa-change-management]] — the change management practices that execute on the mandate
 - [[qa/benefits-realisation]] — measuring whether the mandate's success criteria were achieved
+
+## Open Questions
+
+- How early in a mandate should measurable success criteria be locked — before or after the initial assessment?
+- What's the right escalation path when an executive sponsor's priorities shift mid-engagement and the mandate loses organisational protection?
+- How do you scope a mandate to avoid capturing every QA problem while still driving meaningful change?

@@ -187,6 +187,7 @@ Log search / full-text search → OpenSearch
 - [[cloud/aws-rds-aurora]] — RDS as Glue ETL source
 - [[landscape/aws-cloud-practitioner]] — CLF-C02 study guide; analytics services in Domain 3
 - [[landscape/aws-ai-practitioner]] — AIF-C01 context; Kinesis as real-time ML data ingestion
+- [[landscape/aws-solutions-architect-associate]] — SAA-C03 study guide; analytics services heavily tested in Domains 1 and 2
 
 ## Open Questions
 

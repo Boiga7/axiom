@@ -319,3 +319,9 @@ The default recommendation for most new projects is **ZenML** — it has the low
 - [[evals/methodology]] — eval-as-gate pattern for blocking deployment on quality regression
 - [[observability/langfuse]] — production LLM monitoring post-deployment (distinct from training tracking)
 - [[cloud/aws-step-functions]] — one of the orchestrator backends ZenML and Metaflow can target
+
+## Open Questions
+
+- Can ZenML stack abstractions provide genuine portability across cloud providers, or does cloud-specific glue code accumulate at the edges?
+- What's the right choice between Flyte's Kubernetes-native approach and Metaflow's AWS-native approach for a team primarily on GCP?
+- How do ML pipeline orchestrators handle partial failures — retry the failed step vs rerun the full pipeline from scratch?

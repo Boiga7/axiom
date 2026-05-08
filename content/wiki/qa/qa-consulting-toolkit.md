@@ -44,3 +44,9 @@ Templates should be version-controlled and reviewed after each engagement to inc
 
 - [[qa/qa-change-management]] — change management artefacts that complement the consulting toolkit
 - [[qa/benefits-realisation]] — benefits tracking artefacts: baseline metrics, target metrics, actuals log
+
+## Open Questions
+
+- Which artefacts in the toolkit travel across verticals (finance, health, SaaS) without adaptation vs those requiring heavy tailoring?
+- At what client maturity level does a full RACI become useful vs counterproductive overhead?
+- How do you handle a client whose existing documentation is so poor that baseline measurement becomes the first deliverable?

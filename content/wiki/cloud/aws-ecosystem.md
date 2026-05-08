@@ -44,3 +44,9 @@ The boundary shifts based on service type: EC2 (IaaS) requires customer OS patch
 - [[cloud/bedrock-agentcore]] — Bedrock AgentCore, the managed agentic runtime on AWS
 - [[infra/vector-stores]] — vector store options including Aurora pgvector and OpenSearch
 - [[apis/anthropic-api]] — Claude API patterns that run on Bedrock
+
+## Open Questions
+
+- How does the IAM permission surface for Bedrock Knowledge Bases compare to managing pgvector + Aurora directly?
+- When does Bedrock Agents become the better choice over LangGraph + direct Claude API for a production agentic system?
+- What are the egress costs for cross-region Bedrock invocations, and when do they dominate per-token costs?

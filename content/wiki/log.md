@@ -824,3 +824,9 @@ Index fix: safety/responsible-ai added to wiki/index.md (page existed on disk, m
 ## [2026-05-06] lint | Gap Intelligence (run 2) -- 2 critical gaps, 3 concept gaps found; aws-amazon-q + aws-bedrock-guardrails created, owasp slug fixed
 
 ## [2026-05-06] lint | Gap Intelligence (run 3) -- 0 critical gaps; all active areas current; responsible-ai expanded, study guide connections completed
+
+## [2026-05-08] lint | Gap report fixed — SAA-C03 page already existed (aws-solutions-architect-associate.md), stale deferred item removed, analytics-services cross-link added
+
+## [2026-05-08] lint | vault:lint — 467 pages, score 100/100, 3 orphans (broken links), 4 broken wikilinks, 25 missing Open Questions, 7 pages not in index
+
+## [2026-05-08] lint | vault:lint fixes — 4 broken wikilinks fixed, 1 duplicate page deleted (test-automation/testcontainers), 6 pages added to index, 2 k6 back-links added, 24 Open Questions sections added

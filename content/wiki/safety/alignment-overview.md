@@ -103,3 +103,9 @@ See [[safety/mechanistic-interpretability]].
 - [[safety/red-teaming-methodology]] — evaluating alignment through adversarial testing
 - [[fine-tuning/dpo-grpo]] — DPO and GRPO as practical alignment training methods
 - [[landscape/ai-labs]] — alignment research agendas at each major lab
+
+## Open Questions
+
+- Is scalable oversight viable beyond current capability levels — does the verifier need to be strictly more capable than the prover?
+- Does DPO-trained alignment generalise out of distribution, or does it learn shallow surface patterns similar to RLHF?
+- What's the empirical evidence that Constitutional AI reduces harmful outputs more than RLHF given a comparable-quality preference dataset?

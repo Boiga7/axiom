@@ -296,7 +296,7 @@ Detect: the threshold passes in CI but users report slow experiences; checking t
 Fix: replace average-based thresholds with percentile thresholds: `['p(95)<500', 'p(99)<1000']`.
 
 ## Connections
-[[tqa-hub]] · [[technical-qa/chaos-engineering]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[cloud/observability-stack]] · [[llms/ae-hub]]
+[[tqa-hub]] · [[technical-qa/chaos-engineering]] · [[qa/non-functional-testing]] · [[qa/test-automation-strategy]] · [[cloud/observability-stack]] · [[llms/ae-hub]] · [[technical-qa/k6]]
 ## Open Questions
 
 - What is the most common failure mode when implementing this at scale?

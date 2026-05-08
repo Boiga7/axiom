@@ -77,3 +77,9 @@ Key patterns: Spot for batch and CI workloads, Reserved/Savings Plan for predict
 - [[landscape/aws-cloud-practitioner]] — foundational AWS certification; the prerequisite conceptual layer
 - [[cloud/aws-bedrock-agentcore]] — Bedrock and AI-specific AWS architecture patterns
 - [[infra/vector-stores]] — database selection for AI workloads covered under Domain 2
+
+## Open Questions
+
+- Which domain rewards studying AWS whitepapers most — Domain 1 (resiliency) or Domain 3 (security)?
+- What's the realistic minimum practice question count to reliably pass for a candidate with 2+ years hands-on AWS?
+- Has SAA-C03 shifted toward serverless and container questions as EC2-centric architectures decline in practice?

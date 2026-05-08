@@ -321,3 +321,9 @@ LIMIT 20;
 - [[sql/sqlalchemy-patterns]] — Python ORM and async engine patterns
 - [[sql/sql-for-ai]] — pgvector, LLM observability schema, JSONB for AI payloads
 - [[infra/vector-stores]] — pgvector in depth for AI workloads
+
+## Open Questions
+
+- When does a GIN partial index outperform a full GIN index for JSONB queries against a column with high null rates?
+- Is `pg_stat_statements` sufficient for identifying slow queries in production, or does a dedicated APM add enough signal to justify the cost?
+- How does PostgreSQL's BRIN index perform on a high-cardinality `created_at` timestamp column compared to B-tree at 100M rows?

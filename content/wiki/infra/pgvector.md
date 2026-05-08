@@ -196,3 +196,9 @@ results = session.execute(stmt).scalars().all()
 - [[sql/query-optimization]] — indexing strategy interacts with standard Postgres query planning
 - [[sql/sql-for-ai]] — SQL patterns for AI engineering including vector queries
 - [[python/sqlalchemy]] — SQLAlchemy ORM integration with pgvector
+
+## Open Questions
+
+- At what vector count does HNSW outperform IVFFlat on recall@10 with comparable query latency?
+- Does pgvector support filtered vector search (`WHERE user_id = ? ORDER BY embedding <=> ?`) with efficient index use, or does it fall back to a sequential scan?
+- When does adding a dedicated vector DB (Qdrant, Weaviate) become worth the operational overhead versus staying on pgvector?

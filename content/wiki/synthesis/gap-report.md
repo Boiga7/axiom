@@ -4,12 +4,12 @@ category: synthesis
 para: resource
 tags: [gaps, intelligence]
 tldr: Ranked list of knowledge gaps relative to active areas — what to research next.
-updated: 2026-05-06
+updated: 2026-05-08
 ---
 
-# Knowledge Gap Report — 2026-05-06 (run 3)
+# Knowledge Gap Report — 2026-05-08
 
-> **TL;DR** No critical gaps remain. One deferred item (SAA-C03) contingent on cert intent. Vault is current against all active areas.
+> **TL;DR** No gaps. All active areas current. SAA-C03 confirmed as a target cert — `landscape/aws-solutions-architect-associate.md` already exists and is complete.
 
 No `para/projects.md` exists; running against active areas from `para/areas.md`.
 
@@ -41,15 +41,9 @@ None.
 
 ---
 
-## Deferred (not a gap — contingent on intent)
-
-- **AWS SAA-C03 study guide** — `cloud/aws-analytics-services.md` is tagged `saa-c03`; no landscape study page exists. Not a gap unless SAA-C03 is a target cert.
-  → Create only if SAA-C03 is being pursued
-
----
-
 ## What's Well Covered
 
+- **SAA-C03:** `landscape/aws-solutions-architect-associate.md` ✓ — 4 domains, exam format, key patterns, Connections wired
 - **CLF-C02:** core AWS ✓, analytics services ✓, AI recognition services ✓, Amazon Q ✓, shared responsibility ✓, Well-Architected ✓
 - **AIF-C01 Domain 1 (20%):** ML fundamentals ✓, supervised/unsupervised/RL ✓, evaluation metrics ✓, ML lifecycle ✓
 - **AIF-C01 Domain 3 (28%):** SageMaker sub-services ✓, pre-built AI APIs ✓, Comprehend Custom ✓, Amazon Q Business ✓, Bedrock ✓
@@ -71,4 +65,4 @@ None.
 
 ## Open Questions
 
-- Is SAA-C03 a target cert? If so, a landscape/aws-solutions-architect study guide is the only remaining cert gap.
+- None.

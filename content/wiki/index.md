@@ -5,7 +5,7 @@ updated: 2026-05-03
 
 # Nexus — Content Index
 
-464 pages across 31 categories. Updated 2026-05-06.
+469 pages across 31 categories. Updated 2026-05-08.
 
 ---
 
@@ -87,6 +87,7 @@ updated: 2026-05-03
 - [[llms/small-language-models]] — SLM decision framework: Phi-4 (14B), Llama 3.2 (1B/3B), Gemma 3, Qwen 2.5, Mistral Ministral — edge, mobile, and cost-sensitive inference
 - [[llms/inference-time-scaling]] — Best-of-N, PRMs, MCTS, self-consistency, and extended CoT: how allocating more compute at inference time produces quality gains independent of training
 - [[llms/ml-fundamentals]] — Traditional ML foundations: supervised (regression, classification, Random Forest, XGBoost, SVM), unsupervised (k-Means, PCA), RL (PPO, RLHF), evaluation metrics, and the ML lifecycle — AIF-C01 Domain 1 core
+- [[llms/foundation-models]] — The foundation model paradigm: pretraining, instruction fine-tuning, alignment phases, and the economics shift from task-specific models to prompting
 
 ### `safety/` — Alignment and Interpretability
 - [[safety/alignment]] — RSP (ASL tiers), red teaming, scalable oversight, superalignment, safety vs helpfulness
@@ -363,6 +364,7 @@ updated: 2026-05-03
 - [[cloud/aws-ai-recognition-services]] — Pre-built AWS AI APIs: Rekognition (vision), Comprehend (NLP), Lex (chatbots), Polly/Transcribe (speech), Translate (language), Textract (documents), Kendra (search), Personalize (recommendations), Forecast (time series) — CLF-C02 + AIF-C01
 - [[cloud/vpc-design-patterns]] — 3-tier VPC CIDR allocation, CDK ProductionVPC (NAT per AZ, flow logs, isolated data subnets), security groups vs NACLs (stateful vs stateless), CDK ALB/app/RDS security group chain, VPC endpoints (S3 gateway free, Secrets Manager interface), Fargate private subnet endpoints, multi-account Transit Gateway routing table isolation, NAT Gateway cost optimisation
 - [[cloud/bedrock-agentcore]] — AWS serverless agent hosting; microVM session isolation; $0.0895/vCPU-hr; LangGraph/Strands/CrewAI support; GA October 2025
+- [[cloud/aws-ecosystem]] — AWS service ecosystem overview for AI practitioners: compute (EC2/Lambda/ECS), storage (S3/EFS), AI/ML (Bedrock/SageMaker/Q), databases, observability, and security services
 
 ---
 
@@ -415,6 +417,9 @@ updated: 2026-05-03
 - [[qa/qa-leadership]] — 5-level QA maturity model (reactive→optimising), QA strategy template (goal/activities/tools/metrics), metrics table (escape rate/detection stage/automation ROI/MTTD/flaky rate), audience-specific communication (PO/EM/CTO/developers), 3-level quality gate framework, hiring signals + red flags, QA roadmap template
 - [[qa/process-improvement-model]] — TMMi 5-level maturity model, TPI Next 16 key areas, Process Improvement Model (PIM) consulting workflow; capability assessment and benefits-driven roadmap methodology
 - [[qa/test-estimation]] — Three-point PERT, T-shirt sizing, analogy-based, UCP; estimating test writing/execution/retesting/automation separately; agile story points and velocity tracking; context-switch tax for concurrent streams; capacity model (testers × days × utilisation); new-client ramp-up; presenting ranges not single-point figures; scope creep playbook; re-baselining when requirements change
+- [[qa/process-improvement-mandate]] — Formal organisational authorisation for a QA transformation: executive sponsor, problem statement, scope, measurable success criteria, and budget — the foundation of a consulting engagement
+- [[qa/qa-consulting-toolkit]] — Standard artefacts a QA consultant produces on an engagement: quality strategy, test policy, RACI, assessment templates, deliverable register
+- [[qa/stakeholder-reporting]] — Transforming test data into decision-relevant information per audience: RAG dashboards (executives), defect burn-down (test managers), release readiness (release managers)
 
 ---
 
@@ -457,6 +462,7 @@ updated: 2026-05-03
 - [[technical-qa/self-healing-tests]] — Healenium (tree-edit-distance algorithm, SelfHealingDriver, Docker backend, healing reports), Playwright Healer Agent v1.56 (75% success rate, GitHub PR auto-fix), Mabl (cloud ML multi-signal healing), testRigor (plain English, no selectors), Applitools visual AI, decision framework (Playwright migration vs Healenium wrapper), when self-healing is not the answer, ROI calculation, client presentation guide for 3000-test legacy suites
 - [[technical-qa/websocket-testing]] — WebSocket protocol (handshake, opcodes, lifecycle), why it differs from REST testing, Playwright framesent/framereceived/routeWebSocket, websocat CLI, Postman WS, k6/ws 10-minute soak script (100 connections), performance metrics (RTT p50/p95/p99, fan-out latency, drop rate), SSE vs WebSocket, JSON Schema contract validation, Pact async messaging, common failure modes (ordering, backpressure, token expiry), CI integration (Node.js echo server, WireMock limitation)
 - [[technical-qa/jmeter]] — Apache JMeter test plan structure (Test Plan/Thread Group/Samplers/Config Elements/Assertions/Timers/Listeners), HTTP/JDBC/WebSocket samplers, CSV Data Set Config parameterisation, correlation (Regex/JSON Extractor), Constant Throughput Timer, Backend Listener to InfluxDB/Grafana, CLI non-GUI mode (`jmeter -n -t`), distributed testing (controller/injector, >500 VUs), GitHub Actions CI integration with JTL threshold enforcement, JMeter vs k6 decision framework, plugin ecosystem (Stepping Thread Group, Throughput Shaping Timer, 3 Basic Graphs)
+- [[technical-qa/k6]] — k6 code-first load testing: Go VU model (lighter than JMeter JVM threads), JavaScript/TypeScript scripts, threshold-based pass/fail, native WebSocket support, CI integration via exit codes
 
 ---
 

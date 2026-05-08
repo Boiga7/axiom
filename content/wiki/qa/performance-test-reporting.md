@@ -429,3 +429,9 @@ Risks must be in the main body of every stakeholder-facing report. An appendix i
 ## Connections
 
 [[qa/performance-testing-qa]] · [[qa/non-functional-testing]] · [[qa/test-reporting]] · [[qa/qa-metrics]] · [[qa/test-planning]] · [[qa/test-documentation]] · [[qa/risk-based-testing]] · [[qa/qa-hub]]
+
+## Open Questions
+
+- At what stage in a release cycle should performance regression thresholds be locked — during design, after the first run, or after three stable baseline runs?
+- How should reports distinguish between regressions that exceed the SLO threshold and those within statistical noise — and communicate the difference to non-technical stakeholders?
+- What's the right response when a go/no-go sign-off is overridden by a stakeholder despite a failing performance gate?

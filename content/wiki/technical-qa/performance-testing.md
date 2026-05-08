@@ -273,6 +273,7 @@ Fix: add a custom metric tracking DB pool wait time and set a threshold on it (`
 - [[qa/test-strategy]] — performance testing sits in Q3 (critique product, technology-facing)
 - [[qa/risk-based-testing]] — performance tests prioritised for high-traffic endpoints
 - [[cloud/kubernetes]] — HPA behaviour under load is a key scenario to test
+- [[technical-qa/k6]] — dedicated k6 page: VU model, thresholds, WebSocket support, CI integration
 ## Open Questions
 
 - What is the most common failure mode when implementing this at scale?

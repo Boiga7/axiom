@@ -369,3 +369,9 @@ Fix: use a default query scope (SQLAlchemy `@declared_attr` filter or Django mod
 - [[infra/vector-stores]] — pgvector extends PostgreSQL with vector column types for AI workloads
 - [[web-frameworks/django]] — Django ORM sits on top of SQL; understanding SQL makes ORM debugging tractable
 - [[web-frameworks/fastapi]] — SQLAlchemy async engine integrates directly with FastAPI's dependency injection
+
+## Open Questions
+
+- Is `EXPLAIN ANALYZE` interpretation a skill worth investing in, or is a query profiler tool sufficient for most production debugging?
+- How do isolation levels interact with SQLAlchemy's connection pool recycling — can a long-lived connection accumulate a stale transaction?
+- When does normalisation to 3NF hurt query performance badly enough to justify denormalisation for AI workload read patterns?

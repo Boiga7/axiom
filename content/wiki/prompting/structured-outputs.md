@@ -370,3 +370,9 @@ For complex tasks, forcing the model to generate valid JSON token-by-token can d
 - [[security/guardrails]] — broader output safety validation beyond schema conformance
 - [[evals/methodology]] — using structured output extraction to get LLM judge scores as typed objects
 - [[test-automation/testing-llm-apps]] — testing structured output pipelines with pytest and respx mocking
+
+## Open Questions
+
+- When Anthropic adds native JSON mode, will it use constrained decoding or remain retry-based?
+- Does XGrammar's grammar-constrained decoding significantly reduce token throughput compared to unconstrained generation?
+- How do structured outputs interact with chain-of-thought — does forcing JSON output hurt reasoning quality?

@@ -141,3 +141,9 @@ FROM request_logs;
 - [[cs-fundamentals/sql]] — core SQL fundamentals
 - [[python/sqlalchemy]] — SQLAlchemy supports window functions via `func.row_number().over()`
 - [[data/data-engineering-hub]] — analytical patterns in data pipelines
+
+## Open Questions
+
+- When does a window function require a sort pass that prevents index use, and how do you detect this in EXPLAIN ANALYZE output?
+- Is there a practical limit to window frame clause complexity before the planner produces a bad plan?
+- Can window functions be pushed into a CTE to improve incremental view maintenance patterns?

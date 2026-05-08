@@ -323,3 +323,9 @@ The divergence creates a practical burden for engineers building for both market
 - FRIA (Article 27) required for public-body deployers and Annex III points 5(b)/(c) deployers — can be consolidated with GDPR Article 35 DPIA
 - ISO 42001:2023 provides a certifiable framework that maps to AI Act obligations but does not replace conformity assessment
 - Digital Omnibus: proposed deferral under trilogue as of May 2026 — treat August 2026 as the planning deadline
+
+## Open Questions
+
+- Will the Digital Omnibus deferral extend to GPAI transparency obligations or only high-risk system requirements?
+- How do AI Act penalties interact with GDPR fines — are they additive or does the higher fine apply?
+- What constitutes "substantial modification" that re-triggers conformity assessment for a deployed high-risk system?
