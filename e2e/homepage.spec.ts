@@ -8,7 +8,7 @@ test.describe("Homepage", () => {
 
   test("renders h1 and page count badge", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "The Axiom" })).toBeVisible();
-    await expect(page.locator("text=AI Engineering Reference")).toBeVisible();
+    await expect(page.locator("text=Live knowledge base")).toBeVisible();
   });
 
   test("nav: logo links to home", async ({ page }) => {
@@ -43,17 +43,17 @@ test.describe("Homepage", () => {
 
   test("Browse by domain section renders category cards", async ({ page }) => {
     await expect(page.getByText("Browse by domain")).toBeVisible();
-    // Category cards link to /<category>
-    const categoryCards = page.locator("main a[href^='/agents'], main a[href^='/llms'], main a[href^='/rag']");
+    // Category cards link to /browse/<brain>
+    const categoryCards = page.locator("main a[href^='/browse/']");
     await expect(categoryCards.first()).toBeVisible();
   });
 
-  test("clicking a category card navigates to category page", async ({ page }) => {
-    const agentsCard = page.locator("main a[href='/agents']");
-    await expect(agentsCard).toBeVisible();
-    await agentsCard.click();
-    await page.waitForURL("**/agents");
-    expect(page.url()).toContain("/agents");
+  test("clicking a category card navigates to browse page", async ({ page }) => {
+    const firstCard = page.locator("main a[href^='/browse/']").first();
+    await expect(firstCard).toBeVisible();
+    await firstCard.click();
+    await page.waitForURL("**/browse/**");
+    expect(page.url()).toContain("/browse/");
   });
 
   test("footer links present", async ({ page }) => {
