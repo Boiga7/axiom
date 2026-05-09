@@ -72,4 +72,9 @@ test.describe("Homepage", () => {
     await page.waitForLoadState("networkidle");
     expect(errors).toHaveLength(0);
   });
+
+  test("hero canvas element is present", async ({ page }) => {
+    const canvas = page.locator("canvas[aria-hidden='true']");
+    await expect(canvas).toBeVisible();
+  });
 });

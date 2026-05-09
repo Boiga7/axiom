@@ -48,3 +48,12 @@ When a new page is ingested via Nexus/agents/research/, it lands in both:
 - `axiom/content/wiki/<category>/<slug>.md`
 
 After syncing, update `content/wiki/index.md` to include the new page entry.
+
+## Accuracy
+
+- Do not guess APIs, versions, flags, commit SHAs, or package names. Verify by reading code or docs before asserting.
+
+## Output Style
+
+- No status updates like "Now I will..." or "I have completed...". Execute the task.
+- No em-dashes. Plain hyphens only.

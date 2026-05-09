@@ -514,6 +514,7 @@ updated: 2026-05-03
 
 ## Synthesis
 
+- [[synthesis/system-architecture]] — Three Ms (architecture) and Four Cs (workflow) framework for the Nexus/Axiom system
 - [[synthesis/audit-report]] — First full vault audit (2026-05-02): 134 broken links, 167 frontmatter gaps, 3 confirmed complementary duplicate pairs
 - [[synthesis/debugging-runbooks]] — Index of 32 production debugging runbooks by failure domain: AI/LLM, agents, database, infra, network, security, APIs, observability, CI/CD
   - [[synthesis/debug-hallucination-in-production]] — Model returning confident but incorrect answers

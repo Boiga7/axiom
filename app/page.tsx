@@ -11,6 +11,7 @@ import {
 import { LEARNING_PATHS } from "@/lib/learning-paths";
 import Nav from "@/components/Nav";
 import LearningPathCard from "@/components/LearningPathCard";
+import HeroCanvas from "@/components/HeroCanvas";
 
 export default function HomePage() {
   const categories = getCategories();
@@ -46,6 +47,7 @@ export default function HomePage() {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="pt-16 pb-14 relative">
+          <HeroCanvas />
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
