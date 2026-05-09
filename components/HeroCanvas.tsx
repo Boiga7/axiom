@@ -22,7 +22,6 @@ export default function HeroCanvas() {
     if (!ctx) return;
 
     let animId: number;
-    const mouse = { x: -1000, y: -1000 };
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
@@ -40,26 +39,10 @@ export default function HeroCanvas() {
       vy: (Math.random() - 0.5) * 0.4,
     }));
 
-    const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    };
-    document.addEventListener("mousemove", onMouseMove);
-
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (const node of nodes) {
-        const dx = mouse.x - node.x;
-        const dy = mouse.y - node.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > 0 && dist < 200) {
-          node.vx += (dx / dist) * 0.02;
-          node.vy += (dy / dist) * 0.02;
-        }
-        node.vx *= 0.99;
-        node.vy *= 0.99;
         node.x += node.vx;
         node.y += node.vy;
         if (node.x < 0) node.x = canvas.width;
@@ -98,7 +81,6 @@ export default function HeroCanvas() {
     return () => {
       cancelAnimationFrame(animId);
       ro.disconnect();
-      document.removeEventListener("mousemove", onMouseMove);
     };
   }, []);
 
