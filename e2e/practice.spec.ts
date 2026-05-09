@@ -1,15 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { ROLE_PATHS } from "../lib/practice-data";
 
-const ROLE_PATHS = [
-  "AI Engineer",
-  "Software Engineer",
-  "Cloud Engineer",
-  "QA Engineer",
-  "SDET",
-  "Analytics Engineer",
-];
-
 test.describe("Practice page", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/practice");
@@ -25,7 +16,7 @@ test.describe("Practice page", () => {
   });
 
   test("all 6 role path sections are visible", async ({ page }) => {
-    for (const path of ROLE_PATHS) {
+    for (const { title: path } of ROLE_PATHS) {
       await expect(page.getByRole("heading", { name: path })).toBeVisible();
     }
   });
@@ -35,7 +26,7 @@ test.describe("Practice page", () => {
   );
 
   test("each section has the correct exercise card count", async ({ page }) => {
-    for (const path of ROLE_PATHS) {
+    for (const { title: path } of ROLE_PATHS) {
       const section = page.locator("section").filter({ has: page.getByRole("heading", { name: path }) });
       const cards = section.locator("a.rounded-lg");
       await expect(cards).toHaveCount(EXERCISE_COUNTS[path]);
@@ -72,7 +63,7 @@ test.describe("Practice page", () => {
     await search.fill("RAG");
     await expect(page.getByRole("heading", { name: "AI Engineer" })).toBeVisible();
     await search.clear();
-    for (const path of ROLE_PATHS) {
+    for (const { title: path } of ROLE_PATHS) {
       await expect(page.getByRole("heading", { name: path })).toBeVisible();
     }
   });
