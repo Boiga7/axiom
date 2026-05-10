@@ -6,7 +6,7 @@ Axiom is a Next.js web app that publishes Lewis's personal wiki publicly. The wi
 
 The source of truth for all wiki pages is the Nexus vault:
 ```
-C:\Users\lewis\OneDrive\Desktop\Claude MD\Nexus\wiki\
+C:\Dev\Claude MD\Nexus\wiki\
 ```
 
 Do not edit wiki content directly in `content/wiki/` as a primary action. If a wiki page needs updating, update it in Nexus first, then sync to `content/wiki/`. The exception is fixing rendering bugs or frontmatter issues specific to how Axiom displays content.
@@ -15,7 +15,7 @@ Do not edit wiki content directly in `content/wiki/` as a primary action. If a w
 
 If you need to understand a topic covered in the wiki while working on Axiom, use the Nexus agents:
 ```
-C:\Users\lewis\OneDrive\Desktop\Claude MD\Nexus\agents\
+C:\Dev\Claude MD\Nexus\agents\
 ```
 
 Open the relevant subfolder in Claude Code:
